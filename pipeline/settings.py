@@ -129,7 +129,7 @@ class Config(Strict):
 
 # ---------- sources.yaml ----------
 
-Lean = Literal["보수", "중도", "진보", "경제지", "통신·공영"]
+Lean = Literal["보수", "중도", "진보", "경제지", "통신·공영", "관영"]
 MediaType = Literal["종합지", "경제지", "방송", "통신", "국제"]
 
 

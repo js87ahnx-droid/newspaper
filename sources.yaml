@@ -1,9 +1,9 @@
 # 매체 목록 — 2026-10-15 실측 결과 반영 (근거: docs-internal/source-audit.md)
 # lean(성향 라벨)은 일반적 평가일 뿐 기사마다 다를 수 있다. 사용자가 고쳐 써도 된다.
-#   lean: 보수 | 중도 | 진보 | 경제지 | 통신·공영
+#   lean: 보수 | 중도 | 진보 | 경제지 | 통신·공영 | 관영
 #   type: 종합지 | 경제지 | 방송 | 통신 | 국제
 # enabled: true  — 공식 피드가 동작함
-# enabled: false — 공식 피드가 없거나 막혀 Google 뉴스 대체 경로만 있음 (사용자 승인 대기, D6)
+# kind: google_news — 공식 피드가 없거나 막혀 Google 뉴스 매체 한정 검색으로 대체 (2026-10-15 사용자 승인, D6)
 
 sources:
   # ---------------- 국내 ----------------
@@ -26,7 +26,7 @@ sources:
     type: 종합지
     weight: 1.0
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
 
@@ -88,7 +88,7 @@ sources:
     type: 경제지
     weight: 0.9
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:mk.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
 
@@ -111,7 +111,7 @@ sources:
     type: 방송
     weight: 0.9
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:news.kbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
 
@@ -145,7 +145,7 @@ sources:
     type: 방송
     weight: 1.0
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:cnn.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -155,7 +155,7 @@ sources:
     type: 통신
     weight: 1.0
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:apnews.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -227,7 +227,7 @@ sources:
     type: 통신
     weight: 1.0
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:reuters.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -238,7 +238,7 @@ sources:
     type: 경제지
     weight: 0.9
     paywall: true
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:asia.nikkei.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -261,7 +261,7 @@ sources:
     type: 방송
     weight: 0.7
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:www3.nhk.or.jp/nhkworld+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -290,11 +290,11 @@ sources:
 
   - name: Global Times
     country: CN
-    lean: 통신·공영
+    lean: 관영
     type: 국제
     weight: 0.5
     paywall: false
-    enabled: false
+    enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:globaltimes.cn+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
