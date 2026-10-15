@@ -1,22 +1,35 @@
-# 초기 인터뷰 결과 (S2에서 채움). 지금 값은 자리표시 기본값.
+# 초기 인터뷰 결과 (2026-10-15)
+# 분야 id: economy(경제·증시) semis_ai(반도체·AI) politics(정치·안보) international(국제)
+#          industry(산업) society(사회) entertainment_sports(연예·스포츠) incidents(사건·사고)
+#          lifestyle_culture(생활·문화) science(과학)
 
-# 1. 관심 분야와 우선순위 — 분야: 가중치 (0 = 관심 없음, 1 = 기본, 클수록 우선)
+# 1. 관심 분야와 가중치 (1 = 기본 관심, 클수록 우선). 여기 없는 분야는 default_weight.
 topics:
   economy: 1.0
+  semis_ai: 1.0
   politics: 1.0
   international: 1.0
 
-# 2. 관심 기업·산업·키워드
-keywords: []
+# 2. 관심 기업·산업·키워드 (제목·리드에 나오면 keyword_boost 만큼 가산)
+keywords: [삼성전자, SK하이닉스, 엔비디아, TSMC, HBM, 반도체 수출]
 
-# 3. 덜 보고 싶은 분야
-less: []
+# 3. 덜 보고 싶은 분야 (less_weight 적용 — 0이 아니므로 중요하면 다양성 슬롯으로 노출됨)
+less: [entertainment_sports, incidents, lifestyle_culture]
+
+default_weight: 0.5
+less_weight: 0.2
+keyword_boost: 0.5
 
 # 4. 하루 읽을 기사 수
 daily_articles: 40
 
-# 5. 성향 비교를 보고 싶은 이슈 유형
-compare_topics: []
+# 5. 성향·국가별 입장 비교를 우선 보고 싶은 이슈 유형
+compare_topics: [diplomacy_security, economic_policy, domestic_politics, tech_regulation]
 
-# 6. 해외 기사 제목 표시: original(원문 그대로) | translated(번역 병기)
-foreign_title: original
+# 6. 해외 기사 표시
+#   english: original_with_ko_summary — 영어 제목은 원문 그대로, 한국어 요약을 함께 제공
+#   other:   translated_title         — 그 외 언어는 제목을 한국어로 번역
+#   번역·요약은 LLM 훅(구독, 하루 호출 상한 안)으로 처리하고, 실패하면 원문만 표시한다.
+foreign_display:
+  english: original_with_ko_summary
+  other: translated_title

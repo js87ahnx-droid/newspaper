@@ -39,9 +39,10 @@ clustering:
   model: paraphrase-multilingual-MiniLM-L12-v2
   similarity_threshold: 0.62
 
-# LLM 요약 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
+# LLM 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
+# 입장 차이 요약·영어 기사 한국어 요약·비영어 제목 번역을 여러 건씩 묶어 한 번에 호출한다.
 llm:
   enabled: true
   model: haiku
-  max_issues_per_day: 10
+  max_calls_per_day: 10
   timeout_sec: 120

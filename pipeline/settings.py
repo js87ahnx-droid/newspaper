@@ -84,7 +84,7 @@ class Clustering(Strict):
 class Llm(Strict):
     enabled: bool
     model: str
-    max_issues_per_day: int = Field(ge=0, le=50)
+    max_calls_per_day: int = Field(ge=0, le=50)
     timeout_sec: int = Field(gt=0, le=600)
 
 
@@ -170,21 +170,76 @@ class Sources(Strict):
 
 # ---------- interests.yaml ----------
 
+TOPICS = {
+    "economy": "경제·증시",
+    "semis_ai": "반도체·AI",
+    "politics": "정치·안보",
+    "international": "국제",
+    "industry": "산업",
+    "society": "사회",
+    "entertainment_sports": "연예·스포츠",
+    "incidents": "사건·사고",
+    "lifestyle_culture": "생활·문화",
+    "science": "과학",
+}
+
+COMPARE_TOPICS = {
+    "diplomacy_security": "외교·안보",
+    "economic_policy": "경제 정책",
+    "domestic_politics": "국내 정치",
+    "tech_regulation": "테크·규제",
+}
+
+
+class ForeignDisplay(Strict):
+    english: Literal["original", "original_with_ko_summary", "translated_title"]
+    other: Literal["original", "original_with_ko_summary", "translated_title"]
+
+
 class Interests(Strict):
     topics: dict[str, float]
     keywords: list[str]
     less: list[str]
+    default_weight: float = Field(ge=0)
+    less_weight: float = Field(ge=0)
+    keyword_boost: float = Field(ge=0)
     daily_articles: int = Field(gt=0, le=200)
     compare_topics: list[str]
-    foreign_title: Literal["original", "translated"]
+    foreign_display: ForeignDisplay
 
     @field_validator("topics")
     @classmethod
-    def _nonneg(cls, v: dict[str, float]) -> dict[str, float]:
+    def _topics(cls, v: dict[str, float]) -> dict[str, float]:
+        unknown = sorted(set(v) - set(TOPICS))
+        if unknown:
+            raise ValueError(f"알 수 없는 분야: {unknown} (가능: {sorted(TOPICS)})")
         bad = {k: w for k, w in v.items() if w < 0}
         if bad:
             raise ValueError(f"관심 가중치는 음수일 수 없음: {bad}")
         return v
+
+    @field_validator("less")
+    @classmethod
+    def _less(cls, v: list[str]) -> list[str]:
+        unknown = sorted(set(v) - set(TOPICS))
+        if unknown:
+            raise ValueError(f"알 수 없는 분야: {unknown}")
+        return v
+
+    @field_validator("compare_topics")
+    @classmethod
+    def _compare(cls, v: list[str]) -> list[str]:
+        unknown = sorted(set(v) - set(COMPARE_TOPICS))
+        if unknown:
+            raise ValueError(f"알 수 없는 비교 유형: {unknown} (가능: {sorted(COMPARE_TOPICS)})")
+        return v
+
+    @model_validator(mode="after")
+    def _no_overlap(self) -> "Interests":
+        both = sorted(set(self.topics) & set(self.less))
+        if both:
+            raise ValueError(f"관심 분야와 덜 볼 분야에 동시에 있음: {both}")
+        return self
 
 
 # ---------- 읽기 ----------

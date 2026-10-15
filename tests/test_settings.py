@@ -41,7 +41,7 @@ def test_repo_settings_are_valid():
         ("config.yaml", lambda d: d["sections"].append(dict(d["sections"][1])), "섹션 id 중복"),
         ("config.yaml", lambda d: d["sections"].reverse(), "첫 섹션은 front"),
         ("config.yaml", lambda d: d["weights"].update(atention=0.1), "atention"),
-        ("config.yaml", lambda d: d["llm"].update(max_issues_per_day=-1), "llm.max_issues_per_day"),
+        ("config.yaml", lambda d: d["llm"].update(max_calls_per_day=-1), "llm.max_calls_per_day"),
         ("sources.yaml", lambda d: d["sources"][0].update(enabled=True, feeds=[]), "feeds 가 비어"),
         ("sources.yaml", lambda d: d["sources"][0].update(weight=-1), "weight"),
         ("sources.yaml", lambda d: d["sources"][0].update(lean="극우"), "lean"),
@@ -49,7 +49,10 @@ def test_repo_settings_are_valid():
         ("sources.yaml", lambda d: d["sources"].append(dict(d["sources"][0])), "매체명 중복"),
         ("sources.yaml", lambda d: d["sources"][0].update(enabled=True, feeds=[{"section": "top", "url": "ftp://x"}]), "url"),
         ("interests.yaml", lambda d: d["topics"].update(economy=-2), "음수"),
-        ("interests.yaml", lambda d: d.update(foreign_title="both"), "foreign_title"),
+        ("interests.yaml", lambda d: d["foreign_display"].update(english="both"), "foreign_display.english"),
+        ("interests.yaml", lambda d: d["topics"].update(crypto=1.0), "알 수 없는 분야"),
+        ("interests.yaml", lambda d: d["less"].append("economy"), "동시에"),
+        ("interests.yaml", lambda d: d["compare_topics"].append("weather"), "알 수 없는 비교 유형"),
     ],
 )
 def test_invalid_values_rejected(root, name, mutate, expect, capsys):
