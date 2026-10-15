@@ -152,6 +152,8 @@ class Source(Strict):
     paywall: bool
     enabled: bool
     feeds: list[Feed]
+    # 받을 기사 언어(ko/en/ja/zh/ar). 비우면 전부. 예: 조선일보 피드에는 일본어판 기사가 섞여 들어온다
+    langs: list[Literal["ko", "en", "ja", "zh", "ar"]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _enabled_needs_feed(self) -> "Source":

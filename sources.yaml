@@ -14,6 +14,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    langs: [ko]  # 피드에 일본어판 기사가 섞여 들어옴
     feeds:
       - {section: top, url: "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", main: true}
       - {section: politics, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/politics/?outputType=xml"}
