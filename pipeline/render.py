@@ -16,7 +16,8 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
-from .settings import ROOT, Config, Interests, Sources
+from .interest import build_interest_table
+from .settings import ROOT, TOPICS, Config, Interests, Sources
 from .stance import LEAN_ORDER
 from .textutil import LEAD_MAX, cap_lead
 
@@ -53,6 +54,24 @@ def _display(item: dict, display) -> dict:
     }
 
 
+def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) -> dict:
+    """브라우저의 피드백 재계산(feedback.js)이 쓰는 값. 서버 점수 계산(score.py)과 같은 식을 쓰도록 같은 값을 넘긴다."""
+    table = build_interest_table(interests)
+    w = cfg.weights
+    st = edition.get("stats", {})
+    return {
+        "edition": edition["edition"], "masthead": masthead(d),
+        "weights": {"attention": w.attention, "importance": w.importance, "continuity": w.continuity, "interest": w.interest},
+        "topicWeights": table.topic_weights, "keywords": list(table.keywords), "keywordBoost": table.keyword_boost,
+        "maxInterest": (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1,
+        "interestCap": st.get("interest_cap", 0), "interestCounted": st.get("interest_counted", 0),
+        "topics": TOPICS, "topicSection": {"politics": "politics", "economy": "economy", "industry": "economy",
+                                           "semis_ai": "economy", "international": "international"},
+        "sectionTitles": {s.id: s.title for s in cfg.sections},
+        "sectionCaps": {s.id: s.max_articles for s in cfg.sections},
+    }
+
+
 def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
@@ -63,7 +82,11 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         items = edition["sections"].get(s.id, [])
         if not items:
             continue
-        sections.append({"id": s.id, "title": titles[s.id], "items": [{**it, "view": _display(it, interests.foreign_display)} for it in items]})
+        sections.append({"id": s.id, "title": titles[s.id], "items": [
+            {**it, "view": _display(it, interests.foreign_display),
+             # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
+             "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", []))}
+            for it in items]})
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})
@@ -94,7 +117,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         "sections": sections, "compare": compare, "compare_title": titles.get("compare", "입장 비교"),
         "guide": guide, "guide_title": titles.get("guide", "매체 성향 가이드·출처"),
         "lean_class": LEAN_CLASS, "stats": edition.get("stats", {}), "lead_max": LEAD_MAX,
-        "edition_json": json.dumps({"edition": edition["edition"], "masthead": masthead(d)}, ensure_ascii=False),
+        "edition_json": json.dumps(_client_config(edition, cfg, interests, d), ensure_ascii=False).replace("</", "<\\/"),  # 스크립트 안 "</script>" 방지
     }
 
 

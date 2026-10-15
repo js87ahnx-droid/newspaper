@@ -66,7 +66,8 @@
     document.body.appendChild(stage);   // 실제 크기로 재기 위해 화면 밖에 붙인다
     var out = [];
     var mast = flow.querySelector(".masthead-block");
-    var sections = flow.querySelectorAll("section.sec");
+    // 피드백으로 기사가 모두 빠진 섹션은 건너뛴다 (제목만 있는 빈 쪽 방지)
+    var sections = Array.prototype.filter.call(flow.querySelectorAll("section.sec"), function (s) { return s.children.length > 0; });
     sections.forEach(function (sec, si) {
       var id = sec.getAttribute("data-section");
       var title = sec.getAttribute("data-title");

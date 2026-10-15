@@ -21,6 +21,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }  /* 단신으로 내린 기사의 리드·사진 숨김이 display 지정에 밀리지 않게 */
 html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); }
 body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 
@@ -114,3 +115,30 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .guide-intro p { font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- 피드백 알림·주간 설문·설정 (feedback.js) ---------- */
+#toast {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--paper);
+  padding: 8px 14px; border-radius: 18px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50;
+}
+#toast.show { opacity: 0.92; }
+#survey, #settings { position: fixed; top: 56px; left: 16px; z-index: 40; max-width: min(460px, calc(100vw - 32px)); }
+#settings { left: auto; right: 16px; }
+#survey .card, #settings .card {
+  background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); font-size: 14px; max-height: calc(100vh - 80px); overflow: auto;
+}
+#survey h2, #settings h2 { font-size: 17px; margin: 0 0 8px; }
+#survey fieldset { border: 0; padding: 0; margin: 0 0 10px; }
+#survey legend { font-weight: 600; margin-bottom: 6px; }
+#survey input[type="text"] { width: 100%; padding: 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; }
+.chip { display: inline-block; margin: 0 4px 6px 0; }
+.chip input { position: absolute; opacity: 0; }
+.chip span { display: inline-block; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 14px; font-size: 13px; }
+.chip input:checked + span { background: var(--ink); color: var(--paper); }
+.actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 6px; }
+.actions button { min-height: 36px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; }
+.actions button[type="submit"] { background: var(--ink); color: var(--paper); }
+.hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+#settings table { width: 100%; border-collapse: collapse; font-size: 13px; }
+#settings td, #settings th { border-bottom: 1px solid var(--rule); padding: 3px 4px; text-align: left; }

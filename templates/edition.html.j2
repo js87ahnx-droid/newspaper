@@ -27,6 +27,7 @@
   <button type="button" data-act="font-" aria-label="글자 작게">가-</button>
   <button type="button" data-act="font+" aria-label="글자 크게">가+</button>
   <button type="button" data-act="theme" aria-label="밝기 바꾸기">◐</button>
+  <button type="button" data-act="settings" aria-label="관심 학습 설정">⚙</button>
 </div>
 
 <div id="book" aria-label="지면"></div>
@@ -45,7 +46,10 @@
     {% set brief = sec.id == 'briefs' %}
     <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% endif %}"
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
-             data-section="{{ sec.id }}" data-lang="{{ v.lang }}">
+             data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
+             data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}"
+             data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
+             data-top="{{ 1 if (sec.id == 'front' and loop.first) else 0 }}">
       {% if it.photo and not brief %}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
@@ -139,6 +143,7 @@
 
 <script>window.EDITION = {{ edition_json|safe }};</script>
 <script src="static/vendor/page-flip/page-flip.browser.js"></script>
+<script src="static/feedback.js"></script>
 <script src="static/app.js"></script>
 </body>
 </html>
