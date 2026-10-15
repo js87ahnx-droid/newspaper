@@ -46,6 +46,7 @@ class Article:
     sections: list[str] = field(default_factory=list)
     main: bool = False       # 매체 메인 피드에 실렸는지
     first_seen: str = ""
+    image: str | None = None  # RSS가 준 대표 이미지 주소 (원 주소로만 띄우고 복사하지 않는다)
 
     @classmethod
     def from_dict(cls, d: dict) -> "Article":
@@ -67,6 +68,29 @@ def article_id(norm_url: str) -> str:
 
 
 _GNEWS_SUFFIX = re.compile(r"\s+-\s+[^-]{1,40}$")
+_IMG_SRC = re.compile(r'<img[^>]+src=["\'](https?://[^"\']+)["\']', re.I)
+_IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif)(\?|$)", re.I)
+
+
+def entry_image(entry) -> str | None:
+    """RSS 항목이 직접 주는 대표 이미지 주소. 가장 큰 것을 고른다. 없으면 None."""
+    cands: list[tuple[int, str]] = []
+    for m in entry.get("media_content", []) or []:
+        url = m.get("url", "")
+        medium, typ = m.get("medium", ""), m.get("type", "")
+        if url and (medium == "image" or typ.startswith("image/") or (not medium and not typ and _IMG_EXT.search(url))):
+            cands.append((int(m.get("width") or 0) or 1, url))
+    for m in entry.get("media_thumbnail", []) or []:
+        if m.get("url"):
+            cands.append((int(m.get("width") or 0) or 1, m["url"]))
+    for enc in entry.get("enclosures", []) or []:
+        if enc.get("type", "").startswith("image/") and enc.get("href"):
+            cands.append((1, enc["href"]))
+    cands = [(w, u) for w, u in cands if u.startswith(("http://", "https://"))]
+    if cands:
+        return max(cands, key=lambda c: c[0])[1]
+    m = _IMG_SRC.search(entry.get("summary", "") or "")
+    return m.group(1) if m else None
 
 
 def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article | None:
@@ -111,6 +135,7 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
         sections=[feed.section],
         main=feed.main,
         first_seen=now.isoformat(),
+        image=None if feed.kind == "google_news" else entry_image(entry),
     )
 
 
@@ -185,6 +210,8 @@ def merge(store: dict[str, Article], new: list[Article]) -> int:
             old.published = a.published
         if not old.lead and a.lead:
             old.lead = a.lead
+        if not old.image and a.image:
+            old.image = a.image
     return added
 
 

@@ -72,6 +72,7 @@ def prepare(
         kept.main = kept.main or a.main
         if len(a.lead) > len(kept.lead):
             kept.lead = a.lead
+        kept.image = kept.image or a.image
     articles = sorted(by_key.values(), key=lambda a: a.published or "", reverse=True)
 
     langs: dict[str, int] = {}
