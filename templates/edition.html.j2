@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ masthead }}</title>
+<meta name="apple-mobile-web-app-title" content="{{ masthead }}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="static/icon-192.png">
+<link rel="stylesheet" href="static/app.css">
+</head>
+<body>
+<div id="toolbar" role="toolbar" aria-label="보기 설정">
+  <span class="tb-title">{{ masthead }}</span>
+  <span class="tb-page" id="pageInfo" aria-live="polite"></span>
+  <span class="tb-spacer"></span>
+  <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
+  <button type="button" data-act="next" aria-label="다음 쪽">›</button>
+  <button type="button" data-act="font-" aria-label="글자 작게">가-</button>
+  <button type="button" data-act="font+" aria-label="글자 크게">가+</button>
+  <button type="button" data-act="theme" aria-label="밝기 바꾸기">◐</button>
+</div>
+
+<div id="book" aria-label="지면"></div>
+
+{# 쪽으로 나누기 전의 기사 흐름 — app.js 가 화면 크기에 맞춰 쪽으로 나눈다 #}
+<div id="flow" hidden>
+  <div class="masthead-block" data-kind="masthead">
+    <h1 class="masthead">{{ masthead }}</h1>
+    <div class="dateline"><span>{{ date_long }}</span><span>개인 열람용 · 국내외 주요 언론 RSS 편집</span></div>
+  </div>
+
+{% for sec in sections %}
+  <section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">
+  {% for it in sec["items"] %}
+    {% set v = it.view %}
+    {% set brief = sec.id == 'briefs' %}
+    <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% endif %}"
+             data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
+             data-section="{{ sec.id }}" data-lang="{{ v.lang }}">
+      {% if it.photo and not brief %}
+      <figure class="photo">
+        <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        <figcaption>사진: {{ it.photo_source }}</figcaption>
+      </figure>
+      {% endif %}
+      <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer">{{ v.title }}</a></h3>
+      {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
+      {% if v.lead and not brief %}
+      <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
+      {% endif %}
+      <div class="meta">
+        <span class="src">{{ it.source }}</span>
+        <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>
+        {% if it.days > 1 %}<span class="days">{{ it.days }}일째 보도</span>{% endif %}
+        {% if it.coverage.sources > 1 %}<span class="cover">매체 {{ it.coverage.sources }} · 국가 {{ it.coverage.countries }}</span>{% endif %}
+        {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}
+        <a class="orig-link" href="{{ it.url }}" target="_blank" rel="noopener noreferrer">원문{% if v.paywall %} (유료){% endif %}</a>
+      </div>
+      {% if not brief %}
+      <details class="why">
+        <summary>
+          <span class="bar" title="주목도"><i style="width:{{ (it.scores.attention * 100)|round|int }}%"></i></span>주목
+          <span class="bar" title="중요도"><i style="width:{{ (it.scores.importance * 100)|round|int }}%"></i></span>중요
+        </summary>
+        <p>주목도 {{ '%.2f'|format(it.scores.attention) }} · 중요도 {{ '%.2f'|format(it.scores.importance) }} ·
+           연속성 {{ '%.2f'|format(it.scores.continuity) }} · 관심도 {{ '%.2f'|format(it.scores.interest) }}
+           → 종합 {{ '%.2f'|format(it.scores.final) }}</p>
+        <p>배치 이유: {{ it.reasons|join(', ') }}</p>
+      </details>
+      {% endif %}
+      <div class="fb" role="group" aria-label="이 분야 기사">
+        <button type="button" data-fb="more">더 보기</button>
+        <button type="button" data-fb="less">덜 보기</button>
+      </div>
+    </article>
+  {% endfor %}
+  </section>
+{% endfor %}
+
+{% if compare %}
+  <section class="sec sec-compare" data-section="compare" data-title="{{ compare_title }}">
+    <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 강조된 단어는 그 그룹 기사에서 특히 자주 쓰인 말입니다(통계로 뽑음).</p>
+  {% for c in compare %}
+    <article class="item cmp" data-issue="{{ c.issue_id }}" data-topic="{{ c.topic }}" data-section="compare">
+      <h3 class="hl"><a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.view.title }}</a></h3>
+      {% if c.frame_summary %}<p class="frame" data-note="AI 요약">{{ c.frame_summary }}</p>{% endif %}
+      {% if c.stance and c.stance.note %}<p class="note">{{ c.stance.note }}</p>{% endif %}
+      <h4>성향별</h4>
+      <div class="axis">
+      {% for g in c.lean_groups %}
+        <div class="grp"><div class="badge lean-{{ g.cls }}">{{ g.group }}</div>
+        {% for a in g.articles %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        </div>
+      {% endfor %}
+      </div>
+      {% if c.country_groups|length > 1 %}
+      <h4>국가별</h4>
+      <div class="axis">
+      {% for g in c.country_groups %}
+        <div class="grp"><div class="badge">{{ g.group }}</div>
+        {% for a in g.articles %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        </div>
+      {% endfor %}
+      </div>
+      {% endif %}
+    </article>
+  {% endfor %}
+  </section>
+{% endif %}
+
+  <section class="sec sec-guide" data-section="guide" data-title="{{ guide_title }}">
+    <div class="item guide-intro">
+      <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 라벨은 sources.yaml 에서 고칠 수 있습니다.</p>
+      <p>이 지면은 각 매체 RSS의 제목과 요약, 원문 링크로만 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
+      <p>기사 자리: 1면 톱은 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)로만 정하고, 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채웁니다. 관심도 때문에 들어온 기사는 절반을 넘지 않습니다.</p>
+    </div>
+    <div class="item guide-table">
+      <table>
+        <thead><tr><th>매체</th><th>국가</th><th>성향</th><th>유형</th><th>수집</th></tr></thead>
+        <tbody>
+        {% for g in guide %}
+          <tr><td>{{ g.name }}{% if g.paywall %} <small>(유료)</small>{% endif %}</td><td>{{ g.country }}</td>
+              <td><span class="badge lean-{{ g.cls }}">{{ g.lean }}</span></td><td>{{ g.type }}</td><td>{{ g.via }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>window.EDITION = {{ edition_json|safe }};</script>
+<script src="static/vendor/page-flip/page-flip.browser.js"></script>
+<script src="static/app.js"></script>
+</body>
+</html>

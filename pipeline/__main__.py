@@ -212,6 +212,17 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_render(args: argparse.Namespace) -> int:
+    from .render import render
+
+    root = Path(args.root)
+    cfg, interests, sources = load_config(root), load_interests(root), load_sources(root)
+    edition = json.loads((_raw_dir(args) / f"{args.date}.edition.json").read_text(encoding="utf-8"))
+    out = render(edition, cfg, interests, sources, Path(args.out))
+    print(f"{args.date} 호 지면: {out}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     # Windows 콘솔 기본 인코딩(cp949)에서 한글 오류 메시지가 깨지지 않게 UTF-8로 고정
     for stream in (sys.stdout, sys.stderr):
@@ -244,6 +255,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--no-llm", action="store_true", help="이번 실행만 LLM 훅을 건너뜀")
     p.set_defaults(func=cmd_enrich)
+    p = sub.add_parser("render", help="지면 HTML 생성 (종이 넘김 포함)")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--out", default=str(ROOT / "build"), help="출력 폴더 (기본: build/)")
+    p.set_defaults(func=cmd_render)
     args = parser.parse_args(argv)
     return args.func(args)
 

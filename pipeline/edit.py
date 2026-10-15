@@ -13,6 +13,7 @@ import math
 from dataclasses import dataclass, field
 
 from .collect import Article
+from .textutil import clean_lead
 from .score import ScoredIssue
 from .settings import COMPARE_TOPICS, Config, Interests
 
@@ -212,13 +213,21 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
 def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article], choose_stats: dict) -> dict:
     """지면 생성(S8)이 읽을 데이터. 기사 본문은 없다(제목·RSS 리드·링크·이미지 주소만)."""
 
+    def best_lead(rep: Article, issue_ids: list[str]) -> str:
+        """대표 기사 리드가 비었거나 부실하면 같은 언어의 다른 기사 리드 중 가장 충실한 것 (같은 사건이므로)."""
+        own = clean_lead(rep.lead)
+        if own:
+            return own
+        others = [clean_lead(articles[i].lead) for i in issue_ids if articles[i].lang == rep.lang]
+        return max(others, key=len, default="")
+
     def item(p: Placed) -> dict:
         s = p.scored
         rep = articles[s.issue.rep_article]
         return {
             "issue_id": s.issue.id,
             "title": s.issue.title,
-            "lead": rep.lead,
+            "lead": best_lead(rep, s.issue.article_ids),
             "url": rep.url,
             "source": rep.source,
             "lean": rep.lean,

@@ -116,3 +116,16 @@ def detect_lang(text: str) -> str:
     if _LATIN.search(text):
         return "en"
     return "und"
+
+
+_BYLINE = re.compile(r"^\s*[\(\[][^)\]]{1,30}=[^)\]]{0,20}[\)\]]\s*(?:[가-힣]{2,4}\s*){0,3}(?:기자|특파원)?\s*=\s*")
+_PHOTO_CAPTION = re.compile(r"^\s*▲[^.。]*?(?=[가-힣A-Za-z]+[은는이가]\s)")
+MIN_LEAD = 20
+
+
+def clean_lead(lead: str) -> str:
+    """지면용 리드 다듬기: 머리의 기자명·지역 표기("(서울=연합뉴스) 홍길동 기자 =")와 사진 설명("▲ …")을 걷어내고,
+    20자도 안 되는 리드(속보 자리표시 "(" 등)는 없는 것으로 본다."""
+    s = _BYLINE.sub("", lead or "")
+    s = _PHOTO_CAPTION.sub("", s).strip()
+    return s if len(s) >= MIN_LEAD else ""
