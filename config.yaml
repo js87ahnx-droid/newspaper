@@ -11,11 +11,13 @@ window:
 publish_time: "06:10"
 
 # 최종 점수 = 아래 가중치의 가중합 (각 지표는 0~1로 정규화된 값)
+# S6 실측: 관심도 0.10 으로는 관심 설정을 극단(한 분야 100배)으로 바꿔도 실제 지면이 한 건도 달라지지 않았다
+# → 0.25. 1면 톱은 관심도를 쓰지 않고, 다양성 30%·관심 상한 50% 가 따로 지켜지므로 쏠리지 않는다
 weights:
-  attention: 0.40    # 주목도
-  importance: 0.35   # 중요도
-  continuity: 0.15   # 연속성
-  interest: 0.10     # 관심도 (1면 톱 선정에는 쓰지 않음)
+  attention: 0.35    # 주목도
+  importance: 0.30   # 중요도
+  continuity: 0.10   # 연속성
+  interest: 0.25     # 관심도 (1면 톱 선정에는 쓰지 않음)
 
 editing:
   total_articles: 40       # 하루 지면 기사 수 (interests.yaml 의 daily_articles 가 있으면 그 값)
@@ -23,6 +25,7 @@ editing:
   interest_cap: 0.50       # 관심 분야 기사 비율 상한
   continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
   history_days: 14         # 연속성 계산에 쓰는 과거 일수
+  interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
 sections:
@@ -32,7 +35,7 @@ sections:
   - {id: international, title: "국제", max_articles: 6}
   - {id: interest, title: "관심", max_articles: 6}
   - {id: compare, title: "입장 비교", max_articles: 3}
-  - {id: briefs, title: "단신", max_articles: 12}
+  - {id: briefs, title: "단신", max_articles: 20}  # 다른 섹션이 차면 넘친 기사를 받음. 전체 건수는 interests.daily_articles
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0}
 
 clustering:
@@ -46,6 +49,28 @@ clustering:
   # 일본어가 낀 쌍은 더 높게: 10/15호 검수에서 다국어 오류 3건이 모두 일본어 쌍(CSLS 0.071~0.079)
   # 검수 뒤 정한 값이라 시범 운영(S12)에서 새 날짜로 재검증 필요
   csls_min_by_lang: {ja: 0.09}
+
+# 중요도: 분야 기본값 + 핵심 키워드 가산 (+ 다룬 국가 수)
+importance:
+  topic_weights:
+    politics: 1.0
+    economy: 1.0
+    international: 0.9
+    semis_ai: 0.8
+    industry: 0.7
+    society: 0.6
+    science: 0.5
+    incidents: 0.4
+    lifestyle_culture: 0.3
+    entertainment_sports: 0.2
+  keywords: [전쟁, 미사일, 핵, 계엄, 탄핵, 금리, 정상회담, 참사, 지진, 쿠데타, 테러, 관세, 사망자,
+             war, missile, nuclear, coup, summit, earthquake, tariff, killed, ceasefire]
+  keyword_bonus: 0.15
+
+# 사진: RSS 대표 이미지만, 원 주소로 표시. 순위를 바꾸지 않고 정해진 자리에만
+photos:
+  front: 2        # 1면 톱 + 1면 기사 1건
+  per_section: 1  # 섹션 머리기사
 
 # LLM 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
 # 입장 차이 요약·영어 기사 한국어 요약·비영어 제목 번역을 여러 건씩 묶어 한 번에 호출한다.

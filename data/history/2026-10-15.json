@@ -1,0 +1,806 @@
+{
+ "edition": "2026-10-15",
+ "issues": [
+  {
+   "id": "5cab08bf76965895",
+   "title": "레오 14세 교황, 폐암 수술 후 회복세… 교황청 “검사 수치 정상 범위”",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "교황",
+    "레오",
+    "수술",
+    "폐암",
+    "진단",
+    "surgery",
+    "황청",
+    "pope",
+    "leo",
+    "blood",
+    "following",
+    "hospital"
+   ]
+  },
+  {
+   "id": "38894f1d8211a883",
+   "title": "트럼프 “日 투자로 美 뉴욕에 반도체 공장 2곳 건설… 한국·대만 약속도 사업화”",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "chip",
+    "globalfoundrie",
+    "japan",
+    "bn",
+    "factorie",
+    "건설",
+    "invest",
+    "뉴욕",
+    "도체",
+    "반도",
+    "two",
+    "공장"
+   ]
+  },
+  {
+   "id": "8bc1c177ee490d8d",
+   "title": "예상 웃돈 美 9월 소비자물가… 금리인상 압박 재점화",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "물가",
+    "비자",
+    "소비",
+    "웃돌",
+    "자물",
+    "년대",
+    "대비",
+    "망치",
+    "전년",
+    "전망",
+    "돌아",
+    "상승"
+   ]
+  },
+  {
+   "id": "27974f4eac8e1526",
+   "title": "美 9월 물가 3.7%, 5개월만에 최대폭 상승…트럼프 중간선거 앞두고 ‘악재’",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "last",
+    "month",
+    "election",
+    "consumer",
+    "elevated",
+    "pushed",
+    "rose",
+    "sign",
+    "snapshot",
+    "worsened",
+    "개월",
+    "대폭"
+   ]
+  },
+  {
+   "id": "9738a2a1abea8910",
+   "title": "그린란드 정부, 트럼프 ‘대규모 석유·가스 탐사 임박’ 주장 반박",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "greenland",
+    "그린",
+    "란드",
+    "린란",
+    "반박",
+    "탐사",
+    "begin",
+    "석유",
+    "oil",
+    "정부",
+    "gas",
+    "contradict"
+   ]
+  },
+  {
+   "id": "5f64297658b7f904",
+   "title": "Netflix cuts about 6% of jobs in biggest layoff since 2022",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "netflix",
+    "biggest",
+    "since",
+    "cut",
+    "job",
+    "layoff",
+    "cutting",
+    "lay",
+    "shed",
+    "steepest",
+    "employee",
+    "nearly"
+   ]
+  },
+  {
+   "id": "88c7502315724112",
+   "title": "후티, 사우디 ‘석유 심장’ 아람코 본사 타격",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "houthi",
+    "saudi",
+    "aramco",
+    "headquarter",
+    "him",
+    "kill",
+    "mourning",
+    "victim",
+    "に攻",
+    "は攻",
+    "アラ",
+    "ア国"
+   ]
+  },
+  {
+   "id": "f1877fb0c03030b9",
+   "title": "트럼프 “韓, 알래스카 LNG에 500억달러 투자” 거듭 주장",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "래스",
+    "스카",
+    "알래",
+    "달러",
+    "거듭",
+    "만도",
+    "박기",
+    "lng",
+    "대만",
+    "억달",
+    "더해",
+    "못박"
+   ]
+  },
+  {
+   "id": "a0ba148b1aa57630",
+   "title": "12년 방치됐던 신압록강대교, 15일 개통…북·중 밀착 가속",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "강대",
+    "개통",
+    "대교",
+    "록강",
+    "신압",
+    "압록",
+    "bridge",
+    "linking",
+    "thursday",
+    "가속",
+    "균형",
+    "김정"
+   ]
+  },
+  {
+   "id": "3f194f5c2c29d2ef",
+   "title": "Pope Leo XIV has lung cancer called adenocarcinoma. Here’s what that means",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "lung",
+    "cancer",
+    "xiv",
+    "diagnosi",
+    "pope",
+    "leo",
+    "adenocarcinoma",
+    "called",
+    "taking",
+    "mean",
+    "message",
+    "papacy"
+   ]
+  },
+  {
+   "id": "99b7ec356c95accb",
+   "title": "“국정원 직원과 말 섞지마라”…미 검찰, 수미 테리 기소유예",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "소유",
+    "수미",
+    "테리",
+    "검찰",
+    "기소",
+    "유예",
+    "accused",
+    "aiding",
+    "analyst",
+    "cia",
+    "halt",
+    "국정"
+   ]
+  },
+  {
+   "id": "bd5b5defbf850676",
+   "title": "Sally Rooney’s publisher withdraws her books from UK sale over support for Palestine Action",
+   "topic": "lifestyle_culture",
+   "days": 1,
+   "signature": [
+    "rooney",
+    "sally",
+    "book",
+    "support",
+    "longer",
+    "palestine",
+    "action",
+    "banned",
+    "due",
+    "pro-palestinian",
+    "publisher",
+    "sold"
+   ]
+  },
+  {
+   "id": "26f7fc2b98ba3af5",
+   "title": "Two container ships sink near strait of Hormuz amid surge in Iranian attacks",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "sink",
+    "hormuz",
+    "near",
+    "ship",
+    "container",
+    "iranian",
+    "strait",
+    "two",
+    "cargo",
+    "projectile",
+    "increase",
+    "surge"
+   ]
+  },
+  {
+   "id": "407cf4587e67370a",
+   "title": "Social Security recipients to get 3.6% cost of living boost, an average of $75 per month",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "social",
+    "security",
+    "recipient",
+    "get",
+    "boost",
+    "bump",
+    "cola",
+    "living",
+    "per",
+    "average",
+    "benefit",
+    "cost"
+   ]
+  },
+  {
+   "id": "3caf6af552dcf052",
+   "title": "‘노르트스트림 가스관 폭파’ 전 우크라 장교 4년 만에 재판",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "nord",
+    "stream",
+    "alliance",
+    "dismissal",
+    "ex-army",
+    "germany",
+    "pipeline",
+    "seek",
+    "노르",
+    "르트",
+    "스트",
+    "장교"
+   ]
+  },
+  {
+   "id": "44eee7c2ae4f613d",
+   "title": "靑 비서실장에 임광현… 현 국세청장 깜짝 발탁",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "광현",
+    "실장",
+    "임광",
+    "장에",
+    "국세",
+    "서실",
+    "세청",
+    "비서",
+    "청장",
+    "靑",
+    "고돌",
+    "과형"
+   ]
+  },
+  {
+   "id": "b1986ace7b874ff7",
+   "title": "The only winner in the Kelly Clarkson bird feud and ‘Girls’ reboot is Brooklyn",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "brooklyn",
+    "clarkson",
+    "kelly",
+    "reboot",
+    "girl",
+    "only",
+    "winner",
+    "bird",
+    "clashed",
+    "dynamic",
+    "feud",
+    "loomed"
+   ]
+  },
+  {
+   "id": "afb3ea793a5076cb",
+   "title": "與 견제받은 김지용 “檢개혁 완성하고 싶다”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "김지",
+    "지용",
+    "檢",
+    "개혁",
+    "견제",
+    "과드",
+    "광철",
+    "김학",
+    "당도",
+    "드릴",
+    "받은",
+    "법출"
+   ]
+  },
+  {
+   "id": "ffa672c7302011cb",
+   "title": "Banks, buildings burn as Albania's capital Tirana erupts into student violence",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "student",
+    "building",
+    "albania",
+    "albania'",
+    "burn",
+    "tirana",
+    "violence",
+    "capital",
+    "erupt",
+    "government",
+    "protester"
+   ]
+  },
+  {
+   "id": "33e9cca09794796f",
+   "title": "Zimbabwe’s Caine Prize winner rejects claim he used AI to write his story",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "story",
+    "write",
+    "author",
+    "caine",
+    "kundizeza",
+    "prize-winning",
+    "simbarashe",
+    "using",
+    "zimbabwe",
+    "zimbabwean",
+    "denie",
+    "prize"
+   ]
+  },
+  {
+   "id": "c53835832c83beac",
+   "title": "AI infrastructure firms slump as US rate hike bets rise",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "hike",
+    "rate",
+    "bet",
+    "bolster",
+    "fed",
+    "infrastructure",
+    "slump",
+    "drop",
+    "hot",
+    "stock"
+   ]
+  },
+  {
+   "id": "e63b31a310a41891",
+   "title": "Katie Zacharia presented herself as a lawyer. She’s not",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "zacharia",
+    "katie",
+    "lawyer",
+    "herself",
+    "presented",
+    "scrutiny",
+    "secretary",
+    "claim",
+    "face"
+   ]
+  },
+  {
+   "id": "a14fc4fe78e7c186",
+   "title": "필라델피아, 돈 매팅리 재신임...2년 계약으로 정식 감독 임명",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "keeping",
+    "mattingly",
+    "phillie",
+    "계약",
+    "델피",
+    "라델",
+    "매팅",
+    "신임",
+    "약으",
+    "임명",
+    "재신",
+    "팅리"
+   ]
+  },
+  {
+   "id": "96defa9df5960042",
+   "title": "브런슨 “조건 충족안된 전작권 전환땐 美대통령에 위험 알릴것”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "조건",
+    "전환",
+    "작권",
+    "전작",
+    "런슨",
+    "령에",
+    "릴것",
+    "불투",
+    "브런",
+    "안된",
+    "알릴",
+    "우선"
+   ]
+  },
+  {
+   "id": "392dd64dc72ae475",
+   "title": "林 처남, 李 선거법-대북송금 사건 변호… 국힘 “대장동 패밀리 보은 인사 결정판”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "변호",
+    "북송",
+    "송금",
+    "처남",
+    "대북",
+    "장동",
+    "대장",
+    "거법",
+    "결정",
+    "국힘",
+    "남은",
+    "밀리"
+   ]
+  },
+  {
+   "id": "77121f9310773c3c",
+   "title": "해리스 “한미연합훈련 축소에 굉장히 실망”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "리스",
+    "해리",
+    "훈련",
+    "한미",
+    "강화",
+    "미연",
+    "미훈",
+    "벌적",
+    "소에",
+    "실망",
+    "역행",
+    "연합"
+   ]
+  },
+  {
+   "id": "2124ce691124870e",
+   "title": "러, 사할린서 일본인 기자 ‘간첩혐의’ 체포… 中 대표단은 쿠릴열도 방문… 日상대 협공",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "detain",
+    "espionage",
+    "journalist",
+    "간첩",
+    "기자",
+    "단은",
+    "대표",
+    "릴열",
+    "방문",
+    "사할",
+    "상대",
+    "열도"
+   ]
+  },
+  {
+   "id": "0d384ab116281f38",
+   "title": "Appeals court judges question the government about Trump's DC National Guard deployment",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "appeal",
+    "deployment",
+    "guard",
+    "national",
+    "court",
+    "question",
+    "dc",
+    "trump'",
+    "government",
+    "judge"
+   ]
+  },
+  {
+   "id": "30e3bea7a4e9a79d",
+   "title": "Kamala Harris to Campaign for Democrats in Mississippi, New Hampshire and Wisconsin Ahead of Midterms",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "harri",
+    "kamala",
+    "campaign",
+    "come",
+    "decision",
+    "hampshire",
+    "later",
+    "mississippi",
+    "stretch",
+    "wisconsin",
+    "add",
+    "stop"
+   ]
+  },
+  {
+   "id": "26280514834b2b6b",
+   "title": "UK prosecution labels Russell Brand a ruthless sexual predator at opening of his sex assault trial",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "brand",
+    "predator",
+    "russell",
+    "ruthles",
+    "sexual",
+    "calculated",
+    "label",
+    "manipulative",
+    "opening",
+    "told",
+    "assault",
+    "prosecution"
+   ]
+  },
+  {
+   "id": "9823cb26b95872c0",
+   "title": "Kimberly Guilfoyle’s Rise and Fall as Trump’s Ambassador to Greece",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "greece",
+    "guilfoyle",
+    "kimberly",
+    "ambassador",
+    "athen",
+    "feel",
+    "further",
+    "leave",
+    "orbit",
+    "post",
+    "fall"
+   ]
+  },
+  {
+   "id": "55e62112a4d3fc78",
+   "title": "김민석 “신천지 집단 입당 확인”… 與, 또다시 명청대전",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "대전",
+    "청대",
+    "신천",
+    "집단",
+    "천지",
+    "확인",
+    "민석",
+    "김민",
+    "다시",
+    "당수",
+    "또다",
+    "명청"
+   ]
+  },
+  {
+   "id": "4132274173b6e6fd",
+   "title": "China’s trade surplus nears record as pressure mounts from trading partners",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "surplu",
+    "record",
+    "export",
+    "putting",
+    "soar",
+    "trading",
+    "mount",
+    "partner",
+    "pressure",
+    "track"
+   ]
+  },
+  {
+   "id": "c09122f439173a8d",
+   "title": "Here’s the latest.",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "latest",
+    "headline",
+    "here"
+   ]
+  },
+  {
+   "id": "e355ba29d3ce601a",
+   "title": "旧統一教会が最上位機関新設 責任者にハン総裁の孫を任命",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "atop",
+    "church",
+    "ex-unification",
+    "grandson",
+    "leader'",
+    "が最",
+    "にハ",
+    "の孫",
+    "を任",
+    "ハン",
+    "ン総",
+    "一教"
+   ]
+  },
+  {
+   "id": "57e0abf12002db6e",
+   "title": "우크라, 이틀째 美서 미사일 경보 못 받아... 러 향한 드론은 돌연 위성통신 끊겼다",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "경보",
+    "미사",
+    "받아",
+    "사일",
+    "우크",
+    "크라",
+    "겼다",
+    "군용",
+    "끊겼",
+    "도도",
+    "돌연",
+    "론은"
+   ]
+  },
+  {
+   "id": "1c3d2d26dbc49805",
+   "title": "Saudi Airlines Rush to Save Scores of Planes From a War Zone",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "airline",
+    "plane",
+    "rush",
+    "save",
+    "score",
+    "zone",
+    "saudi",
+    "war"
+   ]
+  },
+  {
+   "id": "10caf8b6a26942a3",
+   "title": "The UK energy secretary is flirting with a bad idea for bills – the ‘rising block tariff’",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "bad",
+    "flirting",
+    "idea",
+    "tariff",
+    "bill",
+    "block",
+    "secretary",
+    "energy",
+    "rising"
+   ]
+  },
+  {
+   "id": "01f47520e597a425",
+   "title": "Done family took £30m dividend from Betfred before warning of job cuts",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "betfred",
+    "dividend",
+    "done",
+    "took",
+    "warning",
+    "family"
+   ]
+  },
+  {
+   "id": "f9871c3e03382d05",
+   "title": "김민석, 조희대 탄핵 거론… “모든 방안 검토”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "모든",
+    "조희",
+    "탄핵",
+    "희대",
+    "거론",
+    "검토",
+    "방안",
+    "민석"
+   ]
+  },
+  {
+   "id": "faa5dc6a10adbb14",
+   "title": "Excluding UK from ‘Made in Europe’ law will hurt entire EU car industry, Mercedes boss warns",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "bos",
+    "car",
+    "entire",
+    "excluding",
+    "hurt",
+    "made",
+    "mercede",
+    "law",
+    "eu",
+    "industry"
+   ]
+  },
+  {
+   "id": "e5ce34ddd45ba2ab",
+   "title": "해리스 전 미국 부통령 “트럼프 관세, 동맹 힘 약화시켜 한국 투자 중요…계속해달라”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "계속",
+    "달라",
+    "부통",
+    "속해",
+    "시켜",
+    "약화",
+    "중요",
+    "해달",
+    "화시",
+    "관세",
+    "동맹",
+    "미국"
+   ]
+  }
+ ]
+}

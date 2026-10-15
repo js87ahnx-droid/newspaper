@@ -1,0 +1,184 @@
+"""S6 편집 규칙 검증 — 합성 데이터로 (실제 수집 데이터는 저장소에 없으므로).
+
+기준 (project-plan.md S6):
+- 관심도를 0 / 기본 / 극단으로 바꿔도 1면 톱이 같다
+- 극단 관심 설정에서도 다양성 슬롯 ≥ 30%, 관심 기사 ≤ 50%
+- 가짜 history 로 3일째 이슈는 관심도 0 이어도 단신 이상에 실리고 "3일째"
+- 기사마다 배치 이유(점수 구성)가 있다
+- 사진: 1면 2장, 섹션당 1장 상한
+"""
+import json
+import random
+
+import pytest
+
+from pipeline.cluster import Issue
+from pipeline.collect import Article
+from pipeline.edit import arrange, choose, edition_to_json
+from pipeline.interest import build_interest_table
+from pipeline.score import load_previous, score_issues, write_history
+from pipeline.settings import Interests, load_config, load_interests
+
+CFG = load_config()
+
+SOURCES = [  # (매체, 국가, 성향, 가중치, 언어)
+    ("조선일보", "KR", "보수", 1.0, "ko"), ("한겨레", "KR", "진보", 0.9, "ko"), ("연합뉴스", "KR", "통신·공영", 1.0, "ko"),
+    ("동아일보", "KR", "보수", 1.0, "ko"), ("경향신문", "KR", "진보", 0.9, "ko"), ("한국경제", "KR", "경제지", 0.9, "ko"),
+    ("BBC", "UK", "통신·공영", 1.0, "en"), ("New York Times", "US", "진보", 1.0, "en"), ("Fox News", "US", "보수", 0.8, "en"),
+]
+TEMPLATES = {
+    "politics": "대통령 국회 청문회 {w}",
+    "economy": "코스피 금리 물가 {w}",
+    "semis_ai": "반도체 HBM 엔비디아 {w}",
+    "entertainment_sports": "배우 드라마 시사회 {w}",
+    "incidents": "흉기 체포 사고 {w}",
+    "lifestyle_culture": "날씨 여행 축제 {w}",
+    "society": "교육 노조 파업 {w}",
+}
+
+
+def unique_word(k: int) -> str:
+    """이슈마다 겹치지 않는 세 글자 고유어 (연속성 토큰이 이슈별로 구별되게)."""
+    base = 0xAC00
+    return "".join(chr(base + ((k * 97 + j * 1013) % 11172)) for j in range(3))
+
+
+def build(n_issues=90, seed=3):
+    rnd = random.Random(seed)
+    arts, issues = {}, []
+    topics = list(TEMPLATES)
+    for k in range(n_issues):
+        topic = topics[k % len(topics)]
+        word = f"{unique_word(k)} {unique_word(k + 5000)}"
+        n_src = rnd.choice([1, 1, 1, 2, 3, 5, 7])
+        srcs = rnd.sample(SOURCES, n_src)
+        ids = []
+        for j, (name, country, lean, w, lang) in enumerate(srcs):
+            aid = f"a{k}_{j}"
+            title = TEMPLATES[topic].format(w=word) if lang == "ko" else f"President parliament {word}"
+            arts[aid] = Article(
+                id=aid, url=f"https://x.test/{aid}", source=name, country=country, lean=lean, media_type="종합지",
+                weight=w, paywall=False, kind="rss", title=title, lead="리드", lang=lang,
+                published="2026-10-15T12:00:00+00:00", date_source="feed", sections=["top"], main=(j == 0 and k % 4 == 0),
+                first_seen="2026-10-15T12:00:00+00:00", image=f"https://img.test/{aid}.jpg" if rnd.random() < 0.6 else None,
+            )
+            ids.append(aid)
+        a0 = arts[ids[0]]
+        issues.append(Issue(
+            id=ids[0], article_ids=ids, title=a0.title, rep_article=ids[0],
+            sources=sorted({arts[i].source for i in ids}), countries=sorted({arts[i].country for i in ids}),
+            leans=sorted({arts[i].lean for i in ids}), langs=sorted({arts[i].lang for i in ids}), cohesion=1.0,
+        ))
+    return arts, issues
+
+
+def interests_variant(kind: str) -> Interests:
+    base = load_interests().model_dump()
+    if kind == "zero":
+        base.update(topics={}, keywords=[], less=[], default_weight=0, less_weight=0, keyword_boost=0)
+    elif kind == "extreme":  # 연예·스포츠만 100배
+        base.update(topics={"entertainment_sports": 100.0}, keywords=[], less=[], default_weight=0, less_weight=0)
+    return Interests.model_validate(base)
+
+
+def run(kind="default", previous=None, mode=None):
+    arts, issues = build()
+    cfg = CFG.model_copy(deep=True)
+    if mode:
+        cfg.editing.interest_cap_mode = mode
+    it = interests_variant(kind)
+    scored = score_issues(issues, arts, cfg, build_interest_table(it), previous or [])
+    placed, stats = choose(scored, cfg, it)
+    ed = arrange(placed, cfg, it, arts)
+    return arts, scored, placed, stats, ed, it
+
+
+def test_front_top_independent_of_interest():
+    tops = set()
+    for kind in ("zero", "default", "extreme"):
+        _, _, _, _, ed, _ = run(kind)
+        tops.add(ed.sections["front"][0].scored.issue.id)
+    assert len(tops) == 1
+
+
+@pytest.mark.parametrize("mode", ["driven", "topic"])
+def test_extreme_interest_keeps_diversity_and_cap(mode):
+    _, scored, placed, stats, ed, it = run("extreme", mode=mode)
+    n = it.daily_articles
+    in_paper = [p for sid, ps in ed.sections.items() for p in ps]
+    assert len(in_paper) == n
+    diverse = [p for p in in_paper if any(r.startswith(("다양성", "1면 톱")) for r in p.reasons)]
+    assert len(diverse) / n >= CFG.editing.diversity_ratio
+    # 다양성 슬롯은 관심도와 무관하게 주목도 상위여야 한다
+    by_att = sorted(scored, key=lambda s: (-s.attention, -s.importance, s.issue.id))
+    top_att = {s.issue.id for s in by_att[: len(diverse)]}
+    assert {p.scored.issue.id for p in diverse} <= top_att | {ed.sections["front"][0].scored.issue.id}
+    assert stats["interest_counted"] <= stats["interest_cap"] == int(CFG.editing.interest_cap * n)
+    if mode == "topic":
+        ent = [p for p in in_paper if p.scored.topic == "entertainment_sports"]
+        assert len(ent) <= n * CFG.editing.interest_cap + len(diverse)
+
+
+def test_extreme_interest_actually_shifts_paper_within_cap():
+    """관심도가 바뀌면 지면이 달라지되(학습 효과) 상한을 넘지 않는다."""
+    _, _, _, s0, ed0, _ = run("zero")
+    _, _, _, s1, ed1, _ = run("extreme")
+    ids0 = {p.scored.issue.id for ps in ed0.sections.values() for p in ps}
+    ids1 = {p.scored.issue.id for ps in ed1.sections.values() for p in ps}
+    assert ids0 != ids1
+    assert s1["interest_counted"] > 0
+
+
+def test_three_day_issue_guaranteed_even_without_interest(tmp_path):
+    arts, issues = build()
+    # 가장 점수가 낮을 법한 이슈(매체 1곳, 생활·문화)를 골라 전날까지 2일 이어졌다고 기록
+    target = next(i for i in issues if len(i.article_ids) == 1 and "날씨" in i.title)
+    from pipeline.score import issue_signature, title_df
+
+    all_arts = list(arts.values())
+    sig = issue_signature([arts[target.rep_article]], title_df(all_arts), len(all_arts))
+    (tmp_path / "2026-10-15.json").write_text(
+        json.dumps({"edition": "2026-10-15", "issues": [{"id": "old", "title": "전날", "topic": "lifestyle_culture",
+                                                          "days": 2, "signature": sig}]}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    from datetime import date
+
+    _, previous = load_previous(tmp_path, date(2026, 10, 16))
+    _, scored, placed, _, ed, _ = run("zero", previous=previous)
+    hit = [p for ps in ed.sections.values() for p in ps if p.scored.issue.id == target.id]
+    assert hit, "3일째 이슈가 지면에 없다"
+    assert hit[0].scored.days == 3
+    assert any(r == "연속 보도 3일째" for r in hit[0].reasons)
+
+
+def test_every_item_has_reasons_and_scores():
+    arts, _, _, stats, ed, _ = run()
+    out = edition_to_json(ed, "2026-10-16", arts, stats)
+    items = [it for ps in out["sections"].values() for it in ps]
+    assert items
+    for it in items:
+        assert it["reasons"]
+        assert set(it["scores"]) == {"attention", "importance", "continuity", "interest", "final"}
+        assert all(0 <= v <= 1 for v in it["scores"].values())
+
+
+def test_photo_caps_and_no_duplicates():
+    _, _, _, _, ed, _ = run()
+    assert sum(1 for p in ed.sections["front"] if p.photo) <= CFG.photos.front
+    for sid in ("politics", "economy", "international", "interest", "briefs"):
+        cap = 0 if sid == "briefs" else CFG.photos.per_section
+        assert sum(1 for p in ed.sections[sid] if p.photo) <= cap
+    ids = [p.scored.issue.id for ps in ed.sections.values() for p in ps]
+    assert len(ids) == len(set(ids))
+
+
+def test_history_has_no_body_or_lead(tmp_path):
+    from datetime import date
+
+    _, scored, _, _, ed, _ = run()
+    placed_ids = {p.scored.issue.id for ps in ed.sections.values() for p in ps}
+    path = write_history(tmp_path, date(2026, 10, 16), scored, placed_ids)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for x in data["issues"]:
+        assert set(x) == {"id", "title", "topic", "days", "signature"}

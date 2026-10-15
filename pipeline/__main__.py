@@ -148,6 +148,39 @@ def cmd_cluster(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_edit(args: argparse.Namespace) -> int:
+    from .cluster import Issue
+    from .collect import Article
+    from .edit import arrange, choose, edition_to_json
+    from .interest import build_interest_table
+    from .score import load_previous, score_issues, write_history
+
+    root = Path(args.root)
+    cfg, interests = load_config(root), load_interests(root)
+    raw = _raw_dir(args)
+    edition = date.fromisoformat(args.date)
+    articles = {d["id"]: Article.from_dict(d) for d in json.loads((raw / f"{args.date}.json").read_text(encoding="utf-8"))}
+    issues = [Issue(**d) for d in json.loads((raw / f"{args.date}.issues.json").read_text(encoding="utf-8"))]
+    history_dir = Path(args.data) / "history"
+    prev_date, previous = load_previous(history_dir, edition)
+    scored = score_issues(issues, articles, cfg, build_interest_table(interests), previous)
+    placed, cstats = choose(scored, cfg, interests)
+    ed = arrange(placed, cfg, interests, articles)
+    out = edition_to_json(ed, args.date, articles, cstats)
+    out["stats"]["history_previous"] = prev_date.isoformat() if prev_date else None
+    (raw / f"{args.date}.edition.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    if args.write_history:
+        placed_ids = {p.scored.issue.id for ps in ed.sections.values() for p in ps}
+        write_history(history_dir, edition, scored, placed_ids)
+    st = out["stats"]
+    print(
+        f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "
+        f"관심 {st['interest_counted']}/{st['interest_cap']}(제외 {st['interest_skipped']}), 연속 보장 {st['continuity_guaranteed']}, "
+        f"사진 {st['photos']}, 전날 기록 {st['history_previous']}"
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     # Windows 콘솔 기본 인코딩(cp949)에서 한글 오류 메시지가 깨지지 않게 UTF-8로 고정
     for stream in (sys.stdout, sys.stderr):
@@ -172,6 +205,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--threshold", type=float, help="유사도 임계값 (기본: config.yaml)")
     p.set_defaults(func=cmd_cluster)
+    p = sub.add_parser("edit", help="점수 계산과 지면 편집 (data/raw/<호>.edition.json)")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--write-history", action="store_true", help="연속성 기록(data/history)에 이 호를 저장")
+    p.set_defaults(func=cmd_edit)
     args = parser.parse_args(argv)
     return args.func(args)
 

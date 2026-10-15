@@ -21,6 +21,20 @@ class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+TOPICS = {
+    "economy": "경제·증시",
+    "semis_ai": "반도체·AI",
+    "politics": "정치·안보",
+    "international": "국제",
+    "industry": "산업",
+    "society": "사회",
+    "entertainment_sports": "연예·스포츠",
+    "incidents": "사건·사고",
+    "lifestyle_culture": "생활·문화",
+    "science": "과학",
+}
+
+
 # ---------- config.yaml ----------
 
 class Window(Strict):
@@ -54,6 +68,9 @@ class Editing(Strict):
     interest_cap: float = Field(ge=0, le=1)
     continuity_min_days: int = Field(ge=1)
     history_days: int = Field(ge=1, le=60)
+    # driven: 관심도 덕분에 들어온 기사(관심도를 빼고 골랐다면 빠졌을 기사)만 상한에 셈 (2026-10-16 사용자 결정)
+    # topic: 관심 분야 기사 전체를 상한에 셈
+    interest_cap_mode: Literal["driven", "topic"] = "driven"
 
     @model_validator(mode="after")
     def _ratios(self) -> "Editing":
@@ -86,6 +103,28 @@ class Clustering(Strict):
     csls_min_by_lang: dict[Literal["ko", "en", "ja", "zh", "ar"], float] = Field(default_factory=dict)
 
 
+class Importance(Strict):
+    topic_weights: dict[str, float]          # 분야별 기본 중요도
+    keywords: list[str]                      # 핵심 키워드 (제목에 나오면 가산)
+    keyword_bonus: float = Field(ge=0, le=1)
+
+    @field_validator("topic_weights")
+    @classmethod
+    def _all_topics(cls, v: dict[str, float]) -> dict[str, float]:
+        missing = sorted(set(TOPICS) - set(v))
+        unknown = sorted(set(v) - set(TOPICS))
+        if missing or unknown:
+            raise ValueError(f"분야 가중치 누락 {missing}, 알 수 없는 분야 {unknown}")
+        if any(w < 0 for w in v.values()):
+            raise ValueError("분야 가중치는 음수일 수 없음")
+        return v
+
+
+class Photos(Strict):
+    front: int = Field(ge=0, le=5)        # 1면 사진 수 상한
+    per_section: int = Field(ge=0, le=3)  # 섹션당 사진 수 상한
+
+
 class Llm(Strict):
     enabled: bool
     model: str
@@ -101,6 +140,8 @@ class Config(Strict):
     editing: Editing
     sections: list[Section] = Field(min_length=1)
     clustering: Clustering
+    importance: Importance
+    photos: Photos
     llm: Llm
 
     @field_validator("publish_time")
@@ -181,18 +222,6 @@ class Sources(Strict):
 
 # ---------- interests.yaml ----------
 
-TOPICS = {
-    "economy": "경제·증시",
-    "semis_ai": "반도체·AI",
-    "politics": "정치·안보",
-    "international": "국제",
-    "industry": "산업",
-    "society": "사회",
-    "entertainment_sports": "연예·스포츠",
-    "incidents": "사건·사고",
-    "lifestyle_culture": "생활·문화",
-    "science": "과학",
-}
 
 COMPARE_TOPICS = {
     "diplomacy_security": "외교·안보",
