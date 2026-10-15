@@ -39,5 +39,14 @@
   - 전체 pytest 28건 통과, `validate` 통과
 - 참고: 후보 해외 매체(NHK World, Japan Times, SCMP, Global Times, Al Jazeera 등)는 대부분 영어판이라 "그 외 언어 번역" 규칙은 일본어·중국어판 피드를 추가할 때만 쓰인다 → S3에서 사용자에게 확인
 
-### 다음
-- S3 소스 피드 실측·공식 API 조사표
+### S3 소스 실측·API 조사 — 사용자 확인 대기
+- 조사표: `docs-internal/source-audit.md`
+- 공식 피드 동작 16곳(피드 54개) → `sources.yaml` enabled. Google 뉴스 대체만 가능 9곳(중앙, 매경, KBS 국문, CNN, AP, Reuters, Nikkei Asia, NHK World, Global Times) → enabled: false
+- 발견: WSJ·NHK·CNN 의 예전 피드 주소는 200을 돌려주지만 갱신이 멈춰 있음 → 최신 기사 시각으로 판정해야 함 (check_sources 의 48시간 기준)
+- 발견: 한겨레 RSS에 발행 시각 없음 → 기사 페이지 메타로 보완 (S4)
+- 발견: 피드 16개가 11시간 시간창을 다 덮지 못함 → 시간창 안 여러 번 수집·누적으로 설계 변경 (계획서 S4·S10 반영)
+- 공식 API: 무료로 본문 가능한 곳은 Guardian 하나, NYT는 초록·첫 문단
+- Evaluator 결과
+  - [x] 매체별 판정·근거 표 작성
+  - [x] 동작 피드만 enabled — `tools/check_sources.py` 켜진 피드 54개 실패 0
+  - [ ] D6(대체 경로 매체 사용 여부·성향 라벨)·D7(본문 API) 사용자 답 — 대기

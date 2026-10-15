@@ -137,6 +137,10 @@ class Feed(Strict):
     section: str = Field(min_length=1)
     url: str = Field(pattern=r"^https?://")
     main: bool = False  # 매체 메인(톱) 피드 여부 — 주목도 계산에 사용
+    # rss: 매체 공식 피드 / google_news: 공식 피드가 없어 Google 뉴스의 매체 한정 검색 피드로 대체(리드 없음)
+    kind: Literal["rss", "google_news"] = "rss"
+    # feed: 피드의 발행 시각 사용 / page_meta: 피드에 시각이 없어 기사 페이지 <meta> 의 발행 시각을 읽음
+    date_source: Literal["feed", "page_meta"] = "feed"
 
 
 class Source(Strict):
