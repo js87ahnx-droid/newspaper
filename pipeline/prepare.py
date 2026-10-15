@@ -29,6 +29,16 @@ def current_edition(now: datetime, cfg: Config) -> date:
     return local.date() if local.time() >= time(eh, em) else local.date() - timedelta(days=1)
 
 
+def target_edition(now: datetime, cfg: Config) -> date:
+    """수집·임베딩이 채워 갈 호: 시간창이 열려 있으면 그 호, 닫힌 낮 시간이면 방금 닫힌 호."""
+    tz = ZoneInfo(cfg.timezone)
+    local = now.astimezone(tz)
+    sh, sm = map(int, cfg.window.start.split(":"))
+    if local.time() >= time(sh, sm):
+        return local.date() + timedelta(days=1)
+    return local.date()
+
+
 def prepare(
     store: dict[str, Article], edition: date, cfg: Config, sources: Sources
 ) -> tuple[list[Article], dict]:

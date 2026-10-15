@@ -87,6 +87,67 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     return 0 if articles else 1
 
 
+def _cache(args, cfg):
+    from .embcache import EmbeddingCache
+
+    name = cfg.clustering.model.split("/")[-1]
+    return EmbeddingCache(_raw_dir(args) / f"emb-{name}.npz")
+
+
+def cmd_embed(args: argparse.Namespace) -> int:
+    """지금 채워지는 호의 기사 중 아직 임베딩이 없는 것만 계산해 캐시에 넣는다 (수집 직후 실행)."""
+    import time
+
+    from .collect import load_store
+    from .prepare import prepare, target_edition
+
+    cfg = load_config(Path(args.root))
+    sources = load_sources(Path(args.root))
+    store = load_store(_raw_dir(args) / "store.jsonl")
+    edition = date.fromisoformat(args.date) if args.date else target_edition(datetime.now(timezone.utc), cfg)
+    articles, _ = prepare(store, edition, cfg, sources)
+    cache = _cache(args, cfg)
+    t0 = time.perf_counter()
+    n = cache.fill(articles, cfg.clustering.model)
+    # 캐시 키는 정제 뒤 기사(리드 상한 적용) 기준이므로 정리도 정제 결과로 한다: 이번 호와 직전 호만 남김
+    prev, _ = prepare(store, edition - timedelta(days=1), cfg, sources)
+    pruned = cache.prune(articles + prev)
+    cache.save()
+    print(f"임베딩: {edition} 호 기사 {len(articles)}건 중 새로 계산 {n}건 ({time.perf_counter() - t0:.0f}초), 캐시 정리 {pruned}건")
+    return 0
+
+
+def cmd_cluster(args: argparse.Namespace) -> int:
+    import time
+
+    from .cluster import build_issues, issues_to_json, similarity_matrix
+    from .collect import Article
+
+    cfg = load_config(Path(args.root))
+    raw = _raw_dir(args)
+    path = raw / f"{args.date}.json"
+    articles = [Article.from_dict(d) for d in json.loads(path.read_text(encoding="utf-8"))]
+    t0 = time.perf_counter()
+    cache = _cache(args, cfg)
+    computed = cache.fill(articles, cfg.clustering.model)  # 미리 못 한 것만
+    vecs = cache.get(articles)
+    t1 = time.perf_counter()
+    threshold = args.threshold or cfg.clustering.similarity_threshold
+    sim = similarity_matrix(articles, vecs, cfg.clustering)
+    issues = build_issues(articles, sim, threshold, cfg.clustering.linkage)
+    t2 = time.perf_counter()
+    (raw / f"{args.date}.issues.json").write_text(
+        json.dumps(issues_to_json(issues), ensure_ascii=False, indent=1), encoding="utf-8"
+    )
+    multi = [i for i in issues if len(i.article_ids) > 1]
+    cross = [i for i in multi if len(i.langs) > 1]
+    print(
+        f"{args.date} 호: 기사 {len(articles)}건 → 이슈 {len(issues)}개 (2건 이상 {len(multi)}개, 다국어 {len(cross)}개) "
+        f"| 임베딩 {t1 - t0:.1f}초(새로 계산 {computed}건), 군집 {t2 - t1:.1f}초, 임계값 {threshold}"
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     # Windows 콘솔 기본 인코딩(cp949)에서 한글 오류 메시지가 깨지지 않게 UTF-8로 고정
     for stream in (sys.stdout, sys.stderr):
@@ -104,6 +165,13 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("prepare", help="호 날짜의 시간창 기사만 골라 중복 제거")
     p.add_argument("--date", help="호 날짜 YYYY-MM-DD (기본: 가장 최근에 끝난 시간창)")
     p.set_defaults(func=cmd_prepare)
+    p = sub.add_parser("embed", help="지금 채워지는 호의 새 기사만 임베딩해 캐시에 저장 (수집 직후)")
+    p.add_argument("--date", help="호 날짜 YYYY-MM-DD (기본: 시간창이 열린 호)")
+    p.set_defaults(func=cmd_embed)
+    p = sub.add_parser("cluster", help="정제된 기사를 다국어 임베딩으로 이슈별로 묶음")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--threshold", type=float, help="유사도 임계값 (기본: config.yaml)")
+    p.set_defaults(func=cmd_cluster)
     args = parser.parse_args(argv)
     return args.func(args)
 

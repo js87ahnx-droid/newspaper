@@ -79,6 +79,11 @@ class Section(Strict):
 class Clustering(Strict):
     model: str
     similarity_threshold: float = Field(gt=0, lt=1)
+    linkage: Literal["average", "complete", "single"] = "average"
+    lexical_weight: float = Field(default=0.5, ge=0, le=1)  # 같은 언어 쌍에서 어휘 겹침 비중
+    cross_lang_csls_min: float = Field(default=0.06, gt=-1, lt=1)  # 다른 언어 쌍이 묶이는 CSLS 점수
+    csls_k: int = Field(default=10, ge=1, le=50)                  # CSLS 의 이웃 수
+    csls_min_by_lang: dict[Literal["ko", "en", "ja", "zh", "ar"], float] = Field(default_factory=dict)
 
 
 class Llm(Strict):

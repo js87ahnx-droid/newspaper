@@ -36,8 +36,16 @@ sections:
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0}
 
 clustering:
-  model: paraphrase-multilingual-MiniLM-L12-v2
-  similarity_threshold: 0.62
+  # S5 실측: MiniLM·mpnet·potion 은 한국어 짧은 문장 구별이나 다국어 연결이 약해 탈락 (docs-internal/cluster-review-*.md)
+  model: multilingual-e5-large
+  similarity_threshold: 0.4
+  linkage: average
+  lexical_weight: 0.5        # 같은 언어 쌍: 중심화 임베딩과 어휘 겹침을 반씩
+  cross_lang_csls_min: 0.06  # 다른 언어 쌍: CSLS 이 값 이상이어야 묶임
+  csls_k: 10
+  # 일본어가 낀 쌍은 더 높게: 10/15호 검수에서 다국어 오류 3건이 모두 일본어 쌍(CSLS 0.071~0.079)
+  # 검수 뒤 정한 값이라 시범 운영(S12)에서 새 날짜로 재검증 필요
+  csls_min_by_lang: {ja: 0.09}
 
 # LLM 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
 # 입장 차이 요약·영어 기사 한국어 요약·비영어 제목 번역을 여러 건씩 묶어 한 번에 호출한다.
