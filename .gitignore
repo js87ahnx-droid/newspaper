@@ -1,0 +1,19 @@
+# 비밀값 — 키·토큰·비밀번호는 GitHub Secrets 에만 둔다
+.env
+.env.*
+secrets*
+*.key
+*.pem
+
+# 기사 본문 — 공개 저장소에 절대 올리지 않는다 (지시서 5-5)
+data/bodies/
+
+# 실행 부산물
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+models/
+data/raw/
+run-report.json

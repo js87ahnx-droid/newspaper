@@ -1,0 +1,47 @@
+# 편집 설정 — 사용자가 직접 조정하는 값
+# 잘못된 값은 `python -m pipeline validate` 가 거부한다.
+
+timezone: Asia/Seoul
+
+# 수집 시간창: 전날 start ~ 당일 end (KST). 실행 시각과 무관하게 이 경계로 자른다.
+window:
+  start: "19:00"
+  end: "06:00"
+
+publish_time: "06:10"
+
+# 최종 점수 = 아래 가중치의 가중합 (각 지표는 0~1로 정규화된 값)
+weights:
+  attention: 0.40    # 주목도
+  importance: 0.35   # 중요도
+  continuity: 0.15   # 연속성
+  interest: 0.10     # 관심도 (1면 톱 선정에는 쓰지 않음)
+
+editing:
+  total_articles: 40       # 하루 지면 기사 수 (interests.yaml 의 daily_articles 가 있으면 그 값)
+  diversity_ratio: 0.30    # 관심도와 무관하게 주목도 상위 이슈에 배정하는 비율
+  interest_cap: 0.50       # 관심 분야 기사 비율 상한
+  continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
+  history_days: 14         # 연속성 계산에 쓰는 과거 일수
+
+# 지면 순서와 지면별 최대 기사 수
+sections:
+  - {id: front, title: "1면", max_articles: 5}
+  - {id: politics, title: "정치·안보", max_articles: 6}
+  - {id: economy, title: "경제·산업", max_articles: 6}
+  - {id: international, title: "국제", max_articles: 6}
+  - {id: interest, title: "관심", max_articles: 6}
+  - {id: compare, title: "입장 비교", max_articles: 3}
+  - {id: briefs, title: "단신", max_articles: 12}
+  - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0}
+
+clustering:
+  model: paraphrase-multilingual-MiniLM-L12-v2
+  similarity_threshold: 0.62
+
+# LLM 요약 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
+llm:
+  enabled: true
+  model: haiku
+  max_issues_per_day: 10
+  timeout_sec: 120

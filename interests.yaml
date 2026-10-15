@@ -1,0 +1,22 @@
+# 초기 인터뷰 결과 (S2에서 채움). 지금 값은 자리표시 기본값.
+
+# 1. 관심 분야와 우선순위 — 분야: 가중치 (0 = 관심 없음, 1 = 기본, 클수록 우선)
+topics:
+  economy: 1.0
+  politics: 1.0
+  international: 1.0
+
+# 2. 관심 기업·산업·키워드
+keywords: []
+
+# 3. 덜 보고 싶은 분야
+less: []
+
+# 4. 하루 읽을 기사 수
+daily_articles: 40
+
+# 5. 성향 비교를 보고 싶은 이슈 유형
+compare_topics: []
+
+# 6. 해외 기사 제목 표시: original(원문 그대로) | translated(번역 병기)
+foreign_title: original
