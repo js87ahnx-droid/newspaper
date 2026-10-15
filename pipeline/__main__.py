@@ -181,6 +181,37 @@ def cmd_edit(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_enrich(args: argparse.Namespace) -> int:
+    """입장 차이(무토큰)를 붙이고, LLM 훅이 켜져 있으면 요약·번역을 붙인다."""
+    from .collect import Article
+    from .stance import day_prior, stance
+
+    root = Path(args.root)
+    cfg, interests = load_config(root), load_interests(root)
+    raw = _raw_dir(args)
+    edition = json.loads((raw / f"{args.date}.edition.json").read_text(encoding="utf-8"))
+    day_articles = [Article.from_dict(d) for d in json.loads((raw / f"{args.date}.json").read_text(encoding="utf-8"))]
+    by_id = {a.id: a for a in day_articles}
+    prior = day_prior(day_articles)
+    items = [it for ps in edition["sections"].values() for it in ps] + edition["compare"]
+    for it in items:
+        it["stance"] = stance([by_id[a["id"]] for a in it["articles"]], prior)
+    llm_note = "꺼짐"
+    if cfg.llm.enabled and not args.no_llm:
+        from datetime import date as _date
+
+        from .llm import Budget, enrich  # 켜져 있을 때만 불러온다
+
+        budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
+        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget)
+        llm_note = f"{edition['stats']['llm']['status']} (오늘 {edition['stats']['llm']['calls_today']}회)"
+    (raw / f"{args.date}.edition.json").write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+    noted = sum(1 for it in items if it["stance"]["note"])
+    worded = sum(1 for it in items if it["stance"]["lean_words"] or it["stance"]["country_words"])
+    print(f"{args.date} 호 입장 차이: 기사 {len(items)}건 중 쏠림 표시 {noted}, 특징 단어 {worded} | LLM: {llm_note}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     # Windows 콘솔 기본 인코딩(cp949)에서 한글 오류 메시지가 깨지지 않게 UTF-8로 고정
     for stream in (sys.stdout, sys.stderr):
@@ -209,6 +240,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--write-history", action="store_true", help="연속성 기록(data/history)에 이 호를 저장")
     p.set_defaults(func=cmd_edit)
+    p = sub.add_parser("enrich", help="입장 차이(무토큰) + LLM 요약·번역(켜져 있을 때)")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--no-llm", action="store_true", help="이번 실행만 LLM 훅을 건너뜀")
+    p.set_defaults(func=cmd_enrich)
     args = parser.parse_args(argv)
     return args.func(args)
 
