@@ -75,7 +75,7 @@ def test_no_horizontal_scroll_and_pages_fit(browser, tmp_path, w, h):
         sw: document.scrollingElement.scrollWidth, iw: innerWidth,
         book: document.getElementById('book').getBoundingClientRect().width,
         spread: NEWS.state().spread,
-        overflow: [...document.querySelectorAll('#book .page-inner')].filter(e => e.scrollHeight > e.clientHeight + 1).length,
+        overflow: NEWS.state().overflow.length,   // 쪽 나누기 때 모든 쪽을 잰 값 (넘김 뒤 숨은 쪽은 높이 0이라 DOM 으로는 못 잰다)
         pages: NEWS.state().pages })""")
     ctx.close()
     assert not errors, errors

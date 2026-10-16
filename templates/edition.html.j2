@@ -102,7 +102,8 @@
       <div class="axis">
       {% for g in c.lean_groups %}
         <div class="grp"><div class="badge lean-{{ g.cls }}">{{ g.group }}</div>
-        {% for a in g.articles %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        {% for a in g.articles[:3] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        {% if g.articles|length > 3 %}<p class="more">외 {{ g.articles|length - 3 }}건</p>{% endif %}
         </div>
       {% endfor %}
       </div>
@@ -111,13 +112,59 @@
       <div class="axis">
       {% for g in c.country_groups %}
         <div class="grp"><div class="badge">{{ g.group }}</div>
-        {% for a in g.articles %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        {% for a in g.articles[:3] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+        {% if g.articles|length > 3 %}<p class="more">외 {{ g.articles|length - 3 }}건</p>{% endif %}
         </div>
       {% endfor %}
       </div>
       {% endif %}
     </article>
   {% endfor %}
+  </section>
+{% endif %}
+
+{% if opinion %}
+  <section class="sec sec-opinion" data-section="opinion" data-title="{{ opinion_title }}">
+    <p class="disclaimer">사설은 그 매체의 공식 입장, 칼럼은 필자 개인의 의견입니다. 성향 라벨은 일반적인 평가일 뿐 글마다 다를 수 있습니다. 제목과 요약만 싣고 본문은 원문 링크로 봅니다.</p>
+  {% for c in opinion.compare %}
+    <article class="item opcmp" data-issue="op-cmp-{{ loop.index }}">
+      <h3 class="hl">{{ "같은 이슈, 다른 사설" if c.on_page else "같은 주제, 다른 사설" }} — {{ c.issue_title }}</h3>
+      <div class="axis">
+      {% for g in c.groups %}
+        <div class="grp"><div class="badge lean-{{ g.cls }}">{{ g.lean }}</div>
+        {% for e in g.editorials %}
+          <p><span class="src">{{ e.source }}</span> <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.title }}</a></p>
+          {% if e.lead %}<p class="oplead">{{ e.lead }}</p>{% endif %}
+        {% endfor %}
+        </div>
+      {% endfor %}
+      </div>
+    </article>
+  {% endfor %}
+  {% for chunk in opinion.editorial_chunks %}
+    <article class="item oplist" data-issue="op-ed-{{ loop.index }}">
+      {% if loop.first %}<h3 class="hl">오늘의 사설</h3>{% endif %}
+      <ul>
+      {% for e in chunk %}
+        <li><span class="badge lean-{{ e.cls }}">{{ e.lean }}</span> <span class="src">{{ e.source }}</span>
+            <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer">{{ e.title }}</a>
+            {% if e.issue_title %}<span class="rel">관련: {{ e.issue_title }}</span>{% endif %}</li>
+      {% endfor %}
+      </ul>
+    </article>
+  {% endfor %}
+  {% if opinion.columns %}
+    <article class="item oplist" data-issue="op-col">
+      <h3 class="hl">주요 칼럼·논평</h3>
+      <ul>
+      {% for c in opinion.columns %}
+        <li><span class="badge lean-{{ c.cls }}">{{ c.lean }}</span> <span class="src">{{ c.source }}</span>
+            <a href="{{ c.url }}" target="_blank" rel="noopener noreferrer" lang="{{ c.lang }}">{{ c.title }}</a>{% if c.paywall %} <small>(유료)</small>{% endif %}
+            {% if c.issue_title %}<span class="rel">관련: {{ c.issue_title }}</span>{% endif %}</li>
+      {% endfor %}
+      </ul>
+    </article>
+  {% endif %}
   </section>
 {% endif %}
 

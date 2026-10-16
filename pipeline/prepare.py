@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 
 from .collect import Article
 from .settings import Config, Sources
-from .textutil import cap_lead, title_key
+from .textutil import cap_lead, clean_lead, detect_opinion, title_key
 
 
 def edition_window(edition: date, cfg: Config) -> tuple[datetime, datetime]:
@@ -45,7 +45,7 @@ def prepare(
     """sources 는 수집 뒤 바뀌었을 수 있으므로(성향 라벨·가중치 수정, 매체 끄기) 여기서 다시 적용한다."""
     start, end = edition_window(edition, cfg)
     by_name = {s.name: s for s in sources.sources}
-    no_date = out_of_window = dup_title = disabled = wrong_lang = 0
+    no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = 0
     in_window: list[Article] = []
     for a in store.values():
         src = by_name.get(a.source)
@@ -61,6 +61,9 @@ def prepare(
         t = datetime.fromisoformat(a.published)
         if not (start <= t < end):
             out_of_window += 1
+            continue
+        if _is_opinion(a):  # 논평·사설은 뉴스 이슈·점수에 섞지 않는다 (prepare_opinions 가 따로 모은다)
+            opinion += 1
             continue
         a = copy.deepcopy(a)  # 누적 저장소의 원본은 건드리지 않는다
         a.country, a.lean, a.media_type, a.weight, a.paywall = src.country, src.lean, src.type, src.weight, src.paywall
@@ -95,6 +98,7 @@ def prepare(
         "dropped_source_disabled": disabled,
         "dropped_wrong_lang": wrong_lang,
         "dropped_no_date": no_date,
+        "opinion_separated": opinion,
         "dropped_out_of_window": out_of_window,
         "merged_same_title": dup_title,
         "articles": len(articles),
@@ -102,6 +106,42 @@ def prepare(
         "by_source": _count(articles, "source"),
     }
     return articles, report
+
+
+def _opinion_kind(a: Article) -> str | None:
+    # 저장해 둔 값 대신 매번 다시 판별한다 — 판별 규칙을 고치면 누적분에도 바로 반영되도록
+    return detect_opinion(a.title, a.url, "opinion" if "opinion" in a.sections else "")
+
+
+def _is_opinion(a: Article) -> bool:
+    return _opinion_kind(a) is not None
+
+
+def prepare_opinions(store: dict[str, Article], edition: date, cfg: Config, sources: Sources) -> list[Article]:
+    """논평·사설: 시간창 끝에서 opinion_hours 만큼 거슬러(기본 24시간) 받는다. 같은 매체 같은 제목은 하나만."""
+    _, end = edition_window(edition, cfg)
+    start = end - timedelta(hours=cfg.window.opinion_hours)
+    by_name = {s.name: s for s in sources.sources}
+    seen: dict[tuple[str, str], Article] = {}
+    for a in store.values():
+        src = by_name.get(a.source)
+        if src is None or not src.enabled or (src.langs and a.lang not in src.langs) or not a.published:
+            continue
+        if not _is_opinion(a):
+            continue
+        t = datetime.fromisoformat(a.published)
+        if not (start <= t < end):
+            continue
+        a = copy.deepcopy(a)
+        a.opinion = _opinion_kind(a)
+        a.country, a.lean, a.media_type, a.weight, a.paywall = src.country, src.lean, src.type, src.weight, src.paywall
+        a.lead = clean_lead(cap_lead(a.lead))
+        if a.lead and title_key(a.lead).startswith(title_key(a.title)[:20]):
+            a.lead = ""  # 제목을 되풀이한 리드 (Google 뉴스 요약 등)
+        key = (a.source, title_key(a.title))
+        if key not in seen:
+            seen[key] = a
+    return sorted(seen.values(), key=lambda a: (a.opinion != "editorial", a.country != "KR", -a.weight, a.published or ""))
 
 
 def _count(articles: list[Article], attr: str) -> dict[str, int]:

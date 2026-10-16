@@ -40,6 +40,8 @@ TOPICS = {
 class Window(Strict):
     start: str
     end: str
+    # 논평·사설은 낮에도 올라오므로 시간창 끝(end)에서 거슬러 이 시간만큼 받는다 (뉴스 시간창보다 넓게)
+    opinion_hours: int = Field(default=24, ge=1, le=72)
 
     @field_validator("start", "end")
     @classmethod
@@ -84,7 +86,7 @@ class Editing(Strict):
         return self
 
 
-SectionId = Literal["front", "politics", "economy", "international", "interest", "compare", "briefs", "guide"]
+SectionId = Literal["front", "politics", "economy", "international", "interest", "compare", "briefs", "opinion", "guide"]
 
 
 class Section(Strict):
@@ -187,6 +189,8 @@ class Feed(Strict):
     kind: Literal["rss", "google_news"] = "rss"
     # feed: 피드의 발행 시각 사용 / page_meta: 피드에 시각이 없어 기사 페이지 <meta> 의 발행 시각을 읽음
     date_source: Literal["feed", "page_meta"] = "feed"
+    # 이 문자열이 제목에 있는 항목만 받는다 (예: Google 뉴스 검색 피드에서 "[사설]"만)
+    title_must: str | None = None
 
 
 class Source(Strict):

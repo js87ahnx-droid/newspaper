@@ -3,6 +3,7 @@
 #   lean: 보수 | 중도 | 진보 | 경제지 | 통신·공영 | 관영
 #   type: 종합지 | 경제지 | 방송 | 통신 | 국제
 # enabled: true  — 공식 피드가 동작함
+# section: opinion — 논평·사설 피드 (2026-10-16 사용자 요청, 실측: docs-internal/source-audit.md 4장). 일반 뉴스와 따로 다룬다
 # kind: google_news — 공식 피드가 없거나 막혀 Google 뉴스 매체 한정 검색으로 대체 (2026-10-15 사용자 승인, D6)
 
 sources:
@@ -20,6 +21,7 @@ sources:
       - {section: politics, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/politics/?outputType=xml"}
       - {section: economy, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/economy/?outputType=xml"}
       - {section: international, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/international/?outputType=xml"}
+      - {section: opinion, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/opinion/?outputType=xml"}
 
   - name: 중앙일보
     country: KR
@@ -30,6 +32,7 @@ sources:
     enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+%EC%82%AC%EC%84%A4+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[사설]"}
 
   - name: 동아일보
     country: KR
@@ -43,6 +46,7 @@ sources:
       - {section: politics, url: "https://rss.donga.com/politics.xml"}
       - {section: economy, url: "https://rss.donga.com/economy.xml"}
       - {section: international, url: "https://rss.donga.com/international.xml"}
+      - {section: opinion, url: "https://rss.donga.com/editorials.xml"}
 
   - name: 한겨레
     country: KR
@@ -56,6 +60,7 @@ sources:
       - {section: politics, url: "https://www.hani.co.kr/rss/politics/", date_source: page_meta}
       - {section: economy, url: "https://www.hani.co.kr/rss/economy/", date_source: page_meta}
       - {section: international, url: "https://www.hani.co.kr/rss/international/", date_source: page_meta}
+      - {section: opinion, url: "https://www.hani.co.kr/rss/opinion/", date_source: page_meta}
 
   - name: 경향신문
     country: KR
@@ -69,6 +74,7 @@ sources:
       - {section: politics, url: "https://www.khan.co.kr/rss/rssdata/politic_news.xml"}
       - {section: economy, url: "https://www.khan.co.kr/rss/rssdata/economy_news.xml"}
       - {section: international, url: "https://www.khan.co.kr/rss/rssdata/kh_world.xml"}
+      - {section: opinion, url: "https://www.khan.co.kr/rss/rssdata/opinion_news.xml"}
 
   - name: 한국경제
     country: KR
@@ -82,6 +88,7 @@ sources:
       - {section: economy, url: "https://www.hankyung.com/feed/economy"}
       - {section: markets, url: "https://www.hankyung.com/feed/finance"}
       - {section: tech, url: "https://www.hankyung.com/feed/it"}
+      - {section: opinion, url: "https://www.hankyung.com/feed/opinion"}
 
   - name: 매일경제
     country: KR
@@ -92,6 +99,7 @@ sources:
     enabled: true
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:mk.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:mk.co.kr+%EC%82%AC%EC%84%A4+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[사설]"}
 
   - name: 연합뉴스
     country: KR
@@ -172,6 +180,7 @@ sources:
       - {section: international, url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"}
       - {section: economy, url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml"}
       - {section: politics, url: "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml"}
+      - {section: opinion, url: "https://rss.nytimes.com/services/xml/rss/nyt/Opinion.xml"}
 
   - name: Wall Street Journal
     country: US
@@ -183,6 +192,7 @@ sources:
     feeds:
       - {section: international, url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews", main: true}
       - {section: markets, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain"}
+      - {section: opinion, url: "https://feeds.content.dowjones.io/public/rss/RSSOpinion"}
 
   - name: Fox News
     country: US
@@ -197,6 +207,8 @@ sources:
       - {section: politics, url: "https://moxie.foxnews.com/google-publisher/politics.xml"}
 
   # ---------------- 영국 ----------------
+      - {section: opinion, url: "https://moxie.foxnews.com/google-publisher/opinion.xml"}
+
   - name: BBC
     country: UK
     lean: 통신·공영
@@ -221,6 +233,8 @@ sources:
       - {section: top, url: "https://www.theguardian.com/international/rss", main: true}
       - {section: international, url: "https://www.theguardian.com/world/rss"}
       - {section: economy, url: "https://www.theguardian.com/business/rss"}
+      - {section: opinion, url: "https://www.theguardian.com/profile/editorial/rss"}
+      - {section: opinion, url: "https://www.theguardian.com/commentisfree/rss"}
 
   - name: Reuters
     country: UK
@@ -288,6 +302,7 @@ sources:
       - {section: top, url: "https://www.scmp.com/rss/91/feed", main: true}
       - {section: china, url: "https://www.scmp.com/rss/4/feed"}
       - {section: asia, url: "https://www.scmp.com/rss/2/feed"}
+      - {section: opinion, url: "https://www.scmp.com/rss/93/feed"}
 
   - name: Global Times
     country: CN

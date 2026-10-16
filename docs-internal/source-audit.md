@@ -78,3 +78,28 @@
 조사 한계: Guardian·NYT·AP·Reuters 공식 문서 도메인은 조사 환경에서 직접 열리지 않아 2차 자료로 교차 확인함. 키 발급 시 공식 약관을 다시 확인한다.
 
 **결론:** 무료 공식 API로 개인 열람용 본문을 받을 수 있는 곳은 **Guardian 한 곳**. NYT는 초록·첫 문단까지(리드 보강용). 나머지는 원문 링크 + Safari 읽기 모드가 기본 경로.
+
+## 4. 논평·사설 피드 (2026-10-16 실측, 사용자 요청)
+
+| 매체 | 판정 | 사용 피드 | 사설 구분 방법 |
+|---|---|---|---|
+| 조선일보 | 동작 | 공식 opinion RSS (100건) | 제목 "[사설]", 주소 `/opinion/editorial/` |
+| 중앙일보 | 대체 | Google 뉴스 `site:joongang.co.kr 사설` 중 제목에 "[사설]" 있는 것만 (`title_must`) | 제목 |
+| 동아일보 | 동작 | `editorials.xml` (사설 + 횡설수설·동아광장 등 칼럼) | 제목 "[사설]" |
+| 한겨레 | 동작(보완) | `/rss/opinion/` (시각 없음 → 기사 페이지 메타) | 주소 `/opinion/editorial/` |
+| 경향신문 | 동작 | `opinion_news.xml` | 제목 "[사설]" |
+| 한국경제 | 동작(리드 없음) | `/feed/opinion` | 제목 "[사설]" |
+| 매일경제 | 대체 | Google 뉴스 `site:mk.co.kr 사설` 중 "[사설]" 제목만 | 제목 끝 "[사설]" |
+| New York Times | 동작 | Opinion RSS | 구분 불가 → 칼럼·논평으로 |
+| Wall Street Journal | 동작 | RSSOpinion | 구분 불가 → 칼럼·논평으로 |
+| Fox News | 동작 | opinion | 칼럼·논평 |
+| Guardian | 동작 | `profile/editorial/rss`(사설) + `commentisfree/rss`(칼럼) | "The Guardian view on" |
+| SCMP | 동작 | `rss/93/feed` (opinion) | 칼럼·논평 |
+| Japan Times | 불가 | opinion 피드 403 | - |
+| Al Jazeera | 불가 | 의견 전용 피드 없음 (전체 피드 속 `/opinions/` 주소는 판별로 걸러 냄) | - |
+| Global Times | 불가 | 공식 피드 없음, Google 검색은 뉴스와 섞임 | - |
+| CNN | 불가 | Google 검색 결과 0건 | - |
+
+- 의견 기사 판별(`textutil.detect_opinion`): 사설 표기("[사설]", "The Guardian view on"), 의견면 주소(`/opinion/`, `/commentisfree/`, `/arti/opinion/`), 칼럼 머리말("[朝鮮칼럼]", "[기고]", "[횡설수설/…]", "[○○○의 …]" 필자 연재), 의견 피드. 일반 뉴스 피드에 섞여 들어온 칼럼도 같은 규칙으로 뉴스에서 뺀다
+- 한계: "[송채경화 공덕포차]"처럼 필자 이름 + 연재명만 있는 머리말은 뉴스 머리말과 구별할 단서가 없어 놓친다
+- 시간창: 의견 기사는 시간창 끝에서 24시간(`window.opinion_hours`) — 칼럼은 낮에 많이 올라오기 때문

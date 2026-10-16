@@ -36,6 +36,7 @@ sections:
   - {id: interest, title: "관심", max_articles: 6}
   - {id: compare, title: "입장 비교", max_articles: 3}
   - {id: briefs, title: "단신", max_articles: 20}  # 다른 섹션이 차면 넘친 기사를 받음. 전체 건수는 interests.daily_articles
+  - {id: opinion, title: "논평·사설", max_articles: 0}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0}
 
 clustering:

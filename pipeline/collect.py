@@ -18,7 +18,7 @@ import feedparser
 import httpx
 
 from .settings import Feed, Source, Sources
-from .textutil import cap_lead, clean_text, detect_lang, normalize_url, parse_date
+from .textutil import cap_lead, clean_text, detect_lang, detect_opinion, normalize_url, parse_date
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ class Article:
     main: bool = False       # 매체 메인 피드에 실렸는지
     first_seen: str = ""
     image: str | None = None  # RSS가 준 대표 이미지 주소 (원 주소로만 띄우고 복사하지 않는다)
+    opinion: str | None = None  # "editorial"(사설) / "column"(칼럼·논평) / None(뉴스)
 
     @classmethod
     def from_dict(cls, d: dict) -> "Article":
@@ -101,6 +102,8 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
     if feed.kind == "google_news":
         # Google 뉴스 제목은 "제목 - 매체명" 형식이고 요약은 제목을 되풀이한 링크뿐이다
         title = _GNEWS_SUFFIX.sub("", title)
+    if feed.title_must and feed.title_must not in title:
+        return None
         lead = ""
     else:
         lead = cap_lead(clean_text(entry.get("summary")))
@@ -136,6 +139,7 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
         main=feed.main,
         first_seen=now.isoformat(),
         image=None if feed.kind == "google_news" else entry_image(entry),
+        opinion=detect_opinion(title, link, feed.section),
     )
 
 
@@ -212,6 +216,7 @@ def merge(store: dict[str, Article], new: list[Article]) -> int:
             old.lead = a.lead
         if not old.image and a.image:
             old.image = a.image
+        old.opinion = old.opinion or a.opinion
     return added
 
 

@@ -72,12 +72,23 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
     }
 
 
+def _opinion_view(op: dict | None) -> dict | None:
+    """논평·사설면: 사설 목록은 6편씩 끊어 쪽 나누기가 자연스럽게 되도록."""
+    if not op or not (op["compare"] or op["editorials"] or op["columns"]):
+        return None
+    for g in (g for c in op["compare"] for g in c["groups"]):
+        g["cls"] = LEAN_CLASS.get(g["lean"], "mid")
+    eds = [{**e, "cls": LEAN_CLASS.get(e["lean"], "mid")} for e in op["editorials"]]
+    cols = [{**c, "cls": LEAN_CLASS.get(c["lean"], "mid")} for c in op["columns"]]
+    return {"compare": op["compare"], "editorial_chunks": [eds[i:i + 6] for i in range(0, len(eds), 6)], "columns": cols}
+
+
 def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
     sections = []
     for s in cfg.sections:
-        if s.id in ("compare", "guide"):
+        if s.id in ("compare", "guide", "opinion"):
             continue
         items = edition["sections"].get(s.id, [])
         if not items:
@@ -116,6 +127,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         "date_long": f"{d.year}년 {d.month}월 {d.day}일 {'월화수목금토일'[d.weekday()]}요일",
         "sections": sections, "compare": compare, "compare_title": titles.get("compare", "입장 비교"),
         "guide": guide, "guide_title": titles.get("guide", "매체 성향 가이드·출처"),
+        "opinion": _opinion_view(edition.get("opinion")), "opinion_title": titles.get("opinion", "논평·사설"),
         "lean_class": LEAN_CLASS, "stats": edition.get("stats", {}), "lead_max": LEAD_MAX,
         "edition_json": json.dumps(_client_config(edition, cfg, interests, d), ensure_ascii=False).replace("</", "<\\/"),  # 스크립트 안 "</script>" 방지
     }

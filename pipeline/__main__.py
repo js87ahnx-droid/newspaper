@@ -53,7 +53,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
 
 def cmd_prepare(args: argparse.Namespace) -> int:
     from .collect import load_store
-    from .prepare import current_edition, edition_window, prepare, to_jsonable
+    from .prepare import current_edition, edition_window, prepare, prepare_opinions, to_jsonable
 
     cfg = load_config(Path(args.root))
     sources = load_sources(Path(args.root))
@@ -77,11 +77,18 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     (raw / f"{edition.isoformat()}.json").write_text(
         json.dumps(to_jsonable(articles), ensure_ascii=False, indent=1), encoding="utf-8"
     )
+    opinions = prepare_opinions(load_store(raw / "store.jsonl"), edition, cfg, sources)
+    (raw / f"{edition.isoformat()}.opinion.json").write_text(
+        json.dumps(to_jsonable(opinions), ensure_ascii=False, indent=1), encoding="utf-8"
+    )
+    report["opinions"] = {"editorial": sum(a.opinion == "editorial" for a in opinions),
+                          "column": sum(a.opinion == "column" for a in opinions)}
     Path(args.data, "run-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(
         f"{edition} 호: 기사 {report['articles']}건 "
         f"(시간창 밖 {report['dropped_out_of_window']}, 시각 없음 {report['dropped_no_date']}, "
         f"꺼진 매체 {report['dropped_source_disabled']}, 언어 제외 {report['dropped_wrong_lang']}, "
+        f"논평·사설 분리 {report['opinion_separated']} (사설 {report['opinions']['editorial']}·칼럼 {report['opinions']['column']}), "
         f"같은 제목 병합 {report['merged_same_title']}), 수집 실행 {len(runs)}회"
     )
     return 0 if articles else 1
@@ -196,6 +203,13 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     items = [it for ps in edition["sections"].values() for it in ps] + edition["compare"]
     for it in items:
         it["stance"] = stance([by_id[a["id"]] for a in it["articles"]], prior)
+    # 논평·사설면 (뉴스와 따로 모은 의견 기사를 지면 이슈와 연결)
+    op_path = raw / f"{args.date}.opinion.json"
+    if op_path.exists():
+        from .opinion import organize
+
+        opinions = [Article.from_dict(d) for d in json.loads(op_path.read_text(encoding="utf-8"))]
+        edition["opinion"] = organize(opinions, edition, day_articles)
     llm_note = "꺼짐"
     if cfg.llm.enabled and not args.no_llm:
         from datetime import date as _date
@@ -208,7 +222,9 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     (raw / f"{args.date}.edition.json").write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
     noted = sum(1 for it in items if it["stance"]["note"])
     worded = sum(1 for it in items if it["stance"]["lean_words"] or it["stance"]["country_words"])
-    print(f"{args.date} 호 입장 차이: 기사 {len(items)}건 중 쏠림 표시 {noted}, 특징 단어 {worded} | LLM: {llm_note}")
+    op = edition.get("opinion", {}).get("stats")
+    op_note = f" | 논평·사설: 사설 {op['editorials']}(비교 이슈 {op['compare_issues']}), 칼럼 {op['columns_shown']}/{op['columns_total']}, 이슈 연결 {op['linked']}" if op else ""
+    print(f"{args.date} 호 입장 차이: 기사 {len(items)}건 중 쏠림 표시 {noted}, 특징 단어 {worded}{op_note} | LLM: {llm_note}")
     return 0
 
 

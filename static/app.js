@@ -21,6 +21,7 @@
   var pages = [];
   var current = 0;      // 현재 쪽 번호 (왼쪽 쪽 기준)
   var spread = true;    // 두 쪽 펼침 여부
+  var overflowPages = [], clipped = 0;  // 쪽 나누기 때 잰 넘친 쪽·잘라 낸 기사 (검증용)
 
   // ---------- 설정: 밝기·글자 크기 ----------
   function applyTheme(t) { root.setAttribute("data-theme", t); }
@@ -59,6 +60,18 @@
 
   function overflows(inner) { return inner.scrollHeight > inner.clientHeight + 1; }
 
+  // 한 쪽보다 큰 기사: 리드 줄이기(compact) → 리드·점수 숨기기(tight) → 그래도 크면 쪽 높이에 맞춰 잘라 낸다(clip).
+  // 잘라도 제목과 원문 링크는 위쪽에 남는다
+  function fit(inner, node) {
+    node.classList.add("compact");
+    if (!overflows(inner)) return;
+    node.classList.add("tight");
+    if (!overflows(inner)) return;
+    var room = inner.clientHeight - (node.offsetTop - inner.offsetTop) - 6;
+    node.classList.add("clip");
+    node.style.maxHeight = Math.max(80, room) + "px";
+  }
+
   function paginate() {
     var g = geometry();
     var stage = document.createElement("div");
@@ -81,9 +94,7 @@
         inner.appendChild(node);
         if (overflows(inner)) {
           if (placedOnPage === 0) {
-            // 한 쪽에 다 안 들어가는 기사: 리드를 줄여 본다
-            node.classList.add("compact");
-            if (overflows(inner)) node.classList.add("tight");
+            fit(inner, node);   // 한 쪽에 다 안 들어가는 기사
           } else {
             inner.removeChild(node);
             out.push(page);
@@ -92,7 +103,7 @@
             inner = page.firstChild;
             inner.appendChild(node);
             placedOnPage = 0;
-            if (overflows(inner)) { node.classList.add("compact"); if (overflows(inner)) node.classList.add("tight"); }
+            if (overflows(inner)) fit(inner, node);
           }
         }
         placedOnPage++;
@@ -101,6 +112,9 @@
     });
     if (spread && out.length % 2 === 1) { var b = newPage(g, "blank", null, false); b.classList.add("blank"); out.push(b); }
     out.forEach(function (p, i) { p.querySelector(".folio").textContent = (i + 1) + " / " + out.length; p.setAttribute("data-page", i); });
+    // 모든 쪽이 실제로 배치된 지금 넘침을 센다 (넘김 라이브러리에 넘긴 뒤에는 안 보이는 쪽의 높이가 0으로 재어진다)
+    overflowPages = out.filter(function (p) { return overflows(p.querySelector(".page-inner")); }).map(function (p) { return +p.getAttribute("data-page"); });
+    clipped = stage.querySelectorAll(".item.clip").length;
     stage.remove();
     return { pages: out, g: g };
   }
@@ -237,7 +251,7 @@
     simpleShow(i);
   }
 
-  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, state: function () { return { current: current, pages: pages.length, spread: spread, flip: !!flip }; } };
+  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, state: function () { return { current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped }; } };
   // 글꼴(Noto Sans·Noto Sans KR)을 받은 뒤 쪽을 나눈다 — 먼저 나누면 글꼴이 바뀌며 글 길이가 달라져 쪽이 넘친다.
   // 한글 글꼴은 글자 범위별 조각으로 나뉘어 필요할 때 받으므로, 지면에 쓰인 글자를 넘겨 필요한 조각을 미리 받는다.
   // 글꼴 서버에 닿지 못하면(오프라인) 2.5초 뒤 기본 글꼴로 나눈다 (그 뒤 글꼴이 오면 한 번만 다시 나눈다)

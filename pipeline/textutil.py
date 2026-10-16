@@ -129,3 +129,34 @@ def clean_lead(lead: str) -> str:
     s = _BYLINE.sub("", lead or "")
     s = _PHOTO_CAPTION.sub("", s).strip()
     return s if len(s) >= MIN_LEAD else ""
+
+
+# ---------- 논평·사설 판별 ----------
+_ED_URL = re.compile(r"/opinion/editorial|/editorials?/|the-guardian-view-on", re.I)
+_OP_URL = re.compile(r"/opinions?/|/commentisfree/|/arti/opinion/|/news/Opinion/", re.I)
+_ED_TITLE = re.compile(r"\[\s*사설\s*\]|^사설\s|The Guardian view on|^Editorial\b|^GT Editorial", re.I)
+_OP_TAG = re.compile(
+    r"(칼럼|시론|기고|논평|오피니언|에세이|수첩|데스크|특파원|동아광장|시평|세상읽기|횡설수설|팔면봉|만물상|분수대|여적|"
+    r"프리즘|오늘과 내일|광화문에서|동서남북|사유와 성찰|녹색세상|아침을 열며|편집국에서|기자의 눈)"
+)
+_BRACKET_TAGS = re.compile(r"^\s*\[([^\]]{1,30})\]|\[([^\]]{1,30})\]\s*$")
+_PERSON_COLUMN = re.compile(r"^[가-힣]{2,4}의 \S")
+_NOT_PERSON = {"오늘", "내일", "어제", "이번", "이주", "주간", "금주", "세계", "한국", "우리", "이달", "올해", "지금", "이주일", "오늘날"}
+
+
+def detect_opinion(title: str, url: str, feed_section: str = "") -> str | None:
+    """'editorial'(사설) / 'column'(칼럼·논평·기고) / None(뉴스).
+    근거: 사설 표기("[사설]", "The Guardian view on"), 의견면 주소(/opinion/, /commentisfree/), 칼럼 머리말
+    ("[朝鮮칼럼]", "[기고]", "[김경의 별잇기 예술여행]" 같은 필자 연재), 의견 피드(section: opinion)."""
+    if _ED_TITLE.search(title) or _ED_URL.search(url):
+        return "editorial"
+    if feed_section == "opinion" or _OP_URL.search(url):
+        return "column"
+    for m in _BRACKET_TAGS.finditer(title):
+        tag = (m.group(1) or m.group(2) or "").strip()
+        person = _PERSON_COLUMN.match(tag)
+        if person and tag.split("의", 1)[0] in _NOT_PERSON:  # "[오늘의 날씨]", "[내일의 국감]" 은 필자 연재가 아니다
+            person = None
+        if _OP_TAG.search(tag) or person:
+            return "column"
+    return None
