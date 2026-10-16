@@ -137,9 +137,11 @@ def test_masthead_follows_edition_date(browser, tmp_path):
 class ItemParser(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.items, self.cur, self.too_long = [], None, []
+        self.items, self.cur, self.too_long, self.in_code = [], None, [], False
 
     def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style"):
+            self.in_code = True  # 스크립트·스타일(지면 설정 JSON 등)은 기사 글이 아니다
         a = dict(attrs)
         cls = (a.get("class") or "").split()
         if tag == "article" and "item" in cls and "cmp" not in cls:
@@ -153,11 +155,13 @@ class ItemParser(HTMLParser):
                 self.cur["classes"].add("_fb_" + a["data-fb"])
 
     def handle_endtag(self, tag):
+        if tag in ("script", "style"):
+            self.in_code = False
         if tag == "article":
             self.cur = None
 
     def handle_data(self, data):
-        if len(data.strip()) > LEAD_MAX:
+        if not self.in_code and len(data.strip()) > LEAD_MAX:
             self.too_long.append(data.strip())
 
 
