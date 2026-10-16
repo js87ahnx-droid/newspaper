@@ -101,9 +101,16 @@ def match_score(a: list[str], b: list[str]) -> float:
     return score
 
 
+LATIN_ONLY_MIN = 3  # 공유 토큰이 모두 영어 낱말이면 3개 이상 (10/16 실측: "north korea"·"attack ship"·"record soar"
+                    # 두 낱말로 다른 사건이 이어졌다 — 지난 경과로 지면에 드러나므로 놓치는 쪽을 택한다)
+
+
 def continuity_match(sig: list[str], previous: list[dict]) -> dict | None:
     best = None
     for prev in previous:
+        shared = set(sig) & set(prev["signature"])
+        if shared and all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN:
+            continue
         sc = match_score(sig, prev["signature"])
         if sc >= CONTINUITY_MIN_SCORE and (best is None or (sc, prev["days"]) > best[0]):
             best = ((sc, prev["days"]), prev)

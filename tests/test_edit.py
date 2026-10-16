@@ -197,3 +197,12 @@ def test_timeline_carried_from_previous_editions():
     tl = past_timeline(prev)
     assert len(tl) == TIMELINE_MAX and tl[-1]["date"] == "2026-10-11"
     assert past_timeline(None) == []
+
+
+def test_latin_only_continuity_needs_three_words():
+    from pipeline.score import continuity_match
+
+    prev = [{"title": "China and North Korea to open bridge", "days": 1, "signature": ["north", "korea", "bridge", "open"]}]
+    assert continuity_match(["north", "korea", "missile", "submarine"], prev) is None   # 두 낱말만 — 다른 사건
+    assert continuity_match(["north", "korea", "bridge", "officially"], prev) is prev[0]
+    assert continuity_match(["김지", "지용", "임명"], [{"title": "t", "days": 1, "signature": ["김지", "지용"]}])  # 한글은 그대로
