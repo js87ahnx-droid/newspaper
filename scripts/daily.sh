@@ -33,6 +33,14 @@ $PY -m pipeline cluster --date "$DATE"
 $PY -m pipeline edit --date "$DATE" --write-history
 
 LLM_FLAG=""
+# 붙여 넣을 때 섞인 공백·줄바꿈을 지운다 (터미널 줄 접힘 복사). 값은 찍지 않고 길이·접두어만 남긴다
+if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+  _tok_raw="$CLAUDE_CODE_OAUTH_TOKEN"
+  export CLAUDE_CODE_OAUTH_TOKEN="$(printf '%s' "$_tok_raw" | tr -d '[:space:]')"
+  _pre="다름"; case "$CLAUDE_CODE_OAUTH_TOKEN" in sk-ant-oat01-*) _pre="sk-ant-oat01" ;; esac
+  echo "LLM 토큰: 길이 ${#CLAUDE_CODE_OAUTH_TOKEN}, 접두어 ${_pre}, 공백 제거 $(( ${#_tok_raw} - ${#CLAUDE_CODE_OAUTH_TOKEN} ))자"
+  unset _tok_raw _pre
+fi
 if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || ! command -v claude >/dev/null 2>&1; then
   LLM_FLAG="--no-llm"
   echo "LLM 훅: 토큰 또는 claude CLI 없음 — 무토큰으로 발행"
