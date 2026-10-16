@@ -133,23 +133,44 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
     }
 
 
-def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path) -> Path:
-    env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html", "j2"]),
-                      trim_blocks=True, lstrip_blocks=True)
+def _env() -> Environment:
+    return Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html", "j2"]),
+                       trim_blocks=True, lstrip_blocks=True)
+
+
+def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "") -> str:
+    """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../")."""
     ctx = build_context(edition, cfg, interests, sources)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    html = env.get_template("edition.html.j2").render(**ctx)
-    (out_dir / "index.html").write_text(html, encoding="utf-8")
-    # 정적 파일 (CSS·JS·page-flip·아이콘) — 이미지는 복사하지 않는다
-    if (out_dir / "static").exists():
-        shutil.rmtree(out_dir / "static")
-    shutil.copytree(ROOT / "static", out_dir / "static", ignore=shutil.ignore_patterns(".gitkeep"))
+    ctx["base"] = base
+    client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
+    client["base"] = base
+    ctx["edition_json"] = json.dumps(client, ensure_ascii=False).replace("</", "<\\/")  # 스크립트 안 "</script>" 방지
+    return _env().get_template("edition.html.j2").render(**ctx)
+
+
+def write_assets(site: Path, masthead_name: str) -> None:
+    """정적 파일 (CSS·JS·page-flip·아이콘)과 manifest·서비스 워커 — 기사 이미지는 복사하지 않는다."""
+    if (site / "static").exists():
+        shutil.rmtree(site / "static")
+    shutil.copytree(ROOT / "static", site / "static", ignore=shutil.ignore_patterns(".gitkeep"))
     manifest = {
-        "name": ctx["masthead"], "short_name": ctx["masthead"], "start_url": "./", "scope": "./",
+        "name": masthead_name, "short_name": masthead_name, "start_url": "./", "scope": "./",
         "display": "standalone", "orientation": "landscape", "background_color": "#f6f1e7", "theme_color": "#f6f1e7",
         "icons": [{"src": "static/icon-192.png", "sizes": "192x192", "type": "image/png"},
                   {"src": "static/icon-512.png", "sizes": "512x512", "type": "image/png"}],
     }
-    (out_dir / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
-    shutil.copy(ROOT / "templates" / "sw.js", out_dir / "sw.js")
+    (site / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+    shutil.copy(ROOT / "templates" / "sw.js", site / "sw.js")
+
+
+def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "index.html").write_text(render_html(edition, cfg, interests, sources), encoding="utf-8")
+    write_assets(out_dir, masthead(date.fromisoformat(edition["edition"])))
     return out_dir / "index.html"
+
+
+def render_archive_index(dates: list[date], base: str = "../") -> str:
+    return _env().get_template("archive.html.j2").render(
+        base=base, items=[{"date": d.isoformat(), "name": masthead(d),
+                           "long": f"{d.year}년 {d.month}월 {d.day}일 {'월화수목금토일'[d.weekday()]}요일"} for d in dates])

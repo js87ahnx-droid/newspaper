@@ -1,0 +1,51 @@
+# 시간창(전날 19:00 ~ 당일 06:00 KST) 동안 다섯 번 수집해 누적한다.
+# 피드 하나는 최근 몇 시간치만 담고 있어 06:00 한 번 수집으로는 저녁 기사를 놓치기 때문 (S3 실측).
+# 누적분(data/raw)과 임베딩 캐시는 Actions 캐시로 다음 실행에 넘긴다 — 저장소에는 올리지 않는다.
+name: collect
+
+on:
+  schedule:
+    - cron: "30 10 * * *"   # 19:30 KST
+    - cron: "0 13 * * *"    # 22:00 KST
+    - cron: "30 15 * * *"   # 00:30 KST
+    - cron: "0 18 * * *"    # 03:00 KST
+    - cron: "40 20 * * *"   # 05:40 KST
+  workflow_dispatch:
+
+concurrency:
+  group: newspaper-data       # 수집·발행이 같은 누적분을 동시에 고치지 않게 차례로
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: 누적분 불러오기
+        uses: actions/cache/restore@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+      - name: 임베딩 모델 캐시
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: models-multilingual-e5-large-v1
+      - name: 수집·임베딩
+        run: bash scripts/collect.sh
+      - name: 누적분 저장
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}

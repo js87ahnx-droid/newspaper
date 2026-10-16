@@ -33,6 +33,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 #toolbar .tb-title { font-family: var(--serif); font-weight: 700; }
 #toolbar .tb-page { color: var(--muted); font-size: 12px; margin-left: 8px; }
 #toolbar .tb-spacer { flex: 1; }
+#toolbar .tb-link { color: var(--ink); font-size: 13px; margin-right: 6px; text-decoration: none; border-bottom: 1px solid var(--rule); }
 #toolbar button {
   min-width: 44px; height: 34px; border: 1px solid var(--rule); background: var(--card); color: var(--ink);
   border-radius: 6px; font-size: 15px;

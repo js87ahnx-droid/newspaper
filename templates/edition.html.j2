@@ -10,18 +10,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="static/icon-192.png">
+<link rel="manifest" href="{{ base }}manifest.webmanifest">
+<link rel="apple-touch-icon" href="{{ base }}static/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="static/app.css">
+<link rel="stylesheet" href="{{ base }}static/app.css">
 </head>
 <body>
 <div id="toolbar" role="toolbar" aria-label="보기 설정">
   <span class="tb-title">{{ masthead }}</span>
   <span class="tb-page" id="pageInfo" aria-live="polite"></span>
   <span class="tb-spacer"></span>
+  <a class="tb-link" href="{{ base }}archive/">지난 호</a>
   <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
   <button type="button" data-act="next" aria-label="다음 쪽">›</button>
   <button type="button" data-act="font-" aria-label="글자 작게">가-</button>
@@ -189,8 +190,8 @@
 </div>
 
 <script>window.EDITION = {{ edition_json|safe }};</script>
-<script src="static/vendor/page-flip/page-flip.browser.js"></script>
-<script src="static/feedback.js"></script>
-<script src="static/app.js"></script>
+<script src="{{ base }}static/vendor/page-flip/page-flip.browser.js"></script>
+<script src="{{ base }}static/feedback.js"></script>
+<script src="{{ base }}static/app.js"></script>
 </body>
 </html>

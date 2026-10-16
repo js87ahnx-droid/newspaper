@@ -239,6 +239,18 @@ def cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_publish(args: argparse.Namespace) -> int:
+    from .publish import publish
+
+    root = Path(args.root)
+    cfg, interests, sources = load_config(root), load_interests(root), load_sources(root)
+    edition = json.loads((_raw_dir(args) / f"{args.date}.edition.json").read_text(encoding="utf-8"))
+    files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
+    # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
+    Path(args.site, ".to-encrypt").write_text("".join(f.as_posix() + "\n" for f in files), encoding="utf-8")
+    print(f"{args.date} 호 발행 준비: {args.site} (HTML {len(files)}개 — 암호화 전)")
+    return 0
+
 def main(argv: list[str] | None = None) -> int:
     # Windows 콘솔 기본 인코딩(cp949)에서 한글 오류 메시지가 깨지지 않게 UTF-8로 고정
     for stream in (sys.stdout, sys.stderr):
@@ -275,6 +287,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--out", default=str(ROOT / "build"), help="출력 폴더 (기본: build/)")
     p.set_defaults(func=cmd_render)
+    p = sub.add_parser("publish", help="Pages 폴더(docs/)에 오늘 호·지난 호·목록 쓰기 (암호화 전)")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--site", default=str(ROOT / "docs"), help="Pages 폴더 (기본: docs/)")
+    p.add_argument("--keep-days", type=int, default=180, help="지난 호 보관 일수")
+    p.set_defaults(func=cmd_publish)
     args = parser.parse_args(argv)
     return args.func(args)
 

@@ -243,7 +243,7 @@
   });
 
   if ("serviceWorker" in navigator && location.protocol === "https:") {
-    navigator.serviceWorker.register("sw.js").catch(function () { /* 오프라인 캐시는 선택 기능 */ });
+    navigator.serviceWorker.register((window.EDITION && window.EDITION.base || "") + "sw.js").catch(function () { /* 오프라인 캐시는 선택 기능 */ });
   }
 
   function goTo(i) {
