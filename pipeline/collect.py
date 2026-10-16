@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 UA = "Mozilla/5.0 (personal news digest; RSS reader)"
 RETRIES = 2
-STORE_KEEP_DAYS = 3  # 연속성은 data/history 로 따로 계산하므로 원시 누적분은 며칠만 둔다
+STORE_KEEP_DAYS = 4  # 시간창 최대 72시간 + 여유. 연속성은 data/history 로 따로 계산한다
 
 
 @dataclass

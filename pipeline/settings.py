@@ -38,12 +38,11 @@ TOPICS = {
 # ---------- config.yaml ----------
 
 class Window(Strict):
-    start: str
+    # 시간창 = 직전 발행 호의 끝 ~ 이번 호의 end. 직전 호가 없으면 24시간, 발행을 오래 놓쳐도 max_hours 까지만 거슬러 간다
     end: str
-    # 논평·사설은 낮에도 올라오므로 시간창 끝(end)에서 거슬러 이 시간만큼 받는다 (뉴스 시간창보다 넓게)
-    opinion_hours: int = Field(default=24, ge=1, le=72)
+    max_hours: int = Field(default=72, ge=24, le=168)
 
-    @field_validator("start", "end")
+    @field_validator("end")
     @classmethod
     def _hhmm(cls, v: str) -> str:
         if not _HHMM.match(v):

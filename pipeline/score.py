@@ -37,6 +37,7 @@ class ScoredIssue:
     interest_hit: bool           # 관심 분야(가중치 ≥ 1)이거나 관심 키워드가 나옴
     signature: list[str] = field(default_factory=list)  # 다음날 연속성 비교용 토큰
     raw: dict = field(default_factory=dict)
+    timeline: list[dict] = field(default_factory=list)  # 지난 경과: 앞선 호들의 {date, title, summary} (오래된 것부터)
 
 
 SIGNATURE_SIZE = 12
@@ -77,8 +78,11 @@ def issue_signature(arts: list[Article], df: dict[str, int], n_docs: int, limit:
     return ranked[:limit]
 
 
-def load_previous(history_dir: Path, edition: date, lookback: int = 2) -> tuple[date | None, list[dict]]:
-    """가장 가까운 이전 호의 history (빠진 날이 하루 있어도 이어지도록 이틀 전까지 본다)."""
+TIMELINE_MAX = 7  # 지난 경과로 들고 다니는 앞선 호 수
+
+
+def load_previous(history_dir: Path, edition: date, lookback: int = 3) -> tuple[date | None, list[dict]]:
+    """가장 가까운 이전 호의 history (발행을 빠뜨린 날이 있어도 이어지도록 시간창 최대 길이만큼 본다)."""
     for back in range(1, lookback + 1):
         d = edition - timedelta(days=back)
         p = history_dir / f"{d.isoformat()}.json"
@@ -97,13 +101,26 @@ def match_score(a: list[str], b: list[str]) -> float:
     return score
 
 
-def continuity_days(sig: list[str], previous: list[dict]) -> int:
+def continuity_match(sig: list[str], previous: list[dict]) -> dict | None:
     best = None
     for prev in previous:
         sc = match_score(sig, prev["signature"])
         if sc >= CONTINUITY_MIN_SCORE and (best is None or (sc, prev["days"]) > best[0]):
             best = ((sc, prev["days"]), prev)
-    return 1 + best[1]["days"] if best else 1
+    return best[1] if best else None
+
+
+def continuity_days(sig: list[str], previous: list[dict]) -> int:
+    m = continuity_match(sig, previous)
+    return 1 + m["days"] if m else 1
+
+
+def past_timeline(prev: dict | None) -> list[dict]:
+    """이어진 앞선 이슈의 경과 (그 이슈 자신 포함). 예전 기록에 timeline 이 없으면 제목만으로 한 줄."""
+    if not prev:
+        return []
+    tl = prev.get("timeline") or [{"date": prev.get("date"), "title": prev["title"], "summary": prev.get("summary")}]
+    return tl[-TIMELINE_MAX:]
 
 
 def score_issues(
@@ -132,10 +149,12 @@ def score_issues(
         imp_raw = imp_cfg.topic_weights[topic] + imp_cfg.keyword_bonus * min(kw_hits, 3) + 0.1 * min(countries - 1, 3)
         int_raw = table.score(topic, titles)
         sig = issue_signature(arts, df, len(all_arts))
-        days = continuity_days(sig, previous)
+        prev = continuity_match(sig, previous)
+        days = 1 + prev["days"] if prev else 1
         hit = table.topic_weights.get(topic, 0) >= 1 or any(k.lower() in titles.lower() for k in table.keywords)
         rows.append((iss, topic, att_raw, imp_raw, int_raw, days, hit, sig,
-                     {"sources": len(by_source), "countries": countries, "main_sources": mains, "keyword_hits": kw_hits}))
+                     {"sources": len(by_source), "countries": countries, "main_sources": mains, "keyword_hits": kw_hits},
+                     past_timeline(prev)))
 
     max_att = max((r[2] for r in rows), default=1) or 1
     max_imp = max((r[3] for r in rows), default=1) or 1
@@ -144,7 +163,7 @@ def score_issues(
     wsum = w.attention + w.importance + w.continuity + w.interest
     front_wsum = (w.attention + w.importance) or 1
     out = []
-    for iss, topic, a, i, it, days, hit, sig, raw in rows:
+    for iss, topic, a, i, it, days, hit, sig, raw, tl in rows:
         att, imp, inte = a / max_att, i / max_imp, min(it / max_int, 1.0)
         cont = min(days - 1, 6) / 6
         base = w.attention * att + w.importance * imp + w.continuity * cont
@@ -155,7 +174,7 @@ def score_issues(
                 final=round((base + w.interest * inte) / wsum, 4),
                 frontline=round((w.attention * att + w.importance * imp) / front_wsum, 4),
                 final_no_interest=round(base / ((wsum - w.interest) or 1), 4),
-                days=days, interest_hit=hit, signature=sig, raw=raw,
+                days=days, interest_hit=hit, signature=sig, raw=raw, timeline=tl,
             )
         )
     return out
@@ -163,14 +182,17 @@ def score_issues(
 
 def write_history(history_dir: Path, edition: date, scored: list[ScoredIssue], placed_ids: set[str]) -> Path:
     """연속성 계산용 기록. 지면에 실린 이슈 + 2개 매체 이상이 다룬 이슈 (지면에 안 실려도 "보도는 이어짐").
-    제목·분야·토큰·일수만 저장 — 본문·리드·임베딩 없음 (공개 저장소)."""
+    제목·분야·토큰·일수·지난 경과만 저장 — 본문·리드·임베딩 없음 (공개 저장소).
+    경과의 summary 는 LLM 이 쓴 이슈 정리(enrich 가 채움) — 기사 문장이 아니다."""
     keep = [s for s in scored if s.issue.id in placed_ids or len(s.issue.sources) >= 2]
     history_dir.mkdir(parents=True, exist_ok=True)
     path = history_dir / f"{edition.isoformat()}.json"
     data = {
         "edition": edition.isoformat(),
         "issues": [
-            {"id": s.issue.id, "title": s.issue.title, "topic": s.topic, "days": s.days, "signature": s.signature}
+            {"id": s.issue.id, "title": s.issue.title, "topic": s.topic, "days": s.days, "signature": s.signature,
+             "date": edition.isoformat(),
+             "timeline": (s.timeline + [{"date": edition.isoformat(), "title": s.issue.title, "summary": None}])[-TIMELINE_MAX:]}
             for s in keep
         ],
     }

@@ -181,4 +181,19 @@ def test_history_has_no_body_or_lead(tmp_path):
     path = write_history(tmp_path, date(2026, 10, 16), scored, placed_ids)
     data = json.loads(path.read_text(encoding="utf-8"))
     for x in data["issues"]:
-        assert set(x) == {"id", "title", "topic", "days", "signature"}
+        assert set(x) == {"id", "title", "topic", "days", "signature", "date", "timeline"}
+        assert x["timeline"][-1] == {"date": "2026-10-16", "title": x["title"], "summary": None}
+        assert all(set(t) == {"date", "title", "summary"} for t in x["timeline"])
+
+
+def test_timeline_carried_from_previous_editions():
+    """이어진 이슈는 앞선 호들의 경과(날짜·제목·요약)를 들고 온다. 옛 기록(timeline 없음)도 제목 한 줄로."""
+    from pipeline.score import TIMELINE_MAX, past_timeline
+
+    old = {"title": "옛 제목", "date": "2026-10-14", "days": 1, "signature": []}
+    assert past_timeline(old) == [{"date": "2026-10-14", "title": "옛 제목", "summary": None}]
+    prev = {"title": "어제 제목", "days": 2, "signature": [],
+            "timeline": [{"date": f"2026-10-{d:02d}", "title": f"t{d}", "summary": "s"} for d in range(1, 12)]}
+    tl = past_timeline(prev)
+    assert len(tl) == TIMELINE_MAX and tl[-1]["date"] == "2026-10-11"
+    assert past_timeline(None) == []

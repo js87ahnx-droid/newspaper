@@ -59,10 +59,11 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     sources = load_sources(Path(args.root))
     raw = _raw_dir(args)
     edition = date.fromisoformat(args.date) if args.date else current_edition(datetime.now(timezone.utc), cfg)
-    articles, report = prepare(load_store(raw / "store.jsonl"), edition, cfg, sources)
+    hist = Path(args.data) / "history"
+    articles, report = prepare(load_store(raw / "store.jsonl"), edition, cfg, sources, hist)
 
     # 이 호에 기여한 수집 실행들(시간창 앞뒤 여유 포함)의 피드 실패를 함께 보고한다
-    start, end = edition_window(edition, cfg)
+    start, end = edition_window(edition, cfg, hist)
     lo, hi = start - timedelta(hours=2), end + timedelta(hours=2)
     runs = []
     log_path = raw / "collect-log.jsonl"
@@ -77,7 +78,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     (raw / f"{edition.isoformat()}.json").write_text(
         json.dumps(to_jsonable(articles), ensure_ascii=False, indent=1), encoding="utf-8"
     )
-    opinions = prepare_opinions(load_store(raw / "store.jsonl"), edition, cfg, sources)
+    opinions = prepare_opinions(load_store(raw / "store.jsonl"), edition, cfg, sources, hist)
     (raw / f"{edition.isoformat()}.opinion.json").write_text(
         json.dumps(to_jsonable(opinions), ensure_ascii=False, indent=1), encoding="utf-8"
     )
@@ -112,12 +113,13 @@ def cmd_embed(args: argparse.Namespace) -> int:
     sources = load_sources(Path(args.root))
     store = load_store(_raw_dir(args) / "store.jsonl")
     edition = date.fromisoformat(args.date) if args.date else target_edition(datetime.now(timezone.utc), cfg)
-    articles, _ = prepare(store, edition, cfg, sources)
+    hist = Path(args.data) / "history"
+    articles, _ = prepare(store, edition, cfg, sources, hist)
     cache = _cache(args, cfg)
     t0 = time.perf_counter()
     n = cache.fill(articles, cfg.clustering.model)
     # 캐시 키는 정제 뒤 기사(리드 상한 적용) 기준이므로 정리도 정제 결과로 한다: 이번 호와 직전 호만 남김
-    prev, _ = prepare(store, edition - timedelta(days=1), cfg, sources)
+    prev, _ = prepare(store, edition - timedelta(days=1), cfg, sources, hist)
     pruned = cache.prune(articles + prev)
     cache.save()
     print(f"임베딩: {edition} 호 기사 {len(articles)}건 중 새로 계산 {n}건 ({time.perf_counter() - t0:.0f}초), 캐시 정리 {pruned}건")

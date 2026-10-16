@@ -219,3 +219,36 @@
   1. 토큰 Secret 에 공백 1자(터미널 줄 접힘 복사) → CLI 가 "Not logged in" → daily.sh 가 공백·줄바꿈을 지우고 길이·접두어만 로그(길이 108, sk-ant-oat01, 공백 제거 1자)
   2. force 재발행이 로컬 하루치 전체(1,126건) 10/16 연속성 기록을 부분 실행분(474건)으로 덮어씀 → 원래 기록으로 되돌림. force 재발행은 그날 기록을 덮어쓴다는 점 주의
 - Pages 설정은 자동 승인에서 막힘 → 사용자가 Settings → Pages 에서 main /docs 로 켜기
+
+## 2차 개편 (2026-10-16 사용자 요청) — project-plan.md 4장 D11~D16, S13~S18
+
+### 사용자 결정 요약
+- 서울 06:00 하나(GPS·다중 시간대 안 함) / 기사 범위 = 직전 발행 ~ 이번 발행(24시간), 과거 판 내용은 "지난 경과"로 활용
+- 본문은 발행 때 러너에서 읽어 LLM 분석에만 쓰고 저장하지 않음 / 대표 본문·사진은 누를 때 중계 서버(Cloudflare Worker)가 가져와 그 화면에서 재배열 표시
+- 쪽수 고정, 내용을 맞춤 / LLM 분석은 지면에 실리는 상위 30~50개 묶음만
+- 지면 요청 6개: 제목·요약·사진 바로 보이게, 입장 차이를 대표 기사와 함께, 한 면 보기+스크롤·줌, 전체화면, 기사 날짜·시각, 요약이 제목 반복하는 문제
+
+### S13 연속 시간창과 종일 수집 — 진행 중 (코드·테스트 완료, 실데이터 검증 남음)
+- 구현: `prepare.edition_window` = [직전 호(data/history/<날짜>.json) 06:00, 이번 호 06:00), 직전 호 없으면 24시간, `window.max_hours`(72) 넘게 비면 24시간. `target_edition` = 다음에 닫히는 호(낮에도 다음 호를 채움). 논평·사설도 같은 시간창(`opinion_hours` 삭제). `window.start` 설정 삭제
+- 지난 경과: `score.continuity_match`/`past_timeline` → ScoredIssue.timeline, edition JSON 의 각 기사 `timeline`, history 에 `date`·`timeline`({date,title,summary}, 최대 7) 저장. summary 는 S14 에서 LLM 이 채울 자리(현재 None)
+- 누적분 보관 3일 → 4일
+- 예약: collect 3시간 간격 8회(07:30~04:30 KST), daily 05:55/06:25 → **06:00/06:30 KST** (05:55 시작은 06:00 전이라 어제 호로 판정되던 문제)
+- 테스트: conftest 로 기본 history 폴더를 빈 임시 폴더로 격리, 경계 테스트 새 기준, 연속 3일 빈틈·겹침 없음, 하루 빠뜨리면 48시간, 상한 초과 시 24시간, 설정 max_hours 검증, history 키·timeline 테스트 → **pytest(브라우저 제외) 144건 통과**
+- 기준 체크
+  - [x] 연속 3일 모의 발행에서 시간창이 빈틈·겹침 없이 이어짐 (테스트)
+  - [x] 하루 발행을 건너뛰면 다음 호 시간창 48시간 (테스트)
+  - [x] 수집 예약 하루 종일 3시간 이하 간격
+  - [ ] 2일 이상 이어진 이슈에 지난 경과가 붙는지 실데이터 확인 (10/15→10/16 모의 실행을 scratchpad 에서 돌리다 사용자 요청으로 중지)
+  - [ ] 실데이터 10/16호를 새 시간창으로 다시 만들어 기사 수 증가 확인
+  - [ ] 브라우저 테스트(test_*browser*) 재실행
+- **아직 푸시하지 않음** (원격은 옛 시간창·05:55 예약 그대로 동작). 남은 검증 후 푸시
+
+### 다음에 이어서 할 일
+1. S13 실데이터 검증: 임시 데이터 폴더에 data/raw 의 store.jsonl·emb 캐시·collect-log 복사 →
+   `python -m pipeline --data <임시> prepare|embed|cluster|edit --write-history --date 2026-10-15` 후 같은 순서로 2026-10-16 (`--data` 는 하위 명령 앞에)
+2. 브라우저 테스트 포함 전체 pytest → S13 기준 체크 → 푸시
+3. S14 (trafilatura 2.3.1 이 Python 3.14 에 설치 가능함 확인)
+
+### 아직 사용자 작업
+- GitHub Pages 켜기: Settings → Pages → Deploy from a branch, main, /docs (자동 승인에서 막혀 직접 해야 함)
+- 로컬 Claude CLI 로그인 만료(401) — 로컬에서 LLM 확인하려면 `claude` 로 다시 로그인

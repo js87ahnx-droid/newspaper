@@ -233,6 +233,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "lean": rep.lean,
             "topic": s.topic,
             "days": s.days,
+            "timeline": s.timeline,
             "photo": p.photo,
             "photo_source": p.photo_source,
             "reasons": p.reasons,

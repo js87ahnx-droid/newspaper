@@ -1,49 +1,61 @@
-"""2단계 정제: 누적 저장소에서 그날 호의 시간창 기사만 고르고 중복을 없앤다."""
+"""2단계 정제: 누적 저장소에서 그날 호의 시간창(직전 호 이후 ~ 이번 호) 기사만 고르고 중복을 없앤다."""
 from __future__ import annotations
 
 import copy
 from dataclasses import asdict
 from datetime import date, datetime, time, timedelta, timezone
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from .collect import Article
-from .settings import Config, Sources
+from .settings import ROOT, Config, Sources
 from .textutil import cap_lead, clean_lead, detect_opinion, title_key
 
 
-def edition_window(edition: date, cfg: Config) -> tuple[datetime, datetime]:
-    """호 날짜 → [전날 start, 당일 end) 의 UTC 경계. 시작은 포함, 끝은 제외."""
-    tz = ZoneInfo(cfg.timezone)
-    sh, sm = map(int, cfg.window.start.split(":"))
+DEFAULT_HISTORY = ROOT / "data" / "history"
+
+
+def _end_at(d: date, cfg: Config) -> datetime:
     eh, em = map(int, cfg.window.end.split(":"))
-    start = datetime.combine(edition - timedelta(days=1), time(sh, sm), tz)
-    end = datetime.combine(edition, time(eh, em), tz)
+    return datetime.combine(d, time(eh, em), ZoneInfo(cfg.timezone))
+
+
+def previous_edition(edition: date, cfg: Config, history_dir: Path | None = None) -> date | None:
+    """이 호보다 앞서 발행된 가장 최근 호 (연속성 기록 data/history/<날짜>.json 이 발행 기록을 겸한다)."""
+    history_dir = DEFAULT_HISTORY if history_dir is None else history_dir
+    days = cfg.window.max_hours // 24
+    for back in range(1, days + 1):
+        d = edition - timedelta(days=back)
+        if (history_dir / f"{d.isoformat()}.json").exists():
+            return d
+    return None
+
+
+def edition_window(edition: date, cfg: Config, history_dir: Path | None = None) -> tuple[datetime, datetime]:
+    """호 날짜 → [직전 호의 end, 이 호의 end) 의 UTC 경계. 시작은 포함, 끝은 제외.
+    직전 호가 없으면 24시간. 호와 호 사이가 빈틈·겹침 없이 이어진다."""
+    end = _end_at(edition, cfg)
+    prev = previous_edition(edition, cfg, history_dir)
+    start = _end_at(prev, cfg) if prev else end - timedelta(hours=24)
     return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
 
 
 def current_edition(now: datetime, cfg: Config) -> date:
-    """지금 발행할 호: 가장 최근에 끝난 시간창의 날짜 (06:00 이후면 오늘, 이전이면 어제)."""
-    tz = ZoneInfo(cfg.timezone)
-    local = now.astimezone(tz)
-    eh, em = map(int, cfg.window.end.split(":"))
-    return local.date() if local.time() >= time(eh, em) else local.date() - timedelta(days=1)
+    """지금 발행할 호: 가장 최근에 끝난 시간창의 날짜 (end 이후면 오늘, 이전이면 어제)."""
+    local = now.astimezone(ZoneInfo(cfg.timezone))
+    return local.date() if local >= _end_at(local.date(), cfg) else local.date() - timedelta(days=1)
 
 
 def target_edition(now: datetime, cfg: Config) -> date:
-    """수집·임베딩이 채워 갈 호: 시간창이 열려 있으면 그 호, 닫힌 낮 시간이면 방금 닫힌 호."""
-    tz = ZoneInfo(cfg.timezone)
-    local = now.astimezone(tz)
-    sh, sm = map(int, cfg.window.start.split(":"))
-    if local.time() >= time(sh, sm):
-        return local.date() + timedelta(days=1)
-    return local.date()
+    """수집·임베딩이 채워 갈 호: 아직 끝나지 않은 다음 시간창 (end 이후면 내일 호, 이전이면 오늘 호)."""
+    return current_edition(now, cfg) + timedelta(days=1)
 
 
 def prepare(
-    store: dict[str, Article], edition: date, cfg: Config, sources: Sources
+    store: dict[str, Article], edition: date, cfg: Config, sources: Sources, history_dir: Path | None = None
 ) -> tuple[list[Article], dict]:
     """sources 는 수집 뒤 바뀌었을 수 있으므로(성향 라벨·가중치 수정, 매체 끄기) 여기서 다시 적용한다."""
-    start, end = edition_window(edition, cfg)
+    start, end = edition_window(edition, cfg, history_dir)
     by_name = {s.name: s for s in sources.sources}
     no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = 0
     in_window: list[Article] = []
@@ -117,10 +129,11 @@ def _is_opinion(a: Article) -> bool:
     return _opinion_kind(a) is not None
 
 
-def prepare_opinions(store: dict[str, Article], edition: date, cfg: Config, sources: Sources) -> list[Article]:
-    """논평·사설: 시간창 끝에서 opinion_hours 만큼 거슬러(기본 24시간) 받는다. 같은 매체 같은 제목은 하나만."""
-    _, end = edition_window(edition, cfg)
-    start = end - timedelta(hours=cfg.window.opinion_hours)
+def prepare_opinions(
+    store: dict[str, Article], edition: date, cfg: Config, sources: Sources, history_dir: Path | None = None
+) -> list[Article]:
+    """논평·사설: 뉴스와 같은 시간창. 같은 매체 같은 제목은 하나만."""
+    start, end = edition_window(edition, cfg, history_dir)
     by_name = {s.name: s for s in sources.sources}
     seen: dict[tuple[str, str], Article] = {}
     for a in store.values():

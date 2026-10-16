@@ -2,14 +2,14 @@
 import asyncio
 import json
 import shutil
-from datetime import date, datetime, timezone
+from datetime import timedelta, date, datetime, timezone
 
 import httpx
 import pytest
 
 from pipeline.__main__ import main
 from pipeline.collect import collect, load_store
-from pipeline.prepare import current_edition, edition_window, prepare
+from pipeline.prepare import current_edition, edition_window, prepare, target_edition
 from pipeline.settings import ROOT, Sources, load_config
 
 UTC = timezone.utc
@@ -135,13 +135,15 @@ def test_page_meta_date_resolution_and_drop(tmp_path):
 @pytest.mark.parametrize(
     "pub, inside",
     [
-        ("Thu, 15 Oct 2026 18:59:59 +0900", False),
+        # 직전 호 기록이 없으면 24시간: 전날 06:00 ~ 당일 06:00 KST
+        ("Thu, 15 Oct 2026 05:59:59 +0900", False),
+        ("Thu, 15 Oct 2026 06:00:00 +0900", True),
         ("Thu, 15 Oct 2026 19:00:00 +0900", True),
         ("Fri, 16 Oct 2026 05:59:59 +0900", True),
         ("Fri, 16 Oct 2026 06:00:00 +0900", False),
         # 같은 순간을 다른 표기로
-        ("Thu, 15 Oct 2026 09:59:59 GMT", False),   # 18:59:59 KST
-        ("2026-10-15T10:00:00Z", True),              # 19:00:00 KST
+        ("Wed, 14 Oct 2026 20:59:59 GMT", False),   # 10/15 05:59:59 KST
+        ("2026-10-14T21:00:00Z", True),              # 10/15 06:00:00 KST
         ("2026-10-15T20:59:59+00:00", True),         # 05:59:59 KST
         ("Thu, 15 Oct 2026 17:00:00 -0400", False),  # 06:00:00 KST
         ("2026-10-16 05:59:59", True),               # 시간대 없음 → KR 매체이므로 KST
@@ -169,11 +171,43 @@ def test_same_source_same_title_merged(tmp_path):
 
 def test_window_and_edition():
     start, end = edition_window(date(2026, 10, 16), CFG)
-    assert start == datetime(2026, 10, 15, 10, 0, tzinfo=UTC)
+    assert start == datetime(2026, 10, 14, 21, 0, tzinfo=UTC)   # 직전 호 없음 → 24시간
     assert end == datetime(2026, 10, 15, 21, 0, tzinfo=UTC)
     # 06:10 KST 발행 실행 → 그날 호, 05:50 수집 시각 → 전날 호가 가장 최근에 끝난 창
     assert current_edition(datetime(2026, 10, 15, 21, 10, tzinfo=UTC), CFG) == date(2026, 10, 16)
     assert current_edition(datetime(2026, 10, 15, 20, 50, tzinfo=UTC), CFG) == date(2026, 10, 15)
+    # 수집이 채워 가는 호: 06:00 전이면 오늘 호, 뒤면 내일 호 (낮에도 다음 호를 채운다)
+    assert target_edition(datetime(2026, 10, 15, 20, 50, tzinfo=UTC), CFG) == date(2026, 10, 16)
+    assert target_edition(datetime(2026, 10, 15, 21, 0, tzinfo=UTC), CFG) == date(2026, 10, 17)
+    assert target_edition(datetime(2026, 10, 16, 4, 30, tzinfo=UTC), CFG) == date(2026, 10, 17)   # 13:30 KST
+
+
+def _publish(hist, d):
+    hist.mkdir(parents=True, exist_ok=True)
+    (hist / f"{d.isoformat()}.json").write_text('{"edition": "%s", "issues": []}' % d.isoformat(), encoding="utf-8")
+
+
+def test_windows_contiguous_three_days(tmp_path):
+    """연속 3일 발행: 각 호의 시작 = 직전 호의 끝 (빈틈·겹침 없음)."""
+    hist = tmp_path / "history"
+    windows = []
+    for d in [date(2026, 10, 16), date(2026, 10, 17), date(2026, 10, 18)]:
+        windows.append(edition_window(d, CFG, hist))
+        _publish(hist, d)
+    for (s1, e1), (s2, e2) in zip(windows, windows[1:]):
+        assert s2 == e1
+    assert all(e - s == timedelta(hours=24) for s, e in windows)
+
+
+def test_window_after_missed_day_and_cap(tmp_path):
+    hist = tmp_path / "history"
+    _publish(hist, date(2026, 10, 16))
+    # 10/17 발행을 빠뜨림 → 10/18 호는 10/16 06:00 부터 48시간
+    s, e = edition_window(date(2026, 10, 18), CFG, hist)
+    assert e - s == timedelta(hours=48) and s == datetime(2026, 10, 15, 21, 0, tzinfo=UTC)
+    # max_hours(72) 보다 오래 비면 직전 호를 찾지 않고 24시간으로
+    s, e = edition_window(date(2026, 10, 21), CFG, hist)
+    assert e - s == timedelta(hours=24)
 
 
 def test_source_settings_reapplied_at_prepare(tmp_path):

@@ -56,17 +56,17 @@ def sources(*names):
          "enabled": True, "feeds": [{"section": "top", "url": "https://x.test/rss"}]} for n in names]})
 
 
-def test_opinions_kept_out_of_news_and_use_wider_window():
+def test_opinions_kept_out_of_news_same_window():
     store = {
         "a1": art(1, title="[사설] 밤 사설", published="2026-10-15T13:00:00+00:00", opinion="editorial"),  # 22:00 KST
         "a2": art(2, title="낮 칼럼", published="2026-10-15T03:00:00+00:00", sections=("opinion",)),  # 의견 피드, 12:00 KST 전날
-        "a3": art(3, title="이틀 전 칼럼", published="2026-10-14T03:00:00+00:00", sections=("opinion",)),  # 24시간 밖
+        "a3": art(3, title="이틀 전 칼럼", published="2026-10-14T03:00:00+00:00", sections=("opinion",)),  # 시간창(24시간) 밖
         "a4": art(4, title="뉴스 기사", published="2026-10-15T13:00:00+00:00"),
         "a5": art(5, title="[기고]판별값 없이 저장된 옛 기사", published="2026-10-15T13:00:00+00:00"),  # 다시 판별
     }
     news, rep = prepare(store, date(2026, 10, 16), CFG, sources("조선일보"))
     assert [a.title for a in news] == ["뉴스 기사"]
-    assert rep["opinion_separated"] == 2  # 뉴스 시간창 안의 의견 기사 (a1, a5)
+    assert rep["opinion_separated"] == 3  # 뉴스 시간창 안의 의견 기사 (a1, a2, a5) — 논평·사설도 같은 시간창
     ops = prepare_opinions(store, date(2026, 10, 16), CFG, sources("조선일보"))
     assert {a.title for a in ops} == {"[사설] 밤 사설", "낮 칼럼", "[기고]판별값 없이 저장된 옛 기사"}
     assert ops[0].opinion == "editorial"  # 사설 먼저

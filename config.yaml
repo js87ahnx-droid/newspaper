@@ -3,10 +3,11 @@
 
 timezone: Asia/Seoul
 
-# 수집 시간창: 전날 start ~ 당일 end (KST). 실행 시각과 무관하게 이 경계로 자른다.
+# 수집 시간창: 직전 발행 호의 end ~ 이번 호의 end (KST). 평소 24시간, 발행을 놓친 날이 있으면 그만큼 늘어난다.
+# 실행 시각과 무관하게 이 경계로 자른다. 직전 호가 없으면 24시간, 오래 놓쳐도 max_hours 까지만.
 window:
-  start: "19:00"
   end: "06:00"
+  max_hours: 72
 
 publish_time: "06:10"
 
