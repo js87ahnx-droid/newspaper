@@ -246,11 +246,25 @@
 - 실측: 로컬 임베딩 2,901건 2,442초(건당 0.84초). 러너는 건당 ~0.5초, 하루치를 수집 8회에 나눠 계산하므로 발행 실행에는 마지막 수집분만 남음
 - 공개 사이트 확인(2026-10-17 00:20 KST): Pages main/docs 켜짐, https://js87ahnx-droid.github.io/newspaper/ · archive/ · archive/2026-10-16/ 모두 StaticCrypt 잠금 화면, 지면 제목 40개 중 평문 노출 0 → **S10 "로그인 안 한 브라우저 차단" 통과**
 
+### S14 본문 기반 LLM 이슈 분석 — 진행 중 (코드·단위 테스트 완료, 실제 LLM 출력 검수 남음)
+- `pipeline/bodies.py`: 발행 때 지면 상위 묶음 기사 본문을 메모리로만 받음. trafilatura → 조선 등 Arc `Fusion.globalContent` → JSON-LD `articleBody` 중 가장 긴 것. Google 뉴스 주소는 googlenewsdecoder 로 풀기(selectolax 1.0 과 안 맞아 0.4.13 고정). Chrome UA, 매체당 동시 2개(경향신문이 몰아 받으면 막음)
+  - 실측(10/16호 지면 기사 173건): 51% → **74%(128건)**. 실패: AP·Reuters 봇 차단(403/401), NYT·WSJ·SCMP 유료 벽, NHK 자바스크립트 페이지 → RSS 리드로 대신
+- `llm.analyze`: 지면 상위 `analysis_issues`(40)개를 `analysis_batch`(5)개씩 `analysis_model`(sonnet)로 → headline·summary(3~5문장)·background·points·stances(매체별 관점)·brief. 지난 경과(timeline)를 프롬프트에 넣음
+  - 거부: 요약이 제목과 2-gram 겹침 ≥0.6 / 제목에 없는 낱말 0 / 40자 미만 / 본문과 40자 이상 똑같이 겹침(`copied_span`) → 그 묶음은 기존 무토큰 리드
+  - 분석한 기사는 기존 한국어 요약·제목 번역 호출에서 뺌. 하루 상한 10 → 30회
+- `cmd_enrich`: 본문 받기(메모리) → enrich → `del bodies`, history 의 이번 호 timeline 에 LLM 한 줄 정리(brief) 기록(다음 호 "지난 경과")
+- 지면: 분석이 있으면 한국어 제목 + 원 제목(작게) + 정리 + 배경 + 쟁점 + 매체별 관점, 단신은 한 줄 정리 (배치는 S15 에서 다시)
+- 테스트 `tests/test_analysis.py` 9건 (요약 검사, 베끼기 감지, 캐시에 본문 없음, 상위 N개·묶음 호출 수, 본문 받기 상태, 구조화 데이터 대체, history 한 줄 정리)
+- 남은 기준
+  - [ ] 실제 LLM 출력: 요약 자동 검사 전부 통과 + 직접 검수 10건, 입장 분석 검수 5건 → **로컬 CLI 재로그인 필요**(사용자)
+  - [ ] 하루 호출 상한 안에서 끝나는지, 소요 시간 (sonnet 8회)
+  - [ ] Actions 에서 끝까지 (requirements 에 trafilatura·googlenewsdecoder·selectolax 추가됨)
+- **S14 는 아직 푸시 안 함** (S13 까지는 푸시함 — 오늘 06:00 발행부터 새 시간창)
+
 ### 다음에 이어서 할 일
-1. S13 실데이터 검증: 임시 데이터 폴더에 data/raw 의 store.jsonl·emb 캐시·collect-log 복사 →
-   `python -m pipeline --data <임시> prepare|embed|cluster|edit --write-history --date 2026-10-15` 후 같은 순서로 2026-10-16 (`--data` 는 하위 명령 앞에)
-2. 브라우저 테스트 포함 전체 pytest → S13 기준 체크 → 푸시
-3. S14 (trafilatura 2.3.1 이 Python 3.14 에 설치 가능함 확인)
+1. 사용자가 로컬 `claude` 로그인 → 임시 폴더(scratchpad/s13)의 10/16호로 `python -m pipeline --data <임시> enrich --date 2026-10-16` → 출력 검수
+2. S14 기준 체크 → 커밋·푸시 → Actions 수동 실행으로 확인
+3. S15 신문식 재배열
 
 ### 아직 사용자 작업
 - 로컬 Claude CLI 로그인 만료(401) — 로컬에서 LLM 확인하려면 `claude` 로 다시 로그인

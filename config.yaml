@@ -75,9 +75,15 @@ photos:
   per_section: 1  # 섹션 머리기사
 
 # LLM 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
-# 입장 차이 요약·영어 기사 한국어 요약·비영어 제목 번역을 여러 건씩 묶어 한 번에 호출한다.
+# 1) 이슈 분석(S14): 지면 상위 analysis_issues 개 묶음의 기사 본문을 발행 때 읽어(저장 안 함)
+#    요약·배경·쟁점·매체별 관점을 쓴다. analysis_batch 개씩 묶어 한 번에 (40개 → 8회)
+# 2) 나머지 기사: 입장 차이 요약·영어 기사 한국어 요약·비영어 제목 번역 (model, 여러 건씩 묶어서)
 llm:
   enabled: true
   model: haiku
-  max_calls_per_day: 10
+  max_calls_per_day: 30
   timeout_sec: 120
+  analysis_model: sonnet
+  analysis_issues: 40
+  analysis_batch: 5
+  analysis_timeout_sec: 300

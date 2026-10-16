@@ -44,6 +44,13 @@ def _display(item: dict, display) -> dict:
     rep = next((a for a in item["articles"] if a["title"] == item["title"]), item["articles"][0])
     llm = item.get("llm", {})
     title, orig, lead, lead_note = item["title"], None, item.get("lead", ""), None
+    an = llm.get("analysis")
+    if an:  # 본문 기반 이슈 정리 (S14): 한국어 제목 + 요약, 원 제목은 작게
+        return {
+            "title": an["headline"] or item["title"], "orig_title": item["title"] if an["headline"] else None,
+            "lead": an["summary"], "lead_note": "AI 정리", "analysis": an,
+            "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
+        }
     if rep["lang"] == "en" and display.english == "original_with_ko_summary" and llm.get("ko_summary"):
         lead, lead_note = llm["ko_summary"], "AI 요약"
     elif rep["lang"] not in ("ko", "en") and display.other == "translated_title" and llm.get("ko_title"):

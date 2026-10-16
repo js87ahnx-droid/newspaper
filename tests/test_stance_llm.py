@@ -118,7 +118,7 @@ def test_llm_enrich_batches_and_respects_budget(tmp_path):
             body = {"summaries": {"e1": "교황이 수술을 받았다"}}
         return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
 
-    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=2, timeout_sec=10)
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=2, timeout_sec=10, analysis_issues=0)
     display = load_interests().foreign_display  # 영어: 요약, 그 밖: 제목 번역
     budget = Budget(tmp_path / "usage.json", date(2026, 10, 16), cfg.max_calls_per_day)
     ed = enrich(edition_fixture(), cfg, display, tmp_path / "llm.json", budget, runner=runner)
@@ -137,7 +137,7 @@ def test_llm_failure_falls_back(tmp_path):
     def broken(prompt):
         raise RuntimeError("not logged in")
 
-    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10)
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10, analysis_issues=0)
     budget = Budget(tmp_path / "usage.json", date(2026, 10, 16), 10)
     ed = enrich(edition_fixture(), cfg, load_interests().foreign_display, tmp_path / "llm.json", budget, runner=broken)
     assert all("llm" not in it for ps in ed["sections"].values() for it in ps)
@@ -154,7 +154,7 @@ def test_cli_error_envelope_reason(tmp_path):
     def envelope(prompt):
         return json.dumps({"is_error": True, "result": "Failed to authenticate. API Error: 401 OAuth access token has expired."})
 
-    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10)
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10, analysis_issues=0)
     res, st = call("x", cfg, Budget(tmp_path / "u.json", date(2026, 10, 16), 10), runner=envelope)
     assert res is None and st.startswith("CLI 오류: Failed to authenticate")
 
@@ -168,7 +168,7 @@ def test_llm_cache_prevents_recall(tmp_path):
         calls.append(1)
         return json.dumps({"result": '{"summaries": {"e1": "x"}, "titles": {"j1": "y"}}'})
 
-    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10)
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10, analysis_issues=0)
     budget = Budget(tmp_path / "usage.json", date(2026, 10, 16), 10)
     disp = load_interests().foreign_display
     enrich(edition_fixture(), cfg, disp, tmp_path / "llm.json", budget, runner=runner)

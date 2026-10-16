@@ -10,3 +10,6 @@ onnxruntime==1.31.0
 jinja2==3.1.6
 pytest==9.1.1
 playwright==1.64.0
+trafilatura==2.3.1
+googlenewsdecoder==0.2.1
+selectolax==0.4.13  # googlenewsdecoder 가 1.0 의 바뀐 API 를 못 씀

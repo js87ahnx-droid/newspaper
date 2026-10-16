@@ -190,6 +190,22 @@ def cmd_edit(args: argparse.Namespace) -> int:
     return 0
 
 
+def _history_summaries(path: Path, edition: dict) -> None:
+    """이 호의 연속성 기록에 LLM 이슈 정리(한 줄)를 지난 경과로 남긴다 — 다음 호 분석의 "지난 경과" 재료.
+    LLM 이 쓴 글만 저장한다 (기사 문장 아님)."""
+    if not path.exists():
+        return
+    briefs = {it["issue_id"]: it["llm"]["analysis"]["brief"] or it["llm"]["analysis"]["summary"][:120]
+              for ps in edition["sections"].values() for it in ps if it.get("llm", {}).get("analysis")}
+    if not briefs:
+        return
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for x in data["issues"]:
+        if x["id"] in briefs and x.get("timeline"):
+            x["timeline"][-1]["summary"] = briefs[x["id"]]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
 def cmd_enrich(args: argparse.Namespace) -> int:
     """입장 차이(무토큰)를 붙이고, LLM 훅이 켜져 있으면 요약·번역을 붙인다."""
     from .collect import Article
@@ -218,9 +234,29 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
         from .llm import Budget, enrich  # 켜져 있을 때만 불러온다
 
+        from .llm import available
+
         budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
-        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget)
-        llm_note = f"{edition['stats']['llm']['status']} (오늘 {edition['stats']['llm']['calls_today']}회)"
+        bodies: dict[str, str | None] = {}
+        if cfg.llm.analysis_issues > 0 and available()[0]:
+            # 본문은 이 변수(메모리)에만 있다 — 파일·캐시로 쓰지 않는다 (D16)
+            import asyncio
+
+            from .bodies import fetch_bodies
+
+            top = [it for ps in edition["sections"].values() for it in ps][: cfg.llm.analysis_issues]
+            fetched = asyncio.run(fetch_bodies([a["url"] for it in top for a in it["articles"]]))
+            bodies = {u: b.text for u, b in fetched.items()}
+            ok = sum(1 for b in fetched.values() if b.text)
+            edition.setdefault("stats", {})["bodies"] = {"articles": len(fetched), "ok": ok}
+            print(f"본문 읽기: {ok}/{len(fetched)}건 (메모리에서만 사용)")
+        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies)
+        del bodies
+        st = edition["stats"]["llm"]
+        llm_note = f"{st['status']} (오늘 {st['calls_today']}회)"
+        if st.get("analysis") and st["analysis"]["rejected"]:
+            llm_note += f" | 분석 버림 {st['analysis']['rejected']}"
+        _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)
     (raw / f"{args.date}.edition.json").write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
     noted = sum(1 for it in items if it["stance"]["note"])
     worded = sum(1 for it in items if it["stance"]["lean_words"] or it["stance"]["country_words"])

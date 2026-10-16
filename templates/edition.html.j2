@@ -62,6 +62,14 @@
       {% if v.lead and not brief %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
       {% endif %}
+      {% if v.analysis %}
+        {% if brief %}{% if v.analysis.brief %}<p class="lead brief-line" data-note="AI 정리">{{ v.analysis.brief }}</p>{% endif %}
+        {% else %}
+          {% if v.analysis.background %}<p class="an-bg"><b>배경</b> {{ v.analysis.background }}</p>{% endif %}
+          {% if v.analysis.points %}<ul class="an-pts">{% for p in v.analysis.points %}<li>{{ p }}</li>{% endfor %}</ul>{% endif %}
+          {% if v.analysis.stances %}<ul class="an-views" aria-label="매체별 관점">{% for s in v.analysis.stances %}<li><b>{{ s.source }}</b> {{ s.view }}</li>{% endfor %}</ul>{% endif %}
+        {% endif %}
+      {% endif %}
       <div class="meta">
         <span class="src">{{ it.source }}</span>
         <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>

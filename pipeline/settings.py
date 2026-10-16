@@ -129,8 +129,13 @@ class Photos(Strict):
 class Llm(Strict):
     enabled: bool
     model: str
-    max_calls_per_day: int = Field(ge=0, le=50)
+    max_calls_per_day: int = Field(ge=0, le=60)
     timeout_sec: int = Field(gt=0, le=600)
+    # 본문 기반 이슈 분석 (S14, D13·D15): 지면 상위 묶음만, 여러 묶음을 한 번에
+    analysis_model: str = "sonnet"
+    analysis_issues: int = Field(default=40, ge=0, le=60)
+    analysis_batch: int = Field(default=5, ge=1, le=10)
+    analysis_timeout_sec: int = Field(default=300, gt=0, le=900)
 
 
 class Config(Strict):
