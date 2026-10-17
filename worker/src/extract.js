@@ -15,6 +15,7 @@ export const BODY_SELECTORS = [
   ".article-body__content", ".article__body", ".wysiwyg", ".body-text", ".content__article-body",
   "[data-component=text-block]", "[data-testid=article-body]", "[class*=article-body__content]",
   "section[name=articleBody]", ".StoryBodyCompanionColumn", ".paywall", ".article_right",
+  "#detailContent", "#ozoom",   // 신화통신·인민일보 종이판 (S20d — 짧은 전문도 120자부터)
 ];
 
 // 이 안의 글은 본문이 아니다
@@ -27,7 +28,7 @@ const MIN_LOOSE = 300;     // 매체가 본문이라고 표시하지 않은 문�
 const MAX_CHARS = 30000;
 const MAX_IMAGES = 6;
 
-const NAMED = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", middot: "·", hellip: "…", lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", bull: "•", copy: "©", reg: "®", trade: "™", times: "×", lrm: "", rlm: "", zwj: "", zwnj: "" };
+const NAMED = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", emsp: " ", ensp: " ", thinsp: " ", middot: "·", hellip: "…", lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", bull: "•", copy: "©", reg: "®", trade: "™", times: "×", lrm: "", rlm: "", zwj: "", zwnj: "" };
 
 export function decodeEntities(s) {
   return s.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (m, e) => {

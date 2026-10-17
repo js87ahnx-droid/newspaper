@@ -160,3 +160,7 @@ def detect_opinion(title: str, url: str, feed_section: str = "") -> str | None:
         if _OP_TAG.search(tag) or person:
             return "column"
     return None
+
+
+# 제목 번역 + 한국어 요약을 둘 다 받는 언어 (S20b 프랑스어·독일어, S20d 중국어) — 리드를 읽을 수 없으므로
+TRANSLATE_BOTH = {"fr", "de", "zh"}

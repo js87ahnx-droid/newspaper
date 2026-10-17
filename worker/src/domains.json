@@ -6,6 +6,7 @@
  "bbc.co.uk",
  "bbc.com",
  "bloomberg.com",
+ "caixin.com",
  "chosun.com",
  "cnn.com",
  "donga.com",
@@ -18,8 +19,10 @@
  "khan.co.kr",
  "lemonde.fr",
  "mk.co.kr",
+ "news.cn",
  "news.web.nhk",
  "nytimes.com",
+ "people.com.cn",
  "politico.com",
  "politico.eu",
  "reuters.com",
@@ -28,6 +31,7 @@
  "theguardian.com",
  "washingtonpost.com",
  "wsj.com",
+ "xinhuanet.com",
  "yna.co.kr",
  "yomiuri.co.jp"
 ]

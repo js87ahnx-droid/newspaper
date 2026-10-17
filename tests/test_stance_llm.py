@@ -223,6 +223,10 @@ def test_french_gets_korean_title_and_summary(tmp_path):
         "마크롱, 개각 발표", "Macron annonce un remaniement", "마크롱 대통령이 개각을 발표했다.", "AI 요약", "fr")
     ja = next(i for i in out["sections"]["briefs"] if i["issue_id"] == "j1")
     assert "ko_summary" not in ja.get("llm", {})       # 일본어는 지금처럼 제목 번역만
+    from pipeline.textutil import TRANSLATE_BOTH
+    assert TRANSLATE_BOTH == {"fr", "de", "zh"}        # 중국어(S20d)도 제목 번역 + 요약
+    zh = {**fr, "articles": [{**fr["articles"][0], "lang": "zh"}]}
+    assert _display(zh, display)["lead"] == "마크롱 대통령이 개각을 발표했다."
 
 
 def test_feed_lang_marks_french_and_german():

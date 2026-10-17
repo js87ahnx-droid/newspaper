@@ -83,3 +83,8 @@ test("번역: 키 없음 401, 잘못된 요청 400, 경로·방식이 다르면 
   assert.equal((await post("/", JSON.stringify({ lang: "en", texts: ["a"] }), K)).status, 405);
   assert.equal((await w.fetch("/translate", { headers: K })).status, 405);
 });
+
+test("HTML 문자: 신화통신 문단 앞 &emsp; 는 공백으로 (S20d)", async () => {
+  const { decodeEntities } = await import("../src/extract.js");
+  assert.equal(decodeEntities("&emsp;&emsp;风劲帆满&ensp;海天阔&thinsp;&amp;"), "  风劲帆满 海天阔 &");
+});

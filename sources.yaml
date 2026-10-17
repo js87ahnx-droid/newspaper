@@ -539,6 +539,60 @@ sources:
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:globaltimes.cn+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
+  # 중국 본토 3곳 (S20d, 2026-10-18 사용자 요청): 공식 피드가 모두 멈춤/없음(실측) → Google 뉴스 매체 한정 검색(D6). 사진 없음
+  # 인민일보·신화는 같은 공식 기사를 함께 싣는 일이 많아 주목도가 부풀지 않게 가중치를 낮춤
+  - name: 인민일보
+    country: CN
+    lean: 관영
+    type: 종합지
+    weight: 0.5
+    paywall: false
+    enabled: true
+    site: [people.com.cn]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [zh]
+    headline: [{kind: homepage, url: "https://www.people.com.cn/"}]   # 인민망 채널 기사 제목과 맞춤 → politics·international·economy 피드 필요
+    # 공식 RSS(www.people.com.cn/rss/*.xml)는 2025-06-05 에서 멈춤(2026-10-18 실측). top 은 종이 인민일보(paper.people.com.cn)
+    # 판면·자료실 쪽("要闻"·"人民日报图文数据库")이 섞여 제목으로 거름. 1면(날짜마다 주소가 바뀜)은 지금 형식으론 못 씀
+    feeds:
+      - {section: top, url: "https://news.google.com/rss/search?q=site:paper.people.com.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: '图文数据库|^要闻$|^第?[0-9]+版|PDF'}
+      - {section: politics, url: "https://news.google.com/rss/search?q=site:politics.people.com.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频"}
+      - {section: international, url: "https://news.google.com/rss/search?q=site:world.people.com.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news}
+      - {section: economy, url: "https://news.google.com/rss/search?q=site:finance.people.com.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:opinion.people.com.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news}
+
+  - name: 신화통신
+    country: CN
+    lean: 관영
+    type: 통신
+    weight: 0.6
+    paywall: false
+    enabled: true
+    site: [news.cn, xinhuanet.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [zh]
+    headline: [{kind: homepage, url: "https://www.news.cn/"}]
+    # 공식 XML 은 2022-12 에서 멈추고 날짜 없음(2026-10-18 실측). Google 뉴스는 검색 한 번에 100건까지라 정치·국제를 따로 받음
+    # 논평(新华时评) 피드는 못 찾음. 짧은 전문(100~230자)이 많아 중계 서버 본문 칸에 #detailContent 를 넣음
+    feeds:
+      - {section: top, url: "https://news.google.com/rss/search?q=site:news.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
+      - {section: politics, url: "https://news.google.com/rss/search?q=site:news.cn/politics+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
+      - {section: international, url: "https://news.google.com/rss/search?q=site:news.cn/world+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
+
+  - name: 차이신
+    country: CN
+    lean: 경제지
+    type: 경제지
+    weight: 0.8
+    paywall: true
+    enabled: true
+    site: [caixin.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-18: 본문 앞 1~2문단 뒤 유료 벽 → 원문 창은 한국어 요약 + 링크
+    langs: [zh]
+    headline: [{kind: homepage, url: "https://www.caixin.com/"}]
+    # 공식 RSS 없음(404). 수치 속보(database)·단신(mini)·독자 댓글 쪽(comment)은 검색에서 뺌. 영어판 Caixin Global 은 RSS 403·하루 1~10건
+    feeds:
+      - {section: top, url: "https://news.google.com/rss/search?q=site:caixin.com+-site:database.caixin.com+-site:mini.caixin.com+-site:comment.caixin.com+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:opinion.caixin.com+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news}
+
   # ---------------- 중동 ----------------
   - name: Al Jazeera
     country: QA

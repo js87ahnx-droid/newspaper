@@ -289,3 +289,19 @@ def test_url_must_filters_videos_and_ft_query_is_dropped():
     with pytest.raises(ValueError):
         Feed(section="x", url="https://a.b/", url_must="(")
     assert normalize_url("https://www.ft.com/content/abc?syn-25a6b1a6=1") == normalize_url("https://www.ft.com/content/abc")
+
+
+def test_google_news_items_have_no_fake_lead():
+    """Google 뉴스 요약은 '제목 + 매체명' 링크뿐 — 리드로 쓰지 않는다 (S9b 에서 빠졌던 줄, S20d 에서 발견). 공식 RSS 는 리드 유지."""
+    from pipeline.collect import entry_to_article
+    from pipeline.settings import Feed, Source
+    now = datetime(2026, 10, 18, 1, tzinfo=timezone.utc)
+    gn = Feed(section="top", url="https://news.google.com/rss/search?q=site:news.cn", kind="google_news")
+    rss = Feed(section="top", url="https://a.test/rss")
+    src = Source(name="신화통신", country="CN", lean="관영", type="통신", weight=0.6, paywall=False, enabled=True, feeds=[gn, rss])
+    e = {"link": "https://news.google.com/rss/articles/X", "title": "高市早苗向靖国神社献祭品 - 新华网",
+         "summary": "<a href='x'>高市早苗向靖国神社献祭品</a>&nbsp;新华网", "published": "Sat, 17 Oct 2026 23:00:00 GMT"}
+    a = entry_to_article(e, src, gn, now)
+    assert a.title == "高市早苗向靖国神社献祭品" and a.lead == "" and a.lang == "zh"
+    b = entry_to_article({**e, "summary": "这是一段真正的导语，介绍了事件的背景和经过。"}, src, rss, now)
+    assert b.lead.startswith("这是")

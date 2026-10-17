@@ -433,8 +433,17 @@
 - worker/src/domains.json 갱신(끈 매체 빠지고 새 매체 들어감). 새 매체 중 reader: true 는 Politico Europe·Spiegel·요미우리 → **Worker 재배포 필요** (`cd worker && npx wrangler deploy`)
 - pytest 238건 통과
 
+### S20d 중국 매체 (2026-10-18)
+- 인민일보(관영 0.5)·신화통신(관영 0.6)·차이신(경제지 0.8), 중국어판. 공식 피드가 모두 멈춤(인민망 2025-06, 신화 2022-12)·없음(차이신) → Google 뉴스(D6). 24시간 110·187·26건(주말)
+- 중국어도 제목 번역 + 한국어 요약 (TRANSLATE_BOTH = fr·de·zh, textutil 로 옮김 — LLM 꺼짐 때 llm 모듈을 불러오지 않게)
+- Google 뉴스 피드는 주소가 news.google.com 이라 url_must 가 듣지 않음 → 제목으로 거르는 `title_not`(인민일보 판면·자료실, 신화 영상), 인민망 제목 꼬리 "--国际" 제거
+- 중계 서버 본문 칸에 #detailContent(신화)·#ozoom(인민일보 종이판): 로컬 Worker 로 실제 기사 6건 모두 "본문 칸"(217~3748자), &emsp; 등 공백 문자 변환 추가
+- 평가에서 찾은 기존 결함: **S9b 부터 Google 뉴스 기사에 '제목 + 매체명'이 리드로 들어감**(collect.py 에서 `if feed.kind == "google_news":` 줄이 빠짐) → 고침, 테스트 추가. 실측 후 CNN·중앙·인민일보 등 Google 뉴스 매체 리드 0
+- 한계: 인민일보 1면(종이판 1면 주소가 날짜마다 바뀜)은 아직 헤드라인으로 못 씀 — 홈페이지로 대신. 신화 논평 피드 없음. 차이신 원문은 유료 벽
+- pytest 239건, worker node 테스트 8건 통과
+
 ### 다음에 이어서 할 일
-1. Worker 재배포 (새 허용 도메인: politico.eu·spiegel.de·yomiuri.co.jp)
+1. Worker 재배포 (S20d: news.cn·people.com.cn 허용, 본문 칸·공백 문자)
 2. S18 통합 평가 — 실제 발행 지면(GitHub Pages)에서 원문 보기 동작, Worker 한도 초과 수 관찰, 새 매체 5곳·24쪽 확인
 
 ### 아직 사용자 작업

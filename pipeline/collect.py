@@ -69,6 +69,7 @@ def article_id(norm_url: str) -> str:
 
 
 _GNEWS_SUFFIX = re.compile(r"\s+-\s+[^-]{1,40}$")
+_PEOPLE_SUFFIX = re.compile(r"--[一-鿿]{1,6}$")   # 인민망 채널 제목 꼬리 "--国际"·"--时政" (S20d)
 _IMG_SRC = re.compile(r'<img[^>]+src=["\'](https?://[^"\']+)["\']', re.I)
 _IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif)(\?|$)", re.I)
 
@@ -101,11 +102,15 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
         return None
     if feed.kind == "google_news":
         # Google 뉴스 제목은 "제목 - 매체명" 형식이고 요약은 제목을 되풀이한 링크뿐이다
-        title = _GNEWS_SUFFIX.sub("", title)
+        title = _PEOPLE_SUFFIX.sub("", _GNEWS_SUFFIX.sub("", title))
     if feed.title_must and feed.title_must not in title:
         return None
     if feed.url_must and not re.search(feed.url_must, link):
         return None
+    if feed.title_not and re.search(feed.title_not, title):
+        return None
+    if feed.kind == "google_news":
+        # 요약은 "제목 + 매체명" 링크뿐이라 리드로 쓰지 않는다 (S9b 에서 이 줄이 빠져 '제목 매체명'이 리드로 들어갔음 — S20d 에서 발견)
         lead = ""
     else:
         lead = cap_lead(clean_text(entry.get("summary")))

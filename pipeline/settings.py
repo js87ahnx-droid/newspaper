@@ -209,15 +209,17 @@ class Feed(Strict):
     lang: Literal["fr", "de"] | None = None
     # 기사 주소가 이 정규식에 맞는 항목만 받는다 (S19e: Bloomberg 피드에 섞인 영상·오디오·뉴스레터를 거름)
     url_must: str | None = None
+    # 제목이 이 정규식에 맞으면 버린다 (S20d: Google 뉴스 피드는 주소가 news.google.com 이라 url_must 가 듣지 않음 — 인민일보 판면·자료실 쪽)
+    title_not: str | None = None
 
-    @field_validator("url_must")
+    @field_validator("url_must", "title_not")
     @classmethod
     def _regex(cls, v: str | None) -> str | None:
         if v is not None:
             try:
                 re.compile(v)
             except re.error as e:
-                raise ValueError(f"url_must 정규식 오류: {e}") from None
+                raise ValueError(f"정규식 오류: {e}") from None
         return v
 
 

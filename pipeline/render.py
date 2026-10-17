@@ -21,7 +21,7 @@ from .interest import build_interest_table
 from . import reader as reader_mod
 from .settings import ROOT, TOPICS, Config, Interests, Sources
 from .stance import LEAN_ORDER
-from .textutil import LEAD_MAX, cap_lead, title_key
+from .textutil import LEAD_MAX, TRANSLATE_BOTH, cap_lead, title_key
 
 LEAN_CLASS = {"보수": "con", "중도": "mid", "진보": "pro", "경제지": "biz", "통신·공영": "pub", "관영": "state"}
 KIND_NOTE = {"google_news": "Google 뉴스 경유 (리드 없음)"}
@@ -71,7 +71,7 @@ def _display(item: dict, display) -> dict:
             "lead": an["summary"], "lead_note": "AI 정리", "analysis": an,
             "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
         }
-    if rep["lang"] in ("fr", "de"):   # S20b: 한국어 제목 + 한국어 요약, 원 제목은 작게
+    if rep["lang"] in TRANSLATE_BOTH:   # S20b·S20d: 한국어 제목 + 한국어 요약, 원 제목은 작게
         if llm.get("ko_title"):
             title, orig = llm["ko_title"], item["title"]
         if llm.get("ko_summary"):
@@ -90,7 +90,7 @@ SHORT_NAME = {"조선일보": "조선", "중앙일보": "중앙", "동아일보"
               "매일경제": "매경", "연합뉴스": "연합", "New York Times": "NYT", "Wall Street Journal": "WSJ", "Fox News": "Fox",
               "Global Times": "환구시보", "Al Jazeera": "알자지라", "NHK World": "NHK World",
               "Financial Times": "FT", "Washington Post": "WaPo", "The Economist": "Economist",
-              "요미우리신문": "요미우리", "아사히신문": "아사히", "Der Spiegel": "Spiegel"}
+              "요미우리신문": "요미우리", "아사히신문": "아사히", "인민일보": "인민", "신화통신": "신화", "Der Spiegel": "Spiegel"}
 
 
 def headline_label(by: dict) -> str | None:
