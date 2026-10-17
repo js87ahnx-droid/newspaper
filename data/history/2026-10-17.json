@@ -2,8 +2,8 @@
  "edition": "2026-10-17",
  "issues": [
   {
-   "id": "5c852c154fed40d4",
-   "title": "4 killed, including 3 children, in shooting at Oregon elementary school, source says. Shooter is also dead",
+   "id": "338a97a85731ee16",
+   "title": "Teen shooter kills 3 children, teacher at Oregon elementary school",
    "topic": "international",
    "days": 2,
    "signature": [
@@ -14,23 +14,23 @@
     "shooter",
     "children",
     "kill",
-    "killed",
     "teacher",
+    "killed",
     "shot",
     "police",
-    "dead"
+    "teen"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": null,
-     "title": "Bend, Oregon school shooting: 3 children, 1 adult killed, source says. Shooter is also dead",
+     "title": "파키스탄 사립학교 지붕 붕괴… 학생 34명-교사 1명 숨져",
      "summary": null
     },
     {
      "date": "2026-10-17",
-     "title": "4 killed, including 3 children, in shooting at Oregon elementary school, source says. Shooter is also dead",
-     "summary": "오리건 초등학교서 16세 총격, 4명 숨지고 시민이 제압"
+     "title": "Teen shooter kills 3 children, teacher at Oregon elementary school",
+     "summary": "오리건 초등학교서 10대 총격, 4명 숨지고 주민 추모"
     }
    ]
   },
@@ -47,11 +47,11 @@
     "white",
     "house",
     "day",
-    "role",
     "bar",
     "five",
     "exam",
-    "fired"
+    "fired",
+    "role"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -77,8 +77,8 @@
     "충락",
     "신상",
     "기난",
-    "동범",
     "난동",
+    "동범",
     "인천",
     "흉기",
     "상정",
@@ -101,8 +101,8 @@
    "topic": "politics",
    "days": 1,
    "signature": [
-    "민석",
     "탄핵",
+    "민석",
     "김민",
     "조희",
     "희대",
@@ -168,7 +168,7 @@
     "경유",
     "유가",
     "달러",
-    "고유"
+    "에도"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -297,39 +297,6 @@
    ]
   },
   {
-   "id": "3fabf59b95f57b2b",
-   "title": "후티 반군, 예멘 대통령궁에 미사일 발사…5명 사망·16명 부상",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "예멘",
-    "령궁",
-    "후티",
-    "공격",
-    "반군",
-    "사우",
-    "우디",
-    "사일",
-    "미사",
-    "사망",
-    "궁까",
-    "이란"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": null,
-     "title": "사우디 \"후티 반군, 10월 리야드 공항 20회 공격…17명 사망\"(종합)",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "후티 반군, 예멘 대통령궁에 미사일 발사…5명 사망·16명 부상",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "f07e8519744a2bb6",
    "title": "美오리건주 초등학교서 대낮 수업중 총격…어린이 등 5명 숨져",
    "topic": "international",
@@ -448,6 +415,34 @@
      "date": "2026-10-17",
      "title": "CJ그룹, 다우키움그룹과 중앙일보 인수전 참여 가능성",
      "summary": "CJ·다우키움 컨소시엄, 중앙일보 본입찰 참여 전망"
+    }
+   ]
+  },
+  {
+   "id": "6902681aab37c601",
+   "title": "野 \"직무 유기\"·與 \"헌법적 판단\"…'李대통령 재판중단' 공방",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "재판",
+    "중단",
+    "헌법",
+    "울고",
+    "고법",
+    "판중",
+    "법원",
+    "공방",
+    "근거",
+    "법적",
+    "직무",
+    "판단"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "野 \"직무 유기\"·與 \"헌법적 판단\"…'李대통령 재판중단' 공방",
+     "summary": "서울고법원장, 대통령 재판 중단 적법 취지 답변"
     }
    ]
   },
@@ -653,7 +648,7 @@
     {
      "date": "2026-10-17",
      "title": "‘딸 임용 특혜 의혹’ 경찰, 유승민 송치",
-     "summary": "유승민 등 4명 송치, 본인은 정치수사라며 무죄 주장"
+     "summary": null
     }
    ]
   },
@@ -737,7 +732,7 @@
     {
      "date": "2026-10-17",
      "title": "애플 CEO “메모리 공급 위기…중국산도 선택지\" 또 강조",
-     "summary": null
+     "summary": "애플 CEO, 메모리 대란에 중국산도 선택지로"
     }
    ]
   },
@@ -755,10 +750,10 @@
     "musk",
     "jump",
     "upside",
+    "called",
+    "roadster",
     "down",
-    "drive",
-    "really",
-    "event"
+    "drive"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -892,30 +887,63 @@
    ]
   },
   {
-   "id": "de93dae7b4eecd0f",
-   "title": "서울고법원장 “李 재판 중단, 헌법 84조에 따른 재판부 결정 존중”",
+   "id": "40a632d0286fc5d2",
+   "title": "국힘, ‘ARS 오류’ 용인갑 조직위원장 재경선 안 하기로...윤재복 당선",
    "topic": "politics",
    "days": 1,
    "signature": [
-    "재판",
-    "울고",
-    "중단",
-    "헌법",
-    "법원",
-    "고법",
-    "근거",
-    "무유",
-    "법조",
-    "조로",
-    "조항",
-    "따른"
+    "용인",
+    "윤재",
+    "인갑",
+    "직위",
+    "재복",
+    "조직",
+    "국힘",
+    "양향",
+    "향자",
+    "장에",
+    "투표",
+    "당선"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": "2026-10-17",
-     "title": "서울고법원장 “李 재판 중단, 헌법 84조에 따른 재판부 결정 존중”",
-     "summary": "서울고법원장, 대통령 재판 중단은 불법 아니라고 답변"
+     "title": "국힘, ‘ARS 오류’ 용인갑 조직위원장 재경선 안 하기로...윤재복 당선",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "d97b7a354fd69ff3",
+   "title": "후티, 예멘 대통령궁 미사일 공격 “20여명 사상”",
+   "topic": "international",
+   "days": 2,
+   "signature": [
+    "령궁",
+    "예멘",
+    "후티",
+    "공격",
+    "반군",
+    "사우",
+    "우디",
+    "이란",
+    "사일",
+    "미사",
+    "사망",
+    "격으"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "사우디 \"후티 반군, 10월 리야드 공항 20회 공격…17명 사망\"(종합)",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "후티, 예멘 대통령궁 미사일 공격 “20여명 사상”",
+     "summary": null
     }
    ]
   },
@@ -999,7 +1027,7 @@
     {
      "date": "2026-10-17",
      "title": "특검, 尹 '평양무인기' 2심 징역30년 구형…\"내란보다 죄질 무거워\"(종합)",
-     "summary": "특검, 평양 무인기 2심서 윤석열 징역 30년 구형"
+     "summary": null
     }
    ]
   },
@@ -1010,6 +1038,7 @@
    "days": 1,
    "signature": [
     "전날",
+    "스피",
     "급락",
     "출발",
     "폭락",
@@ -1019,8 +1048,7 @@
     "닥도",
     "도세",
     "락했",
-    "락세",
-    "인은"
+    "락세"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -1311,8 +1339,8 @@
    "signature": [
     "peltola",
     "sullivan",
-    "alaska",
     "senate",
+    "alaska",
     "clash",
     "debate",
     "corruption",
@@ -1341,14 +1369,14 @@
     "신진",
     "진창",
     "융위",
+    "금융",
     "무처",
     "처장",
     "장에",
     "원회",
     "사무",
     "갖춘",
-    "급회",
-    "더십"
+    "급회"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -1617,7 +1645,7 @@
     {
      "date": "2026-10-17",
      "title": "주일 러 대사, 기자 구금 관련 \"日요구 거부…러 법대로 수사\"",
-     "summary": "러 당국이 일본 기자를 간첩 혐의로 구금, 일본은 접촉 못 해"
+     "summary": null
     }
    ]
   },
@@ -1734,29 +1762,34 @@
    ]
   },
   {
-   "id": "40a632d0286fc5d2",
-   "title": "국힘, ‘ARS 오류’ 용인갑 조직위원장 재경선 안 하기로...윤재복 당선",
-   "topic": "politics",
-   "days": 1,
+   "id": "f35218342f4628ee",
+   "title": "후티 반군, 예멘 임시수도 아덴 이틀 연속 타격",
+   "topic": "international",
+   "days": 2,
    "signature": [
-    "용인",
-    "윤재",
-    "인갑",
-    "직위",
-    "재복",
-    "조직",
-    "국힘",
-    "당선",
-    "장에",
-    "ars",
-    "강특",
-    "경선"
+    "후티",
+    "예멘",
+    "반군",
+    "사우",
+    "우디",
+    "공격",
+    "아덴",
+    "임시",
+    "타격",
+    "령궁",
+    "이틀",
+    "사일"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
+     "date": null,
+     "title": "사우디 \"후티 반군, 10월 리야드 공항 20회 공격…17명 사망\"(종합)",
+     "summary": null
+    },
+    {
      "date": "2026-10-17",
-     "title": "국힘, ‘ARS 오류’ 용인갑 조직위원장 재경선 안 하기로...윤재복 당선",
+     "title": "후티 반군, 예멘 임시수도 아덴 이틀 연속 타격",
      "summary": null
     }
    ]
@@ -2337,6 +2370,34 @@
    ]
   },
   {
+   "id": "965a55897d90e073",
+   "title": "Kenya confirms third Ebola case, a relative of the first patient who died",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "kenya",
+    "patient",
+    "ebola",
+    "third",
+    "case",
+    "first",
+    "relative",
+    "died",
+    "close",
+    "confirm",
+    "linked",
+    "two"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Kenya confirms third Ebola case, a relative of the first patient who died",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "aa07f04e834e216b",
    "title": "Ethiopia's Abiy names new Tigray government, wants polls in six months",
    "topic": "international",
@@ -2421,7 +2482,7 @@
     {
      "date": "2026-10-17",
      "title": "[시스루피플] 판매보다 팔레스타인 지지 신념···‘노멀 피플’ 작가 샐리 루니 “영국에서 책 안 팔겠다”",
-     "summary": "루니 책, 팔레스타인 액션 지지로 영국 서점서 철수"
+     "summary": null
     }
    ]
   },
@@ -2449,6 +2510,34 @@
     {
      "date": "2026-10-17",
      "title": "北, 'HGV 고도화' 韓입장에 \"우리 국방력강화 명분\"",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "a1158f313c4f49bc",
+   "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "산동",
+    "삼산",
+    "세대",
+    "정전",
+    "아파",
+    "파트",
+    "인천",
+    "대단",
+    "단지",
+    "기서",
+    "불편",
+    "여세"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
      "summary": null
     }
    ]
@@ -2494,11 +2583,11 @@
     "먹통",
     "체는",
     "워치",
-    "차례",
     "폭풍",
     "화웨",
     "달만",
-    "웨이"
+    "웨이",
+    "이달"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2903,9 +2992,9 @@
     "소심",
     "항소",
     "심서",
+    "개월",
     "대해",
-    "생후",
-    "울던"
+    "생후"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -3242,8 +3331,8 @@
     "깜깜",
     "깜이",
     "드메",
-    "부과",
     "스드",
+    "부과",
     "과태",
     "요금",
     "태료",
@@ -3313,7 +3402,7 @@
     {
      "date": "2026-10-17",
      "title": "6.9-magnitude quake hits Russia's Kamchatka",
-     "summary": "캄차카 규모 6.9 지진, 피해·쓰나미 경보 없음"
+     "summary": null
     }
    ]
   },
@@ -3358,11 +3447,11 @@
     "election",
     "giveaway",
     "lottery",
-    "단소",
     "만불",
     "송에",
     "집단",
-    "fraud"
+    "fraud",
+    "단소"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -3491,6 +3580,34 @@
    ]
   },
   {
+   "id": "a3b25b02da68475d",
+   "title": "폭락하던 코스피, 그래도 2% 반등···외국인 8거래일 만에 ‘사자’",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "래일",
+    "매수",
+    "거래",
+    "등세",
+    "외국",
+    "국인",
+    "드카",
+    "세에",
+    "이드",
+    "사이",
+    "급등",
+    "스닥"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "폭락하던 코스피, 그래도 2% 반등···외국인 8거래일 만에 ‘사자’",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "e68b33eb154c87c4",
    "title": "[표] 주간 거래소 외국인 순매수도 상위종목",
    "topic": "economy",
@@ -3552,29 +3669,62 @@
    ]
   },
   {
-   "id": "a3b25b02da68475d",
-   "title": "폭락하던 코스피, 그래도 2% 반등···외국인 8거래일 만에 ‘사자’",
-   "topic": "economy",
+   "id": "6473a58d2f22196c",
+   "title": "토요일까지 맑고 포근…일요일엔 가을치고 많은 비",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
-    "래일",
-    "매수",
-    "거래",
-    "등세",
-    "드카",
-    "세에",
-    "이드",
-    "사이",
-    "급등",
-    "스닥",
-    "반등",
-    "외국"
+    "토요",
+    "포근",
+    "요일",
+    "구름",
+    "맑고",
+    "일요",
+    "전국",
+    "많고",
+    "맑다",
+    "밤부",
+    "을치",
+    "일엔"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": "2026-10-17",
-     "title": "폭락하던 코스피, 그래도 2% 반등···외국인 8거래일 만에 ‘사자’",
+     "title": "토요일까지 맑고 포근…일요일엔 가을치고 많은 비",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "19045530f5513eda",
+   "title": "Trump on Katie Zacharia’s WH press secretary role: ‘You don’t want to go through this’",
+   "topic": "international",
+   "days": 2,
+   "signature": [
+    "katie",
+    "wh",
+    "zacharia",
+    "pres",
+    "secretary",
+    "don",
+    "role",
+    "maybe",
+    "zacharia'",
+    "cast",
+    "think",
+    "doubt"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "Trump on Katie Zacharia’s WH press secretary role: ‘You don’t want to go through this’",
      "summary": null
     }
    ]
@@ -3733,8 +3883,8 @@
     "정대",
     "직위",
     "불안",
-    "예정",
     "준비",
+    "예정",
     "대로",
     "조직"
    ],
@@ -3850,44 +4000,16 @@
     "우조",
     "의로",
     "정구",
-    "해양",
     "대우",
     "법정",
-    "선해"
+    "선해",
+    "해양"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": "2026-10-17",
      "title": "[단독] 김용빈 전 대우조선해양건설 회장 ‘무자본 M&A’로 법정구속",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "6902681aab37c601",
-   "title": "野 \"직무 유기\"·與 \"헌법적 판단\"…'李대통령 재판중단' 공방",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "공방",
-    "재판",
-    "법적",
-    "판단",
-    "판중",
-    "野",
-    "중단",
-    "與",
-    "헌법",
-    "누워",
-    "러누",
-    "사서"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "野 \"직무 유기\"·與 \"헌법적 판단\"…'李대통령 재판중단' 공방",
      "summary": null
     }
    ]
@@ -4071,6 +4193,59 @@
    ]
   },
   {
+   "id": "50a077c2688b4ba6",
+   "title": "美 철강 가격, 4년여만에 최고…트럼프 관세로 공급 부족",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "년여",
+    "세로",
+    "철강",
+    "관세",
+    "부족",
+    "가격",
+    "최고",
+    "공급",
+    "여만"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "美 철강 가격, 4년여만에 최고…트럼프 관세로 공급 부족",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "35ef1fe9d80a1afc",
+   "title": "Selma Blair speaks out on plane incident that resulted in her arrest, saying she ‘did not intend to harm anyone’",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "selma",
+    "arrest",
+    "speak",
+    "blair",
+    "blair'",
+    "intend",
+    "rep",
+    "resulted",
+    "star'",
+    "harm",
+    "anyone",
+    "much"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Selma Blair speaks out on plane incident that resulted in her arrest, saying she ‘did not intend to harm anyone’",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "bc5318353ab29681",
    "title": "Toyota to turn all 50 models into software-defined vehicles by 2030",
    "topic": "economy",
@@ -4120,34 +4295,6 @@
     {
      "date": "2026-10-17",
      "title": "Trump says neither he nor Musk responsible for Ukraine loss of Starlink access",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "50a077c2688b4ba6",
-   "title": "美 철강 가격, 4년여만에 최고…트럼프 관세로 공급 부족",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "여만",
-    "increase",
-    "년여",
-    "세로",
-    "철강",
-    "annual",
-    "largest",
-    "관세",
-    "four",
-    "import",
-    "gain",
-    "post"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "美 철강 가격, 4년여만에 최고…트럼프 관세로 공급 부족",
      "summary": null
     }
    ]
@@ -4204,34 +4351,6 @@
     {
      "date": "2026-10-17",
      "title": "Manchester Utd have ‘moved on’ from Martinez outburst, says Carrick",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "6dc8a7fcb9f5428f",
-   "title": "Kenya reports third Ebola case, a close relative of first two patients",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "kenya",
-    "patient",
-    "ebola",
-    "third",
-    "case",
-    "first",
-    "close",
-    "linked",
-    "relative",
-    "two",
-    "died",
-    "report"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Kenya reports third Ebola case, a close relative of first two patients",
      "summary": null
     }
    ]
@@ -4413,8 +4532,8 @@
     "congo",
     "response",
     "디로",
-    "원은",
-    "africa"
+    "africa",
+    "fund"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -4588,34 +4707,6 @@
    ]
   },
   {
-   "id": "a1158f313c4f49bc",
-   "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "산동",
-    "삼산",
-    "대단",
-    "세대",
-    "정전",
-    "단지",
-    "아파",
-    "파트",
-    "인천",
-    "불편",
-    "여세",
-    "영향"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "7e142fc8bfde5219",
    "title": "Guardians to open with Shawn Armstrong; Rays start Nick Martinez in ALCS Game 4",
    "topic": "international",
@@ -4683,7 +4774,6 @@
    "days": 1,
    "signature": [
     "elementary",
-    "oregon",
     "shooting",
     "congresswoman",
     "district",
@@ -4860,11 +4950,11 @@
     "category",
     "forecast",
     "mexico",
-    "weekend",
     "mexico'",
     "storm",
-    "major",
-    "strengthen"
+    "weekend",
+    "strengthen",
+    "major"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -4886,10 +4976,10 @@
     "브라",
     "과열",
     "낭비",
-    "려다",
     "민물",
     "질산",
     "키워",
+    "려다",
     "서민",
     "세금",
     "워드"
@@ -5741,8 +5831,8 @@
     "사들",
     "고법",
     "울고",
-    "경쓰",
-    "상적"
+    "법원",
+    "경쓰"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -6067,6 +6157,34 @@
    ]
   },
   {
+   "id": "97ed7a0faa3e7e3e",
+   "title": "인천 흉기 난동범 구속…“범행 때 지닌 680만원은 기부하려던 것”",
+   "topic": "incidents",
+   "days": 1,
+   "signature": [
+    "부하",
+    "원은",
+    "하려",
+    "기부",
+    "동범",
+    "만원",
+    "난동",
+    "인천",
+    "낭속",
+    "려던",
+    "배낭",
+    "지닌"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "인천 흉기 난동범 구속…“범행 때 지닌 680만원은 기부하려던 것”",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "347ce7e6410151b7",
    "title": "野 \"이화영 재심 청구는 형집행정지 노림수\"…국감서 질타",
    "topic": "politics",
@@ -6324,9 +6442,9 @@
    "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
-    "고래",
     "뱃속",
     "일폴",
+    "고래",
     "생존",
     "웨일",
     "개봉",
@@ -6666,10 +6784,10 @@
    "days": 1,
    "signature": [
     "리야",
-    "소리",
     "이진",
     "진숙",
     "과방",
+    "소리",
     "방위",
     "남매",
     "면서",
@@ -6956,9 +7074,9 @@
     "택소",
     "다주",
     "전에",
-    "등생",
     "명은",
     "여명",
+    "등생",
     "마련"
    ],
    "date": "2026-10-17",
@@ -7089,9 +7207,9 @@
     "입주",
     "맞춤",
     "주민",
-    "대상",
     "건설",
     "교육",
+    "대상",
     "렵지",
     "르신",
     "않게"
@@ -7393,7 +7511,7 @@
     "융합",
     "화운",
     "초청",
-    "나무"
+    "로봇"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -7439,11 +7557,11 @@
     "단어",
     "리즘",
     "성건",
-    "saying",
     "삭제",
     "썼다",
     "알고",
-    "임신"
+    "임신",
+    "saying"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -8015,10 +8133,10 @@
     "투표",
     "부족",
     "중앙",
+    "법원",
     "거관",
     "맡았",
-    "았던",
-    "앙법"
+    "았던"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -8035,8 +8153,8 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "anniversary",
     "shun",
+    "anniversary",
     "event",
     "tell",
     "revolutionary",
@@ -8559,6 +8677,83 @@
      "date": "2026-10-17",
      "title": "트럼프와 갈등속 우크라 “패트리엇 바닥”…러 미사일에 속수무책",
      "summary": null
+    }
+   ]
+  },
+  {
+   "id": "8f709290fb218464",
+   "title": "[단독] 안보 부처 세종 이전, 지난달엔 “검토 안해”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "달엔",
+    "부처",
+    "난달",
+    "세종",
+    "안해",
+    "지난",
+    "안보",
+    "이전",
+    "검토"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "[단독] 안보 부처 세종 이전, 지난달엔 “검토 안해”",
+     "summary": "안보부처 세종 이전, 직전까지 검토 부인해 졸속 논란"
+    }
+   ]
+  },
+  {
+   "id": "9b07fa3fd7c8c588",
+   "title": "How Iran messaging highlights cost of war ahead of US midterm elections",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "messaging",
+    "highlight",
+    "cost",
+    "iran",
+    "war",
+    "midterm",
+    "election",
+    "ahead"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "How Iran messaging highlights cost of war ahead of US midterm elections",
+     "summary": "이란, 중간선거 앞두고 미국 내 전쟁 비용 논란 부추겨"
+    }
+   ]
+  },
+  {
+   "id": "19ea5465acea82ac",
+   "title": "커지는 한미동맹 파열음… 주목받는 브런슨 ‘거친 입’",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "목받",
+    "열음",
+    "파열",
+    "거친",
+    "커지",
+    "받는",
+    "미동",
+    "런슨",
+    "브런",
+    "동맹",
+    "주목",
+    "지는"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "커지는 한미동맹 파열음… 주목받는 브런슨 ‘거친 입’",
+     "summary": "브런슨 전작권 신중론에 정부·여권 반발 확산"
     }
    ]
   }

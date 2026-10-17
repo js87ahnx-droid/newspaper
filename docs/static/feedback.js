@@ -38,13 +38,14 @@
   }
 
   function rescore(art, p) {
-    var w = E.weights || { attention: 0.35, importance: 0.3, continuity: 0.1, interest: 0.25 };
+    var w = E.weights || { attention: 0.35, importance: 0.3, continuity: 0.1, interest: 0.25, headline: 0 };
     var topic = art.getAttribute("data-topic");
     var title = (art.querySelector(".hl") || art).textContent;
     var inte = Math.min((weightOf(p, topic) + (keywordHit(p, title) ? (E.keywordBoost || 0) : 0)) / (E.maxInterest || 1), 1);
     var a = +art.getAttribute("data-a") || 0, i = +art.getAttribute("data-i") || 0, c = +art.getAttribute("data-c") || 0;
-    var sum = w.attention + w.importance + w.continuity + w.interest;
-    return (w.attention * a + w.importance * i + w.continuity * c + w.interest * inte) / sum;
+    var h = +art.getAttribute("data-h") || 0, wh = w.headline || 0;   // 매체 머리기사 (score.py 와 같은 식)
+    var sum = w.attention + w.importance + w.continuity + w.interest + wh;
+    return (w.attention * a + w.importance * i + w.continuity * c + w.interest * inte + wh * h) / sum;
   }
 
   function sectionEl(id) {
