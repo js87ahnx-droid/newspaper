@@ -373,6 +373,11 @@
 - 배포 뒤 고친 결함
   6. AP·SCMP 가 Cloudflare 주소에서만 막힘 → reader: false
   7. 콜드 스타트 때 가끔 Cloudflare 503(CPU 한도) → 본문을 다 읽으면 읽기 멈춤, 지면이 503 에 한 번 다시 부름
+- 실제 발행 확인 (10/17호 재발행, Actions run 39012236546, 2분 39초 — LLM 분석은 그날 캐시)
+  - [x] 로그: Google 뉴스 주소 62/62 풀림, 암호화 검사 통과(HTML 4개, 평문 0)
+  - [x] Pages 에 새 app.js(읽기 화면·503 재시도) 반영, 지면 HTML 은 암호화 상태
+  - [x] 실제 지면 출처(https://js87ahnx-droid.github.io)에서 중계 서버 호출: CORS 사전 확인 통과, 틀린 키 401 응답을 브라우저가 읽음
+  - [ ] 잠긴 지면 안에서 올바른 키로 기사 열기 — 비밀번호 입력이 필요해 사용자 확인 필요 (키는 Worker·GitHub 에 같은 값으로 넣음)
 - 운영 메모: Worker 코드를 바꾸면 `cd worker && npx wrangler deploy` (Actions 자동 배포 없음). 키를 바꾸려면 `wrangler secret put READER_KEY` 와 `gh secret set READER_KEY` 를 같은 값으로
 
 ### 다음에 이어서 할 일
