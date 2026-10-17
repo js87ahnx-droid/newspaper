@@ -124,6 +124,34 @@
    ]
   },
   {
+   "id": "7c02a05163bec9fc",
+   "title": "박동일 산업통상부 차관, 신진창 금융위 부위원장",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "동일",
+    "박동",
+    "차관",
+    "산업",
+    "부위",
+    "신진",
+    "진창",
+    "융위",
+    "업부",
+    "금융",
+    "위원",
+    "상부"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "박동일 산업통상부 차관, 신진창 금융위 부위원장",
+     "summary": "차관급 2명 모두 내부 승진, 정책 연속성 중시"
+    }
+   ]
+  },
+  {
    "id": "3f537e15042ee24c",
    "title": "50대 여성, 스토킹·교제폭력 신고됐던 남성 차량서 숨진채 발견",
    "topic": "incidents",
@@ -232,34 +260,6 @@
      "date": "2026-10-17",
      "title": "李대통령 \"부마항쟁과 5·18, 헌법에 담아야\"…개헌 논의 요청",
      "summary": "부마항쟁 기념식서 헌법 전문 수록·개헌 논의 촉구"
-    }
-   ]
-  },
-  {
-   "id": "3c7dcdb37604f1d2",
-   "title": "산업부 차관 박동일, 금융위 부위원장에 신진창",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "동일",
-    "박동",
-    "차관",
-    "산업",
-    "부위",
-    "신진",
-    "진창",
-    "융위",
-    "업부",
-    "금융",
-    "위원",
-    "관에"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "산업부 차관 박동일, 금융위 부위원장에 신진창",
-     "summary": "산업부 차관·금융위 부위원장 모두 내부 승진 발탁"
     }
    ]
   },
@@ -595,11 +595,10 @@
    "id": "b4d3be42ae8f0281",
    "title": "부천 공장 화재로 소방관 5명 부상…1명은 심정지",
    "topic": "incidents",
-   "days": 2,
+   "days": 1,
    "signature": [
     "부천",
     "공장",
-    "소방",
     "화재",
     "방관",
     "심정",
@@ -608,15 +607,11 @@
     "경상",
     "도장",
     "명은",
-    "장공"
+    "장공",
+    "중경"
    ],
    "date": "2026-10-17",
    "timeline": [
-    {
-     "date": null,
-     "title": "트럼프, 또 '사형' 언급…소방관 살해범도 사형 구형 지시",
-     "summary": null
-    },
     {
      "date": "2026-10-17",
      "title": "부천 공장 화재로 소방관 5명 부상…1명은 심정지",
@@ -971,34 +966,6 @@
     {
      "date": "2026-10-17",
      "title": "지난달 취업자 11만명 증가했지만, 청년 취업은 14만명 감소...청년 고용률 29개월째 감소세",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "899358c773e78139",
-   "title": "트럼프 '에너지 휴전' 붕괴…젤렌스키, 러 정유시설 공습 재개",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "렌스",
-    "젤렌",
-    "스키",
-    "럼프",
-    "트럼",
-    "휴전",
-    "유럽",
-    "너지",
-    "재개",
-    "에너",
-    "공습",
-    "기댈"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "트럼프 '에너지 휴전' 붕괴…젤렌스키, 러 정유시설 공습 재개",
      "summary": null
     }
    ]
@@ -1397,14 +1364,14 @@
     "신진",
     "진창",
     "융위",
-    "금융",
     "무처",
     "처장",
     "장에",
     "원회",
     "사무",
     "갖춘",
-    "급회"
+    "급회",
+    "더십"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -1935,6 +1902,34 @@
    ]
   },
   {
+   "id": "068a956eb72a6c00",
+   "title": "트럼프 치받은 젤렌스키, '유일한 기댈 언덕' 유럽에 절박한 구애",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "렌스",
+    "젤렌",
+    "스키",
+    "유럽",
+    "기댈",
+    "럽에",
+    "부적",
+    "언덕",
+    "유딜",
+    "유일",
+    "절박",
+    "치받"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "트럼프 치받은 젤렌스키, '유일한 기댈 언덕' 유럽에 절박한 구애",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "093bf860becc4a99",
    "title": "Abdul El-Sayed and AOC campaign in Michigan",
    "topic": "international",
@@ -1958,6 +1953,34 @@
     {
      "date": "2026-10-17",
      "title": "Abdul El-Sayed and AOC campaign in Michigan",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "899358c773e78139",
+   "title": "트럼프 '에너지 휴전' 붕괴…젤렌스키, 러 정유시설 공습 재개",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "유시",
+    "정유",
+    "재개",
+    "시설",
+    "렌스",
+    "젤렌",
+    "공습",
+    "스키",
+    "휴전",
+    "너지",
+    "에너",
+    "우크"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "트럼프 '에너지 휴전' 붕괴…젤렌스키, 러 정유시설 공습 재개",
      "summary": null
     }
    ]
@@ -2159,6 +2182,34 @@
     {
      "date": "2026-10-17",
      "title": "유류할증료 3개월 연속 상승… 뉴욕 왕복 최대 9만원 올라",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "9a2784d5c43ee7fc",
+   "title": "“KFC마저 코카콜라에 뺏겼다”… 입지 좁아지는 펩시",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "kfc",
+    "카콜",
+    "코카",
+    "콜라",
+    "펩시",
+    "coca-cola",
+    "coke",
+    "ditche",
+    "longtime",
+    "pepsico",
+    "pepsico'",
+    "soda"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "“KFC마저 코카콜라에 뺏겼다”… 입지 좁아지는 펩시",
      "summary": null
     }
    ]
@@ -2622,6 +2673,34 @@
     {
      "date": "2026-10-17",
      "title": "‘화웨이 동맹’ 딥시크, 이달만 5차례 서비스 장애… 안정성 도마",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "8a4bf1e91de4d057",
+   "title": "British man fined €3,000 for causing two-year-old son’s death in Cyprus",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "cypru",
+    "fined",
+    "british",
+    "causing",
+    "son",
+    "two-year-old",
+    "death",
+    "man",
+    "fall",
+    "negligence",
+    "pleading",
+    "son'"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "British man fined €3,000 for causing two-year-old son’s death in Cyprus",
      "summary": null
     }
    ]
@@ -3463,34 +3542,6 @@
    ]
   },
   {
-   "id": "c2cdc7b2ed5cfebd",
-   "title": "美 KFC, '40년 인연' 펩시와 결별…내년부터 코카콜라 판다",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "kfc",
-    "카콜",
-    "코카",
-    "콜라",
-    "펩시",
-    "coca-cola",
-    "ditche",
-    "longtime",
-    "pepsico",
-    "soda",
-    "마저",
-    "뺏겼"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "美 KFC, '40년 인연' 펩시와 결별…내년부터 코카콜라 판다",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "a1a0fd038454921b",
    "title": "무료체험 뒤 자동결제에 해지도 어려워…다크패턴 상담 잇따라",
    "topic": "economy",
@@ -3499,8 +3550,8 @@
     "다크",
     "크패",
     "패턴",
-    "무료",
     "상담",
+    "무료",
     "체험",
     "결제",
     "원했",
@@ -4236,8 +4287,8 @@
     "malnutrition",
     "good",
     "un",
-    "food",
-    "gain"
+    "gain",
+    "food"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -5479,34 +5530,6 @@
     {
      "date": "2026-10-17",
      "title": "“소방 재정빨대 표현 사과” 추미애보다 먼저 진화 나선 민주",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "f113e2d0a447cfea",
-   "title": "British father fined for causing his two-year-old son's death in Cyprus hotel fall",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "causing",
-    "two-year-old",
-    "cypru",
-    "fined",
-    "british",
-    "death",
-    "son",
-    "son'",
-    "father",
-    "hotel",
-    "man",
-    "fall"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "British father fined for causing his two-year-old son's death in Cyprus hotel fall",
      "summary": null
     }
    ]
@@ -6879,8 +6902,8 @@
     "track",
     "ease",
     "east",
-    "focu",
     "middle",
+    "focu",
     "head",
     "future"
    ],
@@ -7069,8 +7092,8 @@
    "signature": [
     "노베",
     "이노",
-    "운영",
     "롯데",
+    "운영",
     "센터",
     "베이",
     "데이",
