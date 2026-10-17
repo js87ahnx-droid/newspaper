@@ -33,29 +33,29 @@ def test_parse_naver_a1_only_front_page():
 
 
 def test_parse_homepage_keeps_only_that_outlets_articles_in_order():
-    arts = [art(1, "D", "부천 화재 소방관 순직", "https://www.d.test/news/1"),
-            art(2, "D", "코스피 급락 마감 소식", "https://d.test/news/2")]
+    arts = [art(1, "D", "부천 공장 화재 진압 중 소방관 순직", "https://www.d.test/news/1"),
+            art(2, "D", "코스피 7% 넘게 급락 마감, 서킷브레이커 발동", "https://d.test/news/2")]
     html = ('<a href="/menu">정치</a><a href="https://ad.test/x">광고 클릭</a>'
             '<a href="/news/2?ref=main">코스피</a><a href="https://m.d.test/news/1/">순직</a><a href="/news/2">중복</a>')
     assert H.parse_homepage(html, "https://www.d.test/", arts) == [
-        ("코스피 급락 마감 소식", "https://d.test/news/2"), ("부천 화재 소방관 순직", "https://www.d.test/news/1")]
+        ("코스피 7% 넘게 급락 마감, 서킷브레이커 발동", "https://d.test/news/2"), ("부천 공장 화재 진압 중 소방관 순직", "https://www.d.test/news/1")]
 
 
 def test_match_by_url_title_and_embedding_with_rejection():
     arts = [art(1, "동아일보", "주저앉은 코스피, 넉달새 3560P 날아갔다"),
             art(2, "동아일보", "[단독] 정부, 청해부대 작전범위 오만만으로 확대 검토"),
-            art(3, "동아일보", "전자발찌 경보 의무화 필요"),
+            art(3, "동아일보", "전자발찌 착용자 접근하면 경찰에 자동 경보 의무화"),
             art(4, "한겨레", "주저앉은 코스피, 넉달새 3560P 날아갔다")]
     heads = [H.Headline("동아일보", 1, "주저앉은 코스피, 넉달새 3560P 날아갔다", "naver_a1"),
              H.Headline("동아일보", 2, "청해부대 작전 오만만으로 확대", "naver_a1"),          # 표현만 다름 → 어휘로
              H.Headline("동아일보", 3, "경찰에 8번 신고했는데 또 막지 못한 죽음", "naver_a1"),  # 애매 → 임베딩 기준 미달이면 버림
-             H.Headline("BBC", 1, "Oregon school", "feed", url="https://bbc.test/1")]          # 그 매체 기사 없음
+             H.Headline("BBC", 1, "Oregon school shooting leaves three dead", "feed", url="https://bbc.test/1")]          # 그 매체 기사 없음
     vecs = np.eye(4)
     H.match(heads, arts, vecs, embed=lambda ts: np.array([[0.0, 0.0, 0.85, 0.0]] * len(ts)))
     assert (heads[0].article_id, heads[0].how) == ("a1", "title")   # 같은 제목인 다른 매체(a4)는 고르지 않음
     assert (heads[1].article_id, heads[1].how) == ("a2", "title")
     assert heads[2].article_id is None and heads[3].article_id is None
-    h = H.Headline("동아일보", 3, "완전히 다른 표현", "naver_a1")
+    h = H.Headline("동아일보", 3, "완전히 다른 표현으로 쓴 종이신문 1면 제목", "naver_a1")
     H.match([h], arts, vecs, embed=lambda ts: np.array([[0.0, 0.0, 0.95, 0.0]]))
     assert (h.article_id, h.how) == ("a3", "embed")
 
@@ -83,7 +83,7 @@ def test_fetch_falls_back_and_reports():
             return httpx.Response(200, text=rss)
         return httpx.Response(403)
 
-    arts = [art(1, "동아일보", "부천 화재 소방관 순직", "https://d.test/news/1")]
+    arts = [art(1, "동아일보", "부천 공장 화재 진압 중 소방관 순직", "https://d.test/news/1")]
     client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     heads, status = asyncio.run(H.fetch(srcs, date(2026, 10, 17), arts, client=client))
     assert [(h.source, h.rank, h.via) for h in heads] == [("동아일보", 1, "homepage"), ("BBC", 1, "feed"), ("BBC", 2, "feed")]
@@ -127,3 +127,14 @@ def test_group_credit_shared_across_issues():
              {"source": "경향신문", "rank": 1, "via": "naver_a1", "article_id": "a3", "group": None}]
     assert H.issue_headlines(heads, ["a1"]) == {"동아일보": [1, "naver_a1"], "한겨레": [2, "naver_a1"]}
     assert H.group_members(heads) == [{"a1", "a2"}]
+
+
+def test_short_menu_titles_never_match():
+    """메뉴·섹션 항목("Business")이 같은 주소·제목의 수집 항목과 맞지 않는다."""
+    arts = [art(1, "CNN", "Business", "https://edition.cnn.com/business"),
+            art(2, "CNN", "Why Trump decided to fire his press secretary", "https://edition.cnn.com/2026/10/17/politics/x")]
+    html = '<a href="/business">Business</a><a href="/2026/10/17/politics/x">Why Trump decided</a>'
+    assert H.parse_homepage(html, "https://edition.cnn.com/", arts) == [(arts[1].title, arts[1].url)]
+    h = H.Headline("CNN", 1, "Business", "homepage", url="https://edition.cnn.com/business")
+    H.match([h], arts)
+    assert h.article_id is None

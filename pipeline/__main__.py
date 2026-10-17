@@ -233,7 +233,8 @@ def cmd_headlines(args: argparse.Namespace) -> int:
 
         if available()[0]:
             budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
-            ask = lambda prompt: call(prompt, cfg.llm, budget)[0]  # noqa: E731
+            # 묶기는 판단이 들어가므로 분석과 같은 모델로 (10/17 러너에서 haiku 가 다른 사건을 섞어 11묶음을 만듦)
+            ask = lambda prompt: call(prompt, cfg.llm, budget, model=cfg.llm.analysis_model)[0]  # noqa: E731
     how = group(heads, arts, vecs, ask)
     (raw / f"{args.date}.headlines.json").write_text(json.dumps(to_json(heads), ensure_ascii=False, indent=1), encoding="utf-8")
     got = {h.source for h in heads}

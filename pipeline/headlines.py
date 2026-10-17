@@ -25,6 +25,7 @@ from .collect import Article
 from .textutil import title_key
 
 TOP_N = 3
+MIN_TITLE = 12   # 이보다 짧은 제목은 기사가 아니라 메뉴·섹션 항목 (10/17 CNN "Business"·"Politics" 가 주소까지 같은 항목으로 수집돼 있었음)
 RANK_WEIGHT = {1: 1.0, 2: 0.5, 3: 0.35}   # 1면 머리(1위)가 가장 크다
 
 _A1 = re.compile(r'<em>(A?1)</em>면</span></h3>\s*<ul class="newspaper_article_lst">(.*?)</ul>', re.S)
@@ -68,13 +69,14 @@ def parse_feed(xml: bytes) -> list[tuple[str, str]]:
 
 def parse_homepage(html: str, base: str, arts: list[Article]) -> list[tuple[str, str]]:
     """홈페이지 링크를 순서대로 보며 그 매체의 그날 기사와 맞는 첫 TOP_N 건 (주소가 같거나 링크 글이 제목과 같음)."""
+    arts = [a for a in arts if len(title_key(a.title)) >= MIN_TITLE]
     urls = {norm_url(a.url): a for a in arts}
-    titles = {title_key(a.title)[:24]: a for a in arts if len(title_key(a.title)) >= 8}
+    titles = {title_key(a.title)[:24]: a for a in arts}
     out, seen = [], set()
     for href, inner in _ANCHOR.findall(html):
         text = _text(inner)
         key = title_key(text)[:24]
-        a = urls.get(norm_url(urljoin(base, href))) or (titles.get(key) if len(key) >= 8 else None)
+        a = urls.get(norm_url(urljoin(base, href))) or (titles.get(key) if len(key) >= MIN_TITLE else None)
         if a and a.id not in seen:
             seen.add(a.id)
             out.append((a.title, a.url))
@@ -140,14 +142,15 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
     """머리기사 → 같은 매체 그날 기사 (article_id, how 를 채운다). vecs: day_articles 임베딩, embed: 제목 → 벡터."""
     pos: dict[str, list[int]] = {}
     for i, a in enumerate(day_articles):
-        pos.setdefault(a.source, []).append(i)
+        if len(title_key(a.title)) >= MIN_TITLE:
+            pos.setdefault(a.source, []).append(i)
     url_ix = {norm_url(a.url): i for i, a in enumerate(day_articles)}
     need = []
     for h in heads:
         idx = pos.get(h.source, [])
-        if not idx:
+        if not idx or len(title_key(h.title)) < MIN_TITLE:
             continue
-        if h.url and (i := url_ix.get(norm_url(h.url))) is not None and day_articles[i].source == h.source:
+        if h.url and (i := url_ix.get(norm_url(h.url))) is not None and i in idx:
             h.article_id, h.how = day_articles[i].id, "url"
             continue
         lex = [(_jac(h.title, day_articles[i].title), i) for i in idx]
@@ -168,9 +171,11 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
 
 GROUP_COS = 0.90   # LLM 없이 묶을 때: 같은 언어 기사 임베딩 코사인 (10/16자: 같은 주제 0.891~0.954, 다른 주제 최고 0.892 → 보수적으로)
 
-GROUP_PROMPT = """아래는 오늘 여러 언론사가 1면·머리기사로 올린 기사 제목이다(번호: 매체 | 제목).
-같은 사건·같은 기사거리를 다룬 것끼리 묶어라. 예: 같은 날 증시 폭락을 다룬 서로 다른 분석 기사는 한 묶음.
-같은 분야라도 사건이 다르면 따로 둔다(예: 전작권 협상과 북한 미사일 발사는 다른 묶음). 혼자인 것은 빼도 된다.
+GROUP_PROMPT = """아래는 오늘 여러 언론사가 1면·머리기사로 올린 기사 제목이다(번호, 매체, 제목).
+같은 사건·같은 기사거리를 다룬 것이 확실한 것끼리만 묶어라. 예: 같은 날 증시 폭락을 다룬 서로 다른 분석 기사는 한 묶음,
+같은 인물 경질을 다룬 한국어·영어 기사는 한 묶음. 같은 분야·같은 나라라도 사건이 다르면 묶지 않는다
+(예: 전작권 협상과 북한 미사일 발사, 백악관 대변인 경질과 러시아 제재 완화는 각각 다른 묶음). 조금이라도 애매하면 묶지 말고,
+혼자인 것은 출력하지 않는다.
 출력 형식: {{"groups": [[번호, 번호, ...], ...]}}
 {data}"""
 
