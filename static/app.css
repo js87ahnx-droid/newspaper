@@ -205,3 +205,30 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .meta .fb { display: inline-flex; gap: 4px; margin: 0; }
 .meta .fb button { min-height: 22px; padding: 1px 7px; }
 .reader-body .meta .fb { display: inline-flex; }
+/* S16 — 한 면 보기 (세로 스크롤·줌), 전체화면 */
+#book.scroll { margin: 0; }
+#book.scroll .scroller { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  touch-action: pan-x pan-y; scroll-snap-type: y proximity; }
+#book.scroll .scroller.zoomed { scroll-snap-type: none; }
+#book.scroll .zoom-sizer { position: relative; margin: 0 auto; }
+#book.scroll .zoomer { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#book.scroll .page { display: block; margin: 0 0 12px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18); scroll-snap-align: start; }
+#book.scroll .page.blank { display: none; }
+.fs-tip { position: fixed; left: 50%; top: 56px; transform: translateX(-50%); z-index: 60; max-width: min(92vw, 420px);
+  background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }
+.fs-tip[hidden] { display: none; }
+#toolbar button[hidden] { display: none; }
+/* 좁은 화면: 도구 막대가 한 줄에 들어가게 (버튼 10개 + 지난 호) */
+@media (max-width: 520px) {
+  #toolbar { gap: 3px; padding-left: max(6px, env(safe-area-inset-left)); padding-right: max(6px, env(safe-area-inset-right)); }
+  #toolbar .tb-title, #toolbar .tb-page { display: none; }
+  #toolbar .tb-link { font-size: 12px; margin-right: 2px; white-space: nowrap; }
+  #toolbar button { min-width: 32px; padding: 0 4px; font-size: 13px; }
+}
+/* 한 면 보기는 스크롤이 쪽 넘김을 대신한다 → 좁은 화면에서는 이전·다음 버튼 숨김 (아주 좁으면 확대·축소도 두 손가락으로) */
+@media (max-width: 520px) { body.view-scroll #toolbar button[data-act="prev"], body.view-scroll #toolbar button[data-act="next"] { display: none; } }
+@media (max-width: 360px) {
+  #toolbar button[data-act="prev"], #toolbar button[data-act="next"] { display: none; }
+  body.view-scroll #toolbar button[data-act="zoom-"], body.view-scroll #toolbar button[data-act="zoom+"] { display: none; }
+}
+

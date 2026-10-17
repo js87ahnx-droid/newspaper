@@ -3,6 +3,8 @@
  * 1. #flow 의 섹션·기사를 화면 크기에 맞춰 쪽(.page)으로 나눈다 (가로 화면은 좌우 두 쪽 펼침).
  * 2. page-flip(StPageFlip) 으로 손가락을 따라 넘어가게 한다. 동작 줄이기 설정이면 애니메이션 없이 넘긴다.
  * 3. 화면 회전·크기 변경·글자 크기 변경 때 다시 나눈다 (보던 기사 위치 유지).
+ * 4. 한 면 보기(S16): 같은 쪽을 세로로 쌓아 한 쪽이 한 화면, 스크롤로 다음 쪽, 두 손가락·버튼으로 1~3배 줌.
+ * 5. 전체화면(S16): 지원하면 Fullscreen API, 아니면 "홈 화면에 추가" 안내.
  */
 (function () {
   "use strict";
@@ -24,11 +26,17 @@
   var overflowPages = [], clipped = 0;  // 쪽 나누기 때 잰 넘친 쪽·잘라 낸 기사 (검증용)
   var demotedCount = 0, briefCount = 0, dropped = 0, emptySummary = 0;  // 단신으로 내린 기사·단신 수·쪽이 모자라 못 실은 기사·요약 없는 기사
   var E = window.EDITION || {};
+  var mode = "flip";    // flip: 펼침·종이 넘김 / scroll: 한 면 보기 (스크롤·줌)
+  var zoom = 1;
+  var scroller = null, sizer = null, zoomer = null, pageH = 0, pageW = 0;
+  var ZMIN = 1, ZMAX = 3, GAP = 12;
 
   // ---------- 설정: 밝기·글자 크기 ----------
   function applyTheme(t) { root.setAttribute("data-theme", t); }
   applyTheme(store.get("theme", "auto"));
   var fontScale = parseFloat(store.get("fontScale", "1")) || 1;
+  mode = store.get("viewMode", "flip") === "scroll" ? "scroll" : "flip";
+  zoom = Math.max(1, Math.min(3, parseFloat(store.get("zoom", "1")) || 1));
   root.style.setProperty("--fs", fontScale);
 
   // ---------- 쪽 나누기 ----------
@@ -219,7 +227,7 @@
   // ---------- 넘기기 ----------
   function showInfo() {
     var last = pages.length;
-    var a = current + 1, b = spread ? Math.min(current + 2, last) : a;
+    var a = current + 1, b = spread && mode !== "scroll" ? Math.min(current + 2, last) : a;
     pageInfo.textContent = (a === b ? a : a + "–" + b) + " / " + last + "쪽";
   }
 
@@ -231,15 +239,20 @@
     showInfo();
   }
 
-  function build(keepIssue) {
+  function build(keepIssue, keepPage) {
     if (flip) { try { flip.destroy(); } catch (e) { /* 이미 해제됨 */ } flip = null; }
     book.innerHTML = "";
+    scroller = sizer = zoomer = null;
     var res = paginate();
     pages = res.pages;
     var start = 0;
     if (keepIssue) {
       pages.some(function (p, i) { if (p.querySelector('[data-issue="' + keepIssue + '"]')) { start = i; return true; } return false; });
     }
+    if (typeof keepPage === "number") start = Math.max(0, Math.min(keepPage, pages.length - 1));
+    document.body.classList.toggle("view-scroll", mode === "scroll");
+    syncToolbar();
+    if (mode === "scroll") { buildScroll(res.g, start); return; }
     book.className = (spread ? "spread" : "single") + (reduced.matches ? " reduced" : "");
     book.style.width = (spread ? res.g.w * 2 : res.g.w) + "px";
     book.style.height = res.g.h + "px";
@@ -264,7 +277,141 @@
     showInfo();
   }
 
+  // ---------- 한 면 보기 (S16) ----------
+  function buildScroll(g, start) {
+    pageW = g.w; pageH = g.h;
+    book.className = "scroll";
+    book.style.width = "100%";
+    book.style.height = g.H + "px";
+    scroller = document.createElement("div");
+    scroller.className = "scroller";
+    sizer = document.createElement("div");
+    sizer.className = "zoom-sizer";
+    zoomer = document.createElement("div");
+    zoomer.className = "zoomer";
+    pages.forEach(function (p) { p.style.display = ""; zoomer.appendChild(p); });
+    sizer.appendChild(zoomer);
+    scroller.appendChild(sizer);
+    book.appendChild(scroller);
+    applyZoom(zoom, null);
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    bindPinch(scroller);
+    scrollToPage(start);
+  }
+
+  function applyZoom(z, focal) {
+    z = Math.max(ZMIN, Math.min(ZMAX, Math.round(z * 100) / 100));
+    if (!scroller) { zoom = z; return; }
+    var old = zoom;
+    // 손가락 사이(또는 화면 가운데)를 기준으로 키운다
+    var fx = focal ? focal.x : scroller.clientWidth / 2, fy = focal ? focal.y : scroller.clientHeight / 2;
+    var cx = (scroller.scrollLeft + fx) / old, cy = (scroller.scrollTop + fy) / old;
+    zoom = z;
+    var totalH = pages.length * (pageH + GAP);
+    sizer.style.width = Math.ceil(pageW * z) + "px";
+    sizer.style.height = Math.ceil(totalH * z) + "px";
+    zoomer.style.transform = "scale(" + z + ")";
+    scroller.classList.toggle("zoomed", z > 1.001);
+    scroller.scrollLeft = cx * z - fx;
+    scroller.scrollTop = cy * z - fy;
+    store.set("zoom", String(z));
+    syncToolbar();
+  }
+
+  function onScroll() {
+    if (!scroller) return;
+    // 화면 위쪽 30% 지점에 걸친 쪽 = 지금 읽는 쪽
+    var idx = Math.floor((scroller.scrollTop + scroller.clientHeight * 0.3) / ((pageH + GAP) * zoom));
+    idx = Math.max(0, Math.min(idx, pages.length - 1));
+    if (idx !== current) { current = idx; showInfo(); }
+  }
+
+  function scrollToPage(i) {
+    i = Math.max(0, Math.min(i, pages.length - 1));
+    current = i;
+    if (scroller) scroller.scrollTop = i * (pageH + GAP) * zoom;
+    showInfo();
+  }
+
+  function bindPinch(el) {
+    var d0 = 0, z0 = 1;
+    function dist(t) { var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx * dx + dy * dy); }
+    function mid(t) { var r = el.getBoundingClientRect(); return { x: (t[0].clientX + t[1].clientX) / 2 - r.left, y: (t[0].clientY + t[1].clientY) / 2 - r.top }; }
+    el.addEventListener("touchstart", function (e) {
+      if (e.touches.length === 2) { d0 = dist(e.touches); z0 = zoom; }
+    }, { passive: true });
+    el.addEventListener("touchmove", function (e) {
+      if (e.touches.length !== 2 || !d0) return;
+      e.preventDefault();   // 브라우저 자체 확대 대신 지면만 키운다 (도구 막대는 그대로)
+      applyZoom(z0 * dist(e.touches) / d0, mid(e.touches));
+    }, { passive: false });
+    el.addEventListener("touchend", function (e) { if (e.touches.length < 2) d0 = 0; }, { passive: true });
+    // 트랙패드·Ctrl+휠 확대
+    el.addEventListener("wheel", function (e) {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      var r = el.getBoundingClientRect();
+      applyZoom(zoom * Math.exp(-e.deltaY / 300), { x: e.clientX - r.left, y: e.clientY - r.top });
+    }, { passive: false });
+  }
+
+  function setView(m) {
+    if (m !== "flip" && m !== "scroll") return;
+    var keep = current;
+    mode = m;
+    store.set("viewMode", m);
+    build(null, keep);   // 보던 쪽 그대로
+  }
+
+  // ---------- 전체화면 (S16) ----------
+  function standalone() {
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  }
+  function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  function toggleFullscreen() {
+    var el = document.documentElement;
+    if (fsElement()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    var req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+      try {
+        var r = req.call(el);
+        if (r && r.catch) r.catch(function () { tip(); });
+      } catch (e) { tip(); }
+    } else {
+      tip();
+    }
+  }
+  function tip() {
+    var t = document.getElementById("fsTip");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "fsTip";
+      t.className = "fs-tip";
+      t.setAttribute("role", "status");
+      document.body.appendChild(t);
+    }
+    t.innerHTML = "이 브라우저는 전체화면을 지원하지 않습니다.<br>Safari <b>공유</b> 버튼 → <b>홈 화면에 추가</b>로 열면 주소창 없이 볼 수 있습니다.";
+    t.hidden = false;
+    clearTimeout(tip.timer);
+    tip.timer = setTimeout(function () { t.hidden = true; }, 6000);
+  }
+
+  function syncToolbar() {
+    var v = document.querySelector('[data-act="view"]');
+    if (v) {
+      v.textContent = mode === "scroll" ? "펼침" : "한 면";
+      v.setAttribute("aria-label", mode === "scroll" ? "펼쳐서 넘겨 보기" : "한 면씩 스크롤로 보기");
+      v.setAttribute("aria-pressed", mode === "scroll" ? "true" : "false");
+    }
+    var fs = document.querySelector('[data-act="fullscreen"]');
+    if (fs) fs.hidden = standalone();   // 홈 화면 앱이면 이미 주소창이 없다
+    var zi = document.querySelector('[data-act="zoom+"]'), zo = document.querySelector('[data-act="zoom-"]');
+    if (zi) { zi.hidden = mode !== "scroll"; zi.disabled = zoom >= ZMAX; }
+    if (zo) { zo.hidden = mode !== "scroll"; zo.disabled = zoom <= ZMIN; }
+  }
+
   function go(delta) {
+    if (mode === "scroll") { scrollToPage(current + delta); return; }
     if (flip) { delta > 0 ? flip.flipNext() : flip.flipPrev(); return; }
     simpleShow(current + delta * (spread ? 2 : 1));
   }
@@ -282,6 +429,10 @@
     if (!act) return;
     if (act === "prev") go(-1);
     if (act === "next") go(1);
+    if (act === "view") setView(mode === "scroll" ? "flip" : "scroll");
+    if (act === "zoom+") applyZoom(zoom + 0.5, null);
+    if (act === "zoom-") applyZoom(zoom - 0.5, null);
+    if (act === "fullscreen") toggleFullscreen();
     if (act === "font+" || act === "font-") {
       fontScale = Math.max(0.8, Math.min(1.5, Math.round((fontScale + (act === "font+" ? 0.1 : -0.1)) * 10) / 10));
       root.style.setProperty("--fs", fontScale);
@@ -297,15 +448,23 @@
   });
 
   document.addEventListener("keydown", function (e) {
+    if (reader && !reader.hidden) return;
     if (e.key === "ArrowRight") go(1);
     if (e.key === "ArrowLeft") go(-1);
+  });
+  // iPad·iPhone Safari 는 두 손가락 확대를 gesture 이벤트로도 처리한다 → 한 면 보기에서는 지면 줌만 쓰도록 막는다
+  ["gesturestart", "gesturechange"].forEach(function (ev) {
+    document.addEventListener(ev, function (e) { if (mode === "scroll") e.preventDefault(); }, { passive: false });
+  });
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
+    document.addEventListener(ev, function () { document.body.classList.toggle("is-fullscreen", !!fsElement()); });
   });
 
   // 동작 줄이기 모드의 손가락 넘기기 (애니메이션 없음)
   var tx = null;
-  book.addEventListener("touchstart", function (e) { if (!flip) tx = e.touches[0].clientX; }, { passive: true });
+  book.addEventListener("touchstart", function (e) { if (!flip && mode !== "scroll" && e.touches.length === 1) tx = e.touches[0].clientX; }, { passive: true });
   book.addEventListener("touchend", function (e) {
-    if (flip || tx === null) return;
+    if (flip || mode === "scroll" || tx === null) return;
     var dx = e.changedTouches[0].clientX - tx;
     if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
     tx = null;
@@ -370,11 +529,12 @@
   }
 
   function goTo(i) {
+    if (mode === "scroll") { scrollToPage(i); return; }
     if (flip) { flip.turnToPage(i); current = flip.getCurrentPageIndex(); showInfo(); return; }
     simpleShow(i);
   }
 
-  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, state: function () { return { current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
+  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
   // 글꼴(Noto Sans·Noto Sans KR)을 받은 뒤 쪽을 나눈다 — 먼저 나누면 글꼴이 바뀌며 글 길이가 달라져 쪽이 넘친다.
   // 한글 글꼴은 글자 범위별 조각으로 나뉘어 필요할 때 받으므로, 지면에 쓰인 글자를 넘겨 필요한 조각을 미리 받는다.
   // 글꼴 서버에 닿지 못하면(오프라인) 2.5초 뒤 기본 글꼴로 나눈다 (그 뒤 글꼴이 오면 한 번만 다시 나눈다)
