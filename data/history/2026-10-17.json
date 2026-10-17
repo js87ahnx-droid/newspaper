@@ -547,9 +547,9 @@
     "하늘",
     "착지",
     "츠카",
-    "공중",
     "포츠",
     "스포",
+    "공중",
     "시연",
     "어넘",
     "뛰어"
@@ -1258,8 +1258,8 @@
     "russia",
     "difficult",
     "extra",
-    "sustain",
-    "rift"
+    "rift",
+    "standoff"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -4397,8 +4397,8 @@
     "permanent",
     "publication",
     "trie",
-    "secure",
     "sexual",
+    "secure",
     "stop",
     "allegation"
    ],
@@ -4425,8 +4425,8 @@
     "결별",
     "떠난",
     "의서",
-    "secure",
     "exit",
+    "secure",
     "제출",
     "합의"
    ],
@@ -6815,8 +6815,8 @@
     "이진",
     "진숙",
     "과방",
-    "소리",
     "방위",
+    "소리",
     "남매",
     "면서",
     "삼남",
@@ -7208,8 +7208,8 @@
     "맞춤",
     "주민",
     "건설",
-    "교육",
     "대상",
+    "교육",
     "렵지",
     "르신",
     "않게"
@@ -7518,6 +7518,34 @@
     {
      "date": "2026-10-17",
      "title": "'돈나무 언니' 캐시 우드 \"AI 등 기술 융합…2030년 세계성장률 7.3%\"",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "2189ed33b65b1879",
+   "title": "AI 더빙·고인 목소리 재현에 제동…日 성우들 ‘목소리 권리’ 지키기‘",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "dragon",
+    "고인",
+    "더빙",
+    "성우",
+    "지키",
+    "키기",
+    "현에",
+    "actor",
+    "ball",
+    "unauthorized",
+    "use",
+    "voice"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "AI 더빙·고인 목소리 재현에 제동…日 성우들 ‘목소리 권리’ 지키기‘",
      "summary": null
     }
    ]
@@ -7965,6 +7993,34 @@
     {
      "date": "2026-10-17",
      "title": "North Korea missile chief questions South Korea hypersonic glide vehicle test",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "2b31e4d9269a89e6",
+   "title": "美상원의원, 우크라 스타링크 장애 조사촉구…공화의원도 가세",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "우크",
+    "크라",
+    "라군",
+    "사촉",
+    "타링",
+    "가세",
+    "링크",
+    "었나",
+    "위성",
+    "화의",
+    "끊었",
+    "누가"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "美상원의원, 우크라 스타링크 장애 조사촉구…공화의원도 가세",
      "summary": null
     }
    ]
