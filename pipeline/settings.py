@@ -102,6 +102,9 @@ class Clustering(Strict):
     cross_lang_csls_min: float = Field(default=0.06, gt=-1, lt=1)  # 다른 언어 쌍이 묶이는 CSLS 점수
     csls_k: int = Field(default=10, ge=1, le=50)                  # CSLS 의 이웃 수
     csls_min_by_lang: dict[Literal["ko", "en", "ja", "zh", "ar"], float] = Field(default_factory=dict)
+    # 군집 문턱엔 못 미쳤지만 같은 사건으로 보이는 이웃 이슈 (편집에서 둘 다 싣지 않고 합친다, S14 평가)
+    near_mean_min: float = Field(default=0.36, gt=0, lt=1)   # 두 이슈 기사 쌍 평균 유사도
+    near_max_min: float = Field(default=0.55, gt=0, lt=1)    # 또는 (같은 언어끼리) 가장 가까운 기사 쌍
 
 
 class Importance(Strict):

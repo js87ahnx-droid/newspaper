@@ -69,7 +69,9 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .item.top .lead { -webkit-line-clamp: 6; }
 .sec-front .item:not(.top) .lead { -webkit-line-clamp: 3; }
 .item .lead[data-note]::after, .frame[data-note]::after { content: " · " attr(data-note); color: var(--muted); font-size: 0.8em; }
-.item.compact .lead { -webkit-line-clamp: 2; }
+/* 한 쪽에 안 들어가는 기사 줄이기: 부가 정보(쟁점·점수)부터 → 배경·관점 → 요약은 끝까지 남긴다 (요약이 기사의 핵심) */
+.item.compact .lead { -webkit-line-clamp: 3; }
+.item.compact .an-pts { display: none; }
 /* 본문 기반 이슈 정리 (S14) — 배경·쟁점·매체별 관점. 배치는 S15 에서 다시 짠다 */
 .item .brief-line { -webkit-line-clamp: 1; font-size: 0.92em; }
 .item .an-bg { margin: 0 0 5px; font-size: 0.92em; color: var(--ink); }
@@ -77,7 +79,8 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .item .an-pts, .item .an-views { margin: 0 0 6px; padding-left: 1.1em; font-size: 0.9em; }
 .item .an-pts li, .item .an-views li { margin: 1px 0; }
 .item .an-views { list-style: none; padding-left: 0; border-left: 2px solid var(--rule, #c9bfae); padding-left: 7px; }
-.item.tight .lead, .item.tight .why { display: none; }
+.item.tight .why, .item.tight .an-bg, .item.tight .an-views, .item.tight .orig { display: none; }
+.item.tight .lead { -webkit-line-clamp: 3; }
 .item.tight .photo img { max-height: 110px; }
 .item.clip { overflow: hidden; position: relative; }
 .item.clip::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: linear-gradient(transparent, var(--paper)); }

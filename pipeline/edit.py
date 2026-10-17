@@ -42,6 +42,7 @@ class Placed:
     photo: str | None = None
     photo_source: str | None = None
     guaranteed: bool = False  # 다양성·연속성으로 들어온 기사 — 넘침 정리 때 빼지 않는다
+    merged: list[ScoredIssue] = field(default_factory=list)  # 같은 사건 이웃 이슈 (따로 싣지 않고 이 기사에 합침)
 
 
 @dataclass
@@ -56,7 +57,17 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
     ed = cfg.editing
     placed: dict[str, Placed] = {}
 
+    merged_into: dict[str, str] = {}
+
     def put(s: ScoredIssue, reason: str, guaranteed: bool = False):
+        if s.issue.id in merged_into:
+            return
+        near = set(s.issue.extra.get("near", []))
+        host = next((pid for pid in placed if pid in near), None)
+        if host and s.issue.id not in placed:  # 같은 사건이 이미 실림 → 그 기사에 기사를 합친다 (슬롯은 다음 이슈에)
+            placed[host].merged.append(s)
+            merged_into[s.issue.id] = host
+            return
         p = placed.get(s.issue.id)
         if p:
             if reason not in p.reasons:
@@ -84,7 +95,7 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
 
     # 4. 나머지: 최종 점수 순, 관심 상한
     remaining = n - len(placed)
-    pool = [s for s in scored if s.issue.id not in placed]
+    pool = [s for s in scored if s.issue.id not in placed and s.issue.id not in merged_into]
     if ed.interest_cap_mode == "driven":
         baseline = {s.issue.id for s in sorted(pool, key=lambda s: (-s.final_no_interest, s.issue.id))[:max(remaining, 0)]}
         is_interest = lambda s: s.issue.id not in baseline  # noqa: E731
@@ -111,6 +122,7 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
         "interest_cap": cap,
         "interest_skipped": skipped,
         "continuity_guaranteed": sum(1 for p in placed.values() if any(r.startswith("연속") for r in p.reasons)),
+        "merged_duplicates": len(merged_into),
     }
     return list(placed.values()), stats
 
@@ -224,6 +236,9 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
     def item(p: Placed) -> dict:
         s = p.scored
         rep = articles[s.issue.rep_article]
+        ids = list(dict.fromkeys(s.issue.article_ids + [i for m in p.merged for i in m.issue.article_ids]))
+        arts = [articles[i] for i in ids]
+        coverage = {**s.raw, "sources": len({a.source for a in arts}), "countries": len({a.country for a in arts})}
         return {
             "issue_id": s.issue.id,
             "title": s.issue.title,
@@ -241,13 +256,15 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
                 "attention": s.attention, "importance": s.importance, "continuity": s.continuity,
                 "interest": s.interest, "final": s.final,
             },
-            "coverage": s.raw,
+            "coverage": coverage,
+            "merged": [m.issue.id for m in p.merged],
             "articles": [
                 {
                     "id": a.id, "source": a.source, "country": a.country, "lean": a.lean, "lang": a.lang,
                     "title": a.title, "lead": a.lead, "url": a.url, "paywall": a.paywall, "kind": a.kind,
+                    "published": a.published,
                 }
-                for a in (articles[i] for i in s.issue.article_ids)
+                for a in arts
             ],
         }
 

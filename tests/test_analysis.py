@@ -139,3 +139,19 @@ def test_history_gets_llm_brief(tmp_path):
     data = json.loads(h.read_text(encoding="utf-8"))
     assert data["issues"][0]["timeline"][-1]["summary"] == GOOD["brief"]
     assert data["issues"][1]["timeline"][-1]["summary"] is None
+
+
+def test_llm_analysis_merges_same_event_across_languages():
+    from pipeline.llm import merge_duplicates
+
+    def it(iid, src, an):
+        return {"issue_id": iid, "articles": [{"id": iid, "source": src, "country": "KR" if src == "연합" else "US"}],
+                "coverage": {"sources": 1}, "llm": {"analysis": an}}
+
+    same = dict(GOOD, headline="신압록강대교 12년 만에 개통")
+    other = dict(GOOD, headline="TSMC 6분기 연속 최대 순익", summary="TSMC는 3분기 순이익이 68.7% 늘었다. AI 칩 수요가 이끌었고 내년 투자도 늘린다.")
+    ed = {"sections": {"front": [it("e1", "AP", same)], "politics": [it("k1", "연합", dict(same)), it("t1", "Reuters", other)]}}
+    assert merge_duplicates(ed) == [("e1", "k1")]
+    assert [x["issue_id"] for x in ed["sections"]["politics"]] == ["t1"]
+    host = ed["sections"]["front"][0]
+    assert host["merged"] == ["k1"] and host["coverage"]["sources"] == 2 and host["coverage"]["countries"] == 2

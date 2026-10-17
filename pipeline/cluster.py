@@ -200,5 +200,37 @@ def build_issues(articles: list[Article], sim: np.ndarray, threshold: float, met
     return issues
 
 
+def mark_near(issues: list[Issue], articles: list[Article], sim: np.ndarray, mean_min: float, max_min: float,
+              prefilter: float = 0.25) -> int:
+    """같은 사건으로 보이는 이웃 이슈를 issue.extra["near"] 에 적는다. 돌려주는 값: 이웃 쌍 수.
+    군집(평균 연결)이 합치지 않은 두 이슈라도 기사 쌍 평균이 mean_min 이상이거나, 같은 언어 기사끼리 가장 가까운 쌍이
+    max_min 이상이면 같은 사건으로 본다.
+    10/16호 실측(다매체 이웃 70쌍 검수): 평균 0.36 이상은 같은 사건·같은 흐름이 대부분(틀림 1건), 0.33~0.36 의 다른 언어 쌍은
+    무관한 기사가 많았다(인도 배 전복↔파키스탄 학교 등). 가장 가까운 쌍 규칙은 다른 언어에서 단건 기사가 이웃 수십 개를
+    갖는 쏠림이 생겨 같은 언어로 한정 (코스피 급락 속보 묶음들 0.59~0.64). 놓치는 것: 다른 언어 같은 사건 중 평균이 낮은 쌍
+    (포트후드 0.342, 신압록강대교 0.328)."""
+    pos = {a.id: i for i, a in enumerate(articles)}
+    member = np.zeros((len(issues), len(articles)), dtype=np.float32)
+    for r, iss in enumerate(issues):
+        cols = [pos[x] for x in iss.article_ids]
+        member[r, cols] = 1.0 / len(cols)
+    mean = member @ sim.astype(np.float32) @ member.T
+    pairs = 0
+    for r, c in zip(*np.nonzero(np.triu(mean, 1) >= prefilter)):
+        near = mean[r, c] >= mean_min
+        if not near:
+            ia = [pos[x] for x in issues[r].article_ids]
+            ib = [pos[x] for x in issues[c].article_ids]
+            la = np.array([articles[i].lang for i in ia])
+            lb = np.array([articles[i].lang for i in ib])
+            same = la[:, None] == lb[None, :]
+            near = bool(same.any()) and float(sim[np.ix_(ia, ib)][same].max()) >= max_min
+        if near:
+            issues[r].extra.setdefault("near", []).append(issues[c].id)
+            issues[c].extra.setdefault("near", []).append(issues[r].id)
+            pairs += 1
+    return pairs
+
+
 def issues_to_json(issues: list[Issue]) -> list[dict]:
     return [asdict(i) for i in issues]

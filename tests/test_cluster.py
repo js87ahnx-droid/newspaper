@@ -75,3 +75,24 @@ def test_build_issues_fields():
     assert top.countries == ["KR", "UK"] and top.langs == ["en", "ko"]
     assert top.title == "조선일보 제목 a"
     assert 0.9 < top.cohesion <= 1.0
+
+
+def test_mark_near_mean_or_same_language_max():
+    import numpy as np
+
+    from pipeline.cluster import Issue, mark_near
+
+    def a(i, lang):
+        return Article(id=f"a{i}", url=f"https://x/{i}", source=f"S{i}", country="KR", lean="중도", media_type="종합지",
+                       weight=1.0, paywall=False, kind="rss", title="t", lead="", lang=lang, published="2026-10-15T12:00:00+00:00",
+                       date_source="feed", sections=["top"], first_seen="2026-10-15T12:00:00+00:00")
+
+    arts = [a(0, "ko"), a(1, "ko"), a(2, "en"), a(3, "en"), a(4, "ko"), a(5, "en")]
+    sim = np.eye(6)
+    sim[0, 4] = sim[4, 0] = 0.6    # 같은 언어 가장 가까운 쌍 0.6 → 이웃
+    sim[1, 2] = sim[2, 1] = 0.37   # 다른 언어, 평균 0.37 → 이웃
+    sim[3, 5] = sim[5, 3] = 0.3    # 0.3 → 이웃 아님
+    iss = [Issue(id=f"i{k}", article_ids=[f"a{k}"], title="t", rep_article=f"a{k}", sources=[], countries=[], leans=[],
+                 langs=[], cohesion=1.0) for k in range(6)]
+    assert mark_near(iss, arts, sim, mean_min=0.36, max_min=0.55) == 2
+    assert iss[0].extra["near"] == ["i4"] and iss[1].extra["near"] == ["i2"] and "near" not in iss[3].extra

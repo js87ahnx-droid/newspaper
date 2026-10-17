@@ -206,3 +206,26 @@ def test_latin_only_continuity_needs_three_words():
     assert continuity_match(["north", "korea", "missile", "submarine"], prev) is None   # 두 낱말만 — 다른 사건
     assert continuity_match(["north", "korea", "bridge", "officially"], prev) is prev[0]
     assert continuity_match(["김지", "지용", "임명"], [{"title": "t", "days": 1, "signature": ["김지", "지용"]}])  # 한글은 그대로
+
+
+def test_near_duplicate_issue_merged_not_placed_twice():
+    """같은 사건 이웃(issue.extra["near"])이 이미 실렸으면 따로 싣지 않고 그 기사에 기사를 합친다. 빈 슬롯은 다음 이슈가 채운다."""
+    arts, issues = build()
+    it = interests_variant("default")
+    scored = score_issues(issues, arts, CFG, build_interest_table(it), [])
+    by_front = sorted(scored, key=lambda s: (-s.frontline, -s.attention, s.issue.id))
+    top, dup = by_front[0], by_front[1]
+    top.issue.extra["near"] = [dup.issue.id]
+    dup.issue.extra["near"] = [top.issue.id]
+    placed, stats = choose(scored, CFG, it)
+    ids = {p.scored.issue.id for p in placed}
+    assert dup.issue.id not in ids and stats["merged_duplicates"] == 1
+    assert len(placed) == min(it.daily_articles, len(scored) - 1)
+    host = next(p for p in placed if p.scored.issue.id == top.issue.id)
+    ed = arrange(placed, CFG, it, arts)
+    out = edition_to_json(ed, "2026-10-16", arts, stats)
+    item = next(x for ps in out["sections"].values() for x in ps if x["issue_id"] == top.issue.id)
+    assert item["merged"] == [dup.issue.id]
+    assert {a["id"] for a in item["articles"]} == set(top.issue.article_ids) | set(dup.issue.article_ids)
+    assert all("published" in a for a in item["articles"])
+    assert host.merged == [dup]

@@ -223,6 +223,42 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
     return done, stats
 
 
+DUP_SCORE = 0.35  # 두 분석의 요약 2-gram 자카드 + 제목 자카드 (10/16호: 같은 사건 5쌍 0.42~1.15, 다른 사건 최고 0.19)
+
+
+def _jaccard(a: str, b: str) -> float:
+    x, y = _bigrams(a), _bigrams(b)
+    return len(x & y) / len(x | y) if x | y else 0.0
+
+
+def merge_duplicates(edition: dict) -> list[tuple[str, str]]:
+    """LLM 이 한국어로 정리한 분석끼리 비교해 같은 사건이면 뒤 기사를 앞 기사에 합친다.
+    언어가 달라 임베딩으로는 못 합친 같은 사건(영어 기사 ↔ 한국어 기사)을 잡는다. 돌려주는 값: (남긴 id, 합친 id)."""
+    kept: list[dict] = []
+    merged: list[tuple[str, str]] = []
+    for sid, items in edition["sections"].items():
+        out = []
+        for it in items:
+            an = it.get("llm", {}).get("analysis")
+            host = None
+            if an:
+                host = next((k for k in kept if _jaccard(an["summary"], k["llm"]["analysis"]["summary"])
+                             + _jaccard(an["headline"], k["llm"]["analysis"]["headline"]) >= DUP_SCORE), None)
+            if host is None:
+                out.append(it)
+                if an:
+                    kept.append(it)
+                continue
+            seen = {a["id"] for a in host["articles"]}
+            host["articles"] += [a for a in it["articles"] if a["id"] not in seen]
+            host["merged"] = host.get("merged", []) + [it["issue_id"]] + it.get("merged", [])
+            host["coverage"] = {**host.get("coverage", {}), "sources": len({a["source"] for a in host["articles"]}),
+                                "countries": len({a["country"] for a in host["articles"]})}
+            merged.append((host["issue_id"], it["issue_id"]))
+        edition["sections"][sid] = out
+    return merged
+
+
 def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, runner=None,
            bodies: dict | None = None) -> dict:
     """edition(dict)에 llm 결과를 붙여 돌려준다. 실패해도 edition 은 그대로 쓸 수 있다.
@@ -299,7 +335,9 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             llm["analysis"] = analysis[it["issue_id"]]
         if llm:
             it["llm"] = llm
-    edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "analysis": astats}
+    dups = merge_duplicates(edition)
+    edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "analysis": astats,
+                                              "merged_duplicates": dups}
     return edition
 
 

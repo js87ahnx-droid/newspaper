@@ -129,7 +129,7 @@ def cmd_embed(args: argparse.Namespace) -> int:
 def cmd_cluster(args: argparse.Namespace) -> int:
     import time
 
-    from .cluster import build_issues, issues_to_json, similarity_matrix
+    from .cluster import build_issues, issues_to_json, mark_near, similarity_matrix
     from .collect import Article
 
     cfg = load_config(Path(args.root))
@@ -144,6 +144,7 @@ def cmd_cluster(args: argparse.Namespace) -> int:
     threshold = args.threshold or cfg.clustering.similarity_threshold
     sim = similarity_matrix(articles, vecs, cfg.clustering)
     issues = build_issues(articles, sim, threshold, cfg.clustering.linkage)
+    near = mark_near(issues, articles, sim, cfg.clustering.near_mean_min, cfg.clustering.near_max_min)
     t2 = time.perf_counter()
     (raw / f"{args.date}.issues.json").write_text(
         json.dumps(issues_to_json(issues), ensure_ascii=False, indent=1), encoding="utf-8"
@@ -152,7 +153,7 @@ def cmd_cluster(args: argparse.Namespace) -> int:
     cross = [i for i in multi if len(i.langs) > 1]
     print(
         f"{args.date} 호: 기사 {len(articles)}건 → 이슈 {len(issues)}개 (2건 이상 {len(multi)}개, 다국어 {len(cross)}개) "
-        f"| 임베딩 {t1 - t0:.1f}초(새로 계산 {computed}건), 군집 {t2 - t1:.1f}초, 임계값 {threshold}"
+        f"| 임베딩 {t1 - t0:.1f}초(새로 계산 {computed}건), 군집 {t2 - t1:.1f}초, 임계값 {threshold}, 같은 사건 이웃 {near}쌍"
     )
     return 0
 
@@ -256,6 +257,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         llm_note = f"{st['status']} (오늘 {st['calls_today']}회)"
         if st.get("analysis") and st["analysis"]["rejected"]:
             llm_note += f" | 분석 버림 {st['analysis']['rejected']}"
+        if st.get("merged_duplicates"):
+            llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
         _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)
     (raw / f"{args.date}.edition.json").write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
     noted = sum(1 for it in items if it["stance"]["note"])
