@@ -22,6 +22,8 @@
   var current = 0;      // 현재 쪽 번호 (왼쪽 쪽 기준)
   var spread = true;    // 두 쪽 펼침 여부
   var overflowPages = [], clipped = 0;  // 쪽 나누기 때 잰 넘친 쪽·잘라 낸 기사 (검증용)
+  var demotedCount = 0, briefCount = 0, dropped = 0, emptySummary = 0;  // 단신으로 내린 기사·단신 수·쪽이 모자라 못 실은 기사·요약 없는 기사
+  var E = window.EDITION || {};
 
   // ---------- 설정: 밝기·글자 크기 ----------
   function applyTheme(t) { root.setAttribute("data-theme", t); }
@@ -72,49 +74,144 @@
     node.style.maxHeight = Math.max(80, room) + "px";
   }
 
+  // 단신 꼴: 제목 + 한 줄 + 시각·매체 (정해진 쪽에 다 못 들어간 기사, 단신·예비 기사)
+  function asBrief(el) {
+    if (el.classList.contains("brief")) return el.cloneNode(true);
+    var b = document.createElement("article");
+    Array.prototype.forEach.call(el.attributes, function (a) { b.setAttribute(a.name, a.value); });
+    b.className = "item brief demoted";
+    var hl = el.querySelector(".hl");
+    if (hl) b.appendChild(hl.cloneNode(true));
+    var t = el.getAttribute("data-brief");
+    if (t) { var p = document.createElement("p"); p.className = "lead brief-line"; p.textContent = t; b.appendChild(p); }
+    var meta = el.querySelector(".meta");
+    if (meta) b.appendChild(meta.cloneNode(true));
+    return b;
+  }
+
+  // 섹션 하나를 최대 budget 쪽에 배치 (budget 0 = 제한 없음). 못 들어간 원본 요소는 rest 로 돌려준다
+  function placeSection(stage, g, sec, first, budget, nodes, mast) {
+    var id = sec.getAttribute("data-section"), title = sec.getAttribute("data-title");
+    var out = [], rest = [];
+    var grid = id === "briefs" && g.w >= 480;   // 단신은 폭이 넉넉하면 두 단
+    var mk = function (cont) {
+      var p = newPage(g, id, first && !cont ? null : title, cont);
+      if (grid) p.firstChild.classList.add("brief-grid");
+      return p;
+    };
+    var page = mk(false);
+    stage.appendChild(page);
+    var inner = page.firstChild;
+    if (first && mast) inner.appendChild(mast.cloneNode(true));
+    var placedOnPage = 0;
+    var used = [];
+    nodes.forEach(function (src, k) {
+      if (used[k]) return;
+      var node = src.node;
+      inner.appendChild(node);
+      if (!overflows(inner)) { placedOnPage++; return; }
+      if (placedOnPage === 0) { fit(inner, node); placedOnPage++; return; }   // 한 쪽보다 큰 기사
+      if (budget && out.length + 1 >= budget) {
+        // 마지막 쪽: 바로 내리지 말고 줄여서(사진·요약·부가 정보) 넣어 본다 — 1면 기사가 단신으로 밀리지 않게
+        node.classList.add("compact");
+        if (!overflows(inner)) { placedOnPage++; return; }
+        node.classList.add("tight");
+        if (!overflows(inner)) { placedOnPage++; return; }
+        inner.removeChild(node);
+        rest.push(src);   // 그래도 안 들어가면 단신으로
+        return;
+      }
+      inner.removeChild(node);
+      // 새 쪽으로 넘기기 전에, 뒤 기사 중 남은 자리에 들어가는 것으로 빈자리를 채운다 (한 쪽 아래가 비지 않게)
+      for (var j = k + 1; j < nodes.length; j++) {
+        if (used[j]) continue;
+        inner.appendChild(nodes[j].node);
+        if (overflows(inner)) inner.removeChild(nodes[j].node); else { used[j] = true; placedOnPage++; }
+      }
+      out.push(page);
+      page = mk(true);
+      stage.appendChild(page);
+      inner = page.firstChild;
+      inner.appendChild(node);
+      placedOnPage = 0;
+      if (overflows(inner)) fit(inner, node);
+      placedOnPage++;
+    });
+    if (inner.children.length > (title && !first ? 1 : 0) || out.length === 0) out.push(page); else page.remove();
+    return { pages: out, rest: rest };
+  }
+
   function paginate() {
+    dropped = 0;
     var g = geometry();
     var stage = document.createElement("div");
     stage.className = "stage";
     document.body.appendChild(stage);   // 실제 크기로 재기 위해 화면 밖에 붙인다
-    var out = [];
     var mast = flow.querySelector(".masthead-block");
+    var budgets = {};
+    Object.keys(E.sectionPages || {}).forEach(function (k) { budgets[k] = E.sectionPages[k]; });
+    // 휴대폰처럼 좁은 한 쪽 화면은 단신이 한 단이라 같은 쪽 수에 절반만 들어간다 → 단신 쪽을 두 배로 (기기마다 쪽수는 늘 같다)
+    if (!spread && g.w < 600 && budgets.briefs) budgets.briefs *= 2;
     // 피드백으로 기사가 모두 빠진 섹션은 건너뛴다 (제목만 있는 빈 쪽 방지)
     var sections = Array.prototype.filter.call(flow.querySelectorAll("section.sec"), function (s) { return s.children.length > 0; });
-    sections.forEach(function (sec, si) {
-      var id = sec.getAttribute("data-section");
-      var title = sec.getAttribute("data-title");
-      var page = newPage(g, id, si === 0 ? null : title, false);
-      stage.appendChild(page);
-      var inner = page.firstChild;
-      if (si === 0) inner.appendChild(mast.cloneNode(true));
-      var placedOnPage = 0;
-      Array.prototype.forEach.call(sec.children, function (el) {
-        var node = el.cloneNode(true);
-        inner.appendChild(node);
-        if (overflows(inner)) {
-          if (placedOnPage === 0) {
-            fit(inner, node);   // 한 쪽에 다 안 들어가는 기사
-          } else {
-            inner.removeChild(node);
-            out.push(page);
-            page = newPage(g, id, title, true);
-            stage.appendChild(page);
-            inner = page.firstChild;
-            inner.appendChild(node);
-            placedOnPage = 0;
-            if (overflows(inner)) fit(inner, node);
-          }
-        }
-        placedOnPage++;
-      });
-      out.push(page);   // 섹션은 이어지는 다음 쪽에서 시작한다 (빈 쪽을 끼우면 지면이 성겨진다)
+    var byId = {}, order = [];
+    sections.forEach(function (s) { var id = s.getAttribute("data-section"); byId[id] = s; order.push(id); });
+    var built = {}, demoted = [], spare = 0, firstId = order[0];
+    var kids = function (sec) {
+      return Array.prototype.filter.call(sec.children, function (el) { return el.getAttribute("data-reserve") !== "1"; })
+        .map(function (el) { return { el: el, node: el.cloneNode(true) }; });
+    };
+    // 1) 뉴스 면: 정해진 쪽 안에서, 넘친 기사는 단신으로 내린다 / 논평·가이드: 정해진 쪽 안에서만
+    order.forEach(function (id) {
+      if (id === "briefs") return;
+      var b = budgets[id] || 0;
+      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
+      built[id] = res.pages;
+      if (id !== "opinion" && id !== "guide") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
+      else dropped += res.rest.length;
+      if (b) spare += Math.max(0, b - res.pages.length);
     });
-    if (spread && out.length % 2 === 1) { var b = newPage(g, "blank", null, false); b.classList.add("blank"); out.push(b); }
+    // 2) 단신: 내려온 기사(점수 순) → 원래 단신 → 예비 기사. 다른 면이 남긴 쪽까지 쓴다
+    var briefSec = byId.briefs || (function () {
+      var s = document.createElement("section");
+      s.className = "sec sec-briefs"; s.setAttribute("data-section", "briefs");
+      s.setAttribute("data-title", (E.sectionTitles || {}).briefs || "단신");
+      return s;
+    })();
+    demoted.sort(function (x, y) { return (+y.getAttribute("data-final2") || +y.getAttribute("data-final")) - (+x.getAttribute("data-final2") || +x.getAttribute("data-final")); });
+    var pool = demoted.concat(Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") !== "1"; }),
+      Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") === "1" && el.getAttribute("data-brief"); }));
+    // 오늘 없는 면(예: 논평·사설이 없는 날)에 배정된 쪽도 단신이 쓴다
+    Object.keys(budgets).forEach(function (k) { if (k !== "briefs" && k !== "compare" && !byId[k]) spare += budgets[k] || 0; });
+    var bBudget = budgets.briefs ? budgets.briefs + spare : 0;
+    if (pool.length) {
+      var res = placeSection(stage, g, briefSec, false, bBudget, pool.map(function (el) { return { el: el, node: asBrief(el) }; }), null);
+      built.briefs = res.pages;
+      dropped += res.rest.length;
+      if (order.indexOf("briefs") < 0) order.splice(Math.max(0, order.indexOf("opinion")) || order.length, 0, "briefs");
+    }
+    var out = [];
+    order.forEach(function (id) { out = out.concat(built[id] || []); });
+    // 쪽수 고정: 기사가 모자라 쪽이 남으면 끝 쪽으로 채운다 (같은 화면 크기면 호가 바뀌어도 쪽수가 같다)
+    var total = 0;
+    Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
+    while (total && out.length < total) {
+      var end = newPage(g, "end", null, false);
+      end.classList.add("endpage");
+      end.firstChild.innerHTML = '<p class="end-note">오늘 지면은 여기까지입니다.</p><p class="end-note"><a href="' +
+        ((document.querySelector(".tb-link") || {}).getAttribute ? document.querySelector(".tb-link").getAttribute("href") : "archive/") + '">지난 호 보기</a></p>';
+      out.push(end);
+    }
+    if (spread && out.length % 2 === 1) { var bl = newPage(g, "blank", null, false); bl.classList.add("blank"); out.push(bl); }
     out.forEach(function (p, i) { p.querySelector(".folio").textContent = (i + 1) + " / " + out.length; p.setAttribute("data-page", i); });
     // 모든 쪽이 실제로 배치된 지금 넘침을 센다 (넘김 라이브러리에 넘긴 뒤에는 안 보이는 쪽의 높이가 0으로 재어진다)
     overflowPages = out.filter(function (p) { return overflows(p.querySelector(".page-inner")); }).map(function (p) { return +p.getAttribute("data-page"); });
     clipped = stage.querySelectorAll(".item.clip").length;
+    demotedCount = stage.querySelectorAll(".item.demoted").length;
+    briefCount = stage.querySelectorAll(".item.brief").length;
+    emptySummary = Array.prototype.filter.call(stage.querySelectorAll(".item:not(.oplist):not(.opcmp):not(.guide-intro):not(.guide-table)"), function (el) {
+      return !el.querySelector(".lead");
+    }).length;
     stage.remove();
     return { pages: out, g: g };
   }
@@ -231,6 +328,32 @@
   });
   reduced.addEventListener && reduced.addEventListener("change", function () { build(visibleIssue()); });
 
+  // ---------- 기사 자세히 (S15) ----------
+  // 지면에서는 머리기사만 분석을 다 펼치고, 나머지는 줄여 보인다. "자세히"는 쪽 나누기 전 원본(#flow)을 그대로 보여 준다
+  var reader = document.getElementById("reader");
+  function openReader(issue) {
+    var src = flow.querySelector('article.item[data-issue="' + issue + '"]');
+    if (!src || !reader) return;
+    var node = src.cloneNode(true);
+    node.classList.remove("sub", "compact", "tight", "clip", "brief", "demoted", "reserve");
+    node.style.maxHeight = "";
+    var mb = node.querySelector("[data-more]");
+    if (mb) mb.remove();
+    var body = reader.querySelector(".reader-body");
+    body.innerHTML = "";
+    body.appendChild(node);
+    reader.hidden = false;
+    reader.querySelector(".reader-panel").scrollTop = 0;
+    reader.querySelector("[data-reader-close]").focus();
+  }
+  function closeReader() { if (reader) reader.hidden = true; }
+  document.addEventListener("click", function (e) {
+    var m = e.target.closest && e.target.closest("[data-more]");
+    if (m) { var art = m.closest("[data-issue]"); if (art) openReader(art.getAttribute("data-issue")); return; }
+    if (e.target.closest && (e.target.closest("[data-reader-close]") || e.target === reader)) closeReader();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && reader && !reader.hidden) closeReader(); }, true);
+
   // 피드백 버튼은 feedback.js(S9)가 처리한다. 여기서는 이벤트만 알린다.
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("[data-fb]");
@@ -251,7 +374,7 @@
     simpleShow(i);
   }
 
-  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, state: function () { return { current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped }; } };
+  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, state: function () { return { current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
   // 글꼴(Noto Sans·Noto Sans KR)을 받은 뒤 쪽을 나눈다 — 먼저 나누면 글꼴이 바뀌며 글 길이가 달라져 쪽이 넘친다.
   // 한글 글꼴은 글자 범위별 조각으로 나뉘어 필요할 때 받으므로, 지면에 쓰인 글자를 넘겨 필요한 조각을 미리 받는다.
   // 글꼴 서버에 닿지 못하면(오프라인) 2.5초 뒤 기본 글꼴로 나눈다 (그 뒤 글꼴이 오면 한 번만 다시 나눈다)

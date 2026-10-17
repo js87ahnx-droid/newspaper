@@ -135,9 +135,9 @@
     "량서",
     "여성",
     "발견",
-    "숨진",
     "교제",
     "제폭",
+    "숨진",
     "폭력",
     "남성",
     "차량"
@@ -648,7 +648,7 @@
     {
      "date": "2026-10-17",
      "title": "‘딸 임용 특혜 의혹’ 경찰, 유승민 송치",
-     "summary": null
+     "summary": "유승민 등 4명 송치, 본인은 정치수사라며 무죄 주장"
     }
    ]
   },
@@ -826,8 +826,8 @@
    ]
   },
   {
-   "id": "da98b0e91583c71b",
-   "title": "Houthi missiles strike Yemen presidential palace, killing five",
+   "id": "c668d5f2e7dcc826",
+   "title": "Houthi Missiles Strike Government Headquarters in Yemen",
    "topic": "international",
    "days": 2,
    "signature": [
@@ -853,8 +853,8 @@
     },
     {
      "date": "2026-10-17",
-     "title": "Houthi missiles strike Yemen presidential palace, killing five",
-     "summary": "후티가 아덴 대통령궁을 공격해 5명 사망"
+     "title": "Houthi Missiles Strike Government Headquarters in Yemen",
+     "summary": "후티가 아덴 대통령궁을 타격해 5명이 숨졌다"
     }
    ]
   },
@@ -1004,6 +1004,34 @@
    ]
   },
   {
+   "id": "174e86b9dd4f70ce",
+   "title": "李, 모교 중앙대 110주년 기념식 참석…과잠 입고 촬영도",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "앙대",
+    "념식",
+    "기념",
+    "모교",
+    "중앙",
+    "개교",
+    "참석",
+    "과잠",
+    "교기",
+    "배들",
+    "후배",
+    "입고"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "李, 모교 중앙대 110주년 기념식 참석…과잠 입고 촬영도",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "416cfe3ee8e05ad5",
    "title": "특검, 尹 '평양무인기' 2심 징역30년 구형…\"내란보다 죄질 무거워\"(종합)",
    "topic": "politics",
@@ -1014,8 +1042,8 @@
     "무인",
     "석열",
     "윤석",
-    "징역",
     "특검",
+    "징역",
     "구형",
     "尹",
     "심서",
@@ -1027,7 +1055,7 @@
     {
      "date": "2026-10-17",
      "title": "특검, 尹 '평양무인기' 2심 징역30년 구형…\"내란보다 죄질 무거워\"(종합)",
-     "summary": null
+     "summary": "특검, 평양 무인기 2심서 윤석열 징역 30년 구형"
     }
    ]
   },
@@ -1299,7 +1327,7 @@
     {
      "date": "2026-10-17",
      "title": "서울시, '한강버스 리베이트 의혹' 경찰에 정식 수사 의뢰",
-     "summary": null
+     "summary": "서울시가 한강버스 리베이트 의혹을 경찰에 수사 의뢰했다"
     }
    ]
   },
@@ -1645,7 +1673,7 @@
     {
      "date": "2026-10-17",
      "title": "주일 러 대사, 기자 구금 관련 \"日요구 거부…러 법대로 수사\"",
-     "summary": null
+     "summary": "러 당국이 일본 기자를 간첩 혐의로 구금, 일본은 접촉 못 해"
     }
    ]
   },
@@ -1673,6 +1701,34 @@
     {
      "date": "2026-10-17",
      "title": "한병도 “한강버스 비위 은폐 의혹 충격적…오세훈 관여 여부 수사해야”",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "904804864a63142d",
+   "title": "7명 숨진 현대아울렛 화재…소방업체 소장 징역 3년, 점장 1년",
+   "topic": "incidents",
+   "days": 1,
+   "signature": [
+    "대아",
+    "아울",
+    "울렛",
+    "현대",
+    "방업",
+    "소장",
+    "실형",
+    "참사",
+    "화재",
+    "업체",
+    "대전",
+    "징역"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "7명 숨진 현대아울렛 화재…소방업체 소장 징역 3년, 점장 1년",
      "summary": null
     }
    ]
@@ -1874,34 +1930,6 @@
     {
      "date": "2026-10-17",
      "title": "서울고법원장 “제청권-임명권 간 우열 없어”",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "174e86b9dd4f70ce",
-   "title": "李, 모교 중앙대 110주년 기념식 참석…과잠 입고 촬영도",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "앙대",
-    "모교",
-    "념식",
-    "기념",
-    "과잠",
-    "중앙",
-    "참석",
-    "개교",
-    "교기",
-    "배들",
-    "후배",
-    "입고"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "李, 모교 중앙대 110주년 기념식 참석…과잠 입고 촬영도",
      "summary": null
     }
    ]
@@ -2230,6 +2258,34 @@
    ]
   },
   {
+   "id": "198a854e56b14ab2",
+   "title": "머스크, '100만불 대선 복권 사기' 집단소송에 주민들과 합의",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "settle",
+    "elon",
+    "musk",
+    "lawsuit",
+    "election",
+    "giveaway",
+    "fraud",
+    "voter",
+    "million",
+    "lottery",
+    "만불",
+    "송에"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "머스크, '100만불 대선 복권 사기' 집단소송에 주민들과 합의",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "e7ae88ed55d404f1",
    "title": "서울시 주택정책 20년백서…\"박원순 재임때 43만호 기획 사라져\"(종합)",
    "topic": "economy",
@@ -2393,7 +2449,7 @@
     {
      "date": "2026-10-17",
      "title": "Kenya confirms third Ebola case, a relative of the first patient who died",
-     "summary": null
+     "summary": "케냐에서 에볼라 세 번째 확진, 첫 환자의 친척"
     }
    ]
   },
@@ -2421,7 +2477,7 @@
     {
      "date": "2026-10-17",
      "title": "Ethiopia's Abiy names new Tigray government, wants polls in six months",
-     "summary": null
+     "summary": "에티오피아, 티그라이에 임시정부 세우고 6개월 뒤 선거 예고"
     }
    ]
   },
@@ -2482,7 +2538,7 @@
     {
      "date": "2026-10-17",
      "title": "[시스루피플] 판매보다 팔레스타인 지지 신념···‘노멀 피플’ 작가 샐리 루니 “영국에서 책 안 팔겠다”",
-     "summary": null
+     "summary": "루니 책, 팔레스타인 액션 지지로 영국 서점서 철수"
     }
    ]
   },
@@ -2889,7 +2945,7 @@
     {
      "date": "2026-10-17",
      "title": "Singapore targets 7 companies over wildfires in Indonesia as toxic haze worsens",
-     "summary": null
+     "summary": "싱가포르가 연무 유발 인니 산불 관련 기업을 조사한다"
     }
    ]
   },
@@ -3178,34 +3234,6 @@
    ]
   },
   {
-   "id": "61ad57e6f7b77767",
-   "title": "‘7명 사망’ 현대아울렛 화재, 소방업체 소장 징역 3년",
-   "topic": "incidents",
-   "days": 1,
-   "signature": [
-    "대아",
-    "아울",
-    "울렛",
-    "실형",
-    "참사",
-    "현대",
-    "대전",
-    "사망",
-    "화재",
-    "고에",
-    "멈춰",
-    "방시"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "‘7명 사망’ 현대아울렛 화재, 소방업체 소장 징역 3년",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "547f8c8750eb0fe1",
    "title": "코스피 7% 급락한 '검은 목요일'에 800억원대 또 강제청산",
    "topic": "economy",
@@ -3430,7 +3458,7 @@
     {
      "date": "2026-10-17",
      "title": "6.9-magnitude quake hits Russia's Kamchatka",
-     "summary": null
+     "summary": "캄차카 규모 6.9 지진, 피해·쓰나미 경보 없음"
     }
    ]
   },
@@ -3458,34 +3486,6 @@
     {
      "date": "2026-10-17",
      "title": "美 KFC, '40년 인연' 펩시와 결별…내년부터 코카콜라 판다",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "198a854e56b14ab2",
-   "title": "머스크, '100만불 대선 복권 사기' 집단소송에 주민들과 합의",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "settle",
-    "elon",
-    "musk",
-    "lawsuit",
-    "election",
-    "giveaway",
-    "lottery",
-    "만불",
-    "송에",
-    "집단",
-    "fraud",
-    "단소"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "머스크, '100만불 대선 복권 사기' 집단소송에 주민들과 합의",
      "summary": null
     }
    ]
@@ -3875,8 +3875,8 @@
    "topic": "incidents",
    "days": 1,
    "signature": [
-    "숨진",
     "발견",
+    "숨진",
     "봉화",
     "찔려",
     "화서",
@@ -4594,7 +4594,7 @@
     {
      "date": "2026-10-17",
      "title": "Newly identified green star leaves astronomers amazed",
-     "summary": null
+     "summary": "백색왜성에서 눈에 초록으로 보일 별이 처음 확인됐다"
     }
    ]
   },
@@ -6248,8 +6248,8 @@
    "signature": [
     "념사",
     "李",
-    "기념",
     "마항",
+    "기념",
     "항쟁",
     "부마",
     "잇기",
@@ -8717,8 +8717,8 @@
     "iran",
     "war",
     "midterm",
-    "election",
-    "ahead"
+    "ahead",
+    "election"
    ],
    "date": "2026-10-17",
    "timeline": [
