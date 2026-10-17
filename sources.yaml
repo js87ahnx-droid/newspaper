@@ -4,6 +4,7 @@
 #   type: 종합지 | 경제지 | 방송 | 통신 | 국제
 # enabled: true  — 공식 피드가 동작함
 # section: opinion — 논평·사설 피드 (2026-10-16 사용자 요청, 실측: docs-internal/source-audit.md 4장). 일반 뉴스와 따로 다룬다
+# headline: 그날 머리기사를 얻는 곳(S14b) — naver_a1(네이버 신문 A1면)·feed(편집 순서 머리 피드)·homepage(홈페이지 링크 순서). 앞에서부터 시도
 # kind: google_news — 공식 피드가 없거나 막혀 Google 뉴스 매체 한정 검색으로 대체 (2026-10-15 사용자 승인, D6)
 
 sources:
@@ -16,6 +17,7 @@ sources:
     paywall: false
     enabled: true
     langs: [ko]  # 피드에 일본어판 기사가 섞여 들어옴
+    headline: [{kind: naver_a1, press: "023"}, {kind: homepage, url: "https://www.chosun.com/"}]
     feeds:
       - {section: top, url: "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml", main: true}
       - {section: politics, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/politics/?outputType=xml"}
@@ -30,6 +32,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "025"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
       - {section: opinion, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+%EC%82%AC%EC%84%A4+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[사설]"}
@@ -41,6 +44,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "020"}, {kind: homepage, url: "https://www.donga.com/"}]
     feeds:
       - {section: top, url: "https://rss.donga.com/total.xml", main: true}
       - {section: politics, url: "https://rss.donga.com/politics.xml"}
@@ -55,6 +59,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "028"}, {kind: homepage, url: "https://www.hani.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.hani.co.kr/rss/", main: true, date_source: page_meta}
       - {section: politics, url: "https://www.hani.co.kr/rss/politics/", date_source: page_meta}
@@ -69,6 +74,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "032"}, {kind: homepage, url: "https://www.khan.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.khan.co.kr/rss/rssdata/total_news.xml", main: true}
       - {section: politics, url: "https://www.khan.co.kr/rss/rssdata/politic_news.xml"}
@@ -83,6 +89,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "015"}, {kind: homepage, url: "https://www.hankyung.com/"}]
     feeds:
       - {section: top, url: "https://www.hankyung.com/feed/all-news", main: true}
       - {section: economy, url: "https://www.hankyung.com/feed/economy"}
@@ -97,6 +104,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: naver_a1, press: "009"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:mk.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
       - {section: opinion, url: "https://news.google.com/rss/search?q=site:mk.co.kr+%EC%82%AC%EC%84%A4+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[사설]"}
@@ -108,6 +116,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://www.yna.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.yna.co.kr/rss/news.xml", main: true}
       - {section: politics, url: "https://www.yna.co.kr/rss/politics.xml"}
@@ -155,6 +164,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://edition.cnn.com/"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:cnn.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -175,6 +185,7 @@ sources:
     weight: 1.0
     paywall: true
     enabled: true
+    headline: [{kind: feed, url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"}]
     feeds:
       - {section: top, url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", main: true}
       - {section: international, url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"}
@@ -201,6 +212,7 @@ sources:
     weight: 0.8
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://www.foxnews.com/"}]
     feeds:
       - {section: top, url: "https://moxie.foxnews.com/google-publisher/latest.xml", main: true}
       - {section: international, url: "https://moxie.foxnews.com/google-publisher/world.xml"}
@@ -216,6 +228,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    headline: [{kind: feed, url: "https://feeds.bbci.co.uk/news/rss.xml"}]
     feeds:
       - {section: top, url: "https://feeds.bbci.co.uk/news/rss.xml", main: true}
       - {section: international, url: "https://feeds.bbci.co.uk/news/world/rss.xml"}
@@ -264,6 +277,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://news.web.nhk/"}]
     feeds:
       - {section: top, url: "https://news.web.nhk/n-data/conf/na/rss/cat0.xml", main: true}
       - {section: politics, url: "https://news.web.nhk/n-data/conf/na/rss/cat4.xml"}
@@ -298,6 +312,7 @@ sources:
     weight: 0.8
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://www.scmp.com/"}]
     feeds:
       - {section: top, url: "https://www.scmp.com/rss/91/feed", main: true}
       - {section: china, url: "https://www.scmp.com/rss/4/feed"}
@@ -311,6 +326,7 @@ sources:
     weight: 0.5
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://www.globaltimes.cn/"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:globaltimes.cn+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -322,5 +338,6 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    headline: [{kind: homepage, url: "https://www.aljazeera.com/"}]
     feeds:
       - {section: top, url: "https://www.aljazeera.com/xml/rss/all.xml", main: true}

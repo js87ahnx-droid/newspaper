@@ -48,7 +48,7 @@
     <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% endif %}"
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
              data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
-             data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}"
+             data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}" data-h="{{ it.scores.headline or 0 }}"
              data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
              data-top="{{ 1 if (sec.id == 'front' and loop.first) else 0 }}">
       {% if it.photo and not brief %}
@@ -73,6 +73,7 @@
       <div class="meta">
         <span class="src">{{ it.source }}</span>
         <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>
+        {% if it.headline_label %}<span class="hlb" title="그날 이 매체들이 1면·머리기사로 올림">{{ it.headline_label }}</span>{% endif %}
         {% if it.days > 1 %}<span class="days">{{ it.days }}일째 보도</span>{% endif %}
         {% if it.coverage.sources > 1 %}<span class="cover">매체 {{ it.coverage.sources }} · 국가 {{ it.coverage.countries }}</span>{% endif %}
         {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}

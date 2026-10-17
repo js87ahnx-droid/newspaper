@@ -55,10 +55,12 @@ class Weights(Strict):
     importance: float = Field(ge=0)
     continuity: float = Field(ge=0)
     interest: float = Field(ge=0)
+    headline: float = Field(default=0.0, ge=0)        # 매체 머리기사 (S14b)
+    front_headline: float = Field(default=0.0, ge=0)  # 1면 고를 때(주목도·중요도와 함께) 머리기사 비중
 
     @model_validator(mode="after")
     def _nonzero(self) -> "Weights":
-        if self.attention + self.importance + self.continuity + self.interest <= 0:
+        if self.attention + self.importance + self.continuity + self.interest + self.headline <= 0:
             raise ValueError("가중치 합이 0보다 커야 함")
         return self
 
@@ -200,6 +202,21 @@ class Feed(Strict):
     title_must: str | None = None
 
 
+class HeadlineSrc(Strict):
+    """매체 머리기사를 얻는 곳 (S14b). 앞에서부터 시도해 처음 얻은 곳을 쓴다."""
+    kind: Literal["naver_a1", "feed", "homepage"]
+    press: str | None = Field(default=None, pattern=r"^\d{3}$")   # naver_a1: 네이버 언론사 번호
+    url: str | None = Field(default=None, pattern=r"^https?://")    # feed·homepage
+
+    @model_validator(mode="after")
+    def _needs(self) -> "HeadlineSrc":
+        if self.kind == "naver_a1" and not self.press:
+            raise ValueError("naver_a1 은 press(네이버 언론사 번호)가 필요함")
+        if self.kind != "naver_a1" and not self.url:
+            raise ValueError(f"{self.kind} 는 url 이 필요함")
+        return self
+
+
 class Source(Strict):
     name: str = Field(min_length=1)
     country: str = Field(pattern=r"^[A-Z]{2}$")
@@ -211,6 +228,7 @@ class Source(Strict):
     feeds: list[Feed]
     # 받을 기사 언어(ko/en/ja/zh/ar). 비우면 전부. 예: 조선일보 피드에는 일본어판 기사가 섞여 들어온다
     langs: list[Literal["ko", "en", "ja", "zh", "ar"]] = Field(default_factory=list)
+    headline: list[HeadlineSrc] = Field(default_factory=list)  # 머리기사 (비우면 이 매체는 머리기사 가중 없음)
 
     @model_validator(mode="after")
     def _enabled_needs_feed(self) -> "Source":

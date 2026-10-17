@@ -61,6 +61,22 @@ def _display(item: dict, display) -> dict:
     }
 
 
+SHORT_NAME = {"조선일보": "조선", "중앙일보": "중앙", "동아일보": "동아", "한겨레": "한겨레", "경향신문": "경향", "한국경제": "한경",
+              "매일경제": "매경", "연합뉴스": "연합", "New York Times": "NYT", "Wall Street Journal": "WSJ", "Fox News": "Fox",
+              "Global Times": "환구시보", "Al Jazeera": "알자지라", "NHK World": "NHK World"}
+
+
+def headline_label(by: dict) -> str | None:
+    """'1면 조선·동아 / 머리 BBC' — 종이신문 1면(naver_a1)과 홈페이지·피드 머리기사를 나눠 순위 순으로."""
+    if not by:
+        return None
+    order = sorted(by.items(), key=lambda kv: (kv[1][0], kv[0]))
+    a1 = [SHORT_NAME.get(n, n) for n, (_, via) in order if via == "naver_a1"]
+    top = [SHORT_NAME.get(n, n) for n, (_, via) in order if via != "naver_a1"]
+    parts = ([f"1면 {'·'.join(a1)}"] if a1 else []) + ([f"머리 {'·'.join(top)}"] if top else [])
+    return " / ".join(parts)
+
+
 def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) -> dict:
     """브라우저의 피드백 재계산(feedback.js)이 쓰는 값. 서버 점수 계산(score.py)과 같은 식을 쓰도록 같은 값을 넘긴다."""
     table = build_interest_table(interests)
@@ -68,7 +84,8 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
     st = edition.get("stats", {})
     return {
         "edition": edition["edition"], "masthead": masthead(d),
-        "weights": {"attention": w.attention, "importance": w.importance, "continuity": w.continuity, "interest": w.interest},
+        "weights": {"attention": w.attention, "importance": w.importance, "continuity": w.continuity, "interest": w.interest,
+                    "headline": w.headline},
         "topicWeights": table.topic_weights, "keywords": list(table.keywords), "keywordBoost": table.keyword_boost,
         "maxInterest": (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1,
         "interestCap": st.get("interest_cap", 0), "interestCounted": st.get("interest_counted", 0),
@@ -101,7 +118,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         if not items:
             continue
         sections.append({"id": s.id, "title": titles[s.id], "items": [
-            {**it, "view": _display(it, interests.foreign_display),
+            {**it, "view": _display(it, interests.foreign_display), "headline_label": headline_label(it.get("headline_by", {})),
              # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
              "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", []))}
             for it in items]})

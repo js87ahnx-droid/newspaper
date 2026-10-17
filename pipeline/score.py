@@ -4,6 +4,8 @@
 - 중요도: 분야 기본 가중치 + 핵심 키워드 가산 + 다룬 국가 수 (그날 최댓값으로 나눔)
 - 연속성: data/history 의 전날 이슈와 이어지면 "○일째 보도". 7일째에 1.0
 - 관심도: interests.yaml 의 분야 가중치 + 관심 키워드 가산 (가능한 최댓값으로 나눔)
+- 머리기사(S14b): 이 이슈를 그날 머리기사(종이신문 1면·홈페이지 맨 위)로 올린 매체들의 가중치 × 순위 가중 합 (그날 최댓값으로 나눔).
+  최종 점수(weights.headline)와 1면 선정(weights.front_headline, 주목도·중요도와 함께)에 쓴다
 """
 from __future__ import annotations
 
@@ -37,7 +39,9 @@ class ScoredIssue:
     interest_hit: bool           # 관심 분야(가중치 ≥ 1)이거나 관심 키워드가 나옴
     signature: list[str] = field(default_factory=list)  # 다음날 연속성 비교용 토큰
     raw: dict = field(default_factory=dict)
-    timeline: list[dict] = field(default_factory=list)  # 지난 경과: 앞선 호들의 {date, title, summary} (오래된 것부터)
+    timeline: list[dict] = field(default_factory=list)
+    headline: float = 0.0              # 머리기사 점수 (0~1)
+    headline_by: dict = field(default_factory=dict)  # 매체 → [순위, 얻은 곳] (1면·머리기사로 올린 곳)  # 지난 경과: 앞선 호들의 {date, title, summary} (오래된 것부터)
 
 
 SIGNATURE_SIZE = 12
@@ -77,6 +81,11 @@ def issue_signature(arts: list[Article], df: dict[str, int], n_docs: int, limit:
     ranked = sorted(cands, key=lambda t: (-counts[t] * math.log((n_docs + 1) / (outside[t] + 1)), t))
     return ranked[:limit]
 
+
+# 머리기사 점수 = 1 - exp(-합/HEADLINE_SCALE): 매체가 늘수록 포화. 그날 최댓값으로 나누면 압도적인 이슈 하나(10/16 코스피,
+# 신문 5곳 1면) 때문에 다른 1면 기사(청해부대 — 경향 1면 머리·조선 1면)가 0.4 로 눌려 1면에서 빠졌다.
+# 이 식으로는 한 곳 1면 머리 0.49, 두 곳 0.74, 다섯 곳(순위 섞임) 0.85~0.9
+HEADLINE_SCALE = 1.5
 
 TIMELINE_MAX = 7  # 지난 경과로 들고 다니는 앞선 호 수
 
@@ -136,7 +145,19 @@ def score_issues(
     cfg: Config,
     table: InterestTable,
     previous: list[dict],
+    headlines: list[dict] | None = None,
 ) -> list[ScoredIssue]:
+    from .headlines import RANK_WEIGHT, group_members, issue_headlines
+
+    # 같은 기사거리 묶음에 든 이슈끼리는 같은 사건 이웃(near)으로 — 편집에서 한 기사로 합친다
+    owner = {a: iss.id for iss in issues for a in iss.article_ids}
+    for members in group_members(headlines or []):
+        ids = sorted({owner[a] for a in members if a in owner})
+        for iss in issues:
+            if iss.id in ids:
+                near = iss.extra.setdefault("near", [])
+                near += [x for x in ids if x != iss.id and x not in near]
+
     imp_cfg = cfg.importance
     kw = [re.compile(re.escape(k), re.I) for k in imp_cfg.keywords]
     rows = []
@@ -156,32 +177,37 @@ def score_issues(
         imp_raw = imp_cfg.topic_weights[topic] + imp_cfg.keyword_bonus * min(kw_hits, 3) + 0.1 * min(countries - 1, 3)
         int_raw = table.score(topic, titles)
         sig = issue_signature(arts, df, len(all_arts))
+        hl_by = issue_headlines(headlines or [], iss.article_ids)
+        hl_raw = sum(RANK_WEIGHT.get(r, 0) * by_source.get(src, articles[iss.article_ids[0]]).weight
+                     for src, (r, _) in hl_by.items())
         prev = continuity_match(sig, previous)
         days = 1 + prev["days"] if prev else 1
         hit = table.topic_weights.get(topic, 0) >= 1 or any(k.lower() in titles.lower() for k in table.keywords)
         rows.append((iss, topic, att_raw, imp_raw, int_raw, days, hit, sig,
                      {"sources": len(by_source), "countries": countries, "main_sources": mains, "keyword_hits": kw_hits},
-                     past_timeline(prev)))
+                     past_timeline(prev), hl_raw, hl_by))
 
     max_att = max((r[2] for r in rows), default=1) or 1
     max_imp = max((r[3] for r in rows), default=1) or 1
     max_int = (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1
     w = cfg.weights
-    wsum = w.attention + w.importance + w.continuity + w.interest
-    front_wsum = (w.attention + w.importance) or 1
+    wsum = w.attention + w.importance + w.continuity + w.interest + w.headline
+    front_wsum = (w.attention + w.importance + w.front_headline) or 1
     out = []
-    for iss, topic, a, i, it, days, hit, sig, raw, tl in rows:
+    for iss, topic, a, i, it, days, hit, sig, raw, tl, hl, hl_by in rows:
         att, imp, inte = a / max_att, i / max_imp, min(it / max_int, 1.0)
         cont = min(days - 1, 6) / 6
-        base = w.attention * att + w.importance * imp + w.continuity * cont
+        head = 1 - math.exp(-hl / HEADLINE_SCALE)
+        base = w.attention * att + w.importance * imp + w.continuity * cont + w.headline * head
         out.append(
             ScoredIssue(
                 issue=iss, topic=topic,
                 attention=round(att, 4), importance=round(imp, 4), continuity=round(cont, 4), interest=round(inte, 4),
                 final=round((base + w.interest * inte) / wsum, 4),
-                frontline=round((w.attention * att + w.importance * imp) / front_wsum, 4),
+                frontline=round((w.attention * att + w.importance * imp + w.front_headline * head) / front_wsum, 4),
                 final_no_interest=round(base / ((wsum - w.interest) or 1), 4),
                 days=days, interest_hit=hit, signature=sig, raw=raw, timeline=tl,
+                headline=round(head, 4), headline_by=hl_by,
             )
         )
     return out

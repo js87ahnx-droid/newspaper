@@ -254,8 +254,9 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "reasons": p.reasons,
             "scores": {
                 "attention": s.attention, "importance": s.importance, "continuity": s.continuity,
-                "interest": s.interest, "final": s.final,
+                "interest": s.interest, "final": s.final, "headline": s.headline, "frontline": s.frontline,
             },
+            "headline_by": {**s.headline_by, **{k: v for m in p.merged for k, v in m.headline_by.items() if k not in s.headline_by}},
             "coverage": coverage,
             "merged": [m.issue.id for m in p.merged],
             "articles": [

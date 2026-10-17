@@ -159,7 +159,7 @@ def test_every_item_has_reasons_and_scores():
     assert items
     for it in items:
         assert it["reasons"]
-        assert set(it["scores"]) == {"attention", "importance", "continuity", "interest", "final"}
+        assert set(it["scores"]) == {"attention", "importance", "continuity", "interest", "final", "headline", "frontline"}
         assert all(0 <= v <= 1 for v in it["scores"].values())
 
 
@@ -229,3 +229,27 @@ def test_near_duplicate_issue_merged_not_placed_twice():
     assert {a["id"] for a in item["articles"]} == set(top.issue.article_ids) | set(dup.issue.article_ids)
     assert all("published" in a for a in item["articles"])
     assert host.merged == [dup]
+
+
+def test_outlet_headlines_raise_front_and_final():
+    """매체 머리기사(1면)로 오른 이슈는 1면 점수·최종 점수가 오르고, 여러 매체 1면이면 1면 톱이 된다 (S14b)."""
+    arts, issues = build()
+    it = interests_variant("default")
+    base = score_issues(issues, arts, CFG, build_interest_table(it), [])
+    multi = sorted((s for s in base if len({arts[i].source for i in s.issue.article_ids}) >= 2), key=lambda s: s.frontline)
+    low = multi[len(multi) // 2]   # 1면 점수가 중간쯤인 이슈 (원래는 1면 밖)
+    srcs = sorted({arts[i].source for i in low.issue.article_ids})
+    heads = [{"source": s, "rank": 1, "title": "t", "via": "naver_a1",
+              "article_id": next(i for i in low.issue.article_ids if arts[i].source == s)} for s in srcs]
+    scored = score_issues(issues, arts, CFG, build_interest_table(it), [], heads)
+    s = next(x for x in scored if x.issue.id == low.issue.id)
+    b = next(x for x in base if x.issue.id == low.issue.id)
+    assert s.headline > 0.8 and s.frontline > b.frontline and s.final > b.final   # 세 곳 1면 머리 → 1-exp(-3/1.5)
+    assert s.headline_by == {src: [1, "naver_a1"] for src in srcs}
+    assert all(x.headline == 0 for x in scored if x.issue.id != low.issue.id)
+    placed, _ = choose(scored, CFG, it)
+    ed = arrange(placed, CFG, it, arts)
+    front = {p.scored.issue.id for p in ed.sections["front"]}
+    assert low.issue.id in front   # 세 곳 1면 머리면 1면에 오른다
+    ed0 = arrange(choose(base, CFG, it)[0], CFG, it, arts)
+    assert low.issue.id not in {p.scored.issue.id for p in ed0.sections["front"]}   # 머리기사 정보 없이는 1면 밖

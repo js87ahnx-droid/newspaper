@@ -19,6 +19,8 @@ weights:
   importance: 0.30   # 중요도
   continuity: 0.10   # 연속성
   interest: 0.25     # 관심도 (1면 톱 선정에는 쓰지 않음)
+  headline: 0.25     # 매체 머리기사: 그날 종이신문 1면·홈페이지 맨 위에 올린 매체들 (S14b, 사용자 요청)
+  front_headline: 0.50  # 1면을 고를 때 머리기사 비중 (주목도 0.35·중요도 0.30 과 함께 → 1면에서는 머리기사가 가장 큼)
 
 editing:
   total_articles: 40       # 하루 지면 기사 수 (interests.yaml 의 daily_articles 가 있으면 그 값)

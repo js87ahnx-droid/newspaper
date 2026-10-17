@@ -173,7 +173,9 @@ def cmd_edit(args: argparse.Namespace) -> int:
     issues = [Issue(**d) for d in json.loads((raw / f"{args.date}.issues.json").read_text(encoding="utf-8"))]
     history_dir = Path(args.data) / "history"
     prev_date, previous = load_previous(history_dir, edition)
-    scored = score_issues(issues, articles, cfg, build_interest_table(interests), previous)
+    hl_path = raw / f"{args.date}.headlines.json"
+    headlines = json.loads(hl_path.read_text(encoding="utf-8")) if hl_path.exists() else []
+    scored = score_issues(issues, articles, cfg, build_interest_table(interests), previous, headlines)
     placed, cstats = choose(scored, cfg, interests)
     ed = arrange(placed, cfg, interests, articles)
     out = edition_to_json(ed, args.date, articles, cstats)
@@ -186,8 +188,59 @@ def cmd_edit(args: argparse.Namespace) -> int:
     print(
         f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "
         f"관심 {st['interest_counted']}/{st['interest_cap']}(제외 {st['interest_skipped']}), 연속 보장 {st['continuity_guaranteed']}, "
-        f"사진 {st['photos']}, 전날 기록 {st['history_previous']}"
+        f"사진 {st['photos']}, 전날 기록 {st['history_previous']}, 같은 사건 합침 {st.get('merged_duplicates', 0)}, "
+        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건"
     )
+    from .render import headline_label
+
+    for it in out["sections"].get("front", []):  # 1면 구성 (기사 제목만 — 공개 로그)
+        print(f"  1면: {it['title'][:60]} | {headline_label(it.get('headline_by', {})) or '머리기사 없음'}")
+    return 0
+
+
+def cmd_headlines(args: argparse.Namespace) -> int:
+    """매체 머리기사(종이신문 1면·머리 피드·홈페이지 맨 위)를 받아 그날 기사와 맞춘다 → <호>.headlines.json"""
+    import asyncio
+
+    from .collect import Article
+    from .headlines import fetch, group, match, to_json
+
+    root = Path(args.root)
+    cfg, sources = load_config(root), load_sources(root)
+    raw = _raw_dir(args)
+    edition = date.fromisoformat(args.date)
+    arts = [Article.from_dict(d) for d in json.loads((raw / f"{args.date}.json").read_text(encoding="utf-8"))]
+    heads, status = asyncio.run(fetch(sources, edition, arts))
+    vecs, embed = None, None
+    try:
+        cache = _cache(args, cfg)
+        if not cache.missing(arts):
+            from .cluster import article_text, embed_texts
+
+            vecs = cache.get(arts)
+            probe = lambda t: Article(id="h", url="", source="", country="", lean="", media_type="", weight=1.0,  # noqa: E731
+                                      paywall=False, kind="", title=t, lead="", lang="ko", published=None,
+                                      date_source="", sections=[], first_seen="")
+            embed = lambda ts: embed_texts([article_text(probe(t)) for t in ts], cfg.clustering.model)  # noqa: E731
+    except Exception as e:  # 임베딩 없이도 어휘로 맞춘다
+        print(f"머리기사: 임베딩 없이 맞춤 ({type(e).__name__})")
+    match(heads, arts, vecs, embed)
+    ask = None
+    if cfg.llm.enabled and not getattr(args, "no_llm", False):
+        from datetime import date as _date
+
+        from .llm import Budget, available, call
+
+        if available()[0]:
+            budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
+            ask = lambda prompt: call(prompt, cfg.llm, budget)[0]  # noqa: E731
+    how = group(heads, arts, vecs, ask)
+    (raw / f"{args.date}.headlines.json").write_text(json.dumps(to_json(heads), ensure_ascii=False, indent=1), encoding="utf-8")
+    got = {h.source for h in heads}
+    matched = sum(1 for h in heads if h.article_id)
+    groups = len({h.group for h in heads if h.group is not None})
+    print(f"{args.date} 호 머리기사: 매체 {len(got)}/{len(status)}곳, {len(heads)}건 중 기사와 맞춤 {matched}건, 같은 기사거리 {groups}묶음({how})"
+          f" | 못 얻음: {[f'{k}({v})' for k, v in status.items() if k not in got]}")
     return 0
 
 
@@ -316,6 +369,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--threshold", type=float, help="유사도 임계값 (기본: config.yaml)")
     p.set_defaults(func=cmd_cluster)
+    p = sub.add_parser("headlines", help="매체 머리기사(종이신문 1면·머리 피드·홈페이지 맨 위)를 받아 기사와 맞춤")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
+    p.add_argument("--no-llm", action="store_true", help="같은 기사거리 묶기를 LLM 없이 (임베딩)")
+    p.set_defaults(func=cmd_headlines)
     p = sub.add_parser("edit", help="점수 계산과 지면 편집 (data/raw/<호>.edition.json)")
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--write-history", action="store_true", help="연속성 기록(data/history)에 이 호를 저장")

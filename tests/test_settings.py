@@ -33,7 +33,7 @@ def test_repo_settings_are_valid():
     "name, mutate, expect",
     [
         ("config.yaml", lambda d: d["weights"].update(attention=-0.1), "weights.attention"),
-        ("config.yaml", lambda d: d["weights"].update(attention=0, importance=0, continuity=0, interest=0), "가중치 합"),
+        ("config.yaml", lambda d: d["weights"].update(attention=0, importance=0, continuity=0, interest=0, headline=0), "가중치 합"),
         ("config.yaml", lambda d: d["editing"].update(diversity_ratio=0.6, interest_cap=0.5), "1을 넘음"),
         ("config.yaml", lambda d: d["editing"].update(interest_cap=1.5), "editing.interest_cap"),
         ("config.yaml", lambda d: d["window"].update(end="25:00"), "HH:MM"),

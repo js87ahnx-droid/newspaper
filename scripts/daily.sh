@@ -30,6 +30,7 @@ $PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모
 $PY -m pipeline prepare --date "$DATE"
 $PY -m pipeline embed --date "$DATE"
 $PY -m pipeline cluster --date "$DATE"
+$PY -m pipeline headlines --date "$DATE" || echo "::warning::매체 머리기사를 받지 못했습니다 (머리기사 가중 없이 편집)"
 $PY -m pipeline edit --date "$DATE" --write-history
 
 LLM_FLAG=""
