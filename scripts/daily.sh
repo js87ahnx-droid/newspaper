@@ -25,14 +25,7 @@ if [ -z "${NEWS_PASSWORD:-}" ]; then
   exit 1
 fi
 
-$PY -m pipeline validate
-$PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모두 실패했습니다 (누적분으로 발행)"
-$PY -m pipeline prepare --date "$DATE"
-$PY -m pipeline embed --date "$DATE"
-$PY -m pipeline cluster --date "$DATE"
-$PY -m pipeline headlines --date "$DATE" || echo "::warning::매체 머리기사를 받지 못했습니다 (머리기사 가중 없이 편집)"
-$PY -m pipeline edit --date "$DATE" --write-history
-
+# LLM 토큰 정리·확인은 맨 앞에서 (머리기사 묶기·이슈 분석 둘 다 LLM 을 쓴다)
 LLM_FLAG=""
 # 붙여 넣을 때 섞인 공백·줄바꿈을 지운다 (터미널 줄 접힘 복사). 값은 찍지 않고 길이·접두어만 남긴다
 if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
@@ -46,6 +39,15 @@ if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || ! command -v claude >/dev/null 2>&1;
   LLM_FLAG="--no-llm"
   echo "LLM 훅: 토큰 또는 claude CLI 없음 — 무토큰으로 발행"
 fi
+
+$PY -m pipeline validate
+$PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모두 실패했습니다 (누적분으로 발행)"
+$PY -m pipeline prepare --date "$DATE"
+$PY -m pipeline embed --date "$DATE"
+$PY -m pipeline cluster --date "$DATE"
+$PY -m pipeline headlines --date "$DATE" $LLM_FLAG || echo "::warning::매체 머리기사를 받지 못했습니다 (머리기사 가중 없이 편집)"
+$PY -m pipeline edit --date "$DATE" --write-history
+
 $PY -m pipeline enrich --date "$DATE" $LLM_FLAG
 $PY -m pipeline publish --date "$DATE" --site docs
 
