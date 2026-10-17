@@ -73,15 +73,20 @@ def test_compare_shown_under_representative_and_reader(browser, tmp_path):  # no
 
 
 def test_demoted_items_become_briefs_in_score_order(browser, tmp_path):  # noqa: F811
-    """정해진 쪽에 다 못 들어간 기사는 단신으로 내려가고, 내려간 기사는 단신 맨 앞(점수 순)."""
+    """정해진 쪽에 다 못 들어간 기사는 단신으로 내려가고, 내려간 기사는 단신 분야 묶음마다 맨 앞(점수 순) — S19c."""
     index = make_site(tmp_path)
     ctx, page, _ = open_page(browser, index, 1024, 768)
     st = page.evaluate(STATE)
-    order = page.evaluate("""() => [...document.querySelectorAll('#book .page.sec-briefs article.item.demoted')]
-        .map(a => +(a.dataset.final2 || a.dataset.final))""")
+    rows = page.evaluate("""() => [...document.querySelectorAll('#book .page.sec-briefs article.item')]
+        .map(a => [a.dataset.topic, a.classList.contains('demoted'), +(a.dataset.final2 || a.dataset.final)])""")
     ctx.close()
-    assert st["demoted"] == len(order)
-    assert order == sorted(order, reverse=True)
+    assert st["demoted"] == sum(1 for r in rows if r[1]) > 0
+    for t in {r[0] for r in rows}:
+        grp = [r for r in rows if r[0] == t]
+        flags = [r[1] for r in grp]
+        assert flags == sorted(flags, reverse=True)          # 내려온 기사가 묶음 앞
+        dem = [r[2] for r in grp if r[1]]
+        assert dem == sorted(dem, reverse=True)
 
 
 @pytest.mark.parametrize("w,h", [(1180, 820), (820, 1180), (390, 844)])
@@ -100,3 +105,28 @@ def test_briefs_are_one_line(browser, tmp_path, w, h):  # noqa: F811
     assert not errors
     assert m["n"] >= 5 and m["grid"] == 0
     assert m["maxH"] <= 36 and m["maxT"] <= 30, m   # 한 줄 높이
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (390, 844)])
+def test_briefs_grouped_by_topic(browser, tmp_path, w, h):  # noqa: F811
+    """S19c: 단신은 분야 소제목 아래로. 한 분야는 한 묶음(쪽이 바뀌면 "(이어서)"), 소제목은 늘 첫 단신과 함께, 넘친 쪽 0."""
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, w, h)
+    m = page.evaluate("""() => {
+      const ps = [...document.querySelectorAll('#book .page.sec-briefs')];
+      ps.forEach(p => p.style.display = '');
+      const rows = ps.flatMap(p => [...p.querySelectorAll('.item.brief')].map(a => a.dataset.topic));
+      const heads = ps.flatMap(p => [...p.querySelectorAll('.brief-topic')].map(h => h.textContent));
+      const lone = [...document.querySelectorAll('#book .brief-group')].filter(g => !g.querySelector('.item.brief')).length;
+      const firsts = ps.map(p => { const a = p.querySelector('.item.brief'); return a ? !!a.closest('.brief-group') : true; });
+      return {rows, heads, lone, firsts, topics: EDITION.briefTopics, names: EDITION.topics}; }""")
+    st = page.evaluate(STATE)
+    ctx.close()
+    assert not errors and st["overflow"] == []
+    runs = [t for i, t in enumerate(m["rows"]) if i == 0 or m["rows"][i - 1] != t]
+    assert len(runs) == len(set(runs)) >= 2                                  # 분야마다 한 번
+    rank = {t: i for i, t in enumerate(m["topics"])}
+    assert [rank.get(t, 99) for t in runs] == sorted(rank.get(t, 99) for t in runs)   # 분야 중요도 순
+    fresh = [h for h in m["heads"] if not h.endswith("(이어서)")]
+    assert fresh == [m["names"].get(t, "기타") for t in runs]
+    assert m["lone"] == 0 and all(m["firsts"])                              # 소제목만 남은 곳 없음, 쪽 첫 단신엔 소제목

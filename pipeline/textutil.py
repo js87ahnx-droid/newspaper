@@ -48,7 +48,7 @@ def parse_date(raw: str | None, country: str) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
-_TRACKING = re.compile(r"^(utm_|fbclid$|gclid$|igshid$|mc_|ocid$|cmpid$|ref$|ref_src$|smid$|rss$|plink$|sectionid$)", re.I)
+_TRACKING = re.compile(r"^(utm_|fbclid$|gclid$|igshid$|mc_|ocid$|cmpid$|ref$|ref_src$|smid$|rss$|plink$|sectionid$|syn-)", re.I)
 
 
 def normalize_url(url: str) -> str:

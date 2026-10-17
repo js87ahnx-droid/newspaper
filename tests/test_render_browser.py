@@ -26,7 +26,7 @@ pw = pytest.importorskip("playwright.sync_api")
 IPADS = [(1024, 768), (1180, 820), (1194, 834), (1366, 1024)]
 
 
-def make_site(tmp_path: Path, edition_date="2026-10-16", broken_photo=False, previous=None) -> Path:
+def make_site(tmp_path: Path, edition_date="2026-10-16", broken_photo=False, previous=None, mutate=None) -> Path:
     cfg, interests, sources = load_config(), load_interests(), load_sources()
     arts, issues = build()
     for a in arts.values():  # 리드는 RSS 상한까지 긴 것으로 (쪽 넘침을 잘 드러내도록)
@@ -40,6 +40,8 @@ def make_site(tmp_path: Path, edition_date="2026-10-16", broken_photo=False, pre
     prior = day_prior(list(arts.values()))
     for it in [i for ps in out["sections"].values() for i in ps] + out["compare"]:
         it["stance"] = stance([arts[a["id"]] for a in it["articles"]], prior)
+    if mutate:   # 테스트가 LLM 분석 등을 붙여 볼 때
+        mutate(out)
     site = tmp_path / "site"
     render(out, cfg, interests, sources, site)
     return site / "index.html"

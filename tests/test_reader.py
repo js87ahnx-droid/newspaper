@@ -100,14 +100,14 @@ ARTICLE = {"ok": True, "url": "https://www.chosun.com/x/", "title": "재배열�
            "paragraphs": ["첫 문단 <b>태그는 글자로</b>", "둘째 문단", "셋째 문단"], "via": "본문 칸", "chars": 30}
 
 
-def _open(browser, tmp_path, monkeypatch, handler, configured=True):  # noqa: F811
+def _open(browser, tmp_path, monkeypatch, handler, configured=True, mutate=None):  # noqa: F811
     if configured:
         monkeypatch.setenv("READER_URL", "https://reader.test")
         monkeypatch.setenv("READER_KEY", "k-test")
     else:
         monkeypatch.delenv("READER_URL", raising=False)
         monkeypatch.delenv("READER_KEY", raising=False)
-    index = make_site(tmp_path)
+    index = make_site(tmp_path, mutate=mutate)
     ctx = browser.new_context(viewport={"width": 1180, "height": 820}, reduced_motion="reduce")
     ctx.add_init_script("try{localStorage.setItem('news.survey', '2099-W01');}catch(e){}")
     seen = []
@@ -342,3 +342,53 @@ def test_related_opinions_by_issue_including_merged():
     # 같은 사건으로 합쳐진 이슈(b → a)에 연결된 것도 그 기사 곁에
     ids = ["a", *["b"]]
     assert [o["title"] for i in ids for o in rel.get(i, [])] == ["사설1", "칼럼", "합쳐진 쪽"]
+
+
+# ---------- S19a 표기, S19b 매체별 관점 원문 ----------
+def test_stance_links_match_source_names():
+    from pipeline.render import stance_links
+    it = {"articles": [{"source": "New York Times", "url": "n1"}, {"source": "조선일보", "url": "c1"}, {"source": "조선일보", "url": "c2"},
+                       {"source": "Guardian", "url": "g1"}]}
+    an = {"stances": [{"source": "NYT", "view": "a"}, {"source": "조선일보", "view": "b"}, {"source": "조선", "view": "c"},
+                      {"source": "The Guardian", "view": "d"}, {"source": "Le Monde", "view": "e"}, {"source": "", "view": "f"},
+                      {"source": "뉴욕타임스", "view": "g"}, {"source": "가디언", "view": "h"}]}
+    got = [(s["view"], s["article"]["url"] if s["article"] else None) for s in stance_links(it, an)]
+    assert got == [("a", "n1"), ("b", "c1"), ("c", "c1"), ("d", "g1"), ("e", None), ("f", None),
+                   ("g", "n1"), ("h", "g1")]   # 대표 = 첫 기사, 한글 이름도
+    assert stance_links(it, None) == [] and stance_links(it, {"stances": []}) == []
+
+
+def test_headline_and_coverage_labels(tmp_path):
+    from pipeline.render import headline_label
+    assert headline_label({"BBC": [1, "feed"], "조선일보": [1, "naver_a1"]}) == "1면 조선 / 헤드라인 BBC"
+    html = make_site(tmp_path).read_text(encoding="utf-8")
+    assert re.search(r"\d+개 매체·\d+개국 보도", html) and not re.search(r"매체 \d+ · 국가 \d+", html)
+    assert "머리 " not in re.sub(r"<script.*?</script>", "", html, flags=re.S)
+
+
+def _with_stances(out):
+    for ps in out["sections"].values():
+        for it in ps[:2]:
+            srcs = list(dict.fromkeys(a["source"] for a in it["articles"]))
+            it["llm"] = {"analysis": {"headline": "분석 제목", "summary": "요약", "background": "", "points": [], "brief": "",
+                                      "stances": [{"source": s, "view": f"{s} 관점"} for s in srcs] + [{"source": "없는 매체", "view": "x"}]}}
+
+
+def test_stance_view_orig_opens_that_outlets_article(browser, tmp_path, monkeypatch):  # noqa: F811
+    """매체별 관점 줄의 "원문" → 그 매체 기사 원문 창 (S19b). 맞는 기사가 없는 줄엔 단추 없음."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), mutate=_with_stances)
+    info = page.evaluate("""() => { const lis = [...document.querySelectorAll('#flow .an-views li')];
+        const b = document.querySelector('#book .page .an-views button.view-orig:not([data-read=""])');
+        const r = {rows: lis.length, btn: lis.filter(l => l.querySelector('button.view-orig')).length,
+                   nobtn: lis.filter(l => l.textContent.startsWith('없는 매체')).every(l => !l.querySelector('button')),
+                   srcOk: lis.every(l => { const x = l.querySelector('button'); return !x || l.querySelector('b').textContent === x.dataset.src; })};
+        if (b) { b.scrollIntoView(); b.click(); r.read = b.dataset.read; }
+        return r; }""")
+    assert info["rows"] > info["btn"] > 0 and info["nobtn"] and info["srcOk"], info
+    assert info.get("read"), "지면에 원문 단추가 보이는 관점 줄이 없음"
+    page.wait_for_selector(".readview .rv-p")
+    assert _view(page)["label"] == "원문 보기" and errors == []
+    from urllib.parse import parse_qs, urlsplit
+    get = [s for s in seen if s["method"] == "GET"]
+    assert parse_qs(urlsplit(get[-1]["url"]).query)["url"] == [info["read"]]
+    ctx.close()

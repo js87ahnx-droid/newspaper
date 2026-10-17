@@ -175,3 +175,18 @@ def test_llm_cache_prevents_recall(tmp_path):
     n = len(calls)
     enrich(edition_fixture(), cfg, disp, tmp_path / "llm.json", budget, runner=runner)
     assert len(calls) == n
+
+
+def test_call_takes_first_json_object_despite_trailing_text(tmp_path):
+    """S19 평가: 응답 JSON 뒤에 설명이나 두 번째 객체가 붙어도 첫 객체를 쓴다 ("Extra data" 실패)."""
+    import json as _json
+    from datetime import date as _d
+    from pipeline.llm import Budget, call
+    from pipeline.settings import load_config
+    cfg = load_config().llm
+    for body in ['{"groups": [[0, 1]]}\n\n{"note": "x"}', '설명 {"groups": [[0, 1]]} 끝 {괄호}', '```json\n{"groups": [[0, 1]]}\n```']:
+        out = _json.dumps({"result": body})
+        got, st = call("p", cfg, Budget(tmp_path / "u.json", _d(2026, 10, 17), 99), runner=lambda t, o=out: o)
+        assert (got, st) == ({"groups": [[0, 1]]}, "ok"), body
+    got, st = call("p", cfg, Budget(tmp_path / "u.json", _d(2026, 10, 17), 99), runner=lambda t: _json.dumps({"result": "없음"}))
+    assert got is None and st.startswith("응답 형식 오류")

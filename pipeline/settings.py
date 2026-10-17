@@ -75,7 +75,7 @@ class Editing(Strict):
     # topic: 관심 분야 기사 전체를 상한에 셈
     interest_cap_mode: Literal["driven", "topic"] = "driven"
     # 예비 기사 (S15): 하루 분량 다음 순위 기사. 지면에 쪽이 남으면 단신으로 채운다 (같은 사건 합치기로 빈 자리도)
-    reserve: int = Field(default=10, ge=0, le=40)
+    reserve: int = Field(default=10, ge=0, le=150)
 
     @model_validator(mode="after")
     def _ratios(self) -> "Editing":
@@ -142,7 +142,7 @@ class Llm(Strict):
     timeout_sec: int = Field(gt=0, le=600)
     # 본문 기반 이슈 분석 (S14, D13·D15): 지면 상위 묶음만, 여러 묶음을 한 번에
     analysis_model: str = "sonnet"
-    analysis_issues: int = Field(default=40, ge=0, le=60)
+    analysis_issues: int = Field(default=40, ge=0, le=100)
     analysis_batch: int = Field(default=5, ge=1, le=10)
     analysis_timeout_sec: int = Field(default=300, gt=0, le=900)
 
@@ -204,6 +204,18 @@ class Feed(Strict):
     date_source: Literal["feed", "page_meta"] = "feed"
     # 이 문자열이 제목에 있는 항목만 받는다 (예: Google 뉴스 검색 피드에서 "[사설]"만)
     title_must: str | None = None
+    # 기사 주소가 이 정규식에 맞는 항목만 받는다 (S19e: Bloomberg 피드에 섞인 영상·오디오·뉴스레터를 거름)
+    url_must: str | None = None
+
+    @field_validator("url_must")
+    @classmethod
+    def _regex(cls, v: str | None) -> str | None:
+        if v is not None:
+            try:
+                re.compile(v)
+            except re.error as e:
+                raise ValueError(f"url_must 정규식 오류: {e}") from None
+        return v
 
 
 class HeadlineSrc(Strict):

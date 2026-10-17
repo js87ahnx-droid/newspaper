@@ -23,25 +23,26 @@ weights:
   front_headline: 0.50  # 1면을 고를 때 머리기사 비중 (주목도 0.35·중요도 0.30 과 함께 → 1면에서는 머리기사가 가장 큼)
 
 editing:
-  total_articles: 40       # 하루 지면 기사 수 (interests.yaml 의 daily_articles 가 있으면 그 값)
+  total_articles: 60       # 하루 지면 기사 수 (S19d 40 → 60) (interests.yaml 의 daily_articles 가 있으면 그 값)
   diversity_ratio: 0.30    # 관심도와 무관하게 주목도 상위 이슈에 배정하는 비율
   interest_cap: 0.50       # 관심 분야 기사 비율 상한
   continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
   history_days: 14         # 연속성 계산에 쓰는 과거 일수
-  reserve: 30              # 예비 기사: 쪽이 남으면 단신으로 채움 (S15). 단신이 한 줄이 되며(S17e) 10 → 30
+  reserve: 120             # 예비 기사: 쪽이 남으면 단신으로 채움 (S15). 단신이 한 줄이 되며(S17e) 10 → 30, 24쪽(S19d) 120 — 10/16 실측: 40 이면 끝 빈 쪽 3장, 60 이면 2장, 90 이면 1장
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
-# pages: 고정 쪽 수 (S15). 합 16쪽(펼침 8면) — 짝수여야 펼침면이 맞는다. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 단신이 쓴다
+# pages: 고정 쪽 수 (S15). 합 24쪽(펼침 12면 — S19d 사용자 요청 "지면 좀 더 많이", 16 → 24) — 짝수여야 펼침면이 맞는다.
+# 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 논평·단신이 쓴다
 sections:
   - {id: front, title: "1면", max_articles: 5, pages: 2}
-  - {id: politics, title: "정치·안보", max_articles: 6, pages: 2}
-  - {id: economy, title: "경제·산업", max_articles: 6, pages: 2}
-  - {id: international, title: "국제", max_articles: 6, pages: 2}
-  - {id: interest, title: "관심", max_articles: 6, pages: 2}
-  - {id: compare, title: "입장 비교", max_articles: 3}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
-  - {id: briefs, title: "단신", max_articles: 20, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (기사마다 가로 한 줄 — S17e)
-  - {id: opinion, title: "논평·사설", max_articles: 0, pages: 2}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
+  - {id: politics, title: "정치·안보", max_articles: 9, pages: 3}
+  - {id: economy, title: "경제·산업", max_articles: 9, pages: 3}
+  - {id: international, title: "국제", max_articles: 12, pages: 4}
+  - {id: interest, title: "관심", max_articles: 8, pages: 2}
+  - {id: compare, title: "입장 비교", max_articles: 4}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
+  - {id: briefs, title: "단신", max_articles: 30, pages: 5}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (가로 한 줄 — S17e, 분야별 묶음 — S19c)
+  - {id: opinion, title: "논평·사설", max_articles: 0, pages: 4}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0, pages: 1}
 
 clustering:
@@ -88,6 +89,6 @@ llm:
   max_calls_per_day: 30
   timeout_sec: 120
   analysis_model: sonnet
-  analysis_issues: 50   # 지면 40건 + 예비 10건
+  analysis_issues: 70   # 지면 60건 + 예비 10건 (S19d, 14회)
   analysis_batch: 5
   analysis_timeout_sec: 300

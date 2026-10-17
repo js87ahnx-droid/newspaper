@@ -81,7 +81,7 @@
       {% elif v.analysis %}
           {% if v.analysis.background %}<p class="an-bg"><b>배경</b> {{ v.analysis.background }}</p>{% endif %}
           {% if v.analysis.points %}<ul class="an-pts">{% for p in v.analysis.points %}<li>{{ p }}</li>{% endfor %}</ul>{% endif %}
-          {% if v.analysis.stances %}<ul class="an-views" aria-label="매체별 관점">{% for s in v.analysis.stances %}<li><b>{{ s.source }}</b> {{ s.view }}</li>{% endfor %}</ul>{% endif %}
+          {% if it.stance_links %}<ul class="an-views" aria-label="매체별 관점">{% for s in it.stance_links %}<li><b>{{ s.source }}</b> {{ s.view }}{% if s.article %} <button type="button" class="view-orig" data-href="{{ real_url(s.article.url) }}"{{ art(s.article.url, s.article.source, s.article.lang) }} aria-label="{{ s.source }} 기사 원문">원문</button>{% endif %}</li>{% endfor %}</ul>{% endif %}
       {% endif %}
       {% if it.cmp_groups and not brief %}
       <div class="cmp-inline" aria-label="성향별 보도">
@@ -108,9 +108,9 @@
         {% if it.time %}<time class="tm">{{ it.time }}</time>{% endif %}
         <span class="src">{{ it.source }}</span>
         <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>
-        {% if it.headline_label %}<span class="hlb" title="그날 이 매체들이 1면·머리기사로 올림">{{ it.headline_label }}</span>{% endif %}
+        {% if it.headline_label %}<span class="hlb" title="그날 이 매체들이 1면·헤드라인으로 올림">{{ it.headline_label }}</span>{% endif %}
         {% if it.days > 1 %}<span class="days">{{ it.days }}일째 보도</span>{% endif %}
-        {% if it.coverage.sources > 1 %}<span class="cover">매체 {{ it.coverage.sources }} · 국가 {{ it.coverage.countries }}</span>{% endif %}
+        {% if it.coverage.sources > 1 %}<span class="cover" title="이 이슈를 다룬 매체 수·나라 수">{{ it.coverage.sources }}개 매체·{{ it.coverage.countries }}개국 보도</span>{% endif %}
         {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}
         <button type="button" class="orig-btn" data-href="{{ real_url(it.url) }}"{{ art(it.url, it.source, v.lang) }}>원문{% if v.paywall %} (유료){% endif %}</button>
         <a class="link-btn" href="{{ real_url(it.url) }}" target="_blank" rel="noopener noreferrer">링크</a>
@@ -185,7 +185,7 @@
     <div class="item guide-intro">
       <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 라벨은 sources.yaml 에서 고칠 수 있습니다.</p>
       <p>이 지면은 각 매체 RSS의 제목·요약과 원문 링크, 그리고 AI가 여러 매체 기사를 읽고 새로 쓴 정리("AI 정리")로 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
-      <p>기사 자리: 1면은 그날 각 신문 1면·홈페이지 머리기사로 오른 이슈("1면 조선·동아 / 머리 BBC")를 가장 무겁게 보고, 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)를 함께 봅니다. 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채우고, 관심도 때문에 들어온 기사는 절반을 넘지 않습니다. 정해진 쪽에 다 못 들어간 기사는 단신으로 실립니다.</p>
+      <p>기사 자리: 1면은 그날 각 신문 1면·홈페이지 헤드라인으로 오른 이슈("1면 조선·동아 / 헤드라인 BBC")를 가장 무겁게 보고, 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)를 함께 봅니다. 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채우고, 관심도 때문에 들어온 기사는 절반을 넘지 않습니다. 정해진 쪽에 다 못 들어간 기사는 단신으로 실립니다.</p>
     </div>
     <div class="item guide-table">
       <table>

@@ -97,8 +97,42 @@
     return b;
   }
 
+  // 단신 분야 묶음 (S19c): 분야 소제목 + 그 분야 첫 단신을 한 덩어리로 (소제목만 쪽 끝에 남지 않게)
+  function topicHead(name, cont, node) {
+    var w = document.createElement("div");
+    w.className = "brief-group";
+    var h = document.createElement("h4");
+    h.className = "brief-topic";
+    h.textContent = name + (cont ? " (이어서)" : "");
+    w.appendChild(h);
+    w.appendChild(node);
+    return w;
+  }
+  // 실을 단신(우선순위 순)을 분야 순서(분야 중요도 순)로 다시 늘어놓는다. 분야 안은 원래 순서
+  function groupBriefs(els) {
+    var rank = {};
+    (E.briefTopics || []).forEach(function (t, i) { rank[t] = i; });
+    var idx = els.map(function (el, i) { return { el: el, i: i, r: rank[el.getAttribute("data-topic")] !== undefined ? rank[el.getAttribute("data-topic")] : 99 }; });
+    idx.sort(function (a, b) { return a.r - b.r || a.i - b.i; });
+    var last = null;
+    return idx.map(function (x) {
+      var t = x.el.getAttribute("data-topic"), name = (E.topics || {})[t] || "기타";
+      var node = asBrief(x.el);
+      node.setAttribute("data-topic-name", name);
+      var start = t !== last;
+      last = t;
+      return { el: x.el, node: start ? topicHead(name, false, node) : node };
+    });
+  }
+  // 묶음 배치에서 쪽이 바뀌면, 새 쪽 첫 단신이 묶음 첫 줄이 아니어도 소제목을 "(이어서)"로 다시 단다
+  function contHead(node) {
+    return node.classList.contains("brief-group") ? node : topicHead(node.getAttribute("data-topic-name") || "기타", true, node);
+  }
+
   // 섹션 하나를 최대 budget 쪽에 배치 (budget 0 = 제한 없음). 못 들어간 원본 요소는 rest 로 돌려준다
-  function placeSection(stage, g, sec, first, budget, nodes, mast) {
+  // opts.grouped: 단신 분야 묶음 — 뒤 기사로 빈자리 채우기를 하지 않고(분야 순서 유지), 새 쪽엔 소제목을 다시 단다
+  function placeSection(stage, g, sec, first, budget, nodes, mast, opts) {
+    var grouped = opts && opts.grouped;
     var id = sec.getAttribute("data-section"), title = sec.getAttribute("data-title");
     var out = [], rest = [];
     var grid = false;   // 단신은 기사마다 가로 한 줄 (S17e — 예전엔 폭이 넉넉하면 두 단)
@@ -131,7 +165,7 @@
       }
       inner.removeChild(node);
       // 새 쪽으로 넘기기 전에, 뒤 기사 중 남은 자리에 들어가는 것으로 빈자리를 채운다 (한 쪽 아래가 비지 않게)
-      for (var j = k + 1; j < nodes.length; j++) {
+      for (var j = k + 1; j < nodes.length && !grouped; j++) {
         if (used[j]) continue;
         inner.appendChild(nodes[j].node);
         if (overflows(inner)) inner.removeChild(nodes[j].node); else { used[j] = true; placedOnPage++; }
@@ -140,6 +174,7 @@
       page = mk(true);
       stage.appendChild(page);
       inner = page.firstChild;
+      if (grouped) node = src.node = contHead(node);
       inner.appendChild(node);
       placedOnPage = 0;
       if (overflows(inner)) fit(inner, node);
@@ -219,6 +254,18 @@
         opRest = op.rest.length;
         res = fewer; bBudget -= 1;
       }
+      // 실을 단신이 정해졌으면 분야별로 묶어 다시 배치 (S19c). 소제목 몫만큼 넘치면 우선순위가 가장 낮은 단신부터 뺀다
+      var cut = res.rest.map(function (r) { return r.el; });
+      var keep = pool.filter(function (el) { return cut.indexOf(el) < 0; });
+      res.pages.forEach(function (p) { p.remove(); });
+      var grp;
+      while (true) {
+        grp = placeSection(stage, g, briefSec, false, bBudget, groupBriefs(keep), null, { grouped: true });   // 쪽 한도는 그대로(bBudget)
+        if (!grp.rest.length || !keep.length) break;
+        grp.pages.forEach(function (p) { p.remove(); });
+        cut.push(keep.pop());
+      }
+      res = { pages: grp.pages, rest: cut.map(function (el) { return { el: el }; }).concat(grp.rest) };
       built.briefs = res.pages;
       dropped += res.rest.length;
       if (order.indexOf("briefs") < 0) order.splice(Math.max(0, order.indexOf("opinion")) || order.length, 0, "briefs");

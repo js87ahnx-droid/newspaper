@@ -104,6 +104,8 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
         title = _GNEWS_SUFFIX.sub("", title)
     if feed.title_must and feed.title_must not in title:
         return None
+    if feed.url_must and not re.search(feed.url_must, link):
+        return None
         lead = ""
     else:
         lead = cap_lead(clean_text(entry.get("summary")))

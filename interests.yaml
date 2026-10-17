@@ -21,7 +21,7 @@ less_weight: 0.2
 keyword_boost: 0.5
 
 # 4. 하루 읽을 기사 수
-daily_articles: 40
+daily_articles: 60
 
 # 5. 성향·국가별 입장 비교를 우선 보고 싶은 이슈 유형
 compare_topics: [diplomacy_security, economic_policy, domestic_politics, tech_regulation]

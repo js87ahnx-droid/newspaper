@@ -83,18 +83,47 @@ def _display(item: dict, display) -> dict:
 
 SHORT_NAME = {"조선일보": "조선", "중앙일보": "중앙", "동아일보": "동아", "한겨레": "한겨레", "경향신문": "경향", "한국경제": "한경",
               "매일경제": "매경", "연합뉴스": "연합", "New York Times": "NYT", "Wall Street Journal": "WSJ", "Fox News": "Fox",
-              "Global Times": "환구시보", "Al Jazeera": "알자지라", "NHK World": "NHK World"}
+              "Global Times": "환구시보", "Al Jazeera": "알자지라", "NHK World": "NHK World",
+              "Financial Times": "FT", "Washington Post": "WaPo", "The Economist": "Economist"}
 
 
 def headline_label(by: dict) -> str | None:
-    """'1면 조선·동아 / 머리 BBC' — 종이신문 1면(naver_a1)과 홈페이지·피드 머리기사를 나눠 순위 순으로."""
+    """'1면 조선·동아 / 헤드라인 BBC' — 종이신문 1면(naver_a1)과 홈페이지·피드 헤드라인을 나눠 순위 순으로 (S19a: "머리"→"헤드라인")."""
     if not by:
         return None
     order = sorted(by.items(), key=lambda kv: (kv[1][0], kv[0]))
     a1 = [SHORT_NAME.get(n, n) for n, (_, via) in order if via == "naver_a1"]
     top = [SHORT_NAME.get(n, n) for n, (_, via) in order if via != "naver_a1"]
-    parts = ([f"1면 {'·'.join(a1)}"] if a1 else []) + ([f"머리 {'·'.join(top)}"] if top else [])
+    parts = ([f"1면 {'·'.join(a1)}"] if a1 else []) + ([f"헤드라인 {'·'.join(top)}"] if top else [])
     return " / ".join(parts)
+
+
+# 매체별 관점에서 LLM 이 쓰는 한글 매체 이름 (S19b 평가: 10/16 "가디언·월스트리트저널·뉴욕타임스"가 안 맞음)
+KO_NAMES = {"New York Times": "뉴욕타임스", "Wall Street Journal": "월스트리트저널", "Guardian": "가디언", "Fox News": "폭스뉴스",
+            "Reuters": "로이터", "AP": "AP통신", "Nikkei Asia": "닛케이", "Japan Times": "재팬타임스", "SCMP": "사우스차이나모닝포스트",
+            "Bloomberg": "블룸버그", "Financial Times": "파이낸셜타임스", "The Economist": "이코노미스트", "Le Monde": "르몽드",
+            "Washington Post": "워싱턴포스트", "Al Jazeera": "알자지라", "Global Times": "환구시보", "BBC": "비비씨", "CNN": "씨엔엔"}
+
+
+def _source_key(name: str) -> str:
+    return re.sub(r"[\s.·'’-]|^the", "", name.casefold())
+
+
+def stance_links(it: dict, analysis: dict | None) -> list[dict]:
+    """매체별 관점 (S19b): 줄마다 그 매체의 이슈 기사(대표 = 첫 기사)를 붙여 원문 창으로. LLM 이 쓴 매체 이름이
+    정식 이름·약칭(NYT·WSJ·조선 등)·앞뒤 일부("The Guardian"↔"Guardian")와 맞으면, 맞는 기사가 없으면 article 없음."""
+    if not analysis or not analysis.get("stances"):
+        return []
+    first: dict[str, dict] = {}
+    for a in it.get("articles", []):
+        for k in {_source_key(n) for n in (a["source"], SHORT_NAME.get(a["source"], ""), KO_NAMES.get(a["source"], "")) if n}:
+            first.setdefault(k, a)
+    out = []
+    for st in analysis["stances"]:
+        k = _source_key(st.get("source", ""))
+        art = first.get(k) or (next((a for kk, a in first.items() if len(k) >= 3 and (k in kk or kk in k)), None) if k else None)
+        out.append({**st, "article": art})
+    return out
 
 
 def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) -> dict:
@@ -109,6 +138,8 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
         "topicWeights": table.topic_weights, "keywords": list(table.keywords), "keywordBoost": table.keyword_boost,
         "maxInterest": (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1,
         "interestCap": st.get("interest_cap", 0), "interestCounted": st.get("interest_counted", 0),
+        # 단신 분야 묶음 순서 (S19c): 분야 중요도 순, 같으면 TOPICS 순
+        "briefTopics": sorted(TOPICS, key=lambda k: -cfg.importance.topic_weights.get(k, 0)),
         "topics": TOPICS, "topicSection": {"politics": "politics", "economy": "economy", "industry": "economy",
                                            "semis_ai": "economy", "international": "international"},
         "sectionTitles": {s.id: s.title for s in cfg.sections},
@@ -191,6 +222,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
                 **it, "view": view, "photo": larger_photo(it.get("photo")), "headline_label": headline_label(it.get("headline_by", {})),
                 "time": time_label(rep.get("published"), cfg.timezone),
                 "brief_text": brief_text(it, view),
+                "stance_links": stance_links(it, view.get("analysis")),
                 # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)
                 "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
                 # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)

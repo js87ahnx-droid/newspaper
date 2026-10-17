@@ -237,9 +237,43 @@ sources:
       - {section: top, url: "https://moxie.foxnews.com/google-publisher/latest.xml", main: true}
       - {section: international, url: "https://moxie.foxnews.com/google-publisher/world.xml"}
       - {section: politics, url: "https://moxie.foxnews.com/google-publisher/politics.xml"}
+      - {section: opinion, url: "https://moxie.foxnews.com/google-publisher/opinion.xml"}
+
+  - name: Bloomberg
+    country: US
+    lean: 경제지
+    type: 경제지
+    weight: 1.0
+    paywall: true
+    enabled: true
+    site: [bloomberg.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S19e): 봇 차단(403 캡차) → 원문 링크로. 피드에 사진 없음, 홈페이지 403 → 헤드라인 없음
+    # 피드에 영상·오디오·뉴스레터가 섞임(정치 20건 중 영상 10) → 기사 주소만
+    feeds:
+      - {section: economy, url: "https://feeds.bloomberg.com/markets/news.rss", main: true, url_must: "/(news|opinion)/articles/"}
+      - {section: economy, url: "https://feeds.bloomberg.com/economics/news.rss", url_must: "/(news|opinion)/articles/"}
+      - {section: politics, url: "https://feeds.bloomberg.com/politics/news.rss", url_must: "/(news|opinion)/articles/"}
+      - {section: tech, url: "https://feeds.bloomberg.com/technology/news.rss", url_must: "/(news|opinion)/articles/"}
+      - {section: opinion, url: "https://feeds.bloomberg.com/bview/news.rss", url_must: "/(news|opinion)/articles/"}
+
+  - name: Washington Post
+    country: US
+    lean: 진보
+    type: 종합지
+    weight: 0.9
+    paywall: true
+    enabled: true
+    site: [washingtonpost.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S19e): 유료 벽(본문 300자 안팎만) → 원문 링크로
+    # feeds.washingtonpost.com/rss/* 는 전부 502(2026-10-17) → arcio 피드. 사설 전용 피드는 비어 있어 의견 피드 전체
+    feeds:
+      - {section: top, url: "https://www.washingtonpost.com/arcio/rss/", main: true}
+      - {section: politics, url: "https://www.washingtonpost.com/arcio/rss/category/politics/"}
+      - {section: international, url: "https://www.washingtonpost.com/arcio/rss/category/world/"}
+      - {section: economy, url: "https://www.washingtonpost.com/arcio/rss/category/business/"}
+      - {section: opinion, url: "https://www.washingtonpost.com/arcio/rss/category/opinions/"}
 
   # ---------------- 영국 ----------------
-      - {section: opinion, url: "https://moxie.foxnews.com/google-publisher/opinion.xml"}
 
   - name: BBC
     country: UK
@@ -282,6 +316,57 @@ sources:
     reader: false   # 원문 재배열 실측 실패 2026-10-17: 봇 차단(401) → 원문 링크로
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:reuters.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
+
+  - name: Financial Times
+    country: UK
+    lean: 경제지
+    type: 경제지
+    weight: 1.0
+    paywall: true
+    enabled: true
+    site: [ft.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S19e): 봇 차단(403)·유료 벽 → 원문 링크로
+    headline: [{kind: feed, url: "https://www.ft.com/rss/home"}]   # 시간순이 아닌 편집 순서
+    feeds:
+      - {section: top, url: "https://www.ft.com/rss/home", main: true}
+      - {section: international, url: "https://www.ft.com/world?format=rss"}
+      - {section: economy, url: "https://www.ft.com/markets?format=rss"}
+      - {section: economy, url: "https://www.ft.com/companies?format=rss"}
+      - {section: opinion, url: "https://www.ft.com/opinion?format=rss"}
+      - {section: opinion, url: "https://www.ft.com/ft-view?format=rss"}   # FT 사설(The FT View)
+
+  - name: The Economist
+    country: UK
+    lean: 경제지
+    type: 경제지
+    weight: 0.8
+    paywall: true
+    enabled: true
+    site: [economist.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S19e): 봇 차단(403) → 원문 링크로
+    # 주간지: 섹션 피드는 목요일 호만. 평일 새 기사는 latest 에 하루 8건 안팎 — 팟캐스트는 거름
+    feeds:
+      - {section: top, url: "https://www.economist.com/latest/rss.xml", main: true, url_must: "^(?!.*/podcasts/)"}
+      - {section: opinion, url: "https://www.economist.com/leaders/rss.xml"}   # 사설(Leaders), 주 1회
+
+  # ---------------- 프랑스 ----------------
+  - name: Le Monde
+    country: FR
+    lean: 진보
+    type: 종합지
+    weight: 0.8
+    paywall: true
+    enabled: true
+    site: [lemonde.fr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [en]   # 영어판만 — 프랑스어 언어 판정·번역은 아직 없음
+    reader: false   # 실측 2026-10-17(S19e): 봇 차단(402) → 원문 링크로
+    headline: [{kind: feed, url: "https://www.lemonde.fr/en/rss/une.xml"}]   # 편집 순서
+    feeds:
+      - {section: top, url: "https://www.lemonde.fr/en/rss/une.xml", main: true}
+      - {section: international, url: "https://www.lemonde.fr/en/international/rss_full.xml"}
+      - {section: economy, url: "https://www.lemonde.fr/en/economy/rss_full.xml"}
+      - {section: politics, url: "https://www.lemonde.fr/en/politics/rss_full.xml"}
+      - {section: opinion, url: "https://www.lemonde.fr/en/opinion/rss_full.xml"}
 
   # ---------------- 일본 ----------------
   - name: Nikkei Asia

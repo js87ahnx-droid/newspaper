@@ -11,7 +11,10 @@ from pathlib import Path
 
 import pytest
 
+from pipeline.settings import load_config
 from tests.test_render_browser import browser, make_site  # noqa: F401  (fixture 재사용)
+
+CFG = load_config()
 
 pw = pytest.importorskip("playwright.sync_api")
 
@@ -88,7 +91,7 @@ def test_more_feedback_promotes_within_cap(browser, tmp_path):
     ctx.close()
     assert 1 <= moved["promoted"] <= cap_room
     assert target in after["interest"] and target not in after["briefs"]
-    assert len(after["interest"]) <= 6
+    assert len(after["interest"]) <= next(x.max_articles for x in CFG.sections if x.id == "interest")
 
 
 def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
@@ -112,7 +115,7 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     assert first == top                            # 1면 톱 그대로
     assert set(guaranteed) <= book                 # 다양성·연속 보장 기사 모두 지면에
     assert len(guaranteed) / total >= 0.3          # 다양성 30% 이상 유지
-    assert total == 40                             # 기사가 지면에서 사라지지 않음 (단신으로만 내려감)
+    assert total == CFG.editing.total_articles     # 기사가 지면에서 사라지지 않음 (단신으로만 내려감)
 
 
 def test_survey_once_per_week(browser, tmp_path):

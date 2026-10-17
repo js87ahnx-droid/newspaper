@@ -97,7 +97,7 @@ def test_issue_headlines_and_label():
              {"source": "동아일보", "rank": 1, "via": "homepage", "article_id": "zz"}]
     by = H.issue_headlines(heads, ["a1", "a2", "a3"])
     assert by == {"조선일보": [1, "naver_a1"], "BBC": [1, "feed"]}
-    assert headline_label(by) == "1면 조선 / 머리 BBC"
+    assert headline_label(by) == "1면 조선 / 헤드라인 BBC"
     assert headline_label({}) is None
 
 

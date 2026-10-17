@@ -94,8 +94,11 @@ def call(prompt: str, cfg: Llm, budget: Budget, runner=None, model: str | None =
         text = envelope.get("result", "") if isinstance(envelope, dict) else out
         if isinstance(envelope, dict) and envelope.get("is_error"):
             return None, f"CLI 오류: {text[:200]}"
-        start, end = text.find("{"), text.rfind("}")
-        return json.loads(text[start : end + 1]), "ok"
+        # 첫 번째 완전한 JSON 객체만 (뒤에 설명·두 번째 객체가 붙어도 — S19 평가: "Extra data" 로 같은 사건 묶기 실패)
+        start = text.find("{")
+        if start < 0:
+            raise ValueError("JSON 객체 없음")
+        return json.JSONDecoder().raw_decode(text, start)[0], "ok"
     except (ValueError, AttributeError) as e:
         return None, f"응답 형식 오류: {e}"
 

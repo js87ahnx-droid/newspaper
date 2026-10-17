@@ -272,3 +272,20 @@ def test_prepare_cli_writes_report(tmp_path):
     report = json.loads((tmp_path / "run-report.json").read_text(encoding="utf-8"))
     assert report["articles"] == 1
     assert report["collect_runs"][0]["feeds_failed"][0]["error"] == "HTTP 403"
+
+
+def test_url_must_filters_videos_and_ft_query_is_dropped():
+    """S19e: Bloomberg 피드의 영상·뉴스레터는 거르고(url_must), FT 피드 주소의 ?syn-… 는 같은 기사로 합친다."""
+    from pipeline.collect import entry_to_article
+    from pipeline.settings import Feed, Source
+    from pipeline.textutil import normalize_url
+    feed = Feed(section="economy", url="https://feeds.bloomberg.com/markets/news.rss", url_must="/(news|opinion)/articles/")
+    src = Source(name="Bloomberg", country="US", lean="경제지", type="경제지", weight=1.0, paywall=True, enabled=True, feeds=[feed])
+    now = datetime(2026, 10, 17, 12, tzinfo=timezone.utc)
+    mk = lambda u: {"link": u, "title": "Stocks rally", "summary": "x", "published": "Fri, 17 Oct 2026 10:00:00 GMT"}
+    assert entry_to_article(mk("https://www.bloomberg.com/news/articles/2026-10-17/stocks"), src, feed, now)
+    assert entry_to_article(mk("https://www.bloomberg.com/news/videos/2026-10-17/stocks"), src, feed, now) is None
+    assert entry_to_article(mk("https://www.bloomberg.com/news/newsletters/2026-10-17/x"), src, feed, now) is None
+    with pytest.raises(ValueError):
+        Feed(section="x", url="https://a.b/", url_must="(")
+    assert normalize_url("https://www.ft.com/content/abc?syn-25a6b1a6=1") == normalize_url("https://www.ft.com/content/abc")

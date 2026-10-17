@@ -193,6 +193,7 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .item.sub .lead { -webkit-line-clamp: 4; }
 .item.sub::after { content: ""; display: block; clear: both; }
 .meta .orig-btn, .meta .link-btn { font: inherit; font-size: 0.85em; padding: 1px 8px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; text-decoration: none; line-height: 1.5; }
+.an-views .view-orig { font: inherit; font-size: 0.8em; padding: 0 7px; margin-left: 2px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; line-height: 1.4; vertical-align: baseline; }
 .hl a[data-detail] { cursor: pointer; }
 /* 자세히 창 */
 .reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
@@ -273,3 +274,8 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
   .item.brief .brief-line { display: none; }
   .item.brief .hl { max-width: none; flex: 1 1 auto; }
 }
+
+/* 단신 분야 묶음 (S19c) */
+.brief-group { display: block; }
+.brief-topic { font-size: 0.82em; font-weight: 700; color: var(--accent); margin: 8px 0 1px; padding-bottom: 2px; border-bottom: 1px solid var(--rule, #c9bfae); letter-spacing: 0.02em; }
+.page-inner > .brief-group:first-of-type .brief-topic, .sec-title + .brief-group .brief-topic { margin-top: 2px; }
