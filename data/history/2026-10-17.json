@@ -1188,8 +1188,8 @@
    "days": 2,
    "signature": [
     "지용",
-    "김지",
     "근에",
+    "김지",
     "출근",
     "사하",
     "하길",
@@ -1243,7 +1243,7 @@
     {
      "date": "2026-10-17",
      "title": "EU rallies around Zelensky as rift widens with Trump over Russia energy strikes",
-     "summary": "EU, 미국과 갈등 속 젤렌스키에 지원 약속"
+     "summary": null
     }
    ]
   },
@@ -1567,8 +1567,8 @@
     "중수",
     "안착",
     "조기",
-    "청장",
     "출근",
+    "청장",
     "개청",
     "기안",
     "담팀",
@@ -3809,7 +3809,7 @@
     {
      "date": "2026-10-17",
      "title": "“과천경마장 6년 이내 이전 어려워”... 정부 공급대책 또 난관",
-     "summary": null
+     "summary": "과천경마장 이전 지연 우려로 공급대책 차질"
     }
    ]
   },
@@ -4877,7 +4877,7 @@
     {
      "date": "2026-10-17",
      "title": "Zelensky praises ‘real leaders’ in Europe as his relationship with Trump deteriorates",
-     "summary": null
+     "summary": "유럽 결집 속 미·우크라이나 관계 악화"
     }
    ]
   },
@@ -8681,27 +8681,51 @@
    ]
   },
   {
-   "id": "8f709290fb218464",
-   "title": "[단독] 안보 부처 세종 이전, 지난달엔 “검토 안해”",
-   "topic": "politics",
+   "id": "10df01678b28fd85",
+   "title": "Politics",
+   "topic": "international",
    "days": 1,
    "signature": [
-    "달엔",
-    "부처",
-    "난달",
-    "세종",
-    "안해",
-    "지난",
-    "안보",
-    "이전",
-    "검토"
+    "politic",
+    "cnn",
+    "stream",
+    "latest",
+    "new"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": "2026-10-17",
-     "title": "[단독] 안보 부처 세종 이전, 지난달엔 “검토 안해”",
-     "summary": "안보부처 세종 이전, 직전까지 검토 부인해 졸속 논란"
+     "title": "Politics",
+     "summary": "백악관 신임 대변인, 변호사 호칭 반복 공유 논란"
+    }
+   ]
+  },
+  {
+   "id": "a4cfc79958f158b3",
+   "title": "물가 잡자니 빚투 걱정 …'금리 힌트' 못밝히는 워시",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "워시",
+    "물가",
+    "금리",
+    "걱정",
+    "리예",
+    "못밝",
+    "밝히",
+    "잡자",
+    "히는",
+    "예단",
+    "자니",
+    "힌트"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "물가 잡자니 빚투 걱정 …'금리 힌트' 못밝히는 워시",
+     "summary": "워시, 금리 인상 여부 언급 피하고 AI 투자에 주목"
     }
    ]
   },
@@ -8726,34 +8750,6 @@
      "date": "2026-10-17",
      "title": "How Iran messaging highlights cost of war ahead of US midterm elections",
      "summary": "이란, 중간선거 앞두고 미국 내 전쟁 비용 논란 부추겨"
-    }
-   ]
-  },
-  {
-   "id": "19ea5465acea82ac",
-   "title": "커지는 한미동맹 파열음… 주목받는 브런슨 ‘거친 입’",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "목받",
-    "열음",
-    "파열",
-    "거친",
-    "커지",
-    "받는",
-    "미동",
-    "런슨",
-    "브런",
-    "동맹",
-    "주목",
-    "지는"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "커지는 한미동맹 파열음… 주목받는 브런슨 ‘거친 입’",
-     "summary": "브런슨 전작권 신중론에 정부·여권 반발 확산"
     }
    ]
   }
