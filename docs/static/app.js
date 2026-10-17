@@ -501,12 +501,98 @@
     var body = reader.querySelector(".reader-body");
     body.innerHTML = "";
     body.appendChild(node);
+    readSeq++;
+    reader.setAttribute("aria-label", "기사 자세히");
     reader.hidden = false;
     reader.querySelector(".reader-panel").scrollTop = 0;
     reader.querySelector("[data-reader-close]").focus();
   }
-  function closeReader() { if (reader) reader.hidden = true; }
+  function closeReader() { if (reader) { reader.hidden = true; readSeq++; } }
+
+  // ---------- 원문 재배열 보기 (S17) ----------
+  // 기사 제목(data-read)을 누르면 중계 서버가 그 자리에서 원문을 받아 사진·글만 돌려준다. 저장하지 않는다.
+  // 중계 서버가 없거나(E.reader 없음) 실패하면 원문 링크로 넘어간다
+  var RD = E.reader, readSeq = 0;
+  function mk(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
+  function origLink(href, label) {
+    var a = mk("a", "rv-orig", label);
+    a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer";
+    return a;
+  }
+  function figure(im) {
+    var f = mk("figure", "rv-photo"), img = document.createElement("img");
+    img.src = im.src; img.alt = im.caption || ""; img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer";
+    f.appendChild(img);
+    if (im.caption) f.appendChild(mk("figcaption", null, im.caption));
+    return f;
+  }
+  function openArticle(link) {
+    if (!reader) return;
+    var body = reader.querySelector(".reader-body");
+    var back = reader.hidden ? null : Array.prototype.slice.call(body.childNodes);   // 자세히 창에서 열었으면 돌아갈 수 있게
+    var href = link.getAttribute("href"), url = link.getAttribute("data-read");
+    var art = link.closest("[data-issue]"), src = link.parentNode.querySelector(".src") || (art && art.querySelector(".meta .src"));
+    var view = mk("article", "readview");
+    if (back) {
+      var bb = mk("button", "rv-back", "← 돌아가기");
+      bb.type = "button";
+      bb.addEventListener("click", function () { readSeq++; body.innerHTML = ""; back.forEach(function (n) { body.appendChild(n); }); });
+      view.appendChild(bb);
+    }
+    view.appendChild(mk("p", "rv-src", src ? src.textContent : ""));
+    var h = mk("h2", "rv-title", link.textContent.trim());
+    view.appendChild(h);
+    var status = mk("p", "rv-status", "원문을 불러오는 중…");
+    view.appendChild(status);
+    body.innerHTML = "";
+    body.appendChild(view);
+    reader.setAttribute("aria-label", "원문 보기");
+    reader.hidden = false;
+    reader.querySelector(".reader-panel").scrollTop = 0;
+    var seq = ++readSeq;
+    var fail = function (why) {
+      if (seq !== readSeq) return;
+      status.textContent = "이 기사는 여기서 열 수 없습니다" + (why ? " (" + why + ")" : "") + ". 원문에서 읽어 주세요.";
+      status.className = "rv-status rv-fail";
+      var a = origLink(url || href, "원문 열기 ↗");
+      a.className = "rv-orig rv-orig-big";
+      view.appendChild(a);
+      a.focus();
+    };
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); fail("응답 없음"); }, 20000);
+    // 중계 서버가 막 깨어날 때 Cloudflare 가 가끔 503(JSON 아닌 오류 페이지)을 낸다 — 그때만 한 번 더 (실측: 다시 부르면 성공)
+    var load = function (left) {
+      return fetch(RD.url + "/?url=" + encodeURIComponent(url), {
+        headers: { "X-Reader-Key": RD.key }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer", signal: ctrl ? ctrl.signal : undefined
+      }).then(function (r) {
+        var isJson = /json/.test(r.headers.get("Content-Type") || "");
+        if (!isJson && r.status >= 500 && left > 0 && seq === readSeq) return load(left - 1);
+        return r.json();
+      });
+    };
+    load(1).then(function (j) {
+      clearTimeout(timer);
+      if (seq !== readSeq) return;
+      if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) { fail(j && j.reason); return; }
+      if (j.title) h.textContent = j.title;
+      var when = j.published ? new Date(j.published) : null;
+      status.textContent = [j.site, when && !isNaN(when) ? when.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) : ""].filter(Boolean).join(" · ");
+      var imgs = (j.images || []).slice();
+      if (imgs.length) view.appendChild(figure(imgs.shift()));
+      j.paragraphs.forEach(function (p, i) {
+        view.appendChild(mk("p", "rv-p", p));   // textContent 로만 넣는다 (원문 HTML 은 쓰지 않음)
+        if (imgs.length && i % 4 === 3) view.appendChild(figure(imgs.shift()));
+      });
+      var foot = mk("p", "rv-foot", "원문을 그 자리에서 받아 사진과 글만 다시 보여 준 화면입니다(저장하지 않음). 저작권은 " + (j.site || "해당 매체") + "에 있습니다. ");
+      foot.appendChild(origLink(j.url || url, "원문에서 보기 ↗"));
+      view.appendChild(foot);
+    }, function () { clearTimeout(timer); fail("연결 실패"); });
+  }
+
   document.addEventListener("click", function (e) {
+    var rl = RD && e.target.closest && e.target.closest("a[data-read]");
+    if (rl && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) { e.preventDefault(); openArticle(rl); return; }
     var m = e.target.closest && e.target.closest("[data-more]");
     if (m) { var art = m.closest("[data-issue]"); if (art) openReader(art.getAttribute("data-issue")); return; }
     if (e.target.closest && (e.target.closest("[data-reader-close]") || e.target === reader)) closeReader();
@@ -534,7 +620,7 @@
     simpleShow(i);
   }
 
-  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
+  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, openArticle: openArticle, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
   // 글꼴(Noto Sans·Noto Sans KR)을 받은 뒤 쪽을 나눈다 — 먼저 나누면 글꼴이 바뀌며 글 길이가 달라져 쪽이 넘친다.
   // 한글 글꼴은 글자 범위별 조각으로 나뉘어 필요할 때 받으므로, 지면에 쓰인 글자를 넘겨 필요한 조각을 미리 받는다.
   // 글꼴 서버에 닿지 못하면(오프라인) 2.5초 뒤 기본 글꼴로 나눈다 (그 뒤 글꼴이 오면 한 번만 다시 나눈다)

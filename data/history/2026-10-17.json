@@ -180,6 +180,34 @@
    ]
   },
   {
+   "id": "eee3476208473e8c",
+   "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "settler",
+    "olive",
+    "israeli",
+    "palestinian",
+    "west",
+    "bank",
+    "harvest",
+    "attack",
+    "journalist",
+    "tree",
+    "washington",
+    "post"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
+     "summary": "서안 올리브 수확 중 정착민 습격, 미 기자 부상"
+    }
+   ]
+  },
+  {
    "id": "459ab467f7d32282",
    "title": "李대통령 \"부마항쟁과 5·18, 헌법에 담아야\"…개헌 논의 요청",
    "topic": "politics",
@@ -204,34 +232,6 @@
      "date": "2026-10-17",
      "title": "李대통령 \"부마항쟁과 5·18, 헌법에 담아야\"…개헌 논의 요청",
      "summary": "부마항쟁 기념식서 헌법 전문 수록·개헌 논의 촉구"
-    }
-   ]
-  },
-  {
-   "id": "eee3476208473e8c",
-   "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "settler",
-    "olive",
-    "israeli",
-    "palestinian",
-    "harvest",
-    "west",
-    "bank",
-    "attack",
-    "journalist",
-    "tree",
-    "washington",
-    "post"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
-     "summary": "서안 올리브 수확 중 정착민 습격, 미 기자 부상"
     }
    ]
   },
@@ -344,8 +344,8 @@
     "사과",
     "방관",
     "언에",
-    "화재",
     "민주",
+    "화재",
     "현장"
    ],
    "date": "2026-10-17",
@@ -377,9 +377,9 @@
     "위주",
     "비공",
     "막는",
+    "는다",
     "다는",
-    "장관",
-    "는다"
+    "장관"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -899,9 +899,9 @@
     "재복",
     "조직",
     "국힘",
+    "장에",
     "양향",
     "향자",
-    "장에",
     "투표",
     "당선"
    ],
@@ -1271,7 +1271,7 @@
     {
      "date": "2026-10-17",
      "title": "EU rallies around Zelensky as rift widens with Trump over Russia energy strikes",
-     "summary": null
+     "summary": "EU, 미국과 갈등 속 젤렌스키에 지원 약속"
     }
    ]
   },
@@ -1991,6 +1991,34 @@
    ]
   },
   {
+   "id": "7c58ad5c4ab667a2",
+   "title": "Brush fires spark in Southern California as hot weather and winds raise wildfire risk",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "california",
+    "southern",
+    "brush",
+    "fire",
+    "hot",
+    "weather",
+    "wildfire",
+    "spark",
+    "power",
+    "brushfire",
+    "evacuation",
+    "shutoff"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Brush fires spark in Southern California as hot weather and winds raise wildfire risk",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "9edaa36a916922c4",
    "title": "강호동 농협회장 \"외부 감사기구 신설, 자율성·독립성 우려\"",
    "topic": "economy",
@@ -2131,34 +2159,6 @@
     {
      "date": "2026-10-17",
      "title": "유류할증료 3개월 연속 상승… 뉴욕 왕복 최대 9만원 올라",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "a3a714ab48c579fe",
-   "title": "Hot, windy weather stokes brush fires in Southern California; power turned off for many",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "california",
-    "southern",
-    "brush",
-    "hot",
-    "weather",
-    "wildfire",
-    "fire",
-    "power",
-    "brushfire",
-    "evacuation",
-    "shutoff",
-    "stoke"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Hot, windy weather stokes brush fires in Southern California; power turned off for many",
      "summary": null
     }
    ]
@@ -2355,8 +2355,8 @@
     "만전",
     "부천",
     "조에",
-    "화재",
     "공장",
+    "화재",
     "명구",
     "재진"
    ],
@@ -2410,11 +2410,11 @@
     "날부",
     "른데",
     "목교",
-    "뭐가",
     "배송",
     "오목",
     "원진",
-    "월말"
+    "월말",
+    "이랑"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2594,34 +2594,6 @@
     {
      "date": "2026-10-17",
      "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "2711c9909f9a8400",
-   "title": "전작권 전환 신중론 브런슨에… 여권 “영토주권 부정” “입 막아야” 공세",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "런슨",
-    "브런",
-    "주권",
-    "부정",
-    "영토",
-    "토주",
-    "與",
-    "슨에",
-    "책서",
-    "격한",
-    "공세",
-    "남쪽"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "전작권 전환 신중론 브런슨에… 여권 “영토주권 부정” “입 막아야” 공세",
      "summary": null
     }
    ]
@@ -2861,6 +2833,34 @@
    ]
   },
   {
+   "id": "c80faa91bf48b6e3",
+   "title": "개인정보 판 건보공단 직원 파면…\"피해자엔 '정보유출' 통보 안돼\"",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "통보",
+    "해자",
+    "보공",
+    "건보",
+    "공단",
+    "인정",
+    "피해",
+    "개인",
+    "파면",
+    "직원",
+    "정보",
+    "유출"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "개인정보 판 건보공단 직원 파면…\"피해자엔 '정보유출' 통보 안돼\"",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "270ffe4b68d9201e",
    "title": "李대통령, 부상 소방관·장병 쾌유기원…\"헌신에 천금 아깝겠나\"",
    "topic": "politics",
@@ -2957,9 +2957,9 @@
    "signature": [
     "settlement",
     "israel",
-    "west",
     "establishment",
     "forced",
+    "west",
     "bank",
     "stop",
     "expansion",
@@ -3384,10 +3384,10 @@
    "topic": "economy",
    "days": 1,
    "signature": [
-    "깜깜",
     "깜이",
     "드메",
     "스드",
+    "깜깜",
     "부과",
     "과태",
     "요금",
@@ -3608,6 +3608,39 @@
    ]
   },
   {
+   "id": "13dd7e6fe672a986",
+   "title": "[오늘의 운세] 10월 17일",
+   "topic": "society",
+   "days": 2,
+   "signature": [
+    "운세",
+    "늘의",
+    "오늘",
+    "띠별",
+    "먹지",
+    "메뉴",
+    "별자",
+    "심메",
+    "오행",
+    "운의",
+    "점심",
+    "컬러"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "[오늘의 운세] 10월 16일",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "[오늘의 운세] 10월 17일",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "a3b25b02da68475d",
    "title": "폭락하던 코스피, 그래도 2% 반등···외국인 8거래일 만에 ‘사자’",
    "topic": "economy",
@@ -3659,39 +3692,6 @@
     {
      "date": "2026-10-17",
      "title": "[표] 주간 거래소 외국인 순매수도 상위종목",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "13dd7e6fe672a986",
-   "title": "[오늘의 운세] 10월 17일",
-   "topic": "society",
-   "days": 2,
-   "signature": [
-    "운세",
-    "늘의",
-    "오늘",
-    "띠별",
-    "먹지",
-    "메뉴",
-    "별자",
-    "심메",
-    "오행",
-    "운의",
-    "점심",
-    "컬러"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": null,
-     "title": "[오늘의 운세] 10월 16일",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "[오늘의 운세] 10월 17일",
      "summary": null
     }
    ]
@@ -4043,6 +4043,39 @@
    ]
   },
   {
+   "id": "710ff565abbeb6ee",
+   "title": "국힘, 한미 전작권 전환 시각차에 \"참담한 외교안보 사고\"",
+   "topic": "politics",
+   "days": 2,
+   "signature": [
+    "교안",
+    "담한",
+    "참담",
+    "전작",
+    "작권",
+    "안보",
+    "사고",
+    "외교",
+    "전환",
+    "한미",
+    "각차",
+    "차에"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "브런슨 “전작권 전환 조건 변해”… 韓국방부 “골대 계속 옮겨”",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "국힘, 한미 전작권 전환 시각차에 \"참담한 외교안보 사고\"",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "7616e8025c6d588f",
    "title": "China to host global governance forum from Oct. 23 to 25",
    "topic": "international",
@@ -4137,8 +4170,8 @@
     "락에",
     "뉴욕",
     "증시",
-    "금리",
     "하락",
+    "금리",
     "려에",
     "채금",
     "우려",
@@ -4696,8 +4729,8 @@
     "신부",
     "과학",
     "통신",
-    "외교",
     "外",
+    "외교",
     "기술",
     "정보"
    ],
@@ -4748,8 +4781,8 @@
     "armstrong",
     "dominant",
     "shawn",
-    "even",
     "alc",
+    "even",
     "bring",
     "start"
    ],
@@ -4854,6 +4887,34 @@
    ]
   },
   {
+   "id": "2711c9909f9a8400",
+   "title": "전작권 전환 신중론 브런슨에… 여권 “영토주권 부정” “입 막아야” 공세",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "영토",
+    "토주",
+    "런슨",
+    "브런",
+    "주권",
+    "부정",
+    "슨에",
+    "격한",
+    "공세",
+    "여권",
+    "직격",
+    "막아"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "전작권 전환 신중론 브런슨에… 여권 “영토주권 부정” “입 막아야” 공세",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "5d9a0f455fa9ebbc",
    "title": "“우크라 北포로 송환 공개에… 北·러 자극 안 하려는 李정부 전략 차질”",
    "topic": "politics",
@@ -4905,7 +4966,7 @@
     {
      "date": "2026-10-17",
      "title": "Zelensky praises ‘real leaders’ in Europe as his relationship with Trump deteriorates",
-     "summary": "유럽 결집 속 미·우크라이나 관계 악화"
+     "summary": null
     }
    ]
   },
@@ -4961,6 +5022,33 @@
     {
      "date": "2026-10-17",
      "title": "France and Germany Reach Deal to Protect Europe’s Car Industry",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "ec47195d27bdcb48",
+   "title": "홍경수 한국언론학회장",
+   "topic": "society",
+   "days": 1,
+   "signature": [
+    "국언",
+    "론학",
+    "학회",
+    "홍경",
+    "경수",
+    "언론",
+    "회장",
+    "주대",
+    "아주",
+    "취임",
+    "교수"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "홍경수 한국언론학회장",
      "summary": null
     }
    ]
@@ -5180,9 +5268,9 @@
     "트해",
     "strategic",
     "공에",
-    "기가",
     "상공",
     "planned",
+    "기가",
     "전폭"
    ],
    "date": "2026-10-17",
@@ -5457,8 +5545,8 @@
    "signature": [
     "폭동",
     "소심",
-    "무죄",
     "항소",
+    "무죄",
     "심서",
     "견은",
     "일베",
@@ -5616,7 +5704,7 @@
     "adopt",
     "product",
     "chip",
-    "find"
+    "rival"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -5811,6 +5899,34 @@
     {
      "date": "2026-10-17",
      "title": "Romania resumes search for seven missing sailors from drone-hit ship",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "dc3dc649645d658f",
+   "title": "브런슨 “남쪽 철책서 韓 시작”…與 “DMZ 주권 부정하나” 반발",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "남쪽",
+    "철책",
+    "dmz",
+    "런슨",
+    "브런",
+    "주권",
+    "부정",
+    "시작",
+    "국은",
+    "민국",
+    "선에",
+    "책서"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "브런슨 “남쪽 철책서 韓 시작”…與 “DMZ 주권 부정하나” 반발",
      "summary": null
     }
    ]
@@ -6306,8 +6422,8 @@
     "노위",
     "법상",
     "중노",
-    "지방",
     "공기",
+    "지방",
     "공공",
     "이전",
     "기관",
@@ -6572,34 +6688,6 @@
     {
      "date": "2026-10-17",
      "title": "함양 통영대전고속도서 화물차 추돌…60대 운전자 숨져",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "c80faa91bf48b6e3",
-   "title": "개인정보 판 건보공단 직원 파면…\"피해자엔 '정보유출' 통보 안돼\"",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "통보",
-    "해자",
-    "보공",
-    "건보",
-    "공단",
-    "인정",
-    "피해",
-    "개인",
-    "유출",
-    "직원",
-    "정보",
-    "감감"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "개인정보 판 건보공단 직원 파면…\"피해자엔 '정보유출' 통보 안돼\"",
      "summary": null
     }
    ]
@@ -7056,6 +7144,33 @@
     {
      "date": "2026-10-17",
      "title": "이 대통령 취임 500일, 과제는?…①양극화 해소 ②개혁 갈등 수습 ③정치 복원",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "691aac82597e652a",
+   "title": "한국, 싱가포르와 FTA개선·스타트업투자 등 논의",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "fta",
+    "르와",
+    "업투",
+    "가포",
+    "싱가",
+    "타트",
+    "트업",
+    "포르",
+    "개선",
+    "스타",
+    "투자"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "한국, 싱가포르와 FTA개선·스타트업투자 등 논의",
      "summary": null
     }
    ]
@@ -7637,10 +7752,10 @@
     "bts",
     "spotify",
     "리밍",
-    "전세",
     "티파",
     "포티",
     "연간",
+    "전세",
     "ever",
     "become",
     "stream",
@@ -8555,8 +8670,8 @@
     "창업",
     "코어",
     "업자",
-    "이미",
     "공동",
+    "이미",
     "주식",
     "식매",
     "억달"
@@ -8581,8 +8696,8 @@
     "temper",
     "valuation",
     "대감",
-    "아져",
     "revenue",
+    "아져",
     "업가",
     "anthropic",
     "둔화",
@@ -8745,9 +8860,9 @@
     "달엔",
     "부처",
     "난달",
-    "세종",
     "안해",
     "지난",
+    "세종",
     "안보",
     "이전",
     "검토"
@@ -8800,8 +8915,8 @@
     "미동",
     "런슨",
     "브런",
-    "동맹",
     "주목",
+    "동맹",
     "지는"
    ],
    "date": "2026-10-17",

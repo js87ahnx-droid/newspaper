@@ -205,6 +205,19 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .meta .fb { display: inline-flex; gap: 4px; margin: 0; }
 .meta .fb button { min-height: 22px; padding: 1px 7px; }
 .reader-body .meta .fb { display: inline-flex; }
+/* S17 원문 재배열 보기 */
+.readview { font-size: 1.02em; line-height: 1.75; }
+.readview .rv-back { font: inherit; font-size: 0.85em; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+.readview .rv-src { margin: 6px 0 0; font-size: 0.85em; color: var(--muted, #6b6358); }
+.readview .rv-title { font-size: 1.35em; line-height: 1.4; margin: 2px 0 6px; }
+.readview .rv-status { font-size: 0.85em; color: var(--muted, #6b6358); margin: 0 0 12px; }
+.readview .rv-fail { color: var(--ink); font-size: 0.95em; }
+.readview .rv-p { margin: 0 0 0.9em; word-break: keep-all; overflow-wrap: anywhere; }
+.readview .rv-photo { margin: 0 0 14px; }
+.readview .rv-photo img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: rgba(0, 0, 0, 0.04); border-radius: 4px; }
+.readview .rv-photo figcaption { font-size: 0.8em; color: var(--muted, #6b6358); margin-top: 4px; line-height: 1.5; }
+.readview .rv-foot { font-size: 0.8em; color: var(--muted, #6b6358); border-top: 1px solid var(--rule, #c9bfae); padding-top: 8px; margin-top: 16px; }
+.readview .rv-orig-big { display: inline-block; margin-top: 4px; padding: 8px 16px; border: 1px solid var(--ink); border-radius: 6px; text-decoration: none; color: var(--ink); }
 /* S16 — 한 면 보기 (세로 스크롤·줌), 전체화면 */
 #book.scroll { margin: 0; }
 #book.scroll .scroller { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
