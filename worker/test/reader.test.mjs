@@ -70,3 +70,16 @@ test("지면 출처에만 CORS 허용", async () => {
   const r = await get("https://example.com/", { "X-Reader-Key": KEY, Origin: ORIGIN });
   assert.equal(r.headers.get("Access-Control-Allow-Origin"), ORIGIN);   // 거부 응답도 지면이 이유를 읽을 수 있게
 });
+
+test("번역: 키 없음 401, 잘못된 요청 400, 경로·방식이 다르면 405", async () => {
+  const post = (path, body, headers = {}) => w.fetch(path, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body });
+  assert.equal((await post("/translate", JSON.stringify({ lang: "en", texts: ["a"] }))).status, 401);
+  const K = { "X-Reader-Key": KEY };
+  for (const b of ["not json", JSON.stringify({ lang: "xx", texts: ["a"] }), JSON.stringify({ lang: "en", texts: [] }),
+    JSON.stringify({ lang: "en", texts: [1] }), JSON.stringify({ lang: "en", texts: Array(81).fill("a") }),
+    JSON.stringify({ lang: "en", texts: ["a".repeat(24001)] })]) {
+    assert.equal((await post("/translate", b, K)).status, 400, b.slice(0, 40));
+  }
+  assert.equal((await post("/", JSON.stringify({ lang: "en", texts: ["a"] }), K)).status, 405);
+  assert.equal((await w.fetch("/translate", { headers: K })).status, 405);
+});

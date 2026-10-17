@@ -12,6 +12,7 @@
 //   ALLOWED_ORIGINS  지면 주소 (쉼표로 여럿). 이 출처의 브라우저만 응답을 읽을 수 있다
 import DOMAINS from "./domains.json";
 import { extract } from "./extract.js";
+import { translate, validate } from "./translate.js";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 const MAX_REDIRECTS = 5;
@@ -45,8 +46,8 @@ function cors(req, env) {
   const h = { "Vary": "Origin" };
   if (origin && allowed.includes(origin)) {
     h["Access-Control-Allow-Origin"] = origin;
-    h["Access-Control-Allow-Methods"] = "GET, OPTIONS";
-    h["Access-Control-Allow-Headers"] = "X-Reader-Key";
+    h["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+    h["Access-Control-Allow-Headers"] = "X-Reader-Key, Content-Type";
     h["Access-Control-Max-Age"] = "86400";
   }
   return h;
@@ -97,8 +98,28 @@ export default {
   async fetch(req, env) {
     const h = cors(req, env);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
-    if (req.method !== "GET") return json({ ok: false, reason: "GET 만" }, 405, h);
+    const path = new URL(req.url).pathname;
+    if (!(req.method === "GET" && path === "/") && !(req.method === "POST" && path === "/translate")) {
+      return json({ ok: false, reason: "GET / 또는 POST /translate 만" }, 405, h);
+    }
     if (!sameKey(req.headers.get("X-Reader-Key") || "", env.READER_KEY || "")) return json({ ok: false, reason: "키 없음" }, 401, h);
+
+    if (path === "/translate") {
+      // 한국어 번역 (S17b) — Workers AI, 저장 안 함
+      let body;
+      try { body = JSON.parse(await req.text()); } catch (e) { body = null; }
+      const bad = validate(body);
+      if (bad) return json({ ok: false, reason: bad }, 400, h);
+      if (!env.AI) return json({ ok: false, reason: "번역 기능 없음" }, 501, h);
+      try {
+        const why = env.DEBUG ? [] : null;   // 개발 중에만: 묶음별 실패 이유
+        const out = await translate(env, body.lang, body.texts, why);
+        if (!out.some((t) => t)) return json({ ok: false, reason: "번역 실패" }, 502, h);
+        return json({ ok: true, texts: out, ...(why ? { why } : {}) }, 200, h);
+      } catch (e) {
+        return json({ ok: false, reason: "번역 실패", ...(env.DEBUG ? { err: String(e).slice(0, 300) } : {}) }, 502, h);
+      }
+    }
 
     const target = new URL(req.url).searchParams.get("url") || "";
     const chk = checkUrl(target);

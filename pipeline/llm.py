@@ -406,11 +406,18 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     if same.get("key") == key:
         groups, status["same_event"] = same.get("groups", {}), "캐시"
     else:
+        calls: list[str] = []   # 호출마다의 상태 — 호출이 실패했으면 그 이유를 남기고, 답을 받았으면(형식이 틀려도) 캐시한다
+
         def ask(prompt):
-            return guarded(prompt, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)[0]
+            res, st = guarded(prompt, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
+            calls.append(st)
+            return res
 
         groups, status["same_event"] = same_event_groups(analyzed, ask)
-        if status["same_event"] == "ok":
+        failed = next((st for st in calls if st != "ok"), None)
+        if failed:
+            status["same_event"] = failed
+        elif calls:
             cache["same_event"] = {"key": key, "groups": groups}
             cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     dups = merge_duplicates(edition, groups)

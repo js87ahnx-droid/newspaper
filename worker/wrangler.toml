@@ -8,5 +8,9 @@ workers_dev = true
 # 지면 주소 (GitHub Pages). 로컬 시험 주소는 .dev.vars 에
 ALLOWED_ORIGINS = "https://js87ahnx-droid.github.io"
 
+# 한국어 번역 (S17b) — Workers AI 무료 할당량, 저장 안 함
+[ai]
+binding = "AI"
+
 [observability]
 enabled = false   # 요청 기록을 남기지 않는다 (D16)

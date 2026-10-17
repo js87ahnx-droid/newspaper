@@ -1,3 +1,5 @@
+{# 원문 창으로 여는 기사 (S17b): 중계 서버로 읽을 주소(못 읽는 매체면 빈 값)·매체·언어 #}
+{% macro art(url, source, lang) %} data-art data-read="{{ read_url(url, source) }}" data-src="{{ source }}" data-lang="{{ lang }}"{% endmacro %}
 <!doctype html>
 <html lang="ko" data-theme="auto">
 <head>
@@ -70,7 +72,7 @@
         <figcaption>사진: {{ it.photo_source }}</figcaption>
       </figure>
       {% endif %}
-      <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer"{% if read_url(it.url, it.source) %} data-read="{{ read_url(it.url, it.source) }}"{% endif %}>{{ v.title }}</a></h3>
+      <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
       {% if v.lead and not brief %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
@@ -87,7 +89,7 @@
         {% if not (v.analysis and v.analysis.stances) and it.llm and it.llm.frame_summary %}<p class="frame" data-note="AI 요약">{{ it.llm.frame_summary }}</p>{% endif %}
         {% for g in it.cmp_groups %}
         <div class="grp"><span class="badge lean-{{ g.cls }}">{{ g.group }}</span>
-          {% for a in g.articles[:2] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer"{% if read_url(a.url, a.source) %} data-read="{{ read_url(a.url, a.source) }}"{% endif %}>{{ a.title_html }}</a></p>{% endfor %}
+          {% for a in g.articles[:2] %}<p><span class="src">{{ a.source }}</span> <a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.title_html }}</a></p>{% endfor %}
           {% if g.articles|length > 2 %}<p class="more">외 {{ g.articles|length - 2 }}건</p>{% endif %}
         </div>
         {% endfor %}
@@ -101,8 +103,8 @@
         {% if it.days > 1 %}<span class="days">{{ it.days }}일째 보도</span>{% endif %}
         {% if it.coverage.sources > 1 %}<span class="cover">매체 {{ it.coverage.sources }} · 국가 {{ it.coverage.countries }}</span>{% endif %}
         {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}
-        <a class="orig-link" href="{{ it.url }}" target="_blank" rel="noopener noreferrer">원문{% if v.paywall %} (유료){% endif %}</a>
-        <button type="button" class="more-btn" data-more>자세히</button>
+        <button type="button" class="orig-btn" data-href="{{ real_url(it.url) }}"{{ art(it.url, it.source, v.lang) }}>원문{% if v.paywall %} (유료){% endif %}</button>
+        <a class="link-btn" href="{{ real_url(it.url) }}" target="_blank" rel="noopener noreferrer">링크</a>
         <span class="fb" role="group" aria-label="이 분야 기사">
           <button type="button" data-fb="more">더 보기</button>
           <button type="button" data-fb="less">덜 보기</button>
@@ -135,7 +137,7 @@
       {% for g in c.groups %}
         <div class="grp"><div class="badge lean-{{ g.cls }}">{{ g.lean }}</div>
         {% for e in g.editorials %}
-          <p><span class="src">{{ e.source }}</span> <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer"{% if read_url(e.url, e.source) %} data-read="{{ read_url(e.url, e.source) }}"{% endif %}>{{ e.title }}</a></p>
+          <p><span class="src">{{ e.source }}</span> <a href="{{ real_url(e.url) }}" target="_blank" rel="noopener noreferrer"{{ art(e.url, e.source, e.lang) }}>{{ e.title }}</a></p>
           {% if e.lead %}<p class="oplead">{{ e.lead }}</p>{% endif %}
         {% endfor %}
         </div>
@@ -149,7 +151,7 @@
       <ul>
       {% for e in chunk %}
         <li><span class="badge lean-{{ e.cls }}">{{ e.lean }}</span> <span class="src">{{ e.source }}</span>
-            <a href="{{ e.url }}" target="_blank" rel="noopener noreferrer"{% if read_url(e.url, e.source) %} data-read="{{ read_url(e.url, e.source) }}"{% endif %}>{{ e.title }}</a>
+            <a href="{{ real_url(e.url) }}" target="_blank" rel="noopener noreferrer"{{ art(e.url, e.source, e.lang) }}>{{ e.title }}</a>
             {% if e.issue_title %}<span class="rel">관련: {{ e.issue_title }}</span>{% endif %}</li>
       {% endfor %}
       </ul>
@@ -161,7 +163,7 @@
       <ul>
       {% for c in opinion.columns %}
         <li><span class="badge lean-{{ c.cls }}">{{ c.lean }}</span> <span class="src">{{ c.source }}</span>
-            <a href="{{ c.url }}" target="_blank" rel="noopener noreferrer" lang="{{ c.lang }}"{% if read_url(c.url, c.source) %} data-read="{{ read_url(c.url, c.source) }}"{% endif %}>{{ c.title }}</a>{% if c.paywall %} <small>(유료)</small>{% endif %}
+            <a href="{{ real_url(c.url) }}" target="_blank" rel="noopener noreferrer" lang="{{ c.lang }}"{{ art(c.url, c.source, c.lang) }}>{{ c.title }}</a>{% if c.paywall %} <small>(유료)</small>{% endif %}
             {% if c.issue_title %}<span class="rel">관련: {{ c.issue_title }}</span>{% endif %}</li>
       {% endfor %}
       </ul>

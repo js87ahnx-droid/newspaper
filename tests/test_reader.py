@@ -114,10 +114,10 @@ def _open(browser, tmp_path, monkeypatch, handler, configured=True):  # noqa: F8
 
     def route(r):
         seen.append({"url": r.request.url, "key": r.request.headers.get("x-reader-key"), "method": r.request.method})
-        cors = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "X-Reader-Key"}
+        cors = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "X-Reader-Key, Content-Type"}
         if r.request.method == "OPTIONS":
             return r.fulfill(status=204, headers=cors)
-        status, body = handler(r.request.url)
+        status, body = handler(r.request.url, json.loads(r.request.post_data) if r.request.method == "POST" else None)
         if isinstance(body, str):   # 플랫폼 오류 페이지
             return r.fulfill(status=status, headers={**cors, "Content-Type": "text/html"}, body=body)
         r.fulfill(status=status, headers={**cors, "Content-Type": "application/json"}, body=json.dumps(body))
@@ -131,54 +131,125 @@ def _open(browser, tmp_path, monkeypatch, handler, configured=True):  # noqa: F8
     return ctx, page, errors, seen
 
 
-def _first_link(page):
-    return page.evaluate("""() => { const a = document.querySelector('#book .page a[data-read]');
-        a.scrollIntoView(); return a ? a.getAttribute('data-read') : null; }""")
+def _click_orig(page, where):
+    """조건(where: data-lang·data-read 등 CSS)에 맞는 지면 기사의 "원문" 단추를 누르고 그 단추의 속성을 돌려준다."""
+    return page.evaluate("""(sel) => { const b = document.querySelector('#book .page .meta button.orig-btn' + sel);
+        if (!b) return null; b.scrollIntoView(); b.click();
+        return {read: b.getAttribute('data-read'), href: b.getAttribute('data-href'), lang: b.getAttribute('data-lang'),
+                src: b.getAttribute('data-src'), lead: (b.closest('article').querySelector('.lead') || {}).textContent || ''}; }""", where)
 
 
-def test_click_headline_opens_reader_view(browser, tmp_path, monkeypatch):  # noqa: F811
-    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u: (200, ARTICLE))
-    target = _first_link(page)
-    assert target
-    page.evaluate("document.querySelector('#book .page a[data-read]').click()")
-    page.wait_for_selector(".readview .rv-p")
-    v = page.evaluate("""() => { const v = document.querySelector('.readview');
+def _view(page):
+    return page.evaluate("""() => { const v = document.querySelector('.readview');
         return {title: v.querySelector('.rv-title').textContent, ps: [...v.querySelectorAll('.rv-p')].map(p => p.textContent),
                 bold: v.querySelectorAll('.rv-p b').length, photo: v.querySelectorAll('.rv-photo img').length,
-                foot: v.querySelector('.rv-foot a').href, open: !document.getElementById('reader').hidden}; }""")
-    assert v["open"] and v["title"] == "재배열된 제목"
+                status: v.querySelector('.rv-status').textContent, link: (v.querySelector('.rv-top .rv-link') || {}).href,
+                big: (v.querySelector('.rv-link-big') || {}).href, tabs: [...v.querySelectorAll('.rv-tab')].map(b => b.textContent),
+                open: !document.getElementById('reader').hidden, label: document.getElementById('reader').getAttribute('aria-label')}; }""")
+
+
+def test_title_opens_ai_detail_and_link_is_plain(browser, tmp_path, monkeypatch):  # noqa: F811
+    """제목 → AI 정리(자세히 창), "링크" → 그냥 새 탭 링크 (가로채지 않음)."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE))
+    issue = page.evaluate("""() => { const a = document.querySelector('#book .page .hl a[data-detail]'); a.scrollIntoView(); a.click();
+        return a.closest('[data-issue]').getAttribute('data-issue'); }""")
+    st = page.evaluate("""() => ({label: document.getElementById('reader').getAttribute('aria-label'),
+        issue: (document.querySelector('.reader-body article.item') || {getAttribute: () => null}).getAttribute('data-issue'),
+        more: document.querySelectorAll('[data-more]').length})""")
+    assert st["label"] == "기사 자세히" and st["issue"] == issue and st["more"] == 0     # "자세히" 단추는 없앴다
+    link = page.evaluate("""() => { const a = document.querySelector('#book .page .meta a.link-btn');
+        return {href: a.href, target: a.target, art: a.hasAttribute('data-art'), detail: a.hasAttribute('data-detail')}; }""")
+    assert link["target"] == "_blank" and link["href"].startswith("http") and not link["art"] and not link["detail"]
+    assert [s for s in seen if s["method"] != "OPTIONS"] == [] and errors == []
+    ctx.close()
+
+
+def test_orig_button_opens_reader_view(browser, tmp_path, monkeypatch):  # noqa: F811
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE))
+    b = _click_orig(page, '[data-lang="ko"]:not([data-read=""])')
+    assert b and b["read"]
+    page.wait_for_selector(".readview .rv-p")
+    v = _view(page)
+    assert v["open"] and v["label"] == "원문 보기" and v["title"] == "재배열된 제목"
     assert v["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and v["bold"] == 0      # 원문 HTML 은 글자로만
-    assert v["photo"] == 1 and v["foot"] == "https://www.chosun.com/x/"
+    assert v["photo"] == 1 and v["link"] == b["href"] and v["tabs"] == []         # 한국 매체는 번역 없음
     get = [s for s in seen if s["method"] == "GET"]
     assert len(get) == 1 and get[0]["key"] == "k-test"
     from urllib.parse import parse_qs, urlsplit
-    assert parse_qs(urlsplit(get[0]["url"]).query)["url"] == [target]
+    assert parse_qs(urlsplit(get[0]["url"]).query)["url"] == [b["read"]]
     page.keyboard.press("Escape")
     assert page.evaluate("document.getElementById('reader').hidden")
     assert errors == []
     ctx.close()
 
 
-@pytest.mark.parametrize("status,body", [(422, {"ok": False, "reason": "본문을 찾지 못함"}), (502, {"ok": False, "reason": "원문 http 403"})])
-def test_failure_falls_back_to_original_link(browser, tmp_path, monkeypatch, status, body):  # noqa: F811
-    calls = []
-    ctx, page, errors, _ = _open(browser, tmp_path, monkeypatch, lambda u: (calls.append(u), (status, body))[1])
-    target = _first_link(page)
-    page.evaluate("document.querySelector('#book .page a[data-read]').click()")
-    page.wait_for_selector(".readview .rv-orig-big")
-    v = page.evaluate("""() => ({msg: document.querySelector('.rv-status').textContent,
-        href: document.querySelector('.rv-orig-big').href, target: document.querySelector('.rv-orig-big').target,
-        focused: document.activeElement.classList.contains('rv-orig-big')})""")
-    assert body["reason"] in v["msg"] and v["href"] == target and v["target"] == "_blank" and v["focused"]
-    assert len(calls) == 1                                   # 매체 실패는 다시 부르지 않는다
+def test_foreign_article_gets_korean_translation(browser, tmp_path, monkeypatch):  # noqa: F811
+    posts = []
+
+    def handler(u, body=None):
+        if u.endswith("/translate"):
+            posts.append(body)
+            return 200, {"ok": True, "texts": ["[번역] " + t for t in body["texts"]]}
+        return 200, {**ARTICLE, "title": "English title", "paragraphs": ["First.", "Second."]}
+
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler)
+    b = _click_orig(page, '[data-lang="en"]:not([data-read=""])')
+    assert b
+    page.wait_for_selector(".readview .rv-tab")
+    v = _view(page)
+    assert posts[-1]["lang"] == "en" and posts[-1]["texts"] == ["English title", "First.", "Second."]
+    assert v["title"] == "[번역] English title" and v["ps"] == ["[번역] First.", "[번역] Second."] and v["tabs"] == ["한국어", "원문"]
+    page.click(".readview .rv-tab >> text=원문")
+    assert _view(page)["ps"] == ["First.", "Second."]
+    page.click(".readview .rv-tab >> text=한국어")
+    assert _view(page)["ps"][0] == "[번역] First."
+    post = [s for s in seen if s["method"] == "POST"]
+    assert len(post) == 1 and post[0]["key"] == "k-test" and errors == []
+    ctx.close()
+
+
+def test_blocked_source_opens_window_with_feed_content(browser, tmp_path, monkeypatch):  # noqa: F811
+    """중계 서버가 못 여는 매체(NYT 등)도 새 탭이 아니라 원문 창: 피드 내용·안내·링크 + 번역(제목·리드)."""
+    def handler(u, body=None):
+        if u.endswith("/translate"):
+            return 200, {"ok": True, "texts": ["번역됨"] * len(body["texts"])}
+        return 200, ARTICLE
+
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler)
+    b = _click_orig(page, '[data-src="New York Times"]')
+    assert b and b["read"] == ""
+    page.wait_for_selector(".readview .rv-link-big")
+    v = _view(page)
+    assert v["open"] and "막아 두었습니다" in v["status"] and v["big"] == b["href"] and v["link"] == b["href"]
+    assert [s for s in seen if s["method"] == "GET"] == []                       # 막힌 매체는 부르지 않는다
+    page.wait_for_selector(".readview .rv-tab")                                   # 제목·리드 번역
+    assert _view(page)["title"] == "번역됨"
     assert errors == []
     ctx.close()
 
 
-def test_without_relay_links_stay_plain(browser, tmp_path, monkeypatch):  # noqa: F811
-    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u: (200, ARTICLE), configured=False)
-    assert page.evaluate("document.querySelectorAll('a[data-read]').length") == 0
+@pytest.mark.parametrize("status,body", [(422, {"ok": False, "reason": "본문을 찾지 못함"}), (502, {"ok": False, "reason": "원문 http 403"})])
+def test_failure_falls_back_to_feed_content(browser, tmp_path, monkeypatch, status, body):  # noqa: F811
+    calls = []
+    ctx, page, errors, _ = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (calls.append(u), (status, body))[1])
+    b = _click_orig(page, '[data-lang="ko"]:not([data-read=""])')
+    page.wait_for_selector(".readview .rv-link-big")
+    v = _view(page)
+    assert body["reason"] in v["status"] and v["big"] == b["href"]
+    if b["lead"].strip():
+        assert b["lead"].strip() in v["ps"]
+    assert len(calls) == 1                                   # 매체 실패는 다시 부르지 않는다 (한국 매체라 번역도 없음)
+    assert errors == []
+    ctx.close()
+
+
+def test_without_relay_orig_still_opens_window(browser, tmp_path, monkeypatch):  # noqa: F811
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), configured=False)
+    assert page.evaluate("[...document.querySelectorAll('[data-read]')].every(e => e.getAttribute('data-read') === '')")
     assert page.evaluate("window.EDITION.reader") is None
+    b = _click_orig(page, "")
+    page.wait_for_selector(".readview .rv-link-big")
+    assert _view(page)["big"] == b["href"]
     assert seen == [] and errors == []
     ctx.close()
 
@@ -187,14 +258,25 @@ def test_retries_once_on_platform_503(browser, tmp_path, monkeypatch):  # noqa: 
     """Cloudflare 가 깨어날 때 내는 503 오류 페이지(JSON 아님)는 한 번만 다시 부른다. 매체 실패(JSON 502)는 다시 부르지 않는다."""
     calls = []
 
-    def handler(u):
+    def handler(u, body=None):
         calls.append(u)
         return (503, "<!DOCTYPE html>Error 1102") if len(calls) == 1 else (200, ARTICLE)
 
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler)
-    page.evaluate("document.querySelector('#book .page a[data-read]').click()")
+    _click_orig(page, '[data-lang="ko"]:not([data-read=""])')
     page.wait_for_selector(".readview .rv-p")
     assert len(calls) == 2 and errors == []
+    ctx.close()
+
+
+def test_small_links_open_reader_window(browser, tmp_path, monkeypatch):  # noqa: F811
+    """입장 차이의 작은 제목 링크는 원문 창으로."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE))
+    n = page.evaluate("""() => { const a = document.querySelector('#book .page .grp a[data-art]'); if (!a) return 0;
+        a.scrollIntoView(); a.click(); return 1; }""")
+    assert n, "지면에 입장 차이 링크가 없음"
+    page.wait_for_selector(".readview")
+    assert _view(page)["label"] == "원문 보기" and errors == []
     ctx.close()
 
 
