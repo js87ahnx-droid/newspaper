@@ -48,7 +48,7 @@ def test_config_needs_url_and_key(monkeypatch):
 def test_read_url_skips_blocked_sources_and_unresolved_google():
     srcs = load_sources()
     blocked = [s.name for s in srcs.sources if not s.reader]
-    assert {"New York Times", "Wall Street Journal", "Reuters"} <= set(blocked)
+    assert {"New York Times", "Wall Street Journal", "Reuters", "AP", "SCMP"} <= set(blocked)
     ru = reader.read_url_fn({"read_urls": {G: "https://www.joongang.co.kr/article/1"}}, srcs)
     assert ru("https://www.chosun.com/a/", "조선일보") == "https://www.chosun.com/a/"
     assert ru("https://www.nytimes.com/a.html", "New York Times") == ""
@@ -118,6 +118,8 @@ def _open(browser, tmp_path, monkeypatch, handler, configured=True):  # noqa: F8
         if r.request.method == "OPTIONS":
             return r.fulfill(status=204, headers=cors)
         status, body = handler(r.request.url)
+        if isinstance(body, str):   # 플랫폼 오류 페이지
+            return r.fulfill(status=status, headers={**cors, "Content-Type": "text/html"}, body=body)
         r.fulfill(status=status, headers={**cors, "Content-Type": "application/json"}, body=json.dumps(body))
 
     ctx.route("https://reader.test/**", route)
@@ -159,7 +161,8 @@ def test_click_headline_opens_reader_view(browser, tmp_path, monkeypatch):  # no
 
 @pytest.mark.parametrize("status,body", [(422, {"ok": False, "reason": "본문을 찾지 못함"}), (502, {"ok": False, "reason": "원문 http 403"})])
 def test_failure_falls_back_to_original_link(browser, tmp_path, monkeypatch, status, body):  # noqa: F811
-    ctx, page, errors, _ = _open(browser, tmp_path, monkeypatch, lambda u: (status, body))
+    calls = []
+    ctx, page, errors, _ = _open(browser, tmp_path, monkeypatch, lambda u: (calls.append(u), (status, body))[1])
     target = _first_link(page)
     page.evaluate("document.querySelector('#book .page a[data-read]').click()")
     page.wait_for_selector(".readview .rv-orig-big")
@@ -167,6 +170,7 @@ def test_failure_falls_back_to_original_link(browser, tmp_path, monkeypatch, sta
         href: document.querySelector('.rv-orig-big').href, target: document.querySelector('.rv-orig-big').target,
         focused: document.activeElement.classList.contains('rv-orig-big')})""")
     assert body["reason"] in v["msg"] and v["href"] == target and v["target"] == "_blank" and v["focused"]
+    assert len(calls) == 1                                   # 매체 실패는 다시 부르지 않는다
     assert errors == []
     ctx.close()
 
@@ -176,4 +180,19 @@ def test_without_relay_links_stay_plain(browser, tmp_path, monkeypatch):  # noqa
     assert page.evaluate("document.querySelectorAll('a[data-read]').length") == 0
     assert page.evaluate("window.EDITION.reader") is None
     assert seen == [] and errors == []
+    ctx.close()
+
+
+def test_retries_once_on_platform_503(browser, tmp_path, monkeypatch):  # noqa: F811
+    """Cloudflare 가 깨어날 때 내는 503 오류 페이지(JSON 아님)는 한 번만 다시 부른다. 매체 실패(JSON 502)는 다시 부르지 않는다."""
+    calls = []
+
+    def handler(u):
+        calls.append(u)
+        return (503, "<!DOCTYPE html>Error 1102") if len(calls) == 1 else (200, ARTICLE)
+
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler)
+    page.evaluate("document.querySelector('#book .page a[data-read]').click()")
+    page.wait_for_selector(".readview .rv-p")
+    assert len(calls) == 2 and errors == []
     ctx.close()

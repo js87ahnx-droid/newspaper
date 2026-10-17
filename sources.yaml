@@ -189,6 +189,7 @@ sources:
     paywall: false
     enabled: true
     site: [apnews.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: Cloudflare 주소에서 봇 차단(403) — 집 주소에선 2/3 → 원문 링크로
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:apnews.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -342,6 +343,7 @@ sources:
     paywall: false
     enabled: true
     site: [scmp.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: Cloudflare 주소에서 봇 차단(403) — 집 주소에선 3/3 → 원문 링크로
     headline: [{kind: homepage, url: "https://www.scmp.com/"}]
     feeds:
       - {section: top, url: "https://www.scmp.com/rss/91/feed", main: true}

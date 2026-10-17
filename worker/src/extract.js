@@ -122,7 +122,7 @@ export async function extract(response, url, debug) {
     skip: 0, body: 0, art: 0, p: false,
     bodyText: "", artP: "", allP: "", curP: "",
     meta: {}, title: "", ld: [], ldOn: false, ldBuf: "", fusion: "", fusionOn: false,
-    images: [], pend: [],
+    images: [], pend: [], done: false,
   };
   const flushP = () => {
     const t = st.curP.trim();
@@ -134,8 +134,13 @@ export async function extract(response, url, debug) {
   // 그래서 각 처리기는 할 일을 st.pend 에 모으고, 맨 끝의 "*" 처리기가 한 번에 달아 거꾸로(안쪽 일부터) 부른다
   const onEnd = (el, fn) => { if (!VOID.has(el.tagName) && !el.selfClosing) { st.pend.push(fn); return true; } return false; };
   const depth = (key) => ({
-    element(el) { if (onEnd(el, () => { st[key]--; })) st[key]++; },
+    element(el) { if (onEnd(el, () => { st[key]--; if (st[key] === 0) enough(); })) st[key]++; },
   });
+  // 본문 칸(또는 <article>)이 닫혔고 글이 충분하면 그 뒤(꼬리말·광고·스크립트)는 읽지 않는다 — CPU 한도(무료 10ms)
+  const enough = () => {
+    if (st.body === 0 && st.bodyText.length >= 600) st.done = true;
+    if (st.art === 0 && st.artP.length >= 800) st.done = true;
+  };
 
   const rw = new HTMLRewriter()
     .on("meta", {
@@ -189,9 +194,14 @@ export async function extract(response, url, debug) {
       },
     });
 
-  // 너무 큰 페이지는 앞부분만 (본문은 대개 앞쪽, CPU 한도)
-  const html = await rw.transform(response).text();
-  void html;
+  // 바뀐 HTML 은 쓰지 않으므로 모아 두지 않고 흘려 버린다. 본문을 다 읽었으면 거기서 멈춘다
+  const rd = rw.transform(response).body.getReader();
+  for (;;) {
+    const { done } = await rd.read();
+    if (done) break;
+    if (st.done) { await rd.cancel().catch(() => {}); break; }
+  }
+  if (st.p) flushP();
 
   const decode = (s) => paragraphs(decodeEntities(s));
   const fusion = fromFusion(st.fusion);

@@ -342,7 +342,7 @@
   1. 휴대폰 도구 막대 넘침(버튼 10개) → 좁은 화면 규칙
   2. 두 쪽이 화면에 걸칠 때 쪽 번호가 다음 쪽으로 반올림 → 화면 위 30% 지점 기준
 
-### S17 원문 재배열 보기 — 코드 완료, 배포 대기 (2026-10-17)
+### S17 원문 재배열 보기 — 배포 완료 (2026-10-17)
 - `worker/` Cloudflare Worker (`GET /?url=…`, 머리글 `X-Reader-Key`): 그 자리에서 원문을 받아 제목·사진(원 주소)·본문 문단만 JSON. 저장·캐시·요청 기록 없음(no-store, 저장소 바인딩 없음, observability 끔)
   - 거부: 키 없음·다름 401(같은 시간 비교), 허용목록 밖 403(`worker/src/domains.json` = sources.yaml `site`, 하위 도메인만 허용 — `evilchosun.com`·`chosun.com@evil`·포트·내부 주소 거부), 넘겨주기도 매번 허용목록 확인. CORS 는 지면 주소(GitHub Pages)만
   - 추출(HTMLRewriter, 문서 트리 없이 흘려 읽기): 매체 본문 칸 선택자 → ld+json articleBody → Arc 출판 데이터(조선) → `<article>`·페이지 `<p>` 모음. 버튼 글자·안내문·사진 설명 되풀이 거름, 긴 문단 나눔, 사진은 대표 사진 + 본문 칸 안 사진(최대 6)
@@ -356,7 +356,10 @@
   - [x] 본문 저장 없음: 저장소 바인딩·캐시·console.log 없음(테스트), 기존 verify_site 유지
   - [x] 실패 시 원문 링크: 422·502·연결 실패 모두 "원문 열기"로(브라우저 테스트 + 실제 화면), 설정 없으면 링크 그대로
   - [x] 실제 화면: 로컬 Worker + 10/16호 — SCMP(사진·27문단)·조선(휴대폰 375px, 가로 넘침 0)·동아 열림
-  - [ ] Cloudflare 배포 뒤 재측정·CPU 한도 — 사용자 계정 필요
+  - 배포: https://newspaper-reader.da-ilynews.workers.dev (사용자 계정, wrangler OAuth 로그인, 하위 도메인 da-ilynews 는 API 로 등록). GitHub Secrets READER_URL·READER_KEY 등록 — 키는 출력하지 않음
+  - [x] 실서버 거부: 키 없음 401·허용목록 밖 403·CORS 지면만
+  - [ ] **Cloudflare 재측정 17/25(68%) — 목표 70% 미달**: AP·SCMP 가 Cloudflare 주소를 막음(403, 브라우저형 머리글로도 안 풀림) → reader: false (원문으로)
+  - [ ] **CPU**: 성공 요청 중앙값 26~44ms(무료 기준 10ms 초과), 한도 초과 4/231건(첫 배포 때 503). 본문을 다 읽으면 멈추게 고쳤으나 크게 줄지 않음. 지면이 503 에 1회 재시도
   - pytest 216건 통과 (S17 11건 포함)
 - 평가에서 찾아 고친 결함
   1. 성공 5/25: HTMLRewriter 는 한 요소에 닫는 꼬리표 처리기를 하나만 둬서, 선택자가 겹치면 건너뛰기 깊이가 새어 본문 전체를 버림 → 처리기를 모아 한 번에 담
@@ -366,8 +369,13 @@
   5. 논평면 Google 경유 사설 링크가 안 풀림 → 사설·칼럼 주소도 풀기
 - 한계: 측정은 집 인터넷 주소에서 — Cloudflare 주소는 막는 매체가 다를 수 있음. 유료 기사(Nikkei)는 앞부분만. 매체 페이지 구조가 바뀌면 그 매체는 실패 → 원문 링크
 
+  - pytest 217건 통과 (503 재시도 테스트 추가)
+- 배포 뒤 고친 결함
+  6. AP·SCMP 가 Cloudflare 주소에서만 막힘 → reader: false
+  7. 콜드 스타트 때 가끔 Cloudflare 503(CPU 한도) → 본문을 다 읽으면 읽기 멈춤, 지면이 503 에 한 번 다시 부름
+- 운영 메모: Worker 코드를 바꾸면 `cd worker && npx wrangler deploy` (Actions 자동 배포 없음). 키를 바꾸려면 `wrangler secret put READER_KEY` 와 `gh secret set READER_KEY` 를 같은 값으로
+
 ### 다음에 이어서 할 일
-1. S17 배포: 사용자가 Cloudflare 무료 계정을 만든 뒤 `cd worker && npx wrangler login` → `npx wrangler secret put READER_KEY` → `npx wrangler deploy`, GitHub Secrets 에 READER_URL(배포 주소)·READER_KEY 등록 → 같은 표본으로 재측정
-2. S18 통합 평가
+1. S18 통합 평가 — 실제 발행 지면(GitHub Pages)에서 원문 보기 동작, Worker 한도 초과 수 관찰
 
 ### 아직 사용자 작업

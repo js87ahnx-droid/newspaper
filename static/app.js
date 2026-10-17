@@ -561,9 +561,17 @@
     };
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); fail("응답 없음"); }, 20000);
-    fetch(RD.url + "/?url=" + encodeURIComponent(url), {
-      headers: { "X-Reader-Key": RD.key }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer", signal: ctrl ? ctrl.signal : undefined
-    }).then(function (r) { return r.json(); }).then(function (j) {
+    // 중계 서버가 막 깨어날 때 Cloudflare 가 가끔 503(JSON 아닌 오류 페이지)을 낸다 — 그때만 한 번 더 (실측: 다시 부르면 성공)
+    var load = function (left) {
+      return fetch(RD.url + "/?url=" + encodeURIComponent(url), {
+        headers: { "X-Reader-Key": RD.key }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer", signal: ctrl ? ctrl.signal : undefined
+      }).then(function (r) {
+        var isJson = /json/.test(r.headers.get("Content-Type") || "");
+        if (!isJson && r.status >= 500 && left > 0 && seq === readSeq) return load(left - 1);
+        return r.json();
+      });
+    };
+    load(1).then(function (j) {
       clearTimeout(timer);
       if (seq !== readSeq) return;
       if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) { fail(j && j.reason); return; }
