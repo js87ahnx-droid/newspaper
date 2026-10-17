@@ -368,7 +368,10 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             cache["compare"] = res["summaries"]
 
     # 2. 영어 기사 한국어 요약 / 3. 그 밖의 언어 제목 번역
+    #    프랑스어·독일어(S20b)는 제목 번역과 한국어 요약을 둘 다 — 리드를 읽을 수 없으므로
     def want(lang: str, mode: str) -> bool:
+        if lang in TRANSLATE_BOTH:
+            return True
         target = display.english if lang == "en" else display.other
         return lang != "ko" and target == mode
 
@@ -379,15 +382,40 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     ):
         if key in cache:
             continue
-        rows = [{"id": it["issue_id"], "제목": it["title"], "요약": it["lead"][:300]}
-                for it in items if want(_lang_of(it), mode) and it["issue_id"] not in analysis]
+        todo = [it for it in items if want(_lang_of(it), mode) and it["issue_id"] not in analysis]
+        # 프랑스어·독일어 → 지면 기사 → 예비 기사 순 (S20 평가: 24쪽에서 한 번에 100건 넘게 보내 120초 시간 초과)
+        todo.sort(key=lambda it: (_lang_of(it) not in TRANSLATE_BOTH, bool(it.get("reserve"))))
+        rows = [{"id": it["issue_id"], "제목": it["title"], "요약": it["lead"][:300]} for it in todo][: BATCH * MAX_BATCHES]
         if not rows:
             continue
-        prompt = instr + f'\n출력 형식: {{"{out_key}": {{"<id>": "한국어"}}}}\n' + _data_block(rows)
+        got: dict = {}
+        sts = []
+        for i in range(0, len(rows), BATCH):
+            prompt = instr + f'\n출력 형식: {{"{out_key}": {{"<id>": "한국어"}}}}\n' + _data_block(rows[i:i + BATCH])
+            res, st = guarded(prompt)
+            sts.append(st)
+            if res and isinstance(res.get(out_key), dict):
+                got.update(res[out_key])
+        status[key] = sts[0] if len(set(sts)) == 1 else " / ".join(sts)
+        if got:
+            cache[key] = got
+
+    # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설 — 영어는 지금처럼 원문)
+    op = edition.get("opinion") or {}
+    op_all = [o for o in op.get("editorials", []) + op.get("columns", []) + [e for c in op.get("compare", []) for g in c["groups"] for e in g["editorials"]]
+              if o.get("lang") not in ("ko", "en", None)]
+    want_ids = sorted({o["id"] for o in op_all})
+    if want_ids and not set(want_ids) <= set(cache.get("op_title", {})):
+        rows = [{"id": i, "제목": next(o["title"] for o in op_all if o["id"] == i)} for i in want_ids]
+        prompt = ("각 사설·칼럼 제목을 자연스러운 한국어 신문 제목으로 번역하라. '社説' 같은 머리말은 빼라.\n"
+                  '출력 형식: {"titles": {"<id>": "한국어"}}\n' + _data_block(rows))
         res, st = guarded(prompt)
-        status[key] = st
-        if res and isinstance(res.get(out_key), dict):
-            cache[key] = res[out_key]
+        status["op_title"] = st
+        if res and isinstance(res.get("titles"), dict):
+            cache["op_title"] = {**cache.get("op_title", {}), **{k: str(v) for k, v in res["titles"].items()}}
+    for o in op_all:
+        if o["id"] in cache.get("op_title", {}):
+            o["ko_title"] = cache["op_title"][o["id"]]
 
     cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items + edition.get("compare", []):
@@ -427,6 +455,10 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "analysis": astats,
                                               "merged_duplicates": dups}
     return edition
+
+
+TRANSLATE_BOTH = {"fr", "de"}   # 제목 번역 + 한국어 요약 (S20b)
+BATCH, MAX_BATCHES = 40, 3      # 요약·제목 번역 한 번에 40건, 3번까지 (S20: 24쪽에서 한 번에 보내면 시간 초과)
 
 
 def _lang_of(item: dict) -> str:

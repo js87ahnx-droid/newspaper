@@ -119,6 +119,8 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
         lang = detect_lang(lead)
     if lang == "zh" and src.country == "JP":
         lang = "ja"  # 한자만으로 된 일본어 제목
+    if lang == "en" and feed.lang:
+        lang = feed.lang  # 프랑스어·독일어 피드 (S20b)
     if src.langs and lang not in src.langs:
         return None
     norm = normalize_url(link)

@@ -82,7 +82,7 @@ def interests_variant(kind: str) -> Interests:
 
 
 def run(kind="default", previous=None, mode=None):
-    arts, issues = build(200)   # 하루 60건 + 예비 120건이 다 차도록 (S19d)
+    arts, issues = build(260)   # 하루 60건 + 예비 180건이 다 차도록 (S19d·S20)
     cfg = CFG.model_copy(deep=True)
     if mode:
         cfg.editing.interest_cap_mode = mode

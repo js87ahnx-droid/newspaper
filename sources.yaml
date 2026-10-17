@@ -137,7 +137,7 @@ sources:
     type: 방송
     weight: 0.9
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [news.kbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     reader: false   # 원문 재배열 실측 실패 2026-10-17: 본문을 자바스크립트로 불러옴 → 원문 링크로
     feeds:
@@ -149,7 +149,7 @@ sources:
     type: 방송
     weight: 0.5
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [world.kbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://world.kbs.co.kr/rss/rss_news.htm?lang=e", main: true}
@@ -160,7 +160,7 @@ sources:
     type: 방송
     weight: 0.8
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [news.sbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.sbs.co.kr/news/headlineRssFeed.do?plink=RSSREADER", main: true}
@@ -273,6 +273,25 @@ sources:
       - {section: economy, url: "https://www.washingtonpost.com/arcio/rss/category/business/"}
       - {section: opinion, url: "https://www.washingtonpost.com/arcio/rss/category/opinions/"}
 
+  - name: Politico
+    country: US
+    lean: 중도
+    type: 종합지
+    weight: 0.8
+    paywall: false
+    enabled: true
+    site: [politico.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S20c): 기사·홈페이지 봇 차단(403), 중계로도 본문 앞 5문단 안팎뿐 → 원문 링크로. 홈페이지 403 → 헤드라인 없음
+    langs: [en]
+    # 피드에 사진첩·영상·뉴스레터가 섞임 → 기사·속보 주소만. economy.xml 은 9월 이후 멈춤, playbook 등은 뉴스레터뿐. 공식 피드 합계 하루 13건 안팎(토요일 실측)
+    feeds:
+      - {section: politics, url: "https://rss.politico.com/politics-news.xml", main: true, url_must: "/(news|live-updates)/20"}
+      - {section: politics, url: "https://rss.politico.com/congress.xml", url_must: "/(news|live-updates)/20"}
+      - {section: politics, url: "https://rss.politico.com/whitehouse.xml", url_must: "/(news|live-updates)/20"}
+      - {section: economy, url: "https://rss.politico.com/energy.xml", url_must: "/(news|live-updates)/20"}
+      - {section: tech, url: "https://rss.politico.com/technology.xml", url_must: "/(news|live-updates)/20"}
+      - {section: international, url: "https://rss.politico.com/defense.xml", url_must: "/(news|live-updates)/20"}
+
   # ---------------- 영국 ----------------
 
   - name: BBC
@@ -349,6 +368,42 @@ sources:
       - {section: top, url: "https://www.economist.com/latest/rss.xml", main: true, url_must: "^(?!.*/podcasts/)"}
       - {section: opinion, url: "https://www.economist.com/leaders/rss.xml"}   # 사설(Leaders), 주 1회
 
+  # ---------------- 유럽 ----------------
+  - name: Politico Europe
+    country: BE
+    lean: 중도
+    type: 종합지
+    weight: 0.7
+    paywall: false
+    enabled: true
+    site: [politico.eu]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [en]
+    headline: [{kind: homepage, url: "https://www.politico.eu/"}]
+    # 브뤼셀 편집국 — Politico 미국판과 따로 (S20c). 피드에 사진 없음, 팟캐스트가 섞임 → 기사 주소만
+    feeds:
+      - {section: top, url: "https://www.politico.eu/feed/", main: true, url_must: "/article/"}
+      - {section: politics, url: "https://www.politico.eu/section/politics/feed/", url_must: "/article/"}
+      - {section: international, url: "https://www.politico.eu/section/policy/feed/", url_must: "/article/"}
+      - {section: opinion, url: "https://www.politico.eu/section/opinion/feed/", url_must: "/article/"}
+
+  - name: Der Spiegel
+    country: DE
+    lean: 진보
+    type: 종합지
+    weight: 0.8
+    paywall: true    # SPIEGEL+ 일부 유료 (실측 30건 중 8건 — 원문 창은 앞부분만)
+    enabled: true
+    site: [spiegel.de]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    headline: [{kind: feed, url: "https://www.spiegel.de/index.rss"}]   # 편집 순서(홈페이지 순)
+    # 독일어판 (S20b: 제목 번역 + 한국어 요약). 영어판(international)은 넉 달에 20건·전부 유료라 쓰지 않음 (실측 2026-10-17)
+    feeds:
+      - {section: top, url: "https://www.spiegel.de/schlagzeilen/index.rss", main: true, lang: de}
+      - {section: politics, url: "https://www.spiegel.de/politik/index.rss", lang: de}
+      - {section: international, url: "https://www.spiegel.de/ausland/index.rss", lang: de}
+      - {section: economy, url: "https://www.spiegel.de/wirtschaft/index.rss", lang: de}
+      - {section: tech, url: "https://www.spiegel.de/netzwelt/index.rss", lang: de}
+      - {section: opinion, url: "https://www.spiegel.de/thema/meinung/index.rss", lang: de}
+
   # ---------------- 프랑스 ----------------
   - name: Le Monde
     country: FR
@@ -358,17 +413,53 @@ sources:
     paywall: true
     enabled: true
     site: [lemonde.fr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
-    langs: [en]   # 영어판만 — 프랑스어 언어 판정·번역은 아직 없음
-    reader: false   # 실측 2026-10-17(S19e): 봇 차단(402) → 원문 링크로
-    headline: [{kind: feed, url: "https://www.lemonde.fr/en/rss/une.xml"}]   # 편집 순서
+    reader: false   # 실측 2026-10-17(S19e): 봇 차단(402) → 원문 창은 피드 리드(한국어 요약) + 링크
+    # 뉴스는 프랑스어판(S20b: 제목 번역 + 한국어 요약, 원문 창 번역), 사설·칼럼은 영문판(논평면은 번역하지 않으므로). 프랑스어판 기고(/idees/)·실시간 중계(/live/)는 거름
+    headline: [{kind: feed, url: "https://www.lemonde.fr/rss/une.xml"}]   # 편집 순서
     feeds:
-      - {section: top, url: "https://www.lemonde.fr/en/rss/une.xml", main: true}
-      - {section: international, url: "https://www.lemonde.fr/en/international/rss_full.xml"}
-      - {section: economy, url: "https://www.lemonde.fr/en/economy/rss_full.xml"}
-      - {section: politics, url: "https://www.lemonde.fr/en/politics/rss_full.xml"}
+      - {section: top, url: "https://www.lemonde.fr/rss/une.xml", main: true, lang: fr, url_must: "^(?!.*/(idees|live)/)"}
+      - {section: international, url: "https://www.lemonde.fr/international/rss_full.xml", lang: fr, url_must: "^(?!.*/(idees|live)/)"}
+      - {section: economy, url: "https://www.lemonde.fr/economie/rss_full.xml", lang: fr, url_must: "^(?!.*/(idees|live)/)"}
+      - {section: politics, url: "https://www.lemonde.fr/politique/rss_full.xml", lang: fr, url_must: "^(?!.*/(idees|live)/)"}
       - {section: opinion, url: "https://www.lemonde.fr/en/opinion/rss_full.xml"}
 
   # ---------------- 일본 ----------------
+  - name: 요미우리신문
+    country: JP
+    lean: 보수
+    type: 종합지
+    weight: 0.9
+    paywall: false   # 대부분 무료, 일부 회원 한정(앞부분만)
+    enabled: true
+    site: [yomiuri.co.jp]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [ja]
+    headline: [{kind: homepage, url: "https://www.yomiuri.co.jp/"}]
+    # 공식 RSS 없음(404, 2026-10-17 실측) → Google 뉴스 매체 한정 검색(D6). 비공식 재배포(assets.wor.jp)는 끊길 수 있어 쓰지 않음
+    # 영어판 The Japan News 는 봇 차단(202 빈 응답)
+    feeds:
+      - {section: top, url: "https://news.google.com/rss/search?q=site:yomiuri.co.jp+when:1d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:yomiuri.co.jp/editorial+when:1d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "社説"}
+
+  - name: 아사히신문
+    country: JP
+    lean: 진보
+    type: 종합지
+    weight: 0.9
+    paywall: true
+    enabled: true
+    site: [asahi.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-10-17(S20c): 거의 모두 유료 기사(본문 300~780자 뒤 구독 안내) → 원문 링크로
+    langs: [ja]
+    headline: [{kind: homepage, url: "https://www.asahi.com/"}]
+    # 공식 피드에 리드·사진 없음. 사설 피드 없음 → Google 뉴스, 지면 사설 （社説） 만. 영어판 AJW 는 피드 없음
+    feeds:
+      - {section: top, url: "https://www.asahi.com/rss/asahi/newsheadlines.rdf", main: true}
+      - {section: politics, url: "https://www.asahi.com/rss/asahi/politics.rdf"}
+      - {section: economy, url: "https://www.asahi.com/rss/asahi/business.rdf"}
+      - {section: international, url: "https://www.asahi.com/rss/asahi/international.rdf"}
+      - {section: tech, url: "https://www.asahi.com/rss/asahi/science.rdf"}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:asahi.com+%EF%BC%88%E7%A4%BE%E8%AA%AC%EF%BC%89+when:1d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "（社説）"}
+
   - name: Nikkei Asia
     country: JP
     lean: 경제지
@@ -402,7 +493,7 @@ sources:
     type: 방송
     weight: 0.7
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [www3.nhk.or.jp]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:www3.nhk.or.jp/nhkworld+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
@@ -413,7 +504,7 @@ sources:
     type: 종합지
     weight: 0.7
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [japantimes.co.jp]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     reader: false   # 원문 재배열 실측 실패 2026-10-17: 봇 차단(403) → 원문 링크로
     feeds:
@@ -442,7 +533,7 @@ sources:
     type: 국제
     weight: 0.5
     paywall: false
-    enabled: true
+    enabled: false   # 2026-10-17 사용자 요청으로 제외 (S20a)
     site: [globaltimes.cn]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.globaltimes.cn/"}]
     feeds:

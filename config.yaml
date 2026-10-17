@@ -28,7 +28,7 @@ editing:
   interest_cap: 0.50       # 관심 분야 기사 비율 상한
   continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
   history_days: 14         # 연속성 계산에 쓰는 과거 일수
-  reserve: 120             # 예비 기사: 쪽이 남으면 단신으로 채움 (S15). 단신이 한 줄이 되며(S17e) 10 → 30, 24쪽(S19d) 120 — 10/16 실측: 40 이면 끝 빈 쪽 3장, 60 이면 2장, 90 이면 1장
+  reserve: 180             # 예비 기사: 쪽이 남으면 단신으로 채움 (S15·S17e). 24쪽(S19d·S20) 실측 — 10/16 하루치: 40 이면 끝 빈 쪽 3장·120 이면 0, 10/18 주말 반나절치: 120 이면 4장·180 이면 iPad 2장
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
@@ -86,7 +86,7 @@ photos:
 llm:
   enabled: true
   model: haiku
-  max_calls_per_day: 30
+  max_calls_per_day: 40   # S20: 분석 14 + 비교 1 + 요약·번역 6까지 + 같은 사건 2 + 사설 제목 1 + 헤드라인 1 ≈ 25, 재실행 여유
   timeout_sec: 120
   analysis_model: sonnet
   analysis_issues: 70   # 지면 60건 + 예비 10건 (S19d, 14회)

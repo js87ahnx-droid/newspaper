@@ -71,7 +71,12 @@ def _display(item: dict, display) -> dict:
             "lead": an["summary"], "lead_note": "AI 정리", "analysis": an,
             "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
         }
-    if rep["lang"] == "en" and display.english == "original_with_ko_summary" and llm.get("ko_summary"):
+    if rep["lang"] in ("fr", "de"):   # S20b: 한국어 제목 + 한국어 요약, 원 제목은 작게
+        if llm.get("ko_title"):
+            title, orig = llm["ko_title"], item["title"]
+        if llm.get("ko_summary"):
+            lead, lead_note = llm["ko_summary"], "AI 요약"
+    elif rep["lang"] == "en" and display.english == "original_with_ko_summary" and llm.get("ko_summary"):
         lead, lead_note = llm["ko_summary"], "AI 요약"
     elif rep["lang"] not in ("ko", "en") and display.other == "translated_title" and llm.get("ko_title"):
         title, orig, lead_note = llm["ko_title"], item["title"], "AI 번역 제목"
@@ -84,7 +89,8 @@ def _display(item: dict, display) -> dict:
 SHORT_NAME = {"조선일보": "조선", "중앙일보": "중앙", "동아일보": "동아", "한겨레": "한겨레", "경향신문": "경향", "한국경제": "한경",
               "매일경제": "매경", "연합뉴스": "연합", "New York Times": "NYT", "Wall Street Journal": "WSJ", "Fox News": "Fox",
               "Global Times": "환구시보", "Al Jazeera": "알자지라", "NHK World": "NHK World",
-              "Financial Times": "FT", "Washington Post": "WaPo", "The Economist": "Economist"}
+              "Financial Times": "FT", "Washington Post": "WaPo", "The Economist": "Economist",
+              "요미우리신문": "요미우리", "아사히신문": "아사히", "Der Spiegel": "Spiegel"}
 
 
 def headline_label(by: dict) -> str | None:
@@ -102,7 +108,8 @@ def headline_label(by: dict) -> str | None:
 KO_NAMES = {"New York Times": "뉴욕타임스", "Wall Street Journal": "월스트리트저널", "Guardian": "가디언", "Fox News": "폭스뉴스",
             "Reuters": "로이터", "AP": "AP통신", "Nikkei Asia": "닛케이", "Japan Times": "재팬타임스", "SCMP": "사우스차이나모닝포스트",
             "Bloomberg": "블룸버그", "Financial Times": "파이낸셜타임스", "The Economist": "이코노미스트", "Le Monde": "르몽드",
-            "Washington Post": "워싱턴포스트", "Al Jazeera": "알자지라", "Global Times": "환구시보", "BBC": "비비씨", "CNN": "씨엔엔"}
+            "Washington Post": "워싱턴포스트", "Al Jazeera": "알자지라", "Global Times": "환구시보", "BBC": "비비씨", "CNN": "씨엔엔",
+            "Politico": "폴리티코", "Politico Europe": "폴리티코 유럽", "Der Spiegel": "슈피겔"}
 
 
 def _source_key(name: str) -> str:

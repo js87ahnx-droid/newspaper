@@ -3,7 +3,7 @@ import json
 import subprocess
 import sys
 from collections import Counter
-from datetime import date
+from datetime import date, datetime, timezone
 
 from pipeline.collect import Article
 from pipeline.settings import Interests, Llm, load_interests
@@ -190,3 +190,80 @@ def test_call_takes_first_json_object_despite_trailing_text(tmp_path):
         assert (got, st) == ({"groups": [[0, 1]]}, "ok"), body
     got, st = call("p", cfg, Budget(tmp_path / "u.json", _d(2026, 10, 17), 99), runner=lambda t: _json.dumps({"result": "없음"}))
     assert got is None and st.startswith("응답 형식 오류")
+
+
+# ---------- S20b 프랑스어·독일어 ----------
+def test_french_gets_korean_title_and_summary(tmp_path):
+    """프랑스어 기사는 제목 번역과 한국어 요약을 둘 다 받고, 지면은 한국어 제목 + 원 제목 + 한국어 요약."""
+    from pipeline.llm import Budget, enrich
+    from pipeline.render import _display
+    asked = []
+
+    def runner(prompt):
+        asked.append(prompt)
+        if "번역" in prompt:
+            body = {"titles": {"f1": "마크롱, 개각 발표"}}
+        elif "요약하라" in prompt and "성향" not in prompt:
+            body = {"summaries": {"e1": "교황 수술", "f1": "마크롱 대통령이 개각을 발표했다."}}
+        else:
+            body = {"summaries": {}}
+        return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
+
+    ed = edition_fixture()
+    fr = {"issue_id": "f1", "title": "Macron annonce un remaniement", "lead": "Le président a annoncé…", "articles": [
+        {"id": "f1", "source": "Le Monde", "country": "FR", "lean": "진보", "lang": "fr", "title": "Macron annonce un remaniement", "lead": "x"}]}
+    ed["sections"]["front"].append(fr)
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10, analysis_issues=0)
+    display = load_interests().foreign_display
+    out = enrich(ed, cfg, display, tmp_path / "llm.json", Budget(tmp_path / "u.json", date(2026, 10, 17), 10), runner=runner)
+    it = next(i for i in out["sections"]["front"] if i["issue_id"] == "f1")
+    assert it["llm"]["ko_title"] == "마크롱, 개각 발표" and it["llm"]["ko_summary"].startswith("마크롱")
+    v = _display(it, display)
+    assert (v["title"], v["orig_title"], v["lead"], v["lead_note"], v["lang"]) == (
+        "마크롱, 개각 발표", "Macron annonce un remaniement", "마크롱 대통령이 개각을 발표했다.", "AI 요약", "fr")
+    ja = next(i for i in out["sections"]["briefs"] if i["issue_id"] == "j1")
+    assert "ko_summary" not in ja.get("llm", {})       # 일본어는 지금처럼 제목 번역만
+
+
+def test_feed_lang_marks_french_and_german():
+    from pipeline.collect import entry_to_article
+    from pipeline.settings import Feed, Source
+    now = datetime(2026, 10, 17, 12, tzinfo=timezone.utc)
+    e = {"link": "https://www.lemonde.fr/politique/article/2026/10/17/x", "title": "Macron annonce un remaniement",
+         "summary": "Le président…", "published": "Fri, 17 Oct 2026 10:00:00 GMT"}
+    fr = Feed(section="top", url="https://www.lemonde.fr/rss/une.xml", lang="fr")
+    en = Feed(section="opinion", url="https://www.lemonde.fr/en/opinion/rss_full.xml")
+    src = Source(name="Le Monde", country="FR", lean="진보", type="종합지", weight=1, paywall=True, enabled=True, feeds=[fr, en])
+    assert entry_to_article(e, src, fr, now).lang == "fr"
+    assert entry_to_article(e, src, en, now).lang == "en"      # 피드가 알려 주지 않으면 라틴 문자는 영어
+    assert entry_to_article({**e, "title": "프랑스 개각"}, src, fr, now).lang == "ko"   # 문자 체계가 먼저
+    import pytest as _pt
+    with _pt.raises(ValueError):
+        Feed(section="x", url="https://a.b/", lang="xx")
+
+
+def test_opinion_titles_in_japanese_get_korean(tmp_path):
+    """S20c: 논평면 일본어·독일어·프랑스어 사설 제목은 한국어로 (영어는 그대로), 사설 비교 묶음도 같이. 두 번째는 캐시."""
+    from pipeline.llm import Budget, enrich
+    asked = []
+
+    def runner(prompt):
+        asked.append(prompt)
+        body = {"titles": {"y1": "중의원 해산을 서두르지 마라"}} if "사설·칼럼 제목" in prompt else {}
+        return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
+
+    def ed():
+        e = edition_fixture()
+        ja = {"id": "y1", "lang": "ja", "title": "社説：衆院解散を急ぐな", "source": "요미우리신문"}
+        en = {"id": "g1", "lang": "en", "title": "The Guardian view on X", "source": "Guardian"}
+        e["opinion"] = {"editorials": [dict(ja), en], "columns": [], "compare": [{"groups": [{"editorials": [dict(ja)]}]}]}
+        return e
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=20, timeout_sec=10, analysis_issues=0)
+    disp = load_interests().foreign_display
+    out = enrich(ed(), cfg, disp, tmp_path / "llm.json", Budget(tmp_path / "u.json", date(2026, 10, 17), 20), runner=runner)
+    op = out["opinion"]
+    assert op["editorials"][0]["ko_title"] == "중의원 해산을 서두르지 마라" and "ko_title" not in op["editorials"][1]
+    assert op["compare"][0]["groups"][0]["editorials"][0]["ko_title"] == "중의원 해산을 서두르지 마라"
+    n = sum("사설·칼럼 제목" in p for p in asked)
+    out2 = enrich(ed(), cfg, disp, tmp_path / "llm.json", Budget(tmp_path / "u.json", date(2026, 10, 17), 20), runner=runner)
+    assert n == 1 and sum("사설·칼럼 제목" in p for p in asked) == 1 and out2["opinion"]["editorials"][0]["ko_title"]

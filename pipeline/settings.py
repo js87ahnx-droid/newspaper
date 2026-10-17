@@ -75,7 +75,7 @@ class Editing(Strict):
     # topic: 관심 분야 기사 전체를 상한에 셈
     interest_cap_mode: Literal["driven", "topic"] = "driven"
     # 예비 기사 (S15): 하루 분량 다음 순위 기사. 지면에 쪽이 남으면 단신으로 채운다 (같은 사건 합치기로 빈 자리도)
-    reserve: int = Field(default=10, ge=0, le=150)
+    reserve: int = Field(default=10, ge=0, le=300)
 
     @model_validator(mode="after")
     def _ratios(self) -> "Editing":
@@ -107,7 +107,7 @@ class Clustering(Strict):
     lexical_weight: float = Field(default=0.5, ge=0, le=1)  # 같은 언어 쌍에서 어휘 겹침 비중
     cross_lang_csls_min: float = Field(default=0.06, gt=-1, lt=1)  # 다른 언어 쌍이 묶이는 CSLS 점수
     csls_k: int = Field(default=10, ge=1, le=50)                  # CSLS 의 이웃 수
-    csls_min_by_lang: dict[Literal["ko", "en", "ja", "zh", "ar"], float] = Field(default_factory=dict)
+    csls_min_by_lang: dict[Literal["ko", "en", "ja", "zh", "ar", "fr", "de"], float] = Field(default_factory=dict)
     # 군집 문턱엔 못 미쳤지만 같은 사건으로 보이는 이웃 이슈 (편집에서 둘 다 싣지 않고 합친다, S14 평가)
     near_mean_min: float = Field(default=0.36, gt=0, lt=1)   # 두 이슈 기사 쌍 평균 유사도
     near_max_min: float = Field(default=0.55, gt=0, lt=1)    # 또는 (같은 언어끼리) 가장 가까운 기사 쌍
@@ -204,6 +204,9 @@ class Feed(Strict):
     date_source: Literal["feed", "page_meta"] = "feed"
     # 이 문자열이 제목에 있는 항목만 받는다 (예: Google 뉴스 검색 피드에서 "[사설]"만)
     title_must: str | None = None
+    # 라틴 문자 제목의 언어 (S20b): 문자 체계로는 영어와 못 가르므로 피드가 알려 준다. 비우면 en
+    #   예: Le Monde 프랑스어판 fr, Spiegel 독일어판 de (같은 매체 영어판 피드는 비워 둔다)
+    lang: Literal["fr", "de"] | None = None
     # 기사 주소가 이 정규식에 맞는 항목만 받는다 (S19e: Bloomberg 피드에 섞인 영상·오디오·뉴스레터를 거름)
     url_must: str | None = None
 
@@ -243,7 +246,7 @@ class Source(Strict):
     enabled: bool
     feeds: list[Feed]
     # 받을 기사 언어(ko/en/ja/zh/ar). 비우면 전부. 예: 조선일보 피드에는 일본어판 기사가 섞여 들어온다
-    langs: list[Literal["ko", "en", "ja", "zh", "ar"]] = Field(default_factory=list)
+    langs: list[Literal["ko", "en", "ja", "zh", "ar", "fr", "de"]] = Field(default_factory=list)
     headline: list[HeadlineSrc] = Field(default_factory=list)  # 머리기사 (비우면 이 매체는 머리기사 가중 없음)
     # 기사 주소 도메인 — 원문 재배열 중계(worker/)의 허용목록. 하위 도메인 포함 (S17)
     site: list[str] = Field(default_factory=list)

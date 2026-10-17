@@ -104,7 +104,7 @@ _LATIN = re.compile(r"[A-Za-z]")
 
 
 def detect_lang(text: str) -> str:
-    """문자 체계 기반 언어 판별: ko / ja / zh / ar / en / und."""
+    """문자 체계 기반 언어 판별: ko / ja / zh / ar / en / und. 라틴 문자는 모두 en — 프랑스어·독일어는 피드 설정(Feed.lang)으로 (S20b)."""
     if _HANGUL.search(text):
         return "ko"
     if _KANA.search(text):
