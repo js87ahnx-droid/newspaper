@@ -157,10 +157,25 @@ def _lean_groups(it: dict) -> list[dict]:
             for g in st.get("lean", [])]
 
 
+def related_opinions(op: dict | None) -> dict[str, list[dict]]:
+    """논평면에서 지면 이슈와 연결한 사설·칼럼(관련: …)을 이슈별로 (S17e — 기사 곁에 보인다). 사설이 칼럼보다 먼저."""
+    if not op:
+        return {}
+    out: dict[str, list[dict]] = {}
+    seen: set[str] = set()
+    for o in sorted(op.get("editorials", []) + op.get("columns", []), key=lambda o: o.get("kind") != "editorial"):
+        if not o.get("issue_id") or o["url"] in seen:
+            continue
+        seen.add(o["url"])
+        out.setdefault(o["issue_id"], []).append({**o, "cls": LEAN_CLASS.get(o.get("lean"), "mid")})
+    return out
+
+
 def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
     compare_ids = {it["issue_id"] for it in edition.get("compare", [])}
+    rel_ops = related_opinions(edition.get("opinion"))
     sections = []
     for s in cfg.sections:
         if s.id in ("compare", "guide", "opinion"):
@@ -180,6 +195,8 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
                 "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
                 # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
                 "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", [])),
+                # 관련 사설·칼럼 (S17e): 같은 사건으로 합쳐진 이슈에 연결된 것도
+                "opinions": [o for iid in [it["issue_id"], *it.get("merged", [])] for o in rel_ops.get(iid, [])],
             })
         sections.append({"id": s.id, "title": titles[s.id], "items": rows})
     compare = []

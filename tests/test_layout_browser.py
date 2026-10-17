@@ -15,9 +15,7 @@ STATE = "() => NEWS.state()"
 
 
 def fixed_pages(w, h):
-    total = sum(s.pages for s in load_config().sections)
-    briefs = next(s.pages for s in load_config().sections if s.id == "briefs")
-    return total + (briefs if w < 600 and w < h else 0)   # 휴대폰 세로는 단신 쪽 두 배
+    return sum(s.pages for s in load_config().sections)   # S17e: 단신이 한 줄이 되어 휴대폰도 같은 쪽수
 
 
 @pytest.mark.parametrize("w,h", SIZES)
@@ -84,3 +82,21 @@ def test_demoted_items_become_briefs_in_score_order(browser, tmp_path):  # noqa:
     ctx.close()
     assert st["demoted"] == len(order)
     assert order == sorted(order, reverse=True)
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (820, 1180), (390, 844)])
+def test_briefs_are_one_line(browser, tmp_path, w, h):  # noqa: F811
+    """S17e: 단신은 기사마다 가로 한 줄 (줄바꿈 없음), 한 단."""
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, w, h)
+    m = page.evaluate("""() => {
+      const ps = [...document.querySelectorAll('#book .page.sec-briefs')];
+      ps.forEach(p => p.style.display = '');
+      const rows = ps.flatMap(p => [...p.querySelectorAll('.item.brief')]);
+      const lh = rows.map(r => { const t = r.querySelector('.hl'); return [r.getBoundingClientRect().height, t ? t.getBoundingClientRect().height : 0]; });
+      return {n: rows.length, maxH: Math.max(...lh.map(x => x[0])), maxT: Math.max(...lh.map(x => x[1])),
+              grid: document.querySelectorAll('.brief-grid').length, end: document.querySelectorAll('#book .page.endpage').length}; }""")
+    ctx.close()
+    assert not errors
+    assert m["n"] >= 5 and m["grid"] == 0
+    assert m["maxH"] <= 36 and m["maxT"] <= 30, m   # 한 줄 높이

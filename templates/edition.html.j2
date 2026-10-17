@@ -95,6 +95,15 @@
         {% endfor %}
       </div>
       {% endif %}
+      {% if it.opinions and not brief %}
+      <div class="op-rel" aria-label="관련 사설·칼럼">
+        <h4>관련 사설·칼럼</h4>
+        {% for o in it.opinions[:(3 if loop.first else 2)] %}
+        <p><span class="badge lean-{{ o.cls }}">{{ o.lean }}</span> <span class="src">{{ o.source }}</span>
+           <a href="{{ real_url(o.url) }}" target="_blank" rel="noopener noreferrer"{{ art(o.url, o.source, o.lang) }}>{{ o.title }}</a></p>
+        {% endfor %}
+      </div>
+      {% endif %}
       <div class="meta">
         {% if it.time %}<time class="tm">{{ it.time }}</time>{% endif %}
         <span class="src">{{ it.source }}</span>

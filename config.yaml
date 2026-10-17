@@ -28,7 +28,7 @@ editing:
   interest_cap: 0.50       # 관심 분야 기사 비율 상한
   continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
   history_days: 14         # 연속성 계산에 쓰는 과거 일수
-  reserve: 10              # 예비 기사: 쪽이 남으면 단신으로 채움 (S15)
+  reserve: 30              # 예비 기사: 쪽이 남으면 단신으로 채움 (S15). 단신이 한 줄이 되며(S17e) 10 → 30
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
@@ -40,7 +40,7 @@ sections:
   - {id: international, title: "국제", max_articles: 6, pages: 2}
   - {id: interest, title: "관심", max_articles: 6, pages: 2}
   - {id: compare, title: "입장 비교", max_articles: 3}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
-  - {id: briefs, title: "단신", max_articles: 20, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (폭이 넉넉하면 두 단)
+  - {id: briefs, title: "단신", max_articles: 20, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (기사마다 가로 한 줄 — S17e)
   - {id: opinion, title: "논평·사설", max_articles: 0, pages: 2}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0, pages: 1}
 

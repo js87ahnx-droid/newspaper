@@ -328,3 +328,17 @@ def test_same_event_failure_keeps_edition():
     assert same_event_groups(items, lambda p: None) == ({}, "응답 없음")
     calls = iter([{"groups": [[0, 1]]}, None])
     assert same_event_groups(items, lambda p: next(calls)) == ({}, "검증 응답 없음")
+
+
+def test_related_opinions_by_issue_including_merged():
+    from pipeline.render import related_opinions
+    op = {"editorials": [{"issue_id": "a", "url": "u1", "kind": "editorial", "lean": "진보", "source": "경향", "title": "사설1"},
+                         {"issue_id": None, "url": "u2", "kind": "editorial", "lean": "보수", "source": "조선", "title": "무관"}],
+          "columns": [{"issue_id": "a", "url": "u3", "kind": "column", "lean": "보수", "source": "동아", "title": "칼럼"},
+                      {"issue_id": "b", "url": "u4", "kind": "column", "lean": "중도", "source": "NYT", "title": "합쳐진 쪽"}]}
+    rel = related_opinions(op)
+    assert [o["title"] for o in rel["a"]] == ["사설1", "칼럼"] and rel["a"][0]["cls"] == "pro"   # 사설이 먼저
+    assert "None" not in rel and None not in rel and related_opinions(None) == {}
+    # 같은 사건으로 합쳐진 이슈(b → a)에 연결된 것도 그 기사 곁에
+    ids = ["a", *["b"]]
+    assert [o["title"] for i in ids for o in rel.get(i, [])] == ["사설1", "칼럼", "합쳐진 쪽"]
