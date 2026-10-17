@@ -35,8 +35,8 @@
    ]
   },
   {
-   "id": "f94b80aadbf9272d",
-   "title": "Trump fires Katie Zacharia as White House press secretary after five days, advisers say",
+   "id": "187bf88bf8ee0d93",
+   "title": "White House press secretary Katie Zacharia says she did not pass bar exam",
    "topic": "international",
    "days": 2,
    "signature": [
@@ -47,9 +47,9 @@
     "white",
     "house",
     "day",
+    "exam",
     "bar",
     "five",
-    "exam",
     "fired",
     "role"
    ],
@@ -62,8 +62,8 @@
     },
     {
      "date": "2026-10-17",
-     "title": "Trump fires Katie Zacharia as White House press secretary after five days, advisers say",
-     "summary": "백악관 새 대변인 재커라이어, 닷새 만에 퇴장"
+     "title": "White House press secretary Katie Zacharia says she did not pass bar exam",
+     "summary": "재커라이어 백악관 대변인, 5일 만에 퇴진"
     }
    ]
   },
@@ -220,8 +220,8 @@
     "west",
     "bank",
     "harvest",
-    "attack",
     "journalist",
+    "attack",
     "tree",
     "washington",
     "post"
@@ -709,9 +709,9 @@
    "topic": "economy",
    "days": 1,
    "signature": [
-    "ceo",
     "메모",
     "모리",
+    "ceo",
     "애플",
     "국산",
     "위기",
@@ -748,7 +748,7 @@
     "called",
     "roadster",
     "down",
-    "drive"
+    "really"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -878,6 +878,34 @@
      "date": "2026-10-17",
      "title": "OK저축은행서 '또 해킹' 고객 268명 정보 추가 유출",
      "summary": "OK저축은행 예금 고객 268명 추가 유출, 총 518명"
+    }
+   ]
+  },
+  {
+   "id": "db35000601278373",
+   "title": "‘102일 무단이탈’ 송민호 결국 재복무…병무청 “통지 예정”",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "무청",
+    "민호",
+    "병무",
+    "송민",
+    "복무",
+    "통지",
+    "재복",
+    "유죄",
+    "호에",
+    "확정",
+    "예정",
+    "무단"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "‘102일 무단이탈’ 송민호 결국 재복무…병무청 “통지 예정”",
+     "summary": null
     }
    ]
   },
@@ -1050,6 +1078,34 @@
     {
      "date": "2026-10-17",
      "title": "'전날 7%대 급락' 코스피, 1% 내외 강세…코스닥 2%대↑(종합)",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "75a9122376bcd879",
+   "title": "한미 재무-통화 첫 2+2 면담… 경제 현안-금융 협력 등 논의",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "통화",
+    "재무",
+    "당국",
+    "화당",
+    "면담",
+    "한미",
+    "협력",
+    "융충",
+    "경제",
+    "공조",
+    "충격",
+    "韓美"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "한미 재무-통화 첫 2+2 면담… 경제 현안-금융 협력 등 논의",
      "summary": null
     }
    ]
@@ -1533,8 +1589,8 @@
     "action",
     "national",
     "security",
-    "uk",
     "adviser'",
+    "uk",
     "asses",
     "adviser",
     "post",
@@ -1701,34 +1757,6 @@
    ]
   },
   {
-   "id": "db35000601278373",
-   "title": "‘102일 무단이탈’ 송민호 결국 재복무…병무청 “통지 예정”",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "무청",
-    "민호",
-    "병무",
-    "송민",
-    "통지",
-    "복무",
-    "재복",
-    "확정",
-    "유죄",
-    "예정",
-    "호에",
-    "단이"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "‘102일 무단이탈’ 송민호 결국 재복무…병무청 “통지 예정”",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "e1cc061585c3e96e",
    "title": "머스크, 중간선거 앞서 공화당에 3천억원대 투입…최대 후원자로",
    "topic": "international",
@@ -1860,9 +1888,9 @@
     "올해",
     "최대",
     "만호",
-    "말까",
     "더니",
-    "연말"
+    "말까",
+    "전망"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -1981,34 +2009,6 @@
     {
      "date": "2026-10-17",
      "title": "트럼프 '에너지 휴전' 붕괴…젤렌스키, 러 정유시설 공습 재개",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "75a9122376bcd879",
-   "title": "한미 재무-통화 첫 2+2 면담… 경제 현안-금융 협력 등 논의",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "통화",
-    "재무",
-    "당국",
-    "화당",
-    "한미",
-    "면담",
-    "협력",
-    "경제",
-    "韓美",
-    "와프",
-    "융충",
-    "한듯"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "한미 재무-통화 첫 2+2 면담… 경제 현안-금융 협력 등 논의",
      "summary": null
     }
    ]
@@ -2142,7 +2142,7 @@
     "족에",
     "감사",
     "선물",
-    "개국"
+    "동파"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2316,8 +2316,8 @@
    "signature": [
     "settle",
     "elon",
-    "musk",
     "lawsuit",
+    "musk",
     "election",
     "giveaway",
     "fraud",
@@ -2518,10 +2518,10 @@
     "ethiopia'",
     "ex-fighter",
     "instalment",
-    "return",
-    "announce",
     "civilian",
-    "interim"
+    "interim",
+    "poll",
+    "return"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2617,7 +2617,7 @@
     {
      "date": "2026-10-17",
      "title": "北, 'HGV 고도화' 韓입장에 \"우리 국방력강화 명분\"",
-     "summary": null
+     "summary": "북 \"그을음 없는 건 억지\", 한국 HGV 재반박"
     }
    ]
   },
@@ -2645,6 +2645,34 @@
     {
      "date": "2026-10-17",
      "title": "인천 삼산동 대단지 아파트 정전…1천800여세대 불편",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "0cbf4895b0d683f2",
+   "title": "백악관 대변인 “中에 변변한 화장실 없어”…中 “더 자주 와보라”",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "장실",
+    "화장",
+    "없어",
+    "대변",
+    "변인",
+    "악관",
+    "변변",
+    "변한",
+    "자주",
+    "백악",
+    "中",
+    "보라"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "백악관 대변인 “中에 변변한 화장실 없어”…中 “더 자주 와보라”",
      "summary": null
     }
    ]
@@ -2687,8 +2715,8 @@
     "fined",
     "british",
     "causing",
-    "son",
     "two-year-old",
+    "son",
     "death",
     "man",
     "fall",
@@ -2917,8 +2945,8 @@
    "topic": "economy",
    "days": 1,
    "signature": [
-    "통보",
     "해자",
+    "통보",
     "보공",
     "건보",
     "공단",
@@ -3216,8 +3244,8 @@
     "manila",
     "remark",
     "conflict",
-    "calling",
-    "force"
+    "force",
+    "calling"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -3381,9 +3409,9 @@
    "signature": [
     "메타",
     "모델",
-    "애플",
     "앙숙",
     "플과",
+    "애플",
     "방형",
     "잡았",
     "퓨터",
@@ -3520,8 +3548,8 @@
    "days": 1,
    "signature": [
     "kamchatka",
-    "russia'",
     "magnitude",
+    "russia'",
     "emsc",
     "usg",
     "の地",
@@ -3771,39 +3799,6 @@
     {
      "date": "2026-10-17",
      "title": "토요일까지 맑고 포근…일요일엔 가을치고 많은 비",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "19045530f5513eda",
-   "title": "Trump on Katie Zacharia’s WH press secretary role: ‘You don’t want to go through this’",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "katie",
-    "wh",
-    "zacharia",
-    "pres",
-    "secretary",
-    "don",
-    "role",
-    "maybe",
-    "zacharia'",
-    "cast",
-    "think",
-    "doubt"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": null,
-     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Trump on Katie Zacharia’s WH press secretary role: ‘You don’t want to go through this’",
      "summary": null
     }
    ]
@@ -4127,6 +4122,39 @@
    ]
   },
   {
+   "id": "2a440f1b9dc850ac",
+   "title": "Musk contributed more than $150 million to bolster GOP in Texas Senate race, filings show",
+   "topic": "international",
+   "days": 2,
+   "signature": [
+    "texa",
+    "musk",
+    "bolster",
+    "contributed",
+    "senate",
+    "filing",
+    "gop",
+    "race",
+    "show",
+    "million",
+    "heavily",
+    "ken"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "Talarico rallies as his Texas US Senate race against Paxton enters final weeks",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "Musk contributed more than $150 million to bolster GOP in Texas Senate race, filings show",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "7616e8025c6d588f",
    "title": "China to host global governance forum from Oct. 23 to 25",
    "topic": "international",
@@ -4167,8 +4195,8 @@
     "매도",
     "장서",
     "증권",
-    "주식",
     "유출",
+    "주식",
     "전환",
     "식도",
     "시장"
@@ -4191,8 +4219,8 @@
     "외칠",
     "민이",
     "재명",
-    "국민",
     "이재",
+    "국민",
     "핵안",
     "발의",
     "탄핵",
@@ -4575,6 +4603,33 @@
    ]
   },
   {
+   "id": "8f5770985604893e",
+   "title": "Zelenskyy responds with a smile to question about being Trump’s scapegoat",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "scapegoat",
+    "smile",
+    "zelenskyy",
+    "suggestion",
+    "problem",
+    "respond",
+    "answer",
+    "my",
+    "live",
+    "europe",
+    "question"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Zelenskyy responds with a smile to question about being Trump’s scapegoat",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "3454ce905808e203",
    "title": "G7「チョルノービリ原発修復へ460億円拠出」",
    "topic": "international",
@@ -4624,6 +4679,34 @@
     {
      "date": "2026-10-17",
      "title": "US senators call for investigation into Ukraine's Starlink restrictions",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "83a793ec691d252f",
+   "title": "Real Madrid demand resignation of LaLiga chief after Nazi propaganda comparison",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "comparison",
+    "madrid",
+    "resignation",
+    "real",
+    "demand",
+    "chief",
+    "goebbel",
+    "laliga",
+    "liga",
+    "propaganda",
+    "nazi",
+    "la"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Real Madrid demand resignation of LaLiga chief after Nazi propaganda comparison",
      "summary": null
     }
    ]
@@ -4835,7 +4918,7 @@
     "alc",
     "even",
     "bring",
-    "start"
+    "look"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -4889,9 +4972,9 @@
     "shooting",
     "congresswoman",
     "district",
-    "react",
     "helped",
     "praise",
+    "react",
     "governor",
     "local",
     "mas",
@@ -5002,9 +5085,9 @@
     "deteriorate",
     "needed",
     "praise",
-    "real",
     "relationship",
     "tension",
+    "real",
     "watch",
     "europe",
     "zelensky",
@@ -5031,14 +5114,14 @@
     "앨버",
     "독립",
     "나다",
-    "단결",
     "리독",
     "막나",
     "부자",
     "분리",
     "원개",
     "캐나",
-    "타주"
+    "타주",
+    "호소"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -5062,8 +5145,8 @@
     "emission",
     "statu",
     "industry",
-    "protect",
     "special",
+    "protect",
     "reach",
     "europe",
     "uk"
@@ -5119,8 +5202,8 @@
     "mexico",
     "mexico'",
     "storm",
-    "weekend",
     "strengthen",
+    "weekend",
     "major"
    ],
    "date": "2026-10-17",
@@ -5156,34 +5239,6 @@
     {
      "date": "2026-10-17",
      "title": "[금주의 키워드] 브라질 계란",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "9d8c666db8ebd956",
-   "title": "백악관 대변인 \"中 변변한 화장실 없어\"…中 \"더 자주 방문하라\"",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "장실",
-    "화장",
-    "없어",
-    "대변",
-    "변인",
-    "악관",
-    "백악",
-    "中",
-    "변변",
-    "변한",
-    "실도",
-    "와서"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "백악관 대변인 \"中 변변한 화장실 없어\"…中 \"더 자주 방문하라\"",
      "summary": null
     }
    ]
@@ -5474,6 +5529,34 @@
    ]
   },
   {
+   "id": "d3178a7bb6b7cc58",
+   "title": "About 200 people rescued from unregistered South African rehab centre, police say",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "rehab",
+    "rescued",
+    "centre",
+    "south",
+    "unregistered",
+    "african",
+    "chain",
+    "africa",
+    "patient",
+    "suspected",
+    "illegal",
+    "people"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "About 200 people rescued from unregistered South African rehab centre, police say",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "edbd0bf5b3726723",
    "title": "ロシアで収容された経験 米有力紙記者が振り返る 現地の状況",
    "topic": "international",
@@ -5689,10 +5772,10 @@
    "days": 1,
    "signature": [
     "heilongjiang",
-    "swing",
     "맑아",
     "지에",
     "full",
+    "swing",
     "먼지",
     "세먼",
     "어든",
@@ -5776,8 +5859,8 @@
     "rate",
     "chair",
     "shie",
-    "signal",
     "stability",
+    "signal",
     "away",
     "warsh",
     "move",
@@ -6639,8 +6722,8 @@
    "signature": [
     "해보",
     "있으",
-    "보라",
     "자신",
+    "보라",
     "으면",
     "野",
     "탄핵",
@@ -6697,9 +6780,9 @@
     "영대",
     "전고",
     "추돌",
-    "통영",
     "함양",
     "물차",
+    "통영",
     "도서",
     "화물",
     "속도",
@@ -6767,39 +6850,6 @@
     {
      "date": "2026-10-17",
      "title": "현대엘리베이터, 무벡스 지분 1160억 매각 “주주가치 제고”",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "8d2574312773b929",
-   "title": "Elon Musk Spends Heavily to Back Ken Paxton’s Senate Bid in Texas",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "texa",
-    "musk",
-    "senate",
-    "bolster",
-    "contributed",
-    "heavily",
-    "ken",
-    "filing",
-    "paxton",
-    "spend",
-    "bid",
-    "elon"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": null,
-     "title": "Talarico rallies as his Texas US Senate race against Paxton enters final weeks",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Elon Musk Spends Heavily to Back Ken Paxton’s Senate Bid in Texas",
      "summary": null
     }
    ]
@@ -7157,8 +7207,8 @@
     "복원",
     "수습",
     "해소",
-    "다이",
     "갈등",
+    "다이",
     "개혁",
     "이브"
    ],
@@ -7777,9 +7827,9 @@
     "리밍",
     "티파",
     "포티",
-    "연간",
     "전세",
     "ever",
+    "연간",
     "become",
     "stream",
     "파이",
@@ -7832,9 +7882,9 @@
     "원부",
     "전예",
     "사전",
-    "예약",
     "리즈",
     "시리",
+    "예약",
     "부터",
     "만원",
     "바뀐",
@@ -8440,8 +8490,8 @@
     "lawler",
     "inside",
     "acces",
-    "gop",
     "order",
+    "gop",
     "exclusive"
    ],
    "date": "2026-10-17",
@@ -8602,10 +8652,10 @@
     "공할",
     "발에",
     "세는",
-    "멈췄",
     "일단",
     "췄다",
     "락세",
+    "멈췄",
     "할까",
     "오른",
     "성공"
@@ -8875,6 +8925,62 @@
    ]
   },
   {
+   "id": "a4cfc79958f158b3",
+   "title": "물가 잡자니 빚투 걱정 …'금리 힌트' 못밝히는 워시",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "워시",
+    "물가",
+    "금리",
+    "걱정",
+    "리예",
+    "못밝",
+    "밝히",
+    "잡자",
+    "히는",
+    "예단",
+    "자니",
+    "힌트"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "물가 잡자니 빚투 걱정 …'금리 힌트' 못밝히는 워시",
+     "summary": "워시, 금리 인상 여부 언급 피하고 AI 투자에 주목"
+    }
+   ]
+  },
+  {
+   "id": "d16491de2205a880",
+   "title": "台風30号 非常に強い勢力に発達する見込み 今後の情報に注意",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "い勢",
+    "に強",
+    "に注",
+    "に発",
+    "る見",
+    "勢",
+    "勢力",
+    "台",
+    "台風",
+    "報に",
+    "常",
+    "常に"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "台風30号 非常に強い勢力に発達する見込み 今後の情報に注意",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "8f709290fb218464",
    "title": "[단독] 안보 부처 세종 이전, 지난달엔 “검토 안해”",
    "topic": "politics",
@@ -8909,8 +9015,8 @@
     "highlight",
     "cost",
     "iran",
-    "war",
     "midterm",
+    "war",
     "ahead",
     "election"
    ],
@@ -8948,6 +9054,66 @@
      "date": "2026-10-17",
      "title": "커지는 한미동맹 파열음… 주목받는 브런슨 ‘거친 입’",
      "summary": "브런슨 전작권 신중론에 정부·여권 반발 확산"
+    }
+   ]
+  },
+  {
+   "id": "0eb005aa00d920f8",
+   "title": "공화당은 포기했는데…트럼프, 조지아·노스캐롤라이나 왜 갈까",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "기했",
+    "노스",
+    "당은",
+    "롤라",
+    "스캐",
+    "지아",
+    "캐롤",
+    "조지",
+    "포기",
+    "갈까",
+    "이나",
+    "라이"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "공화당은 포기했는데…트럼프, 조지아·노스캐롤라이나 왜 갈까",
+     "summary": "포기 지역 유세 나선 트럼프, 의리와 포석 해석"
+    }
+   ]
+  },
+  {
+   "id": "e871ad0c631ad7f6",
+   "title": "엔비디아, 트럼프 연회장에 337억원 기부 ‘대가성 논란’",
+   "topic": "economy",
+   "days": 2,
+   "signature": [
+    "연회",
+    "가성",
+    "대가",
+    "비디",
+    "엔비",
+    "디아",
+    "기부",
+    "억원",
+    "회장",
+    "논란",
+    "장에"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "엔비디아·애플 각각 330억원…트럼프 쏙 빠진 연회장 기부명단",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "엔비디아, 트럼프 연회장에 337억원 기부 ‘대가성 논란’",
+     "summary": null
     }
    ]
   }

@@ -252,3 +252,24 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
   body.view-scroll #toolbar button[data-act="zoom-"], body.view-scroll #toolbar button[data-act="zoom+"] { display: none; }
 }
 
+/* S17e — 단신은 기사마다 가로 한 줄: 시각·매체 → 제목 → 한 줄 정리, 넘치면 말줄임 (제목을 누르면 AI 정리 창) */
+.item.brief { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; padding: 4px 0; }
+.item.brief > * { margin: 0; }
+.item.brief .meta { order: 0; flex: none; display: inline-flex; gap: 4px; font-size: 0.8em; }
+.item.brief .meta > :not(.tm):not(.src) { display: none; }
+.item.brief .hl { order: 1; flex: 0 1 auto; min-width: 0; max-width: 64%; overflow: hidden; text-overflow: ellipsis; font-size: 1em; margin: 0; }
+.item.brief .brief-line { order: 2; flex: 1 1 0; min-width: 0; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 0.88em; margin: 0; }
+.item.brief .brief-line::before { content: "— "; }
+.item.brief .photo, .item.brief .orig, .item.brief .lead:not(.brief-line), .item.brief .cmp-inline, .item.brief .op-rel,
+.item.brief .an-bg, .item.brief .an-pts, .item.brief .an-views, .item.brief .why { display: none; }
+/* S17e — 관련 사설·칼럼 (기사 곁에) */
+.op-rel { margin: 4px 0 6px; padding: 4px 0 2px 7px; border-left: 2px solid var(--accent); font-size: 0.88em; }
+.op-rel h4 { margin: 0 0 2px; font-size: 0.9em; color: var(--muted); font-weight: 600; }
+.op-rel p { margin: 1px 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.op-rel a { color: var(--ink); }
+.item.tight .op-rel p:nth-of-type(n+2) { display: none; }
+/* 좁은 화면: 단신 한 줄 정리는 접고 제목이 줄을 다 쓴다 (정리는 제목을 누르면 나오는 AI 정리 창에) */
+@media (max-width: 560px) {
+  .item.brief .brief-line { display: none; }
+  .item.brief .hl { max-width: none; flex: 1 1 auto; }
+}

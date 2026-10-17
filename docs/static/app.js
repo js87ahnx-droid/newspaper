@@ -101,7 +101,7 @@
   function placeSection(stage, g, sec, first, budget, nodes, mast) {
     var id = sec.getAttribute("data-section"), title = sec.getAttribute("data-title");
     var out = [], rest = [];
-    var grid = id === "briefs" && g.w >= 480;   // 단신은 폭이 넉넉하면 두 단
+    var grid = false;   // 단신은 기사마다 가로 한 줄 (S17e — 예전엔 폭이 넉넉하면 두 단)
     var mk = function (cont) {
       var p = newPage(g, id, first && !cont ? null : title, cont);
       if (grid) p.firstChild.classList.add("brief-grid");
@@ -151,6 +151,7 @@
 
   function paginate() {
     dropped = 0;
+    var opRest = 0;
     var g = geometry();
     var stage = document.createElement("div");
     stage.className = "stage";
@@ -159,7 +160,7 @@
     var budgets = {};
     Object.keys(E.sectionPages || {}).forEach(function (k) { budgets[k] = E.sectionPages[k]; });
     // 휴대폰처럼 좁은 한 쪽 화면은 단신이 한 단이라 같은 쪽 수에 절반만 들어간다 → 단신 쪽을 두 배로 (기기마다 쪽수는 늘 같다)
-    if (!spread && g.w < 600 && budgets.briefs) budgets.briefs *= 2;
+    // (S15 에선 휴대폰 단신 쪽을 두 배로 했다 — S17e 에서 단신이 한 줄이 되어 없앰)
     // 피드백으로 기사가 모두 빠진 섹션은 건너뛴다 (제목만 있는 빈 쪽 방지)
     var sections = Array.prototype.filter.call(flow.querySelectorAll("section.sec"), function (s) { return s.children.length > 0; });
     var byId = {}, order = [];
@@ -176,7 +177,7 @@
       var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
       built[id] = res.pages;
       if (id !== "opinion" && id !== "guide") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
-      else dropped += res.rest.length;
+      else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       if (b) spare += Math.max(0, b - res.pages.length);
     });
     // 2) 단신: 내려온 기사(점수 순) → 원래 단신 → 예비 기사. 다른 면이 남긴 쪽까지 쓴다
@@ -188,21 +189,45 @@
     })();
     demoted.sort(function (x, y) { return (+y.getAttribute("data-final2") || +y.getAttribute("data-final")) - (+x.getAttribute("data-final2") || +x.getAttribute("data-final")); });
     var pool = demoted.concat(Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") !== "1"; }),
-      Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") === "1" && el.getAttribute("data-brief"); }));
+      Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") === "1"; }));   // 한 줄 단신은 제목만으로도 된다 (S17e)
     // 오늘 없는 면(예: 논평·사설이 없는 날)에 배정된 쪽도 단신이 쓴다
     Object.keys(budgets).forEach(function (k) { if (k !== "briefs" && k !== "compare" && !byId[k]) spare += budgets[k] || 0; });
+    // 남는 쪽은 논평면이 못 실은 사설·칼럼이 먼저 쓴다 (예비 기사보다 우선 — S17e: 사설이 많은 날 사설이 빠지고 예비 단신이 실리던 것)
+    if (opRest && byId.opinion && spare > 0) {
+      var had = built.opinion.length;
+      built.opinion.forEach(function (p) { p.remove(); });
+      var more = placeSection(stage, g, byId.opinion, false, (budgets.opinion || 0) + spare, kids(byId.opinion), null);
+      built.opinion = more.pages;
+      spare -= more.pages.length - had;
+      dropped += more.rest.length - opRest;
+    }
     var bBudget = budgets.briefs ? budgets.briefs + spare : 0;
     if (pool.length) {
-      var res = placeSection(stage, g, briefSec, false, bBudget, pool.map(function (el) { return { el: el, node: asBrief(el) }; }), null);
+      var placeBriefs = function (budget) { return placeSection(stage, g, briefSec, false, budget, pool.map(function (el) { return { el: el, node: asBrief(el) }; }), null); };
+      var res = placeBriefs(bBudget);
+      // 논평면이 아직 못 실은 게 있고 단신 쪽에 예비 기사가 실렸으면, 단신 쪽 하나를 논평면에 넘긴다 — 원래 단신(예비 아님)이 다 실릴 때만 (S17e)
+      while (opRest && byId.opinion && bBudget > 1 && res.rest.every(function (r) { return r.el.getAttribute("data-reserve") === "1"; })
+             && res.pages.some(function (p) { return p.querySelector('[data-reserve="1"]'); })) {
+        var fewer = (res.pages.forEach(function (p) { p.remove(); }), placeBriefs(bBudget - 1));
+        if (!fewer.rest.every(function (r) { return r.el.getAttribute("data-reserve") === "1"; })) {
+          fewer.pages.forEach(function (p) { p.remove(); }); res = placeBriefs(bBudget); break;
+        }
+        built.opinion.forEach(function (p) { p.remove(); });
+        var op = placeSection(stage, g, byId.opinion, false, built.opinion.length + 1, kids(byId.opinion), null);
+        built.opinion = op.pages;
+        dropped += op.rest.length - opRest;
+        opRest = op.rest.length;
+        res = fewer; bBudget -= 1;
+      }
       built.briefs = res.pages;
       dropped += res.rest.length;
       if (order.indexOf("briefs") < 0) order.splice(Math.max(0, order.indexOf("opinion")) || order.length, 0, "briefs");
     }
+    var total = 0;
+    Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
     var out = [];
     order.forEach(function (id) { out = out.concat(built[id] || []); });
     // 쪽수 고정: 기사가 모자라 쪽이 남으면 끝 쪽으로 채운다 (같은 화면 크기면 호가 바뀌어도 쪽수가 같다)
-    var total = 0;
-    Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
     while (total && out.length < total) {
       var end = newPage(g, "end", null, false);
       end.classList.add("endpage");
