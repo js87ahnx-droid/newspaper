@@ -231,24 +231,88 @@ def _jaccard(a: str, b: str) -> float:
     return len(x & y) / len(x | y) if x | y else 0.0
 
 
-def merge_duplicates(edition: dict) -> list[tuple[str, str]]:
-    """LLM 이 한국어로 정리한 분석끼리 비교해 같은 사건이면 뒤 기사를 앞 기사에 합친다.
-    언어가 달라 임베딩으로는 못 합친 같은 사건(영어 기사 ↔ 한국어 기사)을 잡는다. 돌려주는 값: (남긴 id, 합친 id)."""
+SAME_EVENT_PROMPT = """아래는 오늘 지면에 오를 이슈들이다(번호, 제목, 요약 앞부분). 한국어로 정리된 것도 있고 원문 제목·리드 그대로인 것도 있다.
+여러 나라 언론이 같은 사건을 다뤄 따로 들어온 것이 있다. 같은 사건·같은 발표·같은 사고를 다룬 것이 확실한 것끼리만 묶어라.
+예: 한국 언론의 "테슬라, 하늘 나는 스포츠카 시연"과 영어 기사 "Elon Musk unveils Tesla's flying car"는 한 묶음.
+같은 인물·같은 나라·같은 분야라도 일이 다르면 묶지 않는다. 예: 교황의 주일 기도 주례와 교황의 휴전 요청은 다름,
+같은 대통령의 인사 발표와 외교 발언은 다름, 같은 원인(중동 전쟁)으로 생긴 골프 대회 연기와 축구 대회 준비는 다름.
+조금이라도 애매하면 묶지 말고,
+혼자인 것은 출력하지 않는다.
+출력 형식: {{"groups": [[번호, 번호, ...], ...]}}
+{data}"""
+
+
+SAME_EVENT_VERIFY = """아래 묶음마다, 들어 있는 기사들이 정말 같은 하나의 사건(같은 발표·같은 사고·같은 공격·같은 결정)을 다뤘는지 엄격하게 확인하라.
+같은 인물·같은 회사·같은 나라·같은 원인·같은 분야라는 것만으로는 같은 사건이 아니다.
+예: 학교 지붕 붕괴와 선박 드론 피격은 다름, 다리 개통과 미사일 발사는 다름, 규제 당국 조사와 기업 상장 연기 요구는 다름.
+각 묶음에서 같은 사건인 기사 번호만 남겨라(2개 미만이 되면 그 묶음은 버린다). 확신이 없으면 버린다.
+출력 형식: {{"groups": [[번호, 번호, ...], ...]}}
+{data}"""
+
+
+def same_event_groups(items: list[dict], ask) -> tuple[dict[str, int], str]:
+    """지면 이슈들 가운데 같은 사건 묶음을 LLM 한 번으로 받는다 (S17d — 글자 겹침으로 못 잡는 다국어 중복).
+    분석이 있는 이슈는 한국어 제목·요약, 없는 이슈는 원제목·리드를 준다 (10/17: 영어 테슬라 기사는 분석 밖이었다).
+    ask(prompt) → dict|None. 돌려주는 값: (issue_id → 묶음 번호, 상태)."""
+    rows, ids = [], []
+    for it in items:
+        an = it.get("llm", {}).get("analysis")
+        if an:
+            rows.append({"번호": len(ids), "제목": an.get("headline") or it["title"], "요약": an.get("summary", "")[:160]})
+        else:
+            rows.append({"번호": len(ids), "제목": it["title"], "요약": (it.get("lead") or "")[:160]})
+        ids.append(it["issue_id"])
+    if len(rows) < 2:
+        return {}, "대상 없음"
+    def parse(res) -> list[set[int]] | None:
+        if not res or not isinstance(res.get("groups"), list):
+            return None
+        gs = [{int(k) for k in m if str(k).isdigit() and int(k) < len(ids)} for m in res["groups"] if isinstance(m, list)]
+        return [g for g in gs if len(g) >= 2]
+
+    proposed = parse(ask(SAME_EVENT_PROMPT.format(data=_data_block(rows))))
+    if proposed is None:
+        return {}, "응답 없음"
+    if not proposed:
+        return {}, "ok"
+    # 2단계 검증: 이슈 수백 개를 한꺼번에 볼 때 틀린 묶음이 섞인다(10/16 실측 7묶음 중 3) → 묶음마다 따로 엄격히 확인
+    check = [{"묶음": n, "기사": [rows[k] for k in sorted(g)]} for n, g in enumerate(proposed)]
+    verified = parse(ask(SAME_EVENT_VERIFY.format(data=_data_block(check))))
+    if verified is None:
+        return {}, "검증 응답 없음"
+    allowed = {frozenset(g) for g in proposed}
+    out: dict[str, int] = {}
+    for n, g in enumerate(verified):
+        if not any(g <= p for p in allowed):   # 검증은 제안한 묶음을 줄이기만 한다
+            continue
+        for k in g:
+            out.setdefault(ids[k], n)
+    return out, "ok"
+
+
+def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> list[tuple[str, str]]:
+    """같은 사건이면 뒤 기사를 앞 기사에 합친다. groups(LLM 같은 사건 묶음, S17d)가 있으면 그것을, 그리고
+    LLM 이 한국어로 정리한 분석끼리의 글자 겹침을 본다 — 언어가 달라 임베딩으로는 못 합친 같은 사건(영어 ↔ 한국어)을 잡는다.
+    돌려주는 값: (남긴 id, 합친 id)."""
+    groups = groups or {}
     kept: list[dict] = []
     merged: list[tuple[str, str]] = []
     for sid, items in edition["sections"].items():
         out = []
         for it in items:
             an = it.get("llm", {}).get("analysis")
-            host = None
-            if an:
-                host = next((k for k in kept if _jaccard(an["summary"], k["llm"]["analysis"]["summary"])
+            g = groups.get(it["issue_id"])
+            host = next((k for k in kept if g is not None and groups.get(k["issue_id"]) == g), None)
+            if host is None and an:
+                host = next((k for k in kept if k.get("llm", {}).get("analysis")
+                             and _jaccard(an["summary"], k["llm"]["analysis"]["summary"])
                              + _jaccard(an["headline"], k["llm"]["analysis"]["headline"]) >= DUP_SCORE), None)
             if host is None:
                 out.append(it)
-                if an:
-                    kept.append(it)
+                kept.append(it)
                 continue
+            if an and not host.get("llm", {}).get("analysis"):   # 남는 쪽에 분석이 없으면 합쳐지는 쪽 분석을 옮긴다
+                host["llm"] = {**host.get("llm", {}), "analysis": an}
             seen = {a["id"] for a in host["articles"]}
             host["articles"] += [a for a in it["articles"] if a["id"] not in seen]
             host["merged"] = host.get("merged", []) + [it["issue_id"]] + it.get("merged", [])
@@ -335,7 +399,21 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             llm["analysis"] = analysis[it["issue_id"]]
         if llm:
             it["llm"] = llm
-    dups = merge_duplicates(edition)
+    # 같은 사건 묶음 (S17d): 분석 결과가 바뀌지 않았으면 캐시를 쓴다
+    analyzed = [it for it in items if not it.get("reserve")]   # 지면 이슈 전부 (예비 기사 제외)
+    key = ",".join(sorted(it["issue_id"] + ("*" if it.get("llm", {}).get("analysis") else "") for it in analyzed))
+    same = cache.get("same_event", {})
+    if same.get("key") == key:
+        groups, status["same_event"] = same.get("groups", {}), "캐시"
+    else:
+        def ask(prompt):
+            return guarded(prompt, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)[0]
+
+        groups, status["same_event"] = same_event_groups(analyzed, ask)
+        if status["same_event"] == "ok":
+            cache["same_event"] = {"key": key, "groups": groups}
+            cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    dups = merge_duplicates(edition, groups)
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "analysis": astats,
                                               "merged_duplicates": dups}
     return edition

@@ -41,6 +41,24 @@ def _highlight(text: str, words: list[str]) -> Markup:
     return Markup(out)
 
 
+# 피드가 축소판을 주는 매체 → 같은 사진의 큰 판 주소 (S17c, 2026-10-17 실측: 바꾼 주소가 모두 열림)
+_PHOTO_SIZES = [
+    (re.compile(r"^(https://ichef\.bbci\.co\.uk/(?:ace|news)/(?:standard|ws)/)\d{2,3}/"), r"\g<1>976/"),            # BBC 240 → 976px
+    (re.compile(r"^(https://flexible\.img\.hani\.co\.kr/flexible/normal/)\d+/\d+/"), r"\g<1>970/582/"),         # 한겨레 300 → 970px
+    (re.compile(r"^(https://img\.yna\.co\.kr/.+)_P[123](\.\w+)$"), r"\g<1>_P4\g<2>"),                          # 연합 500 → 1183px
+]
+
+
+def larger_photo(url: str | None) -> str | None:
+    if not url:
+        return url
+    for pat, rep in _PHOTO_SIZES:
+        new = pat.sub(rep, url)
+        if new != url:
+            return new
+    return url
+
+
 def _display(item: dict, display) -> dict:
     """언어별 표시: 영어 = 원문 제목 + 한국어 요약(있으면), 그 밖 = 번역 제목(있으면) + 원문 제목."""
     rep = next((a for a in item["articles"] if a["title"] == item["title"]), item["articles"][0])
@@ -155,7 +173,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
             view = _display(it, interests.foreign_display)
             rep = next((a for a in it["articles"] if a.get("url") == it.get("url")), it["articles"][0])
             rows.append({
-                **it, "view": view, "headline_label": headline_label(it.get("headline_by", {})),
+                **it, "view": view, "photo": larger_photo(it.get("photo")), "headline_label": headline_label(it.get("headline_by", {})),
                 "time": time_label(rep.get("published"), cfg.timezone),
                 "brief_text": brief_text(it, view),
                 # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)

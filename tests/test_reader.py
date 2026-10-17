@@ -196,3 +196,53 @@ def test_retries_once_on_platform_503(browser, tmp_path, monkeypatch):  # noqa: 
     page.wait_for_selector(".readview .rv-p")
     assert len(calls) == 2 and errors == []
     ctx.close()
+
+
+# ---------- S17c 사진 큰 판, S17d 언어가 다른 같은 사건 ----------
+
+def test_larger_photo_rewrites_known_thumbnails():
+    from pipeline.render import larger_photo
+    assert larger_photo("https://ichef.bbci.co.uk/ace/standard/240/cpsprodpb/x/live/a.jpg") == \
+        "https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/x/live/a.jpg"
+    assert larger_photo("https://flexible.img.hani.co.kr/flexible/normal/300/180/imgdb/a.webp") == \
+        "https://flexible.img.hani.co.kr/flexible/normal/970/582/imgdb/a.webp"
+    assert larger_photo("https://img.yna.co.kr/photo/cms/2026/01/21/54/PCM1_P2.jpg") == "https://img.yna.co.kr/photo/cms/2026/01/21/54/PCM1_P4.jpg"
+    for u in ("https://dimg.donga.com/a.png", "https://i.guim.co.uk/img/a.jpg?width=700&s=1", None, ""):
+        assert larger_photo(u) == u
+
+
+def _issue(iid, title, headline=None):
+    it = {"issue_id": iid, "title": title, "articles": [{"id": iid + "a", "source": "S" + iid, "country": "KR"}], "lead": ""}
+    if headline:
+        it["llm"] = {"analysis": {"headline": headline, "summary": headline}}
+    return it
+
+
+def test_same_event_two_step_and_merge_moves_analysis():
+    from pipeline.llm import merge_duplicates, same_event_groups
+    items = [_issue("en", "Elon Musk unveils Tesla's flying car"), _issue("ko", "테슬라 하늘 나는 스포츠카", "테슬라, 나는 스포츠카 시연"),
+             _issue("pk", "파키스탄 학교 붕괴", "파키스탄 학교 붕괴"), _issue("ro", "흑해 선박 드론 피격", "흑해 선박 드론 피격")]
+    asked = []
+
+    def ask(prompt):
+        asked.append(prompt)
+        if len(asked) == 1:
+            return {"groups": [[0, 1], [2, 3]]}      # 1단계: 틀린 묶음(2,3)이 섞임
+        return {"groups": [[0, 1], [0, 2]]}           # 2단계: (0,2) 는 제안에 없던 묶음 → 무시
+    groups, st = same_event_groups(items, ask)
+    assert st == "ok" and groups["en"] == groups["ko"] and "pk" not in groups and "ro" not in groups
+    assert "원제목" not in asked[0] and "Elon Musk" in asked[0]          # 분석 없는 이슈도 원제목으로 후보에
+    ed = {"sections": {"international": [items[0]], "economy": [items[1]]}}
+    merged = merge_duplicates(ed, groups)
+    assert merged == [("en", "ko")] and ed["sections"]["economy"] == []
+    host = ed["sections"]["international"][0]
+    assert host["llm"]["analysis"]["headline"] == "테슬라, 나는 스포츠카 시연"   # 분석이 남는 쪽으로 옮겨감
+    assert {a["id"] for a in host["articles"]} == {"ena", "koa"}
+
+
+def test_same_event_failure_keeps_edition():
+    from pipeline.llm import same_event_groups
+    items = [_issue("a", "A", "가"), _issue("b", "B", "나")]
+    assert same_event_groups(items, lambda p: None) == ({}, "응답 없음")
+    calls = iter([{"groups": [[0, 1]]}, None])
+    assert same_event_groups(items, lambda p: next(calls)) == ({}, "검증 응답 없음")
