@@ -1,0 +1,12 @@
+# 원문 재배열 중계 서버 (S17) — 배포: npx wrangler deploy (처음 한 번 npx wrangler login, npx wrangler secret put READER_KEY)
+name = "newspaper-reader"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[vars]
+# 지면 주소 (GitHub Pages). 로컬 시험 주소는 .dev.vars 에
+ALLOWED_ORIGINS = "https://js87ahnx-droid.github.io"
+
+[observability]
+enabled = false   # 요청 기록을 남기지 않는다 (D16)

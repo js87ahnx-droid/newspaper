@@ -18,6 +18,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
 from .interest import build_interest_table
+from . import reader as reader_mod
 from .settings import ROOT, TOPICS, Config, Interests, Sources
 from .stance import LEAN_ORDER
 from .textutil import LEAD_MAX, cap_lead, title_key
@@ -209,6 +210,10 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
     ctx["base"] = base
     client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
     client["base"] = base
+    # 원문 재배열 보기 (S17): 중계 서버가 설정됐을 때만. 키는 이 HTML(암호화됨) 안에만 들어간다
+    rc = reader_mod.config()
+    client["reader"] = rc
+    ctx["read_url"] = reader_mod.read_url_fn(edition, sources) if rc else (lambda url, source=None: "")
     ctx["edition_json"] = json.dumps(client, ensure_ascii=False).replace("</", "<\\/")  # 스크립트 안 "</script>" 방지
     return _env().get_template("edition.html.j2").render(**ctx)
 

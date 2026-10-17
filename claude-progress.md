@@ -342,7 +342,32 @@
   1. 휴대폰 도구 막대 넘침(버튼 10개) → 좁은 화면 규칙
   2. 두 쪽이 화면에 걸칠 때 쪽 번호가 다음 쪽으로 반올림 → 화면 위 30% 지점 기준
 
+### S17 원문 재배열 보기 — 코드 완료, 배포 대기 (2026-10-17)
+- `worker/` Cloudflare Worker (`GET /?url=…`, 머리글 `X-Reader-Key`): 그 자리에서 원문을 받아 제목·사진(원 주소)·본문 문단만 JSON. 저장·캐시·요청 기록 없음(no-store, 저장소 바인딩 없음, observability 끔)
+  - 거부: 키 없음·다름 401(같은 시간 비교), 허용목록 밖 403(`worker/src/domains.json` = sources.yaml `site`, 하위 도메인만 허용 — `evilchosun.com`·`chosun.com@evil`·포트·내부 주소 거부), 넘겨주기도 매번 허용목록 확인. CORS 는 지면 주소(GitHub Pages)만
+  - 추출(HTMLRewriter, 문서 트리 없이 흘려 읽기): 매체 본문 칸 선택자 → ld+json articleBody → Arc 출판 데이터(조선) → `<article>`·페이지 `<p>` 모음. 버튼 글자·안내문·사진 설명 되풀이 거름, 긴 문단 나눔, 사진은 대표 사진 + 본문 칸 안 사진(최대 6)
+  - `tools/reader_domains.py` 로 허용목록 생성(`--check` 테스트)
+- 지면: 제목·입장 차이·사설·칼럼 링크에 `data-read`. 누르면 자세히 창 자리에 읽기 화면(제목·매체·시각·사진·문단, 끝에 "원문에서 보기"), 자세히 창 안에서 열면 "← 돌아가기". 실패하면 이유 + "원문 열기" 버튼(포커스). Ctrl/⌘·가운데 클릭은 그대로 새 탭 원문
+  - 설정: 발행 환경변수 `READER_URL`·`READER_KEY`(GitHub Secrets) 둘 다 있을 때만. 키는 암호화된 지면 HTML 안에만(정적 파일엔 없음 — 테스트)
+  - Google 뉴스 경유 주소는 발행 때 원래 주소로 풀어 둠(10/16호 41/41), `reader: false` 매체(NYT·WSJ·Reuters·Japan Times·KBS·NHK — 실측 실패)는 바로 원문
+- Evaluator 결과
+  - [x] 성공률: 로컬 Workers 런타임으로 25곳 × 3건 — **매체 19/25(76%)·기사 55/75**, 성공 55건 첫·끝 문단 검수 (docs-internal/reader-audit.md)
+  - [x] 키 없음·다른 키·허용목록 밖·잘못된 주소·POST 거부, CORS 지면만 (worker/test, 실제 Workers 런타임) — 허용목록 검사를 일부러 느슨하게 바꾸면 테스트가 잡음(확인 후 되돌림)
+  - [x] 본문 저장 없음: 저장소 바인딩·캐시·console.log 없음(테스트), 기존 verify_site 유지
+  - [x] 실패 시 원문 링크: 422·502·연결 실패 모두 "원문 열기"로(브라우저 테스트 + 실제 화면), 설정 없으면 링크 그대로
+  - [x] 실제 화면: 로컬 Worker + 10/16호 — SCMP(사진·27문단)·조선(휴대폰 375px, 가로 넘침 0)·동아 열림
+  - [ ] Cloudflare 배포 뒤 재측정·CPU 한도 — 사용자 계정 필요
+  - pytest 216건 통과 (S17 11건 포함)
+- 평가에서 찾아 고친 결함
+  1. 성공 5/25: HTMLRewriter 는 한 요소에 닫는 꼬리표 처리기를 하나만 둬서, 선택자가 겹치면 건너뛰기 깊이가 새어 본문 전체를 버림 → 처리기를 모아 한 번에 담
+  2. 버튼 글자("광고"·"close"·"닫기"·"Video")·KBS AI 요약 안내문이 본문으로 → 거름, 문단 모음 후보는 300자 이상
+  3. 동아 짧은 사진 기사(150자) 실패 → 매체 본문 칸은 120자부터
+  4. 관련 기사 썸네일이 사진에 섞임 → 본문 칸 안 사진만, 조선 5000px 원본 → 줄인 주소
+  5. 논평면 Google 경유 사설 링크가 안 풀림 → 사설·칼럼 주소도 풀기
+- 한계: 측정은 집 인터넷 주소에서 — Cloudflare 주소는 막는 매체가 다를 수 있음. 유료 기사(Nikkei)는 앞부분만. 매체 페이지 구조가 바뀌면 그 매체는 실패 → 원문 링크
+
 ### 다음에 이어서 할 일
-1. S17 원문 재배열 보기 (Cloudflare Worker — 사용자 계정 필요)
+1. S17 배포: 사용자가 Cloudflare 무료 계정을 만든 뒤 `cd worker && npx wrangler login` → `npx wrangler secret put READER_KEY` → `npx wrangler deploy`, GitHub Secrets 에 READER_URL(배포 주소)·READER_KEY 등록 → 같은 표본으로 재측정
+2. S18 통합 평가
 
 ### 아직 사용자 작업

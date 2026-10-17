@@ -16,6 +16,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [chosun.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     langs: [ko]  # 피드에 일본어판 기사가 섞여 들어옴
     headline: [{kind: naver_a1, press: "023"}, {kind: homepage, url: "https://www.chosun.com/"}]
     feeds:
@@ -32,6 +33,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [joongang.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "025"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:joongang.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
@@ -44,6 +46,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [donga.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "020"}, {kind: homepage, url: "https://www.donga.com/"}]
     feeds:
       - {section: top, url: "https://rss.donga.com/total.xml", main: true}
@@ -59,6 +62,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [hani.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "028"}, {kind: homepage, url: "https://www.hani.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.hani.co.kr/rss/", main: true, date_source: page_meta}
@@ -74,6 +78,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [khan.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "032"}, {kind: homepage, url: "https://www.khan.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.khan.co.kr/rss/rssdata/total_news.xml", main: true}
@@ -89,6 +94,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [hankyung.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "015"}, {kind: homepage, url: "https://www.hankyung.com/"}]
     feeds:
       - {section: top, url: "https://www.hankyung.com/feed/all-news", main: true}
@@ -104,6 +110,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [mk.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: naver_a1, press: "009"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:mk.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
@@ -116,6 +123,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [yna.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.yna.co.kr/"}]
     feeds:
       - {section: top, url: "https://www.yna.co.kr/rss/news.xml", main: true}
@@ -130,6 +138,8 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [news.kbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 본문을 자바스크립트로 불러옴 → 원문 링크로
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:news.kbs.co.kr+when:1d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news}
 
@@ -140,6 +150,7 @@ sources:
     weight: 0.5
     paywall: false
     enabled: true
+    site: [world.kbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://world.kbs.co.kr/rss/rss_news.htm?lang=e", main: true}
 
@@ -150,6 +161,7 @@ sources:
     weight: 0.8
     paywall: false
     enabled: true
+    site: [news.sbs.co.kr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.sbs.co.kr/news/headlineRssFeed.do?plink=RSSREADER", main: true}
       - {section: politics, url: "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01&plink=RSSREADER"}
@@ -164,6 +176,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [cnn.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://edition.cnn.com/"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:cnn.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
@@ -175,6 +188,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [apnews.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:apnews.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -185,6 +199,8 @@ sources:
     weight: 1.0
     paywall: true
     enabled: true
+    site: [nytimes.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 유료 벽·봇 차단(403) → 원문 링크로
     headline: [{kind: feed, url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"}]
     feeds:
       - {section: top, url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", main: true}
@@ -200,6 +216,8 @@ sources:
     weight: 1.0
     paywall: true
     enabled: true
+    site: [wsj.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 유료 벽(401) → 원문 링크로
     feeds:
       - {section: international, url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews", main: true}
       - {section: markets, url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain"}
@@ -212,6 +230,7 @@ sources:
     weight: 0.8
     paywall: false
     enabled: true
+    site: [foxnews.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.foxnews.com/"}]
     feeds:
       - {section: top, url: "https://moxie.foxnews.com/google-publisher/latest.xml", main: true}
@@ -228,6 +247,7 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [bbc.co.uk, bbc.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: feed, url: "https://feeds.bbci.co.uk/news/rss.xml"}]
     feeds:
       - {section: top, url: "https://feeds.bbci.co.uk/news/rss.xml", main: true}
@@ -242,6 +262,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [theguardian.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://www.theguardian.com/international/rss", main: true}
       - {section: international, url: "https://www.theguardian.com/world/rss"}
@@ -256,6 +277,8 @@ sources:
     weight: 1.0
     paywall: false
     enabled: true
+    site: [reuters.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 봇 차단(401) → 원문 링크로
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:reuters.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -267,6 +290,7 @@ sources:
     weight: 0.9
     paywall: true
     enabled: true
+    site: [asia.nikkei.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:asia.nikkei.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -277,6 +301,8 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [news.web.nhk]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 본문을 자바스크립트로 불러옴 → 원문 링크로
     headline: [{kind: homepage, url: "https://news.web.nhk/"}]
     feeds:
       - {section: top, url: "https://news.web.nhk/n-data/conf/na/rss/cat0.xml", main: true}
@@ -291,6 +317,7 @@ sources:
     weight: 0.7
     paywall: false
     enabled: true
+    site: [www3.nhk.or.jp]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:www3.nhk.or.jp/nhkworld+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
 
@@ -301,6 +328,8 @@ sources:
     weight: 0.7
     paywall: false
     enabled: true
+    site: [japantimes.co.jp]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 원문 재배열 실측 실패 2026-10-17: 봇 차단(403) → 원문 링크로
     feeds:
       - {section: top, url: "https://www.japantimes.co.jp/feed/", main: true}
 
@@ -312,6 +341,7 @@ sources:
     weight: 0.8
     paywall: false
     enabled: true
+    site: [scmp.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.scmp.com/"}]
     feeds:
       - {section: top, url: "https://www.scmp.com/rss/91/feed", main: true}
@@ -326,6 +356,7 @@ sources:
     weight: 0.5
     paywall: false
     enabled: true
+    site: [globaltimes.cn]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.globaltimes.cn/"}]
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:globaltimes.cn+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
@@ -338,6 +369,7 @@ sources:
     weight: 0.9
     paywall: false
     enabled: true
+    site: [aljazeera.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
     headline: [{kind: homepage, url: "https://www.aljazeera.com/"}]
     feeds:
       - {section: top, url: "https://www.aljazeera.com/xml/rss/all.xml", main: true}

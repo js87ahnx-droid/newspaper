@@ -5,6 +5,7 @@
 # 필요한 저장소 Secrets
 #   NEWS_PASSWORD            지면 비밀번호 (필수 — 없으면 발행하지 않음)
 #   CLAUDE_CODE_OAUTH_TOKEN  `claude setup-token` 으로 만든 구독 토큰 (선택 — 없으면 LLM 없이 발행)
+#   READER_URL, READER_KEY   원문 재배열 중계 서버 주소·접근 키 (선택 — 없으면 원문 링크만, S17·worker/)
 name: daily
 
 on:
@@ -62,6 +63,8 @@ jobs:
         env:
           NEWS_PASSWORD: ${{ secrets.NEWS_PASSWORD }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          READER_URL: ${{ secrets.READER_URL }}
+          READER_KEY: ${{ secrets.READER_KEY }}
           EDITION_DATE: ${{ inputs.date }}
           SKIP_IF_PUBLISHED: ${{ (github.event_name == 'schedule' || !inputs.force) && '1' || '0' }}
         run: bash scripts/daily.sh

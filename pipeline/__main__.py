@@ -339,7 +339,15 @@ def cmd_publish(args: argparse.Namespace) -> int:
 
     root = Path(args.root)
     cfg, interests, sources = load_config(root), load_interests(root), load_sources(root)
-    edition = json.loads((_raw_dir(args) / f"{args.date}.edition.json").read_text(encoding="utf-8"))
+    ed_path = _raw_dir(args) / f"{args.date}.edition.json"
+    edition = json.loads(ed_path.read_text(encoding="utf-8"))
+    from . import reader
+
+    if reader.config() and "read_urls" not in edition:
+        # 원문 재배열 보기 (S17): Google 뉴스 경유 주소를 원래 주소로 풀어 둔다 (주소만 저장)
+        st = reader.resolve_google(edition)
+        ed_path.write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"원문 보기: Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
     files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
     # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
     Path(args.site, ".to-encrypt").write_text("".join(f.as_posix() + "\n" for f in files), encoding="utf-8")

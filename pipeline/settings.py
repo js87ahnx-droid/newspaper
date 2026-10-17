@@ -233,6 +233,9 @@ class Source(Strict):
     # 받을 기사 언어(ko/en/ja/zh/ar). 비우면 전부. 예: 조선일보 피드에는 일본어판 기사가 섞여 들어온다
     langs: list[Literal["ko", "en", "ja", "zh", "ar"]] = Field(default_factory=list)
     headline: list[HeadlineSrc] = Field(default_factory=list)  # 머리기사 (비우면 이 매체는 머리기사 가중 없음)
+    # 기사 주소 도메인 — 원문 재배열 중계(worker/)의 허용목록. 하위 도메인 포함 (S17)
+    site: list[str] = Field(default_factory=list)
+    reader: bool = True   # false: 중계 서버로 못 여는 매체(봇 차단·유료 벽·자바스크립트) — 누르면 바로 원문으로
 
     @model_validator(mode="after")
     def _enabled_needs_feed(self) -> "Source":

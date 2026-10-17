@@ -18,3 +18,8 @@ models/
 data/raw/
 run-report.json
 build/
+
+# 원문 재배열 중계 (worker/)
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars

@@ -1,0 +1,12 @@
+{
+  "name": "newspaper-reader",
+  "private": true,
+  "description": "원문 재배열 중계 서버 (S17, D14) — Cloudflare Worker",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.42.0"
+  }
+}
