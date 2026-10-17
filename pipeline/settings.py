@@ -74,6 +74,8 @@ class Editing(Strict):
     # driven: 관심도 덕분에 들어온 기사(관심도를 빼고 골랐다면 빠졌을 기사)만 상한에 셈 (2026-10-16 사용자 결정)
     # topic: 관심 분야 기사 전체를 상한에 셈
     interest_cap_mode: Literal["driven", "topic"] = "driven"
+    # 예비 기사 (S15): 하루 분량 다음 순위 기사. 지면에 쪽이 남으면 단신으로 채운다 (같은 사건 합치기로 빈 자리도)
+    reserve: int = Field(default=10, ge=0, le=40)
 
     @model_validator(mode="after")
     def _ratios(self) -> "Editing":
@@ -94,6 +96,8 @@ class Section(Strict):
     id: SectionId
     title: str = Field(min_length=1)
     max_articles: int = Field(ge=0)
+    # 고정 쪽 수 (S15, D15). 이 쪽에 다 못 들어간 기사는 단신으로 내리고, 남긴 쪽은 단신이 쓴다. 0 = 따로 쪽을 두지 않음
+    pages: int = Field(default=0, ge=0, le=8)
 
 
 class Clustering(Strict):
@@ -127,8 +131,8 @@ class Importance(Strict):
 
 
 class Photos(Strict):
-    front: int = Field(ge=0, le=5)        # 1면 사진 수 상한
-    per_section: int = Field(ge=0, le=3)  # 섹션당 사진 수 상한
+    front: int = Field(ge=0, le=6)        # 1면 사진 수 상한
+    per_section: int = Field(ge=0, le=6)  # 섹션당 사진 수 상한
 
 
 class Llm(Strict):

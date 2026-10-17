@@ -43,6 +43,7 @@ class Placed:
     photo_source: str | None = None
     guaranteed: bool = False  # 다양성·연속성으로 들어온 기사 — 넘침 정리 때 빼지 않는다
     merged: list[ScoredIssue] = field(default_factory=list)  # 같은 사건 이웃 이슈 (따로 싣지 않고 이 기사에 합침)
+    reserve: bool = False     # 예비 기사 — 쪽이 남을 때만 단신으로 실린다 (S15)
 
 
 @dataclass
@@ -115,8 +116,21 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
             put(s, "관심도 반영")
         else:
             put(s, "종합 점수")
+    # 예비: 하루 분량 다음 순위 (관심 상한은 그대로 지킨다). 같은 사건 이웃이 이미 실렸으면 건너뛴다
+    reserves: list[Placed] = []
+    taken = set(placed) | set(merged_into)
+    for s in sorted(scored, key=lambda s: (-s.final, s.issue.id)):
+        if len(reserves) >= ed.reserve:
+            break
+        if s.issue.id in taken or set(s.issue.extra.get("near", [])) & taken:
+            continue
+        if is_interest(s) and interest_count >= cap:
+            continue
+        reserves.append(Placed(s, ["예비: 쪽이 남으면 단신"], reserve=True))
+        taken.add(s.issue.id)
     stats = {
         "target": n,
+        "reserve": len(reserves),
         "diversity_slots": len(diversity) + 1,
         "interest_counted": interest_count,
         "interest_cap": cap,
@@ -124,7 +138,7 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
         "continuity_guaranteed": sum(1 for p in placed.values() if any(r.startswith("연속") for r in p.reasons)),
         "merged_duplicates": len(merged_into),
     }
-    return list(placed.values()), stats
+    return list(placed.values()) + reserves, stats
 
 
 def pick_photo(p: Placed, articles: dict[str, Article]) -> None:
@@ -141,6 +155,8 @@ def pick_photo(p: Placed, articles: dict[str, Article]) -> None:
 
 
 def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: dict[str, Article]) -> Edition:
+    reserves = sorted((p for p in placed if p.reserve), key=lambda p: (-p.scored.final, p.scored.issue.id))
+    placed = [p for p in placed if not p.reserve]
     caps = {s.id: s.max_articles for s in cfg.sections}
     sections: dict[str, list[Placed]] = {s.id: [] for s in cfg.sections}
     order = sorted(placed, key=lambda p: (-p.scored.final, p.scored.issue.id))
@@ -214,6 +230,9 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
         for p in sections[sid][: cfg.photos.per_section]:
             pick_photo(p, articles)
 
+    for p in reserves:  # 단신 맨 뒤에 (지면 쪽이 남을 때만 보인다)
+        p.section = "briefs"
+        sections["briefs"].append(p)
     stats = {
         "dropped_overflow": dropped,
         "photos": sum(1 for ps in sections.values() for p in ps if p.photo),
@@ -252,6 +271,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "photo": p.photo,
             "photo_source": p.photo_source,
             "reasons": p.reasons,
+            "reserve": p.reserve,
             "scores": {
                 "attention": s.attention, "importance": s.importance, "continuity": s.continuity,
                 "interest": s.interest, "final": s.final, "headline": s.headline, "frontline": s.frontline,

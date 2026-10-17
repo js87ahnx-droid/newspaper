@@ -33,6 +33,14 @@
 
 <div id="book" aria-label="지면"></div>
 
+{# 기사 자세히 보기 — 지면에서 줄여 보인 배경·쟁점·매체별 관점·입장 차이를 모두 #}
+<div id="reader" class="reader" hidden role="dialog" aria-modal="true" aria-label="기사 자세히">
+  <div class="reader-panel">
+    <button type="button" class="reader-close" data-reader-close aria-label="닫기">닫기 ✕</button>
+    <div class="reader-body"></div>
+  </div>
+</div>
+
 {# 쪽으로 나누기 전의 기사 흐름 — app.js 가 화면 크기에 맞춰 쪽으로 나눈다 #}
 <div id="flow" hidden>
   <div class="masthead-block" data-kind="masthead">
@@ -45,12 +53,13 @@
   {% for it in sec["items"] %}
     {% set v = it.view %}
     {% set brief = sec.id == 'briefs' %}
-    <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% endif %}"
+    <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}"
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
              data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
              data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}" data-h="{{ it.scores.headline or 0 }}"
              data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
-             data-top="{{ 1 if (sec.id == 'front' and loop.first) else 0 }}">
+             data-top="{{ 1 if (sec.id == 'front' and loop.first) else 0 }}"
+             data-brief="{{ it.brief_text }}" data-reserve="{{ 1 if it.reserve else 0 }}">
       {% if it.photo and not brief %}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
@@ -62,15 +71,26 @@
       {% if v.lead and not brief %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
       {% endif %}
-      {% if v.analysis %}
-        {% if brief %}{% if v.analysis.brief %}<p class="lead brief-line" data-note="AI 정리">{{ v.analysis.brief }}</p>{% endif %}
-        {% else %}
+      {% if brief %}{% if it.brief_text %}<p class="lead brief-line">{{ it.brief_text }}</p>{% endif %}
+      {% elif v.analysis %}
           {% if v.analysis.background %}<p class="an-bg"><b>배경</b> {{ v.analysis.background }}</p>{% endif %}
           {% if v.analysis.points %}<ul class="an-pts">{% for p in v.analysis.points %}<li>{{ p }}</li>{% endfor %}</ul>{% endif %}
           {% if v.analysis.stances %}<ul class="an-views" aria-label="매체별 관점">{% for s in v.analysis.stances %}<li><b>{{ s.source }}</b> {{ s.view }}</li>{% endfor %}</ul>{% endif %}
-        {% endif %}
+      {% endif %}
+      {% if it.cmp_groups and not brief %}
+      <div class="cmp-inline" aria-label="성향별 보도">
+        <h4>입장 차이 <small>성향별 제목</small></h4>
+        {% if not (v.analysis and v.analysis.stances) and it.llm and it.llm.frame_summary %}<p class="frame" data-note="AI 요약">{{ it.llm.frame_summary }}</p>{% endif %}
+        {% for g in it.cmp_groups %}
+        <div class="grp"><span class="badge lean-{{ g.cls }}">{{ g.group }}</span>
+          {% for a in g.articles[:2] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
+          {% if g.articles|length > 2 %}<p class="more">외 {{ g.articles|length - 2 }}건</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
       {% endif %}
       <div class="meta">
+        {% if it.time %}<time class="tm">{{ it.time }}</time>{% endif %}
         <span class="src">{{ it.source }}</span>
         <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>
         {% if it.headline_label %}<span class="hlb" title="그날 이 매체들이 1면·머리기사로 올림">{{ it.headline_label }}</span>{% endif %}
@@ -78,6 +98,11 @@
         {% if it.coverage.sources > 1 %}<span class="cover">매체 {{ it.coverage.sources }} · 국가 {{ it.coverage.countries }}</span>{% endif %}
         {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}
         <a class="orig-link" href="{{ it.url }}" target="_blank" rel="noopener noreferrer">원문{% if v.paywall %} (유료){% endif %}</a>
+        <button type="button" class="more-btn" data-more>자세히</button>
+        <span class="fb" role="group" aria-label="이 분야 기사">
+          <button type="button" data-fb="more">더 보기</button>
+          <button type="button" data-fb="less">덜 보기</button>
+        </span>
       </div>
       {% if not brief %}
       <details class="why">
@@ -91,47 +116,10 @@
         <p>배치 이유: {{ it.reasons|join(', ') }}</p>
       </details>
       {% endif %}
-      <div class="fb" role="group" aria-label="이 분야 기사">
-        <button type="button" data-fb="more">더 보기</button>
-        <button type="button" data-fb="less">덜 보기</button>
-      </div>
     </article>
   {% endfor %}
   </section>
 {% endfor %}
-
-{% if compare %}
-  <section class="sec sec-compare" data-section="compare" data-title="{{ compare_title }}">
-    <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 강조된 단어는 그 그룹 기사에서 특히 자주 쓰인 말입니다(통계로 뽑음).</p>
-  {% for c in compare %}
-    <article class="item cmp" data-issue="{{ c.issue_id }}" data-topic="{{ c.topic }}" data-section="compare">
-      <h3 class="hl"><a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.view.title }}</a></h3>
-      {% if c.frame_summary %}<p class="frame" data-note="AI 요약">{{ c.frame_summary }}</p>{% endif %}
-      {% if c.stance and c.stance.note %}<p class="note">{{ c.stance.note }}</p>{% endif %}
-      <h4>성향별</h4>
-      <div class="axis">
-      {% for g in c.lean_groups %}
-        <div class="grp"><div class="badge lean-{{ g.cls }}">{{ g.group }}</div>
-        {% for a in g.articles[:3] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
-        {% if g.articles|length > 3 %}<p class="more">외 {{ g.articles|length - 3 }}건</p>{% endif %}
-        </div>
-      {% endfor %}
-      </div>
-      {% if c.country_groups|length > 1 %}
-      <h4>국가별</h4>
-      <div class="axis">
-      {% for g in c.country_groups %}
-        <div class="grp"><div class="badge">{{ g.group }}</div>
-        {% for a in g.articles[:3] %}<p><span class="src">{{ a.source }}</span> <a href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.title_html }}</a></p>{% endfor %}
-        {% if g.articles|length > 3 %}<p class="more">외 {{ g.articles|length - 3 }}건</p>{% endif %}
-        </div>
-      {% endfor %}
-      </div>
-      {% endif %}
-    </article>
-  {% endfor %}
-  </section>
-{% endif %}
 
 {% if opinion %}
   <section class="sec sec-opinion" data-section="opinion" data-title="{{ opinion_title }}">
@@ -181,8 +169,8 @@
   <section class="sec sec-guide" data-section="guide" data-title="{{ guide_title }}">
     <div class="item guide-intro">
       <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 라벨은 sources.yaml 에서 고칠 수 있습니다.</p>
-      <p>이 지면은 각 매체 RSS의 제목과 요약, 원문 링크로만 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
-      <p>기사 자리: 1면 톱은 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)로만 정하고, 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채웁니다. 관심도 때문에 들어온 기사는 절반을 넘지 않습니다.</p>
+      <p>이 지면은 각 매체 RSS의 제목·요약과 원문 링크, 그리고 AI가 여러 매체 기사를 읽고 새로 쓴 정리("AI 정리")로 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
+      <p>기사 자리: 1면은 그날 각 신문 1면·홈페이지 머리기사로 오른 이슈("1면 조선·동아 / 머리 BBC")를 가장 무겁게 보고, 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)를 함께 봅니다. 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채우고, 관심도 때문에 들어온 기사는 절반을 넘지 않습니다. 정해진 쪽에 다 못 들어간 기사는 단신으로 실립니다.</p>
     </div>
     <div class="item guide-table">
       <table>

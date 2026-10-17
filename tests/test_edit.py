@@ -105,8 +105,11 @@ def test_front_top_independent_of_interest():
 def test_extreme_interest_keeps_diversity_and_cap(mode):
     _, scored, placed, stats, ed, it = run("extreme", mode=mode)
     n = it.daily_articles
-    in_paper = [p for sid, ps in ed.sections.items() for p in ps]
+    in_paper = [p for sid, ps in ed.sections.items() for p in ps if not p.reserve]   # 예비 기사는 하루 분량 밖
     assert len(in_paper) == n
+    reserves = [p for ps in ed.sections.values() for p in ps if p.reserve]
+    assert len(reserves) == CFG.editing.reserve and all(p.section == "briefs" for p in reserves)
+    assert min(p.scored.final for p in in_paper if not p.guaranteed) >= max(p.scored.final for p in reserves) - 1e-9 or mode == "topic"
     diverse = [p for p in in_paper if any(r.startswith(("다양성", "1면 톱")) for r in p.reasons)]
     assert len(diverse) / n >= CFG.editing.diversity_ratio
     # 다양성 슬롯은 관심도와 무관하게 주목도 상위여야 한다
@@ -220,7 +223,7 @@ def test_near_duplicate_issue_merged_not_placed_twice():
     placed, stats = choose(scored, CFG, it)
     ids = {p.scored.issue.id for p in placed}
     assert dup.issue.id not in ids and stats["merged_duplicates"] == 1
-    assert len(placed) == min(it.daily_articles, len(scored) - 1)
+    assert len([p for p in placed if not p.reserve]) == min(it.daily_articles, len(scored) - 1)
     host = next(p for p in placed if p.scored.issue.id == top.issue.id)
     ed = arrange(placed, CFG, it, arts)
     out = edition_to_json(ed, "2026-10-16", arts, stats)

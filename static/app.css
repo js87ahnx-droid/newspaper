@@ -81,7 +81,10 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .item .an-views { list-style: none; padding-left: 0; border-left: 2px solid var(--rule, #c9bfae); padding-left: 7px; }
 .item.tight .why, .item.tight .an-bg, .item.tight .an-views, .item.tight .orig { display: none; }
 .item.tight .lead { -webkit-line-clamp: 3; }
+.item.compact .photo img { max-height: 160px; }
 .item.tight .photo img { max-height: 110px; }
+.item.tight .cmp-inline .grp:nth-of-type(n+3) { display: none; }
+.item.brief .orig { display: none; }
 .item.clip { overflow: hidden; position: relative; }
 .item.clip::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: linear-gradient(transparent, var(--paper)); }
 
@@ -165,3 +168,40 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .opcmp .oplead { font-size: 11.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .grp .more { color: var(--muted); font-size: 11px; }
 .meta .hlb { font-weight: 700; color: var(--accent, #8a1c1c); }
+/* S15 — 기사 시각, 대표 기사 아래 입장 차이, 단신 */
+.meta .tm { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 2px; }
+.cmp-inline { margin: 4px 0 6px; padding: 6px 8px; border: 1px solid var(--rule, #c9bfae); border-radius: 4px; font-size: 0.88em; }
+.cmp-inline h4 { margin: 0 0 4px; font-size: 0.95em; }
+.cmp-inline h4 small { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.cmp-inline .grp { margin: 3px 0; }
+.cmp-inline .grp p { margin: 1px 0 1px 4px; }
+.cmp-inline .more { color: var(--muted); }
+.item.tight .cmp-inline .grp p:nth-of-type(n+2), .item.tight .cmp-inline .more { display: none; }
+.item.brief { padding-top: 4px; padding-bottom: 4px; }
+.item.brief .hl { font-size: 1em; margin-bottom: 1px; }
+.item.brief .brief-line { -webkit-line-clamp: 1; font-size: 0.9em; color: var(--ink); margin: 0 0 2px; }
+.page.endpage .page-inner { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted); }
+.end-note { margin: 4px 0; }
+.item.brief .fb, .item.brief .why { display: none; }
+.page-inner.brief-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; align-content: start; }
+.page-inner.brief-grid > .sec-title { grid-column: 1 / -1; }
+.page-inner.brief-grid > .item.brief { min-width: 0; }
+/* S15 — 머리기사가 아닌 기사: 작은 사진 오른쪽, 요약만 (자세히에서 전부) */
+.item.sub .photo { float: right; width: 34%; margin: 2px 0 4px 10px; }
+.item.sub .photo img { max-height: 110px; aspect-ratio: 4 / 3; }
+.item.sub .photo figcaption { display: none; }
+.item.sub .an-bg, .item.sub .an-pts, .item.sub .an-views, .item.sub .cmp-inline, .item.sub .why, .item.sub .orig { display: none; }
+.item.sub .lead { -webkit-line-clamp: 4; }
+.item.sub::after { content: ""; display: block; clear: both; }
+.meta .more-btn { font: inherit; font-size: 0.85em; padding: 1px 8px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--ink); cursor: pointer; }
+/* 자세히 창 */
+.reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.reader[hidden] { display: none; }
+.reader-panel { background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
+.reader-close { float: right; font: inherit; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+.reader-body .item { border: 0; }
+.reader-body .item .lead { -webkit-line-clamp: unset; display: block; }
+.reader-body .item .photo img { max-height: 340px; }
+.meta .fb { display: inline-flex; gap: 4px; margin: 0; }
+.meta .fb button { min-height: 22px; padding: 1px 7px; }
+.reader-body .meta .fb { display: inline-flex; }

@@ -28,19 +28,21 @@ editing:
   interest_cap: 0.50       # 관심 분야 기사 비율 상한
   continuity_min_days: 3   # 이 일수 이상 이어진 이슈는 최소 단신으로 노출
   history_days: 14         # 연속성 계산에 쓰는 과거 일수
+  reserve: 10              # 예비 기사: 쪽이 남으면 단신으로 채움 (S15)
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
+# pages: 고정 쪽 수 (S15). 합 16쪽(펼침 8면) — 짝수여야 펼침면이 맞는다. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 단신이 쓴다
 sections:
-  - {id: front, title: "1면", max_articles: 5}
-  - {id: politics, title: "정치·안보", max_articles: 6}
-  - {id: economy, title: "경제·산업", max_articles: 6}
-  - {id: international, title: "국제", max_articles: 6}
-  - {id: interest, title: "관심", max_articles: 6}
-  - {id: compare, title: "입장 비교", max_articles: 3}
-  - {id: briefs, title: "단신", max_articles: 20}  # 다른 섹션이 차면 넘친 기사를 받음. 전체 건수는 interests.daily_articles
-  - {id: opinion, title: "논평·사설", max_articles: 0}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
-  - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0}
+  - {id: front, title: "1면", max_articles: 5, pages: 2}
+  - {id: politics, title: "정치·안보", max_articles: 6, pages: 2}
+  - {id: economy, title: "경제·산업", max_articles: 6, pages: 2}
+  - {id: international, title: "국제", max_articles: 6, pages: 2}
+  - {id: interest, title: "관심", max_articles: 6, pages: 2}
+  - {id: compare, title: "입장 비교", max_articles: 3}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
+  - {id: briefs, title: "단신", max_articles: 20, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (폭이 넉넉하면 두 단)
+  - {id: opinion, title: "논평·사설", max_articles: 0, pages: 2}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
+  - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0, pages: 1}
 
 clustering:
   # S5 실측: MiniLM·mpnet·potion 은 한국어 짧은 문장 구별이나 다국어 연결이 약해 탈락 (docs-internal/cluster-review-*.md)
@@ -73,8 +75,8 @@ importance:
 
 # 사진: RSS 대표 이미지만, 원 주소로 표시. 순위를 바꾸지 않고 정해진 자리에만
 photos:
-  front: 2        # 1면 톱 + 1면 기사 1건
-  per_section: 1  # 섹션 머리기사
+  front: 5        # 1면 기사마다 (이미지가 있으면)
+  per_section: 3  # 섹션 위쪽 기사 3건까지
 
 # LLM 훅 — Claude 구독(Claude Code CLI)으로 호출. 토큰이 없거나 실패하면 무토큰으로 발행.
 # 1) 이슈 분석(S14): 지면 상위 analysis_issues 개 묶음의 기사 본문을 발행 때 읽어(저장 안 함)
@@ -86,6 +88,6 @@ llm:
   max_calls_per_day: 30
   timeout_sec: 120
   analysis_model: sonnet
-  analysis_issues: 40
+  analysis_issues: 50   # 지면 40건 + 예비 10건
   analysis_batch: 5
   analysis_timeout_sec: 300

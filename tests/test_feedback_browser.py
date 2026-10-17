@@ -107,7 +107,7 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     reload_(page)
     book = set(page.evaluate(BOOK_IDS))
     first = page.evaluate("document.querySelector('#book article.item').dataset.issue")
-    total = len(page.evaluate("[...document.querySelectorAll('#flow article.item[data-a]')]"))
+    total = len(page.evaluate("[...document.querySelectorAll('#flow article.item[data-a]:not([data-reserve=\"1\"])')]"))
     ctx.close()
     assert first == top                            # 1면 톱 그대로
     assert set(guaranteed) <= book                 # 다양성·연속 보장 기사 모두 지면에

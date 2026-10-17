@@ -9,9 +9,10 @@ from __future__ import annotations
 import json
 import re
 import shutil
-from datetime import date
+from datetime import date, datetime
 from html import escape
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
@@ -19,7 +20,7 @@ from markupsafe import Markup
 from .interest import build_interest_table
 from .settings import ROOT, TOPICS, Config, Interests, Sources
 from .stance import LEAN_ORDER
-from .textutil import LEAD_MAX, cap_lead
+from .textutil import LEAD_MAX, cap_lead, title_key
 
 LEAN_CLASS = {"보수": "con", "중도": "mid", "진보": "pro", "경제지": "biz", "통신·공영": "pub", "관영": "state"}
 KIND_NOTE = {"google_news": "Google 뉴스 경유 (리드 없음)"}
@@ -93,6 +94,7 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
                                            "semis_ai": "economy", "international": "international"},
         "sectionTitles": {s.id: s.title for s in cfg.sections},
         "sectionCaps": {s.id: s.max_articles for s in cfg.sections},
+        "sectionPages": {s.id: s.pages for s in cfg.sections},
     }
 
 
@@ -107,9 +109,39 @@ def _opinion_view(op: dict | None) -> dict | None:
     return {"compare": op["compare"], "editorial_chunks": [eds[i:i + 6] for i in range(0, len(eds), 6)], "columns": cols}
 
 
+def time_label(published: str | None, tz: str) -> str | None:
+    """기사 시각 → "10/16 05:12" (호의 시간대)."""
+    if not published:
+        return None
+    try:
+        t = datetime.fromisoformat(published).astimezone(ZoneInfo(tz))
+    except ValueError:
+        return None
+    return f"{t.month}/{t.day} {t:%H:%M}"
+
+
+def brief_text(it: dict, view: dict) -> str:
+    """단신 한 줄: LLM 한 줄 정리 → 리드 첫 문장(제목을 되풀이하지 않을 때). 없으면 빈 문자열."""
+    an = view.get("analysis")
+    if an and an.get("brief"):
+        return an["brief"]
+    lead = (view.get("lead") or "").strip()
+    first = re.split(r"(?<=[.!?。])\s|(?<=다\.)\s", lead, maxsplit=1)[0] if lead else ""
+    return first[:90] if first and not title_key(first).startswith(title_key(it["title"])[:15]) else ""
+
+
+def _lean_groups(it: dict) -> list[dict]:
+    st = it.get("stance", {})
+    lw = st.get("lean_words", {})
+    return [{"group": g["group"], "cls": LEAN_CLASS.get(g["group"], "mid"),
+             "articles": [{**a, "title_html": _highlight(a["title"], lw.get(g["group"], []))} for a in g["articles"]]}
+            for g in st.get("lean", [])]
+
+
 def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
+    compare_ids = {it["issue_id"] for it in edition.get("compare", [])}
     sections = []
     for s in cfg.sections:
         if s.id in ("compare", "guide", "opinion"):
@@ -117,11 +149,20 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         items = edition["sections"].get(s.id, [])
         if not items:
             continue
-        sections.append({"id": s.id, "title": titles[s.id], "items": [
-            {**it, "view": _display(it, interests.foreign_display), "headline_label": headline_label(it.get("headline_by", {})),
-             # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
-             "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", []))}
-            for it in items]})
+        rows = []
+        for it in items:
+            view = _display(it, interests.foreign_display)
+            rep = next((a for a in it["articles"] if a.get("url") == it.get("url")), it["articles"][0])
+            rows.append({
+                **it, "view": view, "headline_label": headline_label(it.get("headline_by", {})),
+                "time": time_label(rep.get("published"), cfg.timezone),
+                "brief_text": brief_text(it, view),
+                # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)
+                "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
+                # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
+                "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", [])),
+            })
+        sections.append({"id": s.id, "title": titles[s.id], "items": rows})
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})
