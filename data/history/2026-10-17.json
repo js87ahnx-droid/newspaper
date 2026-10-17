@@ -30,7 +30,40 @@
     {
      "date": "2026-10-17",
      "title": "4 killed, including 3 children, in shooting at Oregon elementary school, source says. Shooter is also dead",
+     "summary": "오리건 초등학교서 16세 총격, 4명 숨지고 시민이 제압"
+    }
+   ]
+  },
+  {
+   "id": "f94b80aadbf9272d",
+   "title": "Trump fires Katie Zacharia as White House press secretary after five days, advisers say",
+   "topic": "international",
+   "days": 2,
+   "signature": [
+    "pres",
+    "secretary",
+    "zacharia",
+    "katie",
+    "white",
+    "house",
+    "day",
+    "role",
+    "bar",
+    "five",
+    "exam",
+    "fired"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
      "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "Trump fires Katie Zacharia as White House press secretary after five days, advisers say",
+     "summary": "백악관 새 대변인 재커라이어, 닷새 만에 퇴장"
     }
    ]
   },
@@ -58,40 +91,7 @@
     {
      "date": "2026-10-17",
      "title": "[1보] '8명 부상' 인천 흉기난동범 신상정보 공개…59세 최충락",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "77f55db83119c59a",
-   "title": "White House press secretary Katie Zacharia fired after five days on the job",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "pres",
-    "secretary",
-    "zacharia",
-    "katie",
-    "white",
-    "house",
-    "day",
-    "role",
-    "bar",
-    "exam",
-    "fired",
-    "five"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": null,
-     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "White House press secretary Katie Zacharia fired after five days on the job",
-     "summary": null
+     "summary": "인천 흉기난동 최충락 신상 공개, 동기 수사 속도"
     }
    ]
   },
@@ -119,7 +119,7 @@
     {
      "date": "2026-10-17",
      "title": "김민석 “조희대 탄핵 모든 방법 논의” 당 차원 추진 공식화",
-     "summary": null
+     "summary": "김민석, 조희대 탄핵 논의 시작 선언…野 반발"
     }
    ]
   },
@@ -147,7 +147,7 @@
     {
      "date": "2026-10-17",
      "title": "50대 여성, 스토킹·교제폭력 신고됐던 남성 차량서 숨진채 발견",
-     "summary": null
+     "summary": "스토킹 신고 두 번 있던 남성 차량서 여성 사망"
     }
    ]
   },
@@ -175,7 +175,7 @@
     {
      "date": "2026-10-17",
      "title": "석유 최고가격 ‘휘발유 1784원·경유 1773원’ 유지",
-     "summary": null
+     "summary": "정부, 11차 석유 최고가격 동결…휘발유 1784원"
     }
    ]
   },
@@ -203,7 +203,7 @@
     {
      "date": "2026-10-17",
      "title": "李대통령 \"부마항쟁과 5·18, 헌법에 담아야\"…개헌 논의 요청",
-     "summary": null
+     "summary": "부마항쟁 기념식서 헌법 전문 수록·개헌 논의 촉구"
     }
    ]
   },
@@ -231,7 +231,7 @@
     {
      "date": "2026-10-17",
      "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
-     "summary": null
+     "summary": "서안 올리브 수확 중 정착민 습격, 미 기자 부상"
     }
    ]
   },
@@ -259,7 +259,7 @@
     {
      "date": "2026-10-17",
      "title": "산업부 차관 박동일, 금융위 부위원장에 신진창",
-     "summary": null
+     "summary": "산업부 차관·금융위 부위원장 모두 내부 승진 발탁"
     }
    ]
   },
@@ -292,7 +292,7 @@
     {
      "date": "2026-10-17",
      "title": "Pope Leo to lead Sunday prayers as he recovers from lung surgery, Vatican says",
-     "summary": null
+     "summary": "폐암 수술 교황, 순조로운 회복 속 일요일 복귀"
     }
    ]
   },
@@ -325,7 +325,7 @@
     {
      "date": "2026-10-17",
      "title": "후티 반군, 예멘 대통령궁에 미사일 발사…5명 사망·16명 부상",
-     "summary": null
+     "summary": "후티, 아덴 대통령궁에 이어 공항도 공격"
     }
    ]
   },
@@ -358,7 +358,7 @@
     {
      "date": "2026-10-17",
      "title": "美오리건주 초등학교서 대낮 수업중 총격…어린이 등 5명 숨져",
-     "summary": null
+     "summary": "오리건 초교 총격으로 어린이 3명·교사 사망"
     }
    ]
   },
@@ -391,7 +391,7 @@
     {
      "date": "2026-10-17",
      "title": "與 \"소방관 헌신 존중\"…추미애 '재정 빨대' 발언에 공식 사과",
-     "summary": null
+     "summary": "추미애 '소방 재정 빨대' 발언에 노조 반발·여당 사과"
     }
    ]
   },
@@ -419,7 +419,7 @@
     {
      "date": "2026-10-17",
      "title": "李대통령 \"국무회의 전부 비공개 동의못해…행정 공개가 원칙\"",
-     "summary": null
+     "summary": "이 대통령 \"국무회의 전면 비공개 반대\" SNS 반박"
     }
    ]
   },
@@ -447,7 +447,7 @@
     {
      "date": "2026-10-17",
      "title": "CJ그룹, 다우키움그룹과 중앙일보 인수전 참여 가능성",
-     "summary": null
+     "summary": "CJ·다우키움 컨소시엄, 중앙일보 본입찰 참여 전망"
     }
    ]
   },
@@ -475,7 +475,7 @@
     {
      "date": "2026-10-17",
      "title": "Indian police detain ‘cockroach’ movement leader ahead of New Delhi protest",
-     "summary": null
+     "summary": "인도 바퀴벌레당 대표, 선관위장 퇴진 시위 앞두고 연행"
     }
    ]
   },
@@ -508,7 +508,7 @@
     {
      "date": "2026-10-17",
      "title": "파키스탄 페샤와르서 사립학교 지붕 붕괴…학생·교사 35명 사망",
-     "summary": null
+     "summary": "파키스탄 사립학교 지붕 붕괴로 학생 등 35명 사망"
     }
    ]
   },
@@ -536,7 +536,7 @@
     {
      "date": "2026-10-17",
      "title": "‘규모 9.9’ 지진 경보에 놀란 日 열도… 긴급 속보 8분 만에 취소",
-     "summary": null
+     "summary": "규모 6.9 지진을 9.9로 잘못 추정한 일본 경보, 취소 후 사과"
     }
    ]
   },
@@ -564,7 +564,7 @@
     {
      "date": "2026-10-17",
      "title": "차량 5대 뛰어넘어 무사 착지…테슬라, 하늘 나는 스포츠카 시연",
-     "summary": null
+     "summary": "테슬라, 차량 5대 뛰어넘는 비행 로드스터 공개"
     }
    ]
   },
@@ -576,9 +576,9 @@
    "signature": [
     "파업",
     "성바",
-    "삼성",
     "이오",
     "바이",
+    "삼성",
     "노조",
     "제동",
     "쟁의",
@@ -653,7 +653,7 @@
     {
      "date": "2026-10-17",
      "title": "‘딸 임용 특혜 의혹’ 경찰, 유승민 송치",
-     "summary": null
+     "summary": "유승민 등 4명 송치, 본인은 정치수사라며 무죄 주장"
     }
    ]
   },
@@ -709,7 +709,7 @@
     {
      "date": "2026-10-17",
      "title": "MSCI, 글로벌 지수서 인니 퇴출 경고…증시 28년 만에 최대 하락",
-     "summary": null
+     "summary": "MSCI 강등 경고에 인니 증시 11% 폭락"
     }
    ]
   },
@@ -719,9 +719,9 @@
    "topic": "economy",
    "days": 1,
    "signature": [
+    "ceo",
     "메모",
     "모리",
-    "ceo",
     "애플",
     "국산",
     "위기",
@@ -770,7 +770,7 @@
     {
      "date": "2026-10-17",
      "title": "Elon Musk unveils Tesla’s ‘flying’ car",
-     "summary": null
+     "summary": "테슬라 로드스터, 분사 장치로 공중 시연…2028년 양산"
     }
    ]
   },
@@ -798,7 +798,7 @@
     {
      "date": "2026-10-17",
      "title": "Norwegian teen sentenced to 20 years for UK murder plot tied to Iran-linked group",
-     "summary": null
+     "summary": "이란 연계 갱 포섭 노르웨이 10대, 영국서 징역 20년"
     }
    ]
   },
@@ -826,7 +826,7 @@
     {
      "date": "2026-10-17",
      "title": "트럼프 \"중러와 핵군축 논의하고 있다…중, 5년내 따라잡을 것\"",
-     "summary": null
+     "summary": "트럼프, 중러와 핵군축 논의 중이라고 주장"
     }
    ]
   },
@@ -859,7 +859,7 @@
     {
      "date": "2026-10-17",
      "title": "Houthi missiles strike Yemen presidential palace, killing five",
-     "summary": null
+     "summary": "후티가 아덴 대통령궁을 공격해 5명 사망"
     }
    ]
   },
@@ -915,7 +915,7 @@
     {
      "date": "2026-10-17",
      "title": "서울고법원장 “李 재판 중단, 헌법 84조에 따른 재판부 결정 존중”",
-     "summary": null
+     "summary": "서울고법원장, 대통령 재판 중단은 불법 아니라고 답변"
     }
    ]
   },
@@ -999,7 +999,7 @@
     {
      "date": "2026-10-17",
      "title": "특검, 尹 '평양무인기' 2심 징역30년 구형…\"내란보다 죄질 무거워\"(종합)",
-     "summary": null
+     "summary": "특검, 평양 무인기 2심서 윤석열 징역 30년 구형"
     }
    ]
   },
@@ -1093,6 +1093,34 @@
    ]
   },
   {
+   "id": "ea1bacdd770db105",
+   "title": "Protester interrupts Maine Senate debate and confronts GOP Sen. Collins on data centers",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "maine",
+    "debate",
+    "collin",
+    "senate",
+    "interrupt",
+    "protester",
+    "susan",
+    "heated",
+    "center",
+    "shut",
+    "data",
+    "donor"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Protester interrupts Maine Senate debate and confronts GOP Sen. Collins on data centers",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "74d000b5cf9971e4",
    "title": "[속보] 코스피 2.1%↑, 8거래일만 반등…코스닥 4.5%↑",
    "topic": "economy",
@@ -1159,34 +1187,6 @@
    ]
   },
   {
-   "id": "5b0da2fc6e9bcb28",
-   "title": "이재용 회장, 중동 파견 임직원 730명-가족에 격려 선물",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "재용",
-    "임직",
-    "파견",
-    "이재",
-    "중동",
-    "직원",
-    "격려",
-    "가족",
-    "선물",
-    "러분",
-    "족에",
-    "여러"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "이재용 회장, 중동 파견 임직원 730명-가족에 격려 선물",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "8ab4592c6654f3ec",
    "title": "EU rallies around Zelensky as rift widens with Trump over Russia energy strikes",
    "topic": "international",
@@ -1215,7 +1215,7 @@
     {
      "date": "2026-10-17",
      "title": "EU rallies around Zelensky as rift widens with Trump over Russia energy strikes",
-     "summary": null
+     "summary": "EU, 미국과 갈등 속 젤렌스키에 지원 약속"
     }
    ]
   },
@@ -1299,35 +1299,7 @@
     {
      "date": "2026-10-17",
      "title": "中, AI·바이오·태양광 등 '수출통제 기술' 적용 확대한다",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "f6a67cbd2ca85032",
-   "title": "Troy Jackson tells Susan Collins to ‘shut up’ during heated Maine Senate debate",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "maine",
-    "debate",
-    "senate",
-    "collin",
-    "heated",
-    "shut",
-    "donor",
-    "heckler",
-    "interrupt",
-    "jab",
-    "loyalty",
-    "protester"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Troy Jackson tells Susan Collins to ‘shut up’ during heated Maine Senate debate",
-     "summary": null
+     "summary": "중국이 AI 등 40개 기술을 수출통제 목록에 추가"
     }
    ]
   },
@@ -1538,9 +1510,9 @@
     "action",
     "national",
     "security",
+    "uk",
     "adviser'",
     "asses",
-    "uk",
     "adviser",
     "post",
     "comment",
@@ -1584,7 +1556,7 @@
     {
      "date": "2026-10-17",
      "title": "트럼프 “총살형 생중계 안할 것”…여론 역풍에 철회",
-     "summary": null
+     "summary": "총살형은 예정대로, 생중계는 여론 역풍에 접었다"
     }
    ]
   },
@@ -1612,7 +1584,7 @@
     {
      "date": "2026-10-17",
      "title": "주일 러 대사, 기자 구금 관련 \"日요구 거부…러 법대로 수사\"",
-     "summary": null
+     "summary": "러 당국이 일본 기자를 간첩 혐의로 구금, 일본은 접촉 못 해"
     }
    ]
   },
@@ -1963,20 +1935,20 @@
     "ukrainian",
     "city",
     "leo",
-    "aid",
     "cease-fire",
     "ceasefire",
     "contested",
     "idea",
     "kremlin",
-    "oleshky"
+    "oleshky",
+    "plea"
    ],
    "date": "2026-10-17",
    "timeline": [
     {
      "date": "2026-10-17",
      "title": "Pope Asks Putin for a Cease-Fire for a Ukrainian City Under Siege",
-     "summary": null
+     "summary": "푸틴, 교황의 올레시키 지원 요청에 협력 동의"
     }
    ]
   },
@@ -2004,6 +1976,34 @@
     {
      "date": "2026-10-17",
      "title": "밀워키 4연승, 거함 다저스 격침… 44년만에 월드시리즈 진출",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "5b0da2fc6e9bcb28",
+   "title": "이재용 회장, 중동 파견 임직원 730명-가족에 격려 선물",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "파견",
+    "재용",
+    "중동",
+    "이재",
+    "임직",
+    "직원",
+    "격려",
+    "가족",
+    "족에",
+    "감사",
+    "선물",
+    "개국"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "이재용 회장, 중동 파견 임직원 730명-가족에 격려 선물",
      "summary": null
     }
    ]
@@ -2044,7 +2044,7 @@
   {
    "id": "a3a714ab48c579fe",
    "title": "Hot, windy weather stokes brush fires in Southern California; power turned off for many",
-   "topic": "lifestyle_culture",
+   "topic": "international",
    "days": 1,
    "signature": [
     "california",
@@ -2248,6 +2248,34 @@
    ]
   },
   {
+   "id": "29395c921d72870d",
+   "title": "\"전쟁터 부상 수준\"…프랑스 경찰 과잉 진압에 비난 봇물",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "french",
+    "teenager",
+    "protest",
+    "injurie",
+    "seriously",
+    "tactic",
+    "war-like",
+    "과잉",
+    "비난",
+    "압에",
+    "쟁터",
+    "봇물"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "\"전쟁터 부상 수준\"…프랑스 경찰 과잉 진압에 비난 봇물",
+     "summary": "프랑스 학생 시위서 10대 중상 잇따라"
+    }
+   ]
+  },
+  {
    "id": "606de6a56b3479d7",
    "title": "아이폰 듀오, 예약 첫날부터 \"내년 1월말 배송\"…출시 전 품귀",
    "topic": "international",
@@ -2320,7 +2348,7 @@
     "hybrid",
     "propose",
     "safeguard",
-    "other"
+    "urge"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2360,7 +2388,7 @@
     {
      "date": "2026-10-17",
      "title": "[시스루피플] 판매보다 팔레스타인 지지 신념···‘노멀 피플’ 작가 샐리 루니 “영국에서 책 안 팔겠다”",
-     "summary": null
+     "summary": "루니 책, 팔레스타인 액션 지지로 영국 서점서 철수"
     }
    ]
   },
@@ -2515,6 +2543,34 @@
    ]
   },
   {
+   "id": "25de55d1bf23ebcf",
+   "title": "중동 전쟁 여파로 아시안투어 시즌 최종전 골프 대회 연기",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "arabia",
+    "asian",
+    "saudi",
+    "cup",
+    "organiser",
+    "postponed",
+    "안투",
+    "종전",
+    "최종",
+    "golf",
+    "stay",
+    "tour"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "중동 전쟁 여파로 아시안투어 시즌 최종전 골프 대회 연기",
+     "summary": "사우디 안전 우려로 골프 연기, 아시안컵은 일단 유지"
+    }
+   ]
+  },
+  {
    "id": "174710a5ec7a2671",
    "title": "추미애 ‘재정 빨대’ 논란 속...李대통령 “소방관에 천금을 준들 아깝겠나”",
    "topic": "politics",
@@ -2576,6 +2632,34 @@
    ]
   },
   {
+   "id": "97301a4cda1f6e4d",
+   "title": "GTX-B 인천시청역∼인천대입구역 추가정거장, 중투심 통과",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "gtx-b",
+    "통과",
+    "정거",
+    "중투",
+    "투심",
+    "거장",
+    "인천",
+    "가정",
+    "추가",
+    "구간",
+    "대입",
+    "앙투"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "GTX-B 인천시청역∼인천대입구역 추가정거장, 중투심 통과",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "7625cb508ccf3623",
    "title": "한미동맹친선협회, 플린 전 美안보보좌관에 한국 이름 ‘신민수’ 선물",
    "topic": "politics",
@@ -2611,10 +2695,10 @@
    "signature": [
     "쾌유",
     "기원",
-    "신에",
     "장병",
-    "헌신",
     "방관",
+    "신에",
+    "헌신",
     "겠나",
     "깝겠",
     "아깝",
@@ -2640,8 +2724,8 @@
     "rtx",
     "비디",
     "엔비",
-    "스파",
     "디아",
+    "스파",
     "파크",
     "출시",
     "cpu",
@@ -2660,7 +2744,7 @@
     {
      "date": "2026-10-17",
      "title": "[AI픽] 클라우드 없이 AI 돌린다…엔비디아 'RTX 스파크' 출시",
-     "summary": null
+     "summary": "엔비디아·MS, 2599달러부터 로컬 AI 노트북 출시"
     }
    ]
   },
@@ -2700,9 +2784,9 @@
    "signature": [
     "settlement",
     "israel",
+    "west",
     "establishment",
     "forced",
-    "west",
     "bank",
     "stop",
     "expansion",
@@ -2756,8 +2840,8 @@
    "signature": [
     "오션",
     "화시",
-    "스템",
     "지분",
+    "스템",
     "시스",
     "유동",
     "전량",
@@ -2800,7 +2884,7 @@
     {
      "date": "2026-10-17",
      "title": "美, 이란에 최강 비핵무기 ‘모든 폭탄의 어머니’ 투하 저울질… ‘출구 전략 고심’",
-     "summary": null
+     "summary": "미국, 이란 대상 초대형 비핵폭탄 사용 저울질"
     }
    ]
   },
@@ -2819,9 +2903,9 @@
     "소심",
     "항소",
     "심서",
-    "개월",
     "대해",
-    "생후"
+    "생후",
+    "울던"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -2878,8 +2962,8 @@
     "chinese",
     "easily",
     "manila",
-    "conflict",
     "remark",
+    "conflict",
     "calling",
     "force"
    ],
@@ -3077,12 +3161,12 @@
     "앙숙",
     "플과",
     "방형",
-    "었던",
     "잡았",
     "퓨터",
     "픈웨",
     "한때",
-    "개방"
+    "개방",
+    "구동"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -3133,9 +3217,9 @@
     "생중",
     "중계",
     "무회",
+    "국무",
     "정효",
     "한성",
-    "국무",
     "회의",
     "긍정",
     "성숙"
@@ -3229,7 +3313,7 @@
     {
      "date": "2026-10-17",
      "title": "6.9-magnitude quake hits Russia's Kamchatka",
-     "summary": null
+     "summary": "캄차카 규모 6.9 지진, 피해·쓰나미 경보 없음"
     }
    ]
   },
@@ -3374,7 +3458,7 @@
     {
      "date": "2026-10-17",
      "title": "China, N.Korea open cross-border bridge | NHK WORLD-JAPAN News",
-     "summary": null
+     "summary": "북중 신압록강대교 완공 12년 만에 개통"
     }
    ]
   },
@@ -3614,10 +3698,10 @@
    "days": 1,
    "signature": [
     "숨진",
+    "발견",
     "봉화",
     "찔려",
     "화서",
-    "발견",
     "감정",
     "부검",
     "틀간",
@@ -3849,9 +3933,9 @@
     "매도",
     "장서",
     "증권",
+    "주식",
     "유출",
     "전환",
-    "주식",
     "식도",
     "시장"
    ],
@@ -3873,8 +3957,8 @@
     "외칠",
     "민이",
     "재명",
-    "이재",
     "국민",
+    "이재",
     "핵안",
     "발의",
     "탄핵",
@@ -3937,12 +4021,12 @@
     "fragile",
     "plague",
     "affordability",
-    "malnutrition",
     "supplie",
+    "malnutrition",
     "good",
     "un",
     "food",
-    "fear"
+    "gain"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -4213,10 +4297,10 @@
     "diddy",
     "sean",
     "moved",
-    "facility",
     "lifestyle",
     "low-security",
     "luxury",
+    "facility",
     "pennsylvania",
     "behind",
     "prison",
@@ -4297,10 +4381,10 @@
     "콩고",
     "확진",
     "cdc",
-    "디로",
     "볼라",
     "congo",
     "response",
+    "디로",
     "원은",
     "africa"
    ],
@@ -4665,8 +4749,8 @@
     "tension",
     "watch",
     "europe",
-    "rise",
     "zelensky",
+    "rise",
     "support",
     "leader"
    ],
@@ -4718,9 +4802,9 @@
     "car",
     "deal",
     "emission",
-    "protect",
     "statu",
     "industry",
+    "protect",
     "special",
     "reach",
     "europe",
@@ -4904,6 +4988,39 @@
    ]
   },
   {
+   "id": "6a7a9c3622cdcc8f",
+   "title": "뉴욕증시, 기술주 불안 이어지며 혼조 출발",
+   "topic": "economy",
+   "days": 2,
+   "signature": [
+    "욕증",
+    "출발",
+    "불안",
+    "뉴욕",
+    "증시",
+    "술주",
+    "약세",
+    "지며",
+    "갈린",
+    "나스",
+    "어지",
+    "엇갈"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": null,
+     "title": "뉴욕증시, 국채금리 하락에 3대 지수 반등 마감",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "뉴욕증시, 기술주 불안 이어지며 혼조 출발",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "6c3c95191f95ba4f",
    "title": "러 전폭기가 발트해 상공에…\"예정된 비행\"",
    "topic": "international",
@@ -4955,6 +5072,34 @@
     {
      "date": "2026-10-17",
      "title": "Air traffic disrupted in Italy due to technical fault",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "17c3cb88fd175cab",
+   "title": "일본은행 심의위원 \"금리 인상에 과도하게 신중할 필요 없어\"",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "allowed",
+    "boj'",
+    "can't",
+    "도하",
+    "본은",
+    "의위",
+    "중할",
+    "further",
+    "ueda",
+    "상에",
+    "심의",
+    "과도"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "일본은행 심의위원 \"금리 인상에 과도하게 신중할 필요 없어\"",
      "summary": null
     }
    ]
@@ -5140,13 +5285,13 @@
    "signature": [
     "spending",
     "funding",
-    "further",
     "pct",
+    "further",
     "steady",
     "keep",
     "cut",
-    "rise",
     "seek",
+    "rise",
     "china'"
    ],
    "date": "2026-10-17",
@@ -5154,34 +5299,6 @@
     {
      "date": "2026-10-17",
      "title": "China’s R&D spending keeps up steady rise as No 1 US seeks further funding cuts",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "97301a4cda1f6e4d",
-   "title": "GTX-B 인천시청역∼인천대입구역 추가정거장, 중투심 통과",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "gtx-b",
-    "정거",
-    "거장",
-    "가정",
-    "통과",
-    "추가",
-    "인천",
-    "구간",
-    "대입",
-    "시청",
-    "앙투",
-    "입구"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "GTX-B 인천시청역∼인천대입구역 추가정거장, 중투심 통과",
      "summary": null
     }
    ]
@@ -5351,9 +5468,9 @@
     "technique",
     "working",
     "adopt",
-    "find",
     "product",
-    "chip"
+    "chip",
+    "find"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -5406,8 +5523,8 @@
     "stability",
     "away",
     "warsh",
-    "key",
     "move",
+    "key",
     "price"
    ],
    "date": "2026-10-17",
@@ -5936,9 +6053,9 @@
     "림수",
     "원고",
     "지할",
-    "질타",
     "형집",
-    "어야"
+    "어야",
+    "연성"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -5973,6 +6090,34 @@
     {
      "date": "2026-10-17",
      "title": "기념사 중 눈물 흘린 李 “부마항쟁 헌법전문 수록, 이제 실천할 때”",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "b1710cb88dbe36fc",
+   "title": "7급 공무원 구속 송치…보복대행 일당에 수수료 받고 주민 정보 넘겨",
+   "topic": "incidents",
+   "days": 1,
+   "signature": [
+    "대행",
+    "보복",
+    "복대",
+    "일당",
+    "공무",
+    "무원",
+    "구속",
+    "넘겨",
+    "도운",
+    "받고",
+    "수료",
+    "수수"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "7급 공무원 구속 송치…보복대행 일당에 수수료 받고 주민 정보 넘겨",
      "summary": null
     }
    ]
@@ -6047,10 +6192,10 @@
     "김이",
     "다소",
     "수심",
-    "외곽",
     "이탁",
     "중저",
-    "승세"
+    "승세",
+    "심리"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -6197,6 +6342,34 @@
     {
      "date": "2026-10-17",
      "title": "與 조희대 탄핵 시동에 野 “자신 있으면 해보라” “와인은 김명수가 먹었는데”",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "7b4e5d23f9d61e0b",
+   "title": "\"메모리株 업황 탄탄 … 저가매수 기회\"",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "가매",
+    "저가",
+    "기회",
+    "메모",
+    "모리",
+    "매수",
+    "랐다",
+    "올랐",
+    "株",
+    "무조",
+    "업황",
+    "조건"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "\"메모리株 업황 탄탄 … 저가매수 기회\"",
      "summary": null
     }
    ]
@@ -6440,8 +6613,8 @@
     "weekly",
     "oil",
     "remain",
-    "track",
     "supply",
+    "track",
     "ease",
     "east",
     "focu",
@@ -6454,34 +6627,6 @@
     {
      "date": "2026-10-17",
      "title": "Oil heads for weekly gain with focus on Middle East supply",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "25de55d1bf23ebcf",
-   "title": "중동 전쟁 여파로 아시안투어 시즌 최종전 골프 대회 연기",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "organiser",
-    "postponed",
-    "안투",
-    "종전",
-    "최종",
-    "golf",
-    "tour",
-    "투어",
-    "여파",
-    "파로",
-    "arabia",
-    "asian"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "중동 전쟁 여파로 아시안투어 시즌 최종전 골프 대회 연기",
      "summary": null
     }
    ]
@@ -6622,6 +6767,34 @@
     {
      "date": "2026-10-17",
      "title": "\"삼성, 3년연속 아시아 브랜드가치 1위…애플·나이키 제쳐\"",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "712e166d1f02791a",
+   "title": "SK하이닉스, ‘ThanksFULL Day’ 개최…협력사 구성원·가족 3만 명 초청",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "력사",
+    "초청",
+    "이닉",
+    "sk",
+    "하이",
+    "닉스",
+    "협력",
+    "thanksfull",
+    "과에",
+    "성원",
+    "울랜",
+    "함께"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "SK하이닉스, ‘ThanksFULL Day’ 개최…협력사 구성원·가족 3만 명 초청",
      "summary": null
     }
    ]
@@ -6989,34 +7162,6 @@
    ]
   },
   {
-   "id": "29395c921d72870d",
-   "title": "\"전쟁터 부상 수준\"…프랑스 경찰 과잉 진압에 비난 봇물",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "injurie",
-    "war-like",
-    "과잉",
-    "비난",
-    "압에",
-    "쟁터",
-    "봇물",
-    "수준",
-    "french",
-    "teenager",
-    "프랑",
-    "accused"
-   ],
-   "date": "2026-10-17",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "\"전쟁터 부상 수준\"…프랑스 경찰 과잉 진압에 비난 봇물",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "ffaf218644a31c7a",
    "title": "EXCLUSIVE: US holds more secret talks with Myanmar's military-backed rulers in Tokyo, sources say",
    "topic": "international",
@@ -7218,9 +7363,9 @@
     "언니",
     "계성",
     "융합",
-    "초청",
     "화운",
-    "신에"
+    "초청",
+    "나무"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -7478,6 +7623,34 @@
    ]
   },
   {
+   "id": "0bc228c8d5be5472",
+   "title": "“여러분 안전이 최우선”…이재용, 중동 임직원 730명에 ‘통 큰 선물’",
+   "topic": "society",
+   "days": 1,
+   "signature": [
+    "러분",
+    "여러",
+    "재용",
+    "선물",
+    "이재",
+    "분의",
+    "우선",
+    "최우",
+    "전이",
+    "명에",
+    "신에",
+    "임직"
+   ],
+   "date": "2026-10-17",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "“여러분 안전이 최우선”…이재용, 중동 임직원 730명에 ‘통 큰 선물’",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "8a10736bb05ca7a8",
    "title": "정부, '경기 회복 흐름' 진단…\"투자 양호·소비는 완만 개선\"",
    "topic": "economy",
@@ -7723,7 +7896,7 @@
     "비자",
     "상회",
     "beijing",
-    "summit"
+    "결과"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -7784,7 +7957,7 @@
     "emerge",
     "targeting",
     "detail",
-    "accused"
+    "plot"
    ],
    "date": "2026-10-17",
    "timeline": [
@@ -8179,8 +8352,8 @@
     "위브",
     "창업",
     "코어",
-    "이미",
     "업자",
+    "이미",
     "공동",
     "주식",
     "식매",
