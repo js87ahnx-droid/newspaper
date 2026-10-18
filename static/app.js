@@ -328,6 +328,8 @@
     var last = pages.length;
     var a = current + 1, b = spread && mode !== "scroll" ? Math.min(current + 2, last) : a;
     pageInfo.textContent = (a === b ? a : a + "–" + b) + " / " + last + "쪽";
+    var fr = document.querySelector('[data-act="front"]');
+    if (fr) fr.disabled = current === 0;   // 이미 1면이면 누를 일이 없다
   }
 
   function simpleShow(idx) {   // 동작 줄이기: 애니메이션 없이 펼침면 교체
@@ -526,6 +528,7 @@
   document.getElementById("toolbar").addEventListener("click", function (e) {
     var act = e.target.getAttribute && e.target.getAttribute("data-act");
     if (!act) return;
+    if (act === "front") goTo(0);   // 1면으로 (S23d)
     if (act === "prev") go(-1);
     if (act === "next") go(1);
     if (act === "view") setView(mode === "scroll" ? "flip" : "scroll");

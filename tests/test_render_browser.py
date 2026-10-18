@@ -115,6 +115,23 @@ def test_reduced_motion_simple_flip(browser, tmp_path):
     assert cur == 2 and visible == 2
 
 
+@pytest.mark.parametrize("reduced", [False, True])
+def test_front_button_returns_to_first_page(browser, tmp_path, reduced):
+    """S23d: 상단 '1면' 단추 — 몇 쪽에 있든 1면으로, 1면에서는 눌리지 않게."""
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, 1180, 820, reduced=reduced)
+    btn = '[data-act="front"]'
+    first = page.evaluate(f"document.querySelector('{btn}').disabled")
+    page.evaluate("NEWS.goTo(6)")
+    page.wait_for_timeout(1500)
+    away = page.evaluate("NEWS.state().current")
+    page.click(btn)
+    page.wait_for_timeout(1500)
+    st = page.evaluate(f"[NEWS.state().current, document.querySelector('{btn}').disabled]")
+    ctx.close()
+    assert not errors and first is True and away >= 4 and st == [0, True]
+
+
 def test_portrait_single_page(browser, tmp_path):
     index = make_site(tmp_path)
     ctx, page, _ = open_page(browser, index, 820, 1180)
