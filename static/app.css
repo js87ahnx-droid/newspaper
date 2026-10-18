@@ -279,3 +279,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .brief-group { display: block; }
 .brief-topic { font-size: 0.82em; font-weight: 700; color: var(--accent); margin: 8px 0 1px; padding-bottom: 2px; border-bottom: 1px solid var(--rule, #c9bfae); letter-spacing: 0.02em; }
 .page-inner > .brief-group:first-of-type .brief-topic, .sec-title + .brief-group .brief-topic { margin-top: 2px; }
+
+/* 관련 기사 (S22b) — 관련 사설·칼럼과 같은 꼴 */
+.rel-arts { margin: 6px 0 4px; padding: 4px 0 2px; border-top: 1px dotted var(--rule, #c9bfae); }
+.rel-arts h4 { font-size: 0.8em; margin: 0 0 2px; color: var(--muted); }
+.rel-arts p { margin: 1px 0; font-size: 0.9em; line-height: 1.45; }
+.item.brief .rel-arts { display: none; }

@@ -341,3 +341,38 @@ def test_continuity_guarantee_capped_and_skips_less_topics():
     import math
     assert 0 < len(cont) <= math.floor(CFG.editing.continuity_max_ratio * it.daily_articles)
     assert not any(p.scored.topic in it.less for p in cont)
+
+
+# ---------- S22b 관련 기사 ----------
+def test_attach_related_moves_brief_under_host():
+    from pipeline.edit import RELATED_MAX, attach_related
+    _, scored, placed, stats, ed, it = run("default")
+    host = ed.sections["politics"][0]
+    briefs = list(ed.sections["briefs"])
+    links = {b.scored.issue.id: host.scored.issue.id for b in briefs[: RELATED_MAX + 2]}
+    links["없는"] = host.scored.issue.id
+    n = attach_related(ed.sections, links)
+    assert n == RELATED_MAX and len(host.related) == RELATED_MAX           # 기사당 상한
+    moved = {r.scored.issue.id for r in host.related}
+    assert not moved & {b.scored.issue.id for b in ed.sections["briefs"]}  # 단신에서 빠짐
+    out = edition_to_json(ed, "2026-10-18", _arts_of(ed), stats)
+    rel = next(i for i in out["sections"]["politics"] if i["issue_id"] == host.scored.issue.id)["related"]
+    assert {r["issue_id"] for r in rel} == moved
+
+
+def _arts_of(ed):
+    arts, _ = build(260)
+    return arts
+
+
+def test_ai_related_parses_and_ignores_bad_ids():
+    from pipeline.topics import ai_related
+    hosts = [{"id": "h0", "title": "A"}, {"id": "h1", "title": "B"}]
+    briefs = [{"id": "b0", "title": "a2"}, {"id": "b1", "title": "x"}]
+    ans = iter([{"links": {"B0": "H1", "B1": "H0", "B7": "H0", "B9": "Hx"}}, {"keep": ["P0", "p9"]}])
+    got, st = ai_related(hosts, briefs, lambda p: next(ans))
+    assert got == {"b0": "h1"} and "검증 1" in st                       # 검증에서 b1 은 지워짐, 틀린 번호는 버림
+    ans2 = iter([{"links": {"B0": "H1"}}, None])
+    assert ai_related(hosts, briefs, lambda p: next(ans2))[0] == {}      # 검증 실패면 쓰지 않음
+    assert ai_related(hosts, briefs, lambda p: None) == ({}, "응답 없음")
+    assert ai_related([], briefs, lambda p: 1/0) == ({}, "후보 없음")

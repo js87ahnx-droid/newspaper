@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 
 from .collect import Article
 from .textutil import clean_lead
-from .score import ScoredIssue
+from .score import CONTINUITY_MIN_SCORE, LATIN_ONLY_MIN, ScoredIssue, _LATIN, match_score
 from .settings import COMPARE_TOPICS, Config, Interests
 
 # 분야 → 섹션 (해당 섹션이 차면 단신으로)
@@ -47,6 +47,7 @@ class Placed:
     guaranteed: bool = False  # 다양성·연속성으로 들어온 기사 — 넘침 정리 때 빼지 않는다
     merged: list[ScoredIssue] = field(default_factory=list)  # 같은 사건 이웃 이슈 (따로 싣지 않고 이 기사에 합침)
     reserve: bool = False     # 예비 기사 — 쪽이 남을 때만 단신으로 실린다 (S15)
+    related: list["Placed"] = field(default_factory=list)  # 관련 기사 (S22b) — 단신에서 옮겨 와 이 기사 아래에
 
 
 @dataclass
@@ -247,12 +248,57 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
     for p in reserves:  # 단신 맨 뒤에 (지면 쪽이 남을 때만 보인다)
         p.section = "briefs"
         sections["briefs"].append(p)
+    moved = attach_related(sections)
     stats = {
+        "related_moved": moved,
         "dropped_overflow": dropped,
         "photos": sum(1 for ps in sections.values() for p in ps if p.photo),
         "by_section": {**{k: len(v) for k, v in sections.items()}, "compare": len(compare)},
     }
     return Edition(sections=sections, compare=compare, stats=stats)
+
+
+RELATED_MAX = 3          # 기사 하나에 붙이는 관련 기사 수
+RELATED_HOSTS = ("front", "politics", "economy", "international", "society", "interest")
+
+
+def related_score(a: ScoredIssue, b: ScoredIssue) -> float:
+    """두 이슈의 관련 정도 (S22b). 같은 사건 이웃(near)이면 확실, 아니면 연속성 판정과 같은 드문 토큰 공유 점수."""
+    if b.issue.id in a.issue.extra.get("near", []) or a.issue.id in b.issue.extra.get("near", []):
+        return 99.0
+    shared = set(a.signature) & set(b.signature)
+    if not shared or (all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN):
+        return 0.0
+    sc = match_score(a.signature, b.signature)
+    return sc if sc >= CONTINUITY_MIN_SCORE else 0.0
+
+
+def attach_related(sections: dict[str, list[Placed]], links: dict[str, str] | None = None) -> int:
+    """단신(예비 포함) 중 앞 면 기사와 이어진 것을 그 기사 아래 '관련 기사'로 옮긴다 (S22b, 2026-10-18 사용자 요청).
+    links(단신 이슈 id → 본 기사 이슈 id, AI 판정)가 있으면 그것을, 없으면 규칙(related_score)을 쓴다.
+    점수 높은 단신부터, 가장 가까운 기사에, 기사당 RELATED_MAX 건까지. 옮긴 수를 돌려준다."""
+    hosts = [p for sid in RELATED_HOSTS for p in sections.get(sid, [])]
+    by_id = {h.scored.issue.id: h for h in hosts}
+    moved = 0
+    for b in sorted(sections.get("briefs", []), key=lambda p: (p.reserve, -p.scored.final)):
+        best, best_sc = None, 0.0
+        if links is not None:
+            h = by_id.get(links.get(b.scored.issue.id, ""))
+            if h is not None and len(h.related) < RELATED_MAX:
+                best = h
+        else:
+            for h in hosts:
+                if len(h.related) >= RELATED_MAX:
+                    continue
+                sc = related_score(b.scored, h.scored)
+                if sc > best_sc:
+                    best, best_sc = h, sc
+        if best is not None:
+            best.related.append(b)
+            sections["briefs"].remove(b)
+            b.section = best.section
+            moved += 1
+    return moved
 
 
 def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article], choose_stats: dict) -> dict:
@@ -293,6 +339,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "headline_by": {**s.headline_by, **{k: v for m in p.merged for k, v in m.headline_by.items() if k not in s.headline_by}},
             "coverage": coverage,
             "merged": [m.issue.id for m in p.merged],
+            "related": [item(r) for r in p.related],
             "articles": [
                 {
                     "id": a.id, "source": a.source, "country": a.country, "lean": a.lean, "lang": a.lang,

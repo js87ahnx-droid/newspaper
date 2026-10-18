@@ -197,3 +197,51 @@ def ai_topics(rows: list[dict], ask, cache: dict) -> tuple[dict[str, str], str]:
         one(todo[i:i + AI_TOPIC_BATCH], True)
     out = {r["id"]: cache[r["id"]] for r in rows if r["id"] in cache}
     return out, (", ".join(sts) if sts else "캐시")
+
+
+# ---------- 관련 기사 짝짓기 (S22b) ----------
+# 규칙(같은 사건 이웃·드문 단어 공유)으로는 10/18 에 1건뿐 — 언어가 다르거나 단어가 안 겹치는 후속 기사를 못 잡는다
+AI_RELATED_PROMPT = """아래 H 는 오늘 지면의 본 기사, B 는 단신이다(번호, 제목 — 여러 언어).
+각 단신이 어느 본 기사와 "같은 사건의 후속·다른 측면·직접 반응"이면 짝지어라. 같은 분야·같은 나라라는 것만으로는 짝짓지 마라.
+같은 전쟁·분쟁·정책 안이라도 서로 다른 사건(다른 공격, 다른 표결, 다른 발표)이면 짝짓지 마라.
+확실한 것만, 없으면 빈 객체. 출력 형식: {{"links": {{"B번호": "H번호"}}}}
+{data}"""
+
+
+def ai_related(hosts: list[dict], briefs: list[dict], ask) -> tuple[dict[str, str], str]:
+    """hosts·briefs: [{"id", "title"}]. 돌려주는 값: (단신 id → 본 기사 id, 상태)."""
+    if not hosts or not briefs:
+        return {}, "후보 없음"
+    lines = [f"H{i}\t{h['title'][:90]}" for i, h in enumerate(hosts)] + [f"B{i}\t{b['title'][:90]}" for i, b in enumerate(briefs)]
+    res = ask(AI_RELATED_PROMPT.format(data="<data>\n" + "\n".join(lines) + "\n</data>"))
+    got = res.get("links") if isinstance(res, dict) else None
+    if not isinstance(got, dict):
+        return {}, "응답 없음"
+    out = {}
+    for b, h in got.items():
+        try:
+            bi, hi = int(str(b).lstrip("Bb")), int(str(h).lstrip("Hh"))
+        except ValueError:
+            continue
+        if 0 <= bi < len(briefs) and 0 <= hi < len(hosts):
+            out[briefs[bi]["id"]] = hosts[hi]["id"]
+    if not out:
+        return out, "0쌍"
+    # 검증 (S22b 평가: 제안만 쓰면 15쌍 중 2~3쌍이 같은 전쟁·같은 인물의 다른 사건) — 줄이기만 한다
+    title = {x["id"]: x["title"] for x in hosts + briefs}
+    pairs = list(out.items())
+    lines = [f"P{i}\t본 기사: {title[h][:90]}\n\t단신: {title[b][:90]}" for i, (b, h) in enumerate(pairs)]
+    res = ask(AI_RELATED_VERIFY.format(data="<data>\n" + "\n".join(lines) + "\n</data>"))
+    keep = res.get("keep") if isinstance(res, dict) else None
+    if not isinstance(keep, list):
+        return {}, f"제안 {len(out)}쌍, 검증 응답 없음 — 쓰지 않음"
+    ok = {f"P{i}" for i in range(len(pairs))} & {str(k).upper() for k in keep}
+    final = {b: h for i, (b, h) in enumerate(pairs) if f"P{i}" in ok}
+    return final, f"제안 {len(out)} → 검증 {len(final)}쌍"
+
+
+AI_RELATED_VERIFY = """아래 각 쌍(P번호)에서 단신이 본 기사와 "바로 그 사건"을 다루는지 엄격히 확인하라.
+같은 사건의 후속 보도·반응·다른 언어 보도·같은 사건의 다른 측면이면 남긴다.
+같은 전쟁·분쟁·인물·정책을 다루더라도 다른 날의 다른 공격·다른 발언·다른 결정이면 지운다. 애매하면 지운다.
+출력 형식: {{"keep": ["P0", ...]}}
+{data}"""

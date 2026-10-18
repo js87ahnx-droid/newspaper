@@ -231,6 +231,10 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
                 "time": time_label(rep.get("published"), cfg.timezone),
                 "brief_text": brief_text(it, view),
                 "stance_links": stance_links(it, view.get("analysis")),
+                # 관련 기사 (S22b): 단신에서 옮겨 온 이어진 기사 — 제목(외국어는 번역 제목) → 원문 창
+                "related_view": [{**r, "view": _display(r, interests.foreign_display), "cls": LEAN_CLASS.get(r["lean"], "mid"),
+                                  "rep": next((a for a in r["articles"] if a.get("url") == r.get("url")), r["articles"][0])}
+                                 for r in it.get("related", [])],
                 # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)
                 "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
                 # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)

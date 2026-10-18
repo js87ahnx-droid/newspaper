@@ -181,6 +181,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
     table = build_interest_table(interests)
     scored = score_issues(issues, articles, cfg, table, previous, headlines)
     topic_note = "규칙"
+    llm_ask = None   # 분야 분류·관련 기사 짝짓기가 같이 쓴다
     if cfg.llm.enabled and not getattr(args, "no_llm", False):
         # AI 분야 분류 (S21b): 점수 상위 후보만, 제목으로. 실패하면 키워드 규칙 그대로
         from .llm import Budget, available, call  # 켜져 있을 때만 불러온다
@@ -204,6 +205,8 @@ def cmd_edit(args: argparse.Namespace) -> int:
                     why.append(st[:60])
                 return res
             override, topic_note = ai_topics(rows, ask, cache)
+            # 짝짓기는 판단이 들어가므로 분석 모델로 (S22b 평가: haiku 는 같은 전쟁의 다른 사건을 짝지음 — 8쌍 중 2쌍)
+            llm_ask = lambda p: call(p, cfg.llm, budget, model=cfg.llm.analysis_model, timeout=240)[0]  # noqa: E731
             if why:
                 topic_note += f" — {'; '.join(why)}"
             cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -213,18 +216,42 @@ def cmd_edit(args: argparse.Namespace) -> int:
                 topic_note = f"AI {len(override)}/{len(cand)} ({topic_note}), 규칙과 다름 {changed}"
     placed, cstats = choose(scored, cfg, interests)
     ed = arrange(placed, cfg, interests, articles)
+    related_note = f"규칙 {ed.stats['related_moved']}"
+    if llm_ask:
+        # 관련 기사 (S22b): 규칙으로 못 잡은 후속·다른 측면 기사를 AI 가 본 기사와 짝짓는다
+        from .edit import RELATED_HOSTS, attach_related
+        from .topics import ai_related
+
+        def title_of(p):
+            arts = sorted((articles[i] for i in p.scored.issue.article_ids), key=lambda a: (a.lang != "ko", a.lang != "en"))
+            return arts[0].title if arts else p.scored.issue.title
+        hosts = [{"id": p.scored.issue.id, "title": title_of(p)} for sid in RELATED_HOSTS for p in ed.sections.get(sid, [])]
+        briefs = [{"id": p.scored.issue.id, "title": title_of(p)} for p in ed.sections.get("briefs", [])]
+        rel_path = raw / f"{args.date}.related.json"
+        key = ",".join(sorted(h["id"] for h in hosts)) + "|" + ",".join(sorted(b["id"] for b in briefs))
+        cached = json.loads(rel_path.read_text(encoding="utf-8")) if rel_path.exists() else {}
+        if cached.get("key") == key:
+            links, st = cached["links"], "캐시"
+        else:
+            links, st = ai_related(hosts, briefs, llm_ask)
+            if st != "응답 없음":
+                rel_path.write_text(json.dumps({"key": key, "links": links}, ensure_ascii=False), encoding="utf-8")
+        n = attach_related(ed.sections, links)
+        ed.stats["related_moved"] += n
+        ed.stats["by_section"]["briefs"] = len(ed.sections["briefs"])
+        related_note += f" + AI {n} ({st})"
     out = edition_to_json(ed, args.date, articles, cstats)
     out["stats"]["history_previous"] = prev_date.isoformat() if prev_date else None
     (raw / f"{args.date}.edition.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.write_history:
-        placed_ids = {p.scored.issue.id for ps in ed.sections.values() for p in ps}
+        placed_ids = {q.scored.issue.id for ps in ed.sections.values() for p in ps for q in [p, *p.related]}
         write_history(history_dir, edition, scored, placed_ids)
     st = out["stats"]
     print(
         f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "
         f"관심 {st['interest_counted']}/{st['interest_cap']}(제외 {st['interest_skipped']}), 연속 보장 {st['continuity_guaranteed']}, "
         f"사진 {st['photos']}, 전날 기록 {st['history_previous']}, 같은 사건 합침 {st.get('merged_duplicates', 0)}, "
-        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건 | 분야 분류 {topic_note}"
+        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건 | 분야 분류 {topic_note} | 관련 기사 {related_note}"
     )
     from .render import headline_label
 

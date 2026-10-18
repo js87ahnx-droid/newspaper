@@ -334,6 +334,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
     status: dict[str, str] = {}
     items = [it for ps in edition["sections"].values() for it in ps]
+    related = [r for it in items for r in it.get("related", [])]   # 관련 기사 (S22b): 제목 번역·요약만 (같은 사건 묶기·분석에는 안 넣음)
     stopped: list[str] = []  # 인증·설치 문제로 멈췄으면 그 이유
 
     def guarded(prompt: str, **kw):
@@ -383,7 +384,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     ):
         if key in cache:
             continue
-        todo = [it for it in items if want(_lang_of(it), mode) and it["issue_id"] not in analysis]
+        todo = [it for it in items + related if want(_lang_of(it), mode) and it["issue_id"] not in analysis]
         # 프랑스어·독일어 → 지면 기사 → 예비 기사 순 (S20 평가: 24쪽에서 한 번에 100건 넘게 보내 120초 시간 초과)
         todo.sort(key=lambda it: (_lang_of(it) not in TRANSLATE_BOTH, bool(it.get("reserve"))))
         rows = [{"id": it["issue_id"], "제목": it["title"], "요약": it["lead"][:300]} for it in todo][: BATCH * MAX_BATCHES]
@@ -419,7 +420,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             o["ko_title"] = cache["op_title"][o["id"]]
 
     cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
-    for it in items + edition.get("compare", []):
+    for it in items + related + edition.get("compare", []):
         llm = {}
         if it["issue_id"] in cache.get("ko_summary", {}):
             llm["ko_summary"] = cache["ko_summary"][it["issue_id"]]
