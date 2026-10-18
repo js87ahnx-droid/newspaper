@@ -2503,7 +2503,6 @@
     "meta",
     "lula",
     "brazil",
-    "account",
     "anti-lula",
     "br",
     "electoral",
@@ -2511,7 +2510,8 @@
     "extr",
     "faveur",
     "ing",
-    "lectorale"
+    "lectorale",
+    "opposant"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -8699,29 +8699,27 @@
    ]
   },
   {
-   "id": "91be8b79df2cf44a",
-   "title": "Hardline Israeli rabbi ruling on stolen Palestinian olives prompts uproar",
+   "id": "4b00acc26b122851",
+   "title": "Trump Signs Order Exempting Russia From Sanctions Law",
    "topic": "international",
    "days": 1,
    "signature": [
-    "palestinian",
-    "hardline",
-    "olive",
-    "pogrom",
-    "rabbi",
-    "uproar",
-    "among",
-    "prompt",
-    "ruling",
-    "stolen",
-    "child",
-    "injured"
+    "law",
+    "sanction",
+    "russia",
+    "brother",
+    "championed",
+    "exempting",
+    "graham",
+    "break",
+    "sign",
+    "order"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "Hardline Israeli rabbi ruling on stolen Palestinian olives prompts uproar",
+     "title": "Trump Signs Order Exempting Russia From Sanctions Law",
      "summary": null
     }
    ]
@@ -8944,6 +8942,34 @@
     {
      "date": "2026-10-18",
      "title": "우크라의 북한군 포로, 또 한국에 올 수 있을까",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "e07b8bddd62b5fbf",
+   "title": "［人生案内］父の介護 前向きになれず",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "なれ",
+    "の介",
+    "れず",
+    "介護",
+    "前向",
+    "案内",
+    "父の",
+    "生案",
+    "向き",
+    "父",
+    "護",
+    "きに"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "［人生案内］父の介護 前向きになれず",
      "summary": null
     }
    ]
@@ -9558,34 +9584,6 @@
     {
      "date": "2026-10-18",
      "title": "静岡新聞で氏名や電話番号など最大３０００件漏えいか…掲載申し込みフォーム利用の企業や個人、デーリー東北新聞は４２３件",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "ef7a8773b6e24c86",
-   "title": "警察官・職員２０００人の個人情報が流出した可能性…「アルカディア」不正アクセス、現時点で業務への影響なし",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "が流",
-    "た可",
-    "で業",
-    "の個",
-    "の影",
-    "アク",
-    "アル",
-    "カデ",
-    "クセ",
-    "セス",
-    "ルカ",
-    "・職"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "警察官・職員２０００人の個人情報が流出した可能性…「アルカディア」不正アクセス、現時点で業務への影響なし",
      "summary": null
     }
    ]
