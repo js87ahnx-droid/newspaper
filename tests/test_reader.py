@@ -63,6 +63,12 @@ def test_page_urls_cover_items_groups_and_opinion():
     assert reader.page_urls(ed) == ["u1", "u2", "u3", "o1", "o2", "o3"]   # 그룹은 보이는 2건만
 
 
+def test_page_urls_cover_analysis_and_picks():
+    """S18: 분석·해설 면·지정 칼럼 주소도 푼다 (지정 칼럼은 Google 뉴스로 받는다 — 빠져서 원문 창이 못 열렸다)."""
+    ed = {"sections": {}, "compare": [], "analysis": [{"url": "a1"}], "picks": [{"url": "p1"}]}
+    assert reader.page_urls(ed) == ["a1", "p1"]
+
+
 def test_worker_has_no_storage():
     """D16: 중계 서버는 아무것도 저장하지 않는다 — 저장소 바인딩 없음, 응답 no-store, 요청 기록 끔."""
     toml = (WORKER / "wrangler.toml").read_text(encoding="utf-8")

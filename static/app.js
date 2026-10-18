@@ -238,10 +238,11 @@
       dropped += more.rest.length - opRest;
     }
     // 남는 쪽은 예비 기사를 일반 기사 모양으로 "더 읽을 기사" 면에 (S21c — 단신을 줄이자 얇은 날 끝 빈 쪽이 생김).
-    // 원래 단신·내려온 기사가 단신 쪽에 다 들어갈 만큼은 남겨 두고, 그 나머지 쪽만 쓴다
-    var reservesEl = pool.filter(function (el) { return el.getAttribute("data-reserve") === "1"; });
+    // 원래 단신이 단신 쪽에 다 들어갈 만큼은 남겨 두고, 그 나머지 쪽만 쓴다.
+    // 다른 면에서 내려온 기사가 예비 기사보다 먼저 (S18 — 1면 다섯째 기사가 단신으로, 점수 낮은 예비 기사는 일반 기사 꼴로 실리던 것)
+    var reservesEl = demoted.concat(pool.filter(function (el) { return el.getAttribute("data-reserve") === "1"; }));
     if (budgets.briefs && spare > 0 && reservesEl.length) {
-      var must = pool.filter(function (el) { return el.getAttribute("data-reserve") !== "1"; });
+      var must = pool.filter(function (el) { return el.getAttribute("data-reserve") !== "1" && demoted.indexOf(el) < 0; });
       var need = 0;
       if (must.length) {
         var trial = placeSection(stage, g, briefSec, false, 0, groupBriefs(must), null, { grouped: true });

@@ -73,14 +73,21 @@ def test_compare_shown_under_representative_and_reader(browser, tmp_path):  # no
 
 
 def test_demoted_items_become_briefs_in_score_order(browser, tmp_path):  # noqa: F811
-    """정해진 쪽에 다 못 들어간 기사는 단신으로 내려가고, 내려간 기사는 단신 분야 묶음마다 맨 앞(점수 순) — S19c."""
+    """정해진 쪽에 다 못 들어간 기사는 남는 쪽의 '더 읽을 기사'(S18)나 단신으로 내려가고, 단신으로 간 것은
+    단신 분야 묶음마다 맨 앞(점수 순) — S19c. 더 읽을 기사에 간 것이 단신에 간 것보다 점수가 높다."""
     index = make_site(tmp_path)
     ctx, page, _ = open_page(browser, index, 1024, 768)
     st = page.evaluate(STATE)
     rows = page.evaluate("""() => [...document.querySelectorAll('#book .page.sec-briefs article.item')]
         .map(a => [a.dataset.topic, a.classList.contains('demoted'), +(a.dataset.final2 || a.dataset.final)])""")
+    more = page.evaluate("""() => [...document.querySelectorAll('#book .page.sec-more article.item')]
+        .filter(a => a.dataset.reserve !== '1').map(a => +(a.dataset.final2 || a.dataset.final))""")
     ctx.close()
-    assert st["demoted"] == sum(1 for r in rows if r[1]) > 0
+    assert st["demoted"] == sum(1 for r in rows if r[1])
+    assert st["demoted"] + len(more) > 0
+    assert more == sorted(more, reverse=True)
+    if more and st["demoted"]:
+        assert min(more) >= max(r[2] for r in rows if r[1])
     for t in {r[0] for r in rows}:
         grp = [r for r in rows if r[0] == t]
         flags = [r[1] for r in grp]
@@ -146,13 +153,60 @@ def test_spare_pages_get_more_articles_not_blank(browser, tmp_path, w, h):  # no
       const more = ps.filter(p => p.classList.contains('sec-more'));
       return {end: ps.filter(p => p.classList.contains('endpage')).length, more: more.length,
               briefs: ps.filter(p => p.classList.contains('sec-briefs')).length,
-              full: more.flatMap(p => [...p.querySelectorAll('article.item')]).every(a => !a.classList.contains('brief') && a.dataset.reserve === '1'),
+              full: more.flatMap(p => [...p.querySelectorAll('article.item')]).every(a => !a.classList.contains('brief')),
+              res: more.flatMap(p => [...p.querySelectorAll('article.item')]).map(a => a.dataset.reserve === '1'),
               title: more.length ? more[0].querySelector('.sec-title').textContent : ''}; }""")
     st = page.evaluate(STATE)
     ctx.close()
     assert not errors and st["overflow"] == []
     assert m["end"] == 0 and m["more"] >= 1 and m["full"] and m["title"].startswith("더 읽을 기사"), m
     assert m["briefs"] <= next(s.pages for s in load_config().sections if s.id == "briefs")
+    assert m["res"] == sorted(m["res"]) and any(m["res"]), m["res"]   # 내려온 기사(예비 아님)가 예비 기사보다 앞
+
+
+def _thin_day_crowded_front(out):
+    """얇은 날 + 1면이 넘치는 날: 관심면을 비워 쪽을 남기고, 1면 기사를 늘려 정해진 쪽에 다 못 들어가게."""
+    _thin_day(out)
+    out["sections"]["front"] = out["sections"]["front"] + out["sections"]["politics"][:6]
+    out["sections"]["politics"] = out["sections"]["politics"][6:]
+
+
+def test_demoted_front_items_go_to_more_before_reserves(browser, tmp_path):  # noqa: F811
+    """S18: 1면에서 넘친 기사는 쪽이 남으면 단신이 아니라 '더 읽을 기사'에 일반 기사 꼴로, 예비 기사보다 앞에.
+    (10/18호: 1면 다섯째 기사가 23쪽 단신에, 점수 낮은 예비 기사는 18~20쪽에 일반 기사 꼴로 실렸다)"""
+    index = make_site(tmp_path, mutate=_thin_day_crowded_front, n_issues=200)
+    ctx, page, errors = open_page(browser, index, 1180, 820)
+    m = page.evaluate("""() => { const ps = [...document.querySelectorAll('#book .page')];
+      const more = ps.filter(p => p.classList.contains('sec-more')).flatMap(p => [...p.querySelectorAll('article.item')]);
+      const briefs = ps.filter(p => p.classList.contains('sec-briefs')).flatMap(p => [...p.querySelectorAll('article.item')]);
+      return {more: more.map(a => a.dataset.section), briefsFront: briefs.filter(a => a.dataset.section === 'front').length}; }""")
+    ctx.close()
+    assert not errors
+    k = m["more"].count("front")
+    assert k >= 1 and m["more"][:k] == ["front"] * k, m      # 1면에서 넘친 기사가 더 읽을 기사 맨 앞
+    assert m["briefsFront"] == 0, m
+
+
+def _many_columns(out):
+    col = {"issue_id": "", "url": "https://www.donga.com/news/Opinion/article/all/20261017/1", "kind": "column",
+           "lean": "보수", "source": "동아일보", "title": "칼럼 제목이 꽤 긴 편입니다 [필자의 연재 이름]", "lang": "ko"}
+    out["opinion"] = {"compare": [], "editorials": [], "columns": [dict(col, url=col["url"] + str(i)) for i in range(10)]}
+    out["picks"] = [{"source": "조선비즈", "url": "https://biz.chosun.com/x", "title": "[김지수의 인터스텔라] 지정 칼럼",
+                     "lang": "ko", "published": "2026-10-17T00:00:00+00:00"}]
+
+
+def test_column_list_splits_across_pages(browser, tmp_path):  # noqa: F811
+    """S18: 칼럼 목록은 5편씩 끊는다 — 10편이 한 덩어리라 통째로 다음 쪽으로 넘어가 논평면 첫 쪽이 비던 것 (10/18호 24쪽)."""
+    index = make_site(tmp_path, mutate=_many_columns)
+    ctx, page, errors = open_page(browser, index, 1180, 820)
+    m = page.evaluate("""() => { const ps = [...document.querySelectorAll('#book .page.sec-opinion')];
+      return {chunks: document.querySelectorAll('#flow [data-issue^="op-col"]').length,
+              first: ps.length ? ps[0].querySelectorAll('.oplist li').length : -1,
+              total: ps.reduce((n, p) => n + p.querySelectorAll('.oplist li').length, 0)}; }""")
+    st = page.evaluate(STATE)
+    ctx.close()
+    assert not errors and st["overflow"] == []
+    assert m["chunks"] == 2 and m["total"] == 10 and m["first"] >= 5, m
 
 
 def test_brief_click_shows_summary_not_just_title(browser, tmp_path):  # noqa: F811

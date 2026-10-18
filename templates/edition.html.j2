@@ -202,18 +202,18 @@
       </ul>
     </article>
   {% endfor %}
-  {% if opinion.columns %}
-    <article class="item oplist" data-issue="op-col">
-      <h3 class="hl">주요 칼럼·논평</h3>
+  {% for chunk in opinion.column_chunks %}
+    <article class="item oplist" data-issue="op-col{{ '' if loop.first else '-' ~ loop.index }}">
+      {% if loop.first %}<h3 class="hl">주요 칼럼·논평</h3>{% endif %}
       <ul>
-      {% for c in opinion.columns %}
+      {% for c in chunk %}
         <li><span class="badge lean-{{ c.cls }}">{{ c.lean }}</span> <span class="src">{{ c.source }}</span>
             <a href="{{ real_url(c.url) }}" target="_blank" rel="noopener noreferrer" lang="{{ c.lang }}"{{ art(c.url, c.source, c.lang) }}>{{ c.ko_title or c.title }}</a>{% if c.ko_title %} <small class="orig" lang="{{ c.lang }}">{{ c.title }}</small>{% endif %}{% if c.paywall %} <small>(유료)</small>{% endif %}
             {% if c.issue_title %}<span class="rel">관련: {{ c.issue_title }}</span>{% endif %}</li>
       {% endfor %}
       </ul>
     </article>
-  {% endif %}
+  {% endfor %}
   {% endif %}{# opinion #}
   </section>
 {% endif %}

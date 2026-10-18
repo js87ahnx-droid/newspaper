@@ -88,3 +88,24 @@ test("HTML 문자: 신화통신 문단 앞 &emsp; 는 공백으로 (S20d)", asyn
   const { decodeEntities } = await import("../src/extract.js");
   assert.equal(decodeEntities("&emsp;&emsp;风劲帆满&ensp;海天阔&thinsp;&amp;"), "  风劲帆满 海天阔 &");
 });
+
+test("번역 묶음: 중국어·일본어는 250자씩, 긴 기사도 호출 상한의 절반 안 (S18)", async () => {
+  const { translate } = await import("../src/translate.js");
+  const sizes = [];
+  const env = { AI: { run: async (_m, { messages }) => {
+    const lines = messages[1].content.split("\n");
+    sizes.push(lines.reduce((n, l) => n + l.replace(/^\d+: /, "").length, 0));
+    return { response: lines.map((l) => l.replace(/^(\d+): .*/, "$1: 번역")).join("\n") };
+  } } };
+  const para = "觉悟看似无形，关键时就会显现出强大力量。".repeat(4);   // 80자
+  let out = await translate(env, "zh", Array(20).fill(para), null);
+  assert.equal(out.length, 20);
+  assert.ok(out.every((t) => t === "번역"));
+  assert.ok(sizes.length >= 6 && Math.max(...sizes) <= 250, JSON.stringify(sizes));
+  sizes.length = 0;
+  await translate(env, "en", Array(20).fill("x".repeat(80)), null);
+  assert.equal(sizes.length, 2);   // 영어는 1500자씩
+  sizes.length = 0;
+  await translate(env, "zh", Array(80).fill("字".repeat(300)), null);   // 24000자
+  assert.ok(sizes.length <= 20, String(sizes.length));
+});

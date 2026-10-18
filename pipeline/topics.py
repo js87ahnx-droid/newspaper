@@ -159,7 +159,8 @@ AI_TOPIC_RULES = """분야:
 - entertainment_sports: 연예·스포츠
 - lifestyle_culture: 생활·문화·여행·음식·날씨·책·전시
 외국에서 일어난 사건·사고·재난(태풍·산불·지진)·사회 문제는 international, 단 그 나라 경제·기업·반도체·과학 연구·스포츠·연예는 해당 분야
-- science 는 연구·발견·우주 탐사만 — 재난 소식 자체는 science 가 아니다"""
+- science 는 연구·발견·우주 탐사만 — 재난 소식 자체는 science 가 아니다
+- 운세·띠별 운세는 lifestyle_culture, 전국체전 등 국내 체육 대회·아이돌·가수 소식은 entertainment_sports (society 아님)"""
 
 AI_TOPIC_PROMPT = """아래는 오늘 뉴스 이슈 목록이다(번호 id, 기사 제목들 — 여러 언어). 각 이슈를 분야 하나로 분류하라.
 {rules}

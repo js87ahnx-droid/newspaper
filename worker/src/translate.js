@@ -21,11 +21,15 @@ export function validate(body) {
 // Llama 3.3 70B 는 한자·일본어가 섞이고, m2m100 은 직역·오역("Crown Court"→"왕관 법원")이 많아 대신할 때만 쓴다
 const LLM = "@cf/meta/llama-4-scout-17b-16e-instruct";
 const GROUP_CHARS = 1500;   // 한 번에 맡기는 글자 수 — 나눠서 동시에 부른다 (7문단 한 번에 12초 → 나누면 빨라짐)
+// 중국어·일본어는 한 글자가 한국어 여러 글자라 같은 글자 수에 출력이 훨씬 길다 — 작게 (S18 실측, 신화 26문단 1617자:
+// 한 번에 88초, 500자씩 42초, 250자씩 14초)
+const GROUP_CHARS_BY_LANG = { zh: 250, ja: 250 };
 const SYSTEM = "You are a professional news translator. Translate each numbered paragraph into natural Korean newspaper style (해라체, 예: '~했다'). " +
   "Keep names, numbers, dates and quotes accurate. Translate weekday names as weekdays (Thursday → 목요일) and never turn them into calendar dates. " +
   "Convert large numbers carefully: 1 million = 100만, 800 million = 8억, 1 billion = 10억, 2.5 billion = 25억, 1 trillion = 1조; " +
   "if unsure, keep the digits with the English unit (e.g. 800 million → 8억). " +
-  "Do not add, omit, merge or summarize. Never output Chinese characters or Japanese. " +
+  "Do not add, omit, merge or summarize. Never output Chinese characters or Japanese: write every Chinese or Japanese name and term in Hangul " +
+  "(习近平 → 시진핑, 谋划 → 계획, 高市早苗 → 다카이치 사나에). " +
   "Output exactly one line per input paragraph, in the same order, each line starting with its number and a colon, like:\n1: 번역\n2: 번역";
 const MAX_CALLS = 40;       // 요청 하나의 AI 호출 상한 (Workers 무료 하위 호출 한도 50 — Fox 54문단에서 넘침)
 
@@ -79,10 +83,13 @@ async function group(env, lang, texts, why, budget, depth) {
 }
 
 export async function translate(env, lang, texts, why) {
+  // 긴 기사는 묶음이 호출 상한의 절반을 넘지 않게 키운다 (실패하면 반으로 나눠 한 번 더 부르므로)
+  const total = texts.reduce((n, t) => n + t.length, 0);
+  const GROUP = Math.max(GROUP_CHARS_BY_LANG[lang] || GROUP_CHARS, Math.ceil(total / (MAX_CALLS / 2)));
   const groups = [];
   let cur = [], n = 0;
   texts.forEach((t, i) => {
-    if (cur.length && n + t.length > GROUP_CHARS) { groups.push(cur); cur = []; n = 0; }
+    if (cur.length && n + t.length > GROUP) { groups.push(cur); cur = []; n = 0; }
     cur.push(i); n += t.length;
   });
   if (cur.length) groups.push(cur);
