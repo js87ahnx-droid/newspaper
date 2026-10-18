@@ -294,3 +294,5 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .oppick .pick p { margin: 0; }
 .oppick .pick-t { font-weight: 700; font-size: 1.02em; line-height: 1.4; margin: 1px 0 2px !important; }
 .oppick .pick-t a { color: var(--ink); }
+.oppick .series { font-weight: 700; color: var(--accent); font-size: 0.9em; }
+.oppick .oplead { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

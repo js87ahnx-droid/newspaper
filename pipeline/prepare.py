@@ -129,9 +129,18 @@ def _is_opinion(a: Article) -> bool:
     return _side_kind(a) is None and _opinion_kind(a) is not None
 
 
+PICK = "column_pick"   # 지정 칼럼 피드의 section. "column_pick:<연재명>" 이면 연재 이름 (S23b)
+
+
+def pick_series(sections: list[str]) -> list[str]:
+    """지정 칼럼 피드 section 들에서 연재 이름 (S23b). 이름 없는 "column_pick" 은 빈 이름."""
+    return sorted({s[len(PICK) + 1:] if s.startswith(PICK + ":") else "" for s in sections
+                   if s == PICK or s.startswith(PICK + ":")})
+
+
 def _side_kind(a: Article) -> str | None:
     """뉴스·논평 말고 따로 싣는 것: 'pick'(지정 칼럼, S22d) / 'analysis'(분석·해설, S22c) / None."""
-    if "column_pick" in a.sections:
+    if pick_series(a.sections):
         return "pick"
     if _opinion_kind(a) is None and detect_analysis(a.title, a.url, "analysis" if "analysis" in a.sections else ""):
         return "analysis"
@@ -164,6 +173,8 @@ def prepare_side(store: dict[str, Article], edition: date, cfg: Config, sources:
             continue
         if _side_kind(a) != kind:
             continue
+        if kind == "pick" and len(pick_series(a.sections)) > 1:
+            continue   # 같은 매체의 두 연재 검색에 걸린 글 — 어느 연재인지 모른다 (S23b: Economist 칼럼은 Google 뉴스 검색)
         t = datetime.fromisoformat(a.published)
         if t >= end or (kind == "analysis" and t < start):
             continue

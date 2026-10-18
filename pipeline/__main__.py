@@ -97,8 +97,15 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     for a in to_jsonable(prepare_side(store, edition, cfg, sources, "pick", hist)):
         picks[a["url"]] = a
     edition_end = edition_window(edition, cfg, hist)[1].isoformat()
-    kept = sorted((p for p in picks.values() if (p.get("published") or "") < edition_end),
-                  key=lambda p: p.get("published") or "", reverse=True)[:10]
+    from .prepare import pick_series
+
+    kept, per = [], {}
+    for p in sorted((p for p in picks.values() if (p.get("published") or "") < edition_end),
+                    key=lambda p: p.get("published") or "", reverse=True):
+        k = (p.get("source"), tuple(pick_series(p.get("sections") or [])))   # 연재마다 3편 (S23b — 전에는 전체 10편)
+        if per.get(k, 0) < 3:
+            per[k] = per.get(k, 0) + 1
+            kept.append(p)
     picks_path.write_text(json.dumps(kept, ensure_ascii=False, indent=1), encoding="utf-8")
     report["analysis"], report["picks"] = len(analysis), len(kept)
     Path(args.data, "run-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -370,7 +377,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         edition["analysis"] = organize_analysis([Article.from_dict(d) for d in json.loads(an_path.read_text(encoding="utf-8"))])
     picks_path = raw / "picks.json"
     if picks_path.exists():
-        edition["picks"] = recent_picks(json.loads(picks_path.read_text(encoding="utf-8")))
+        edition["picks"] = recent_picks(json.loads(picks_path.read_text(encoding="utf-8")), date.fromisoformat(args.date))
     llm_note = "꺼짐"
     if cfg.llm.enabled and not args.no_llm:
         from datetime import date as _date

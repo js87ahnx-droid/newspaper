@@ -405,8 +405,9 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설 — 영어는 지금처럼 원문)
     op = edition.get("opinion") or {}
     op_all = [o for o in op.get("editorials", []) + op.get("columns", []) + [e for c in op.get("compare", []) for g in c["groups"] for e in g["editorials"]]
-              + edition.get("analysis", []) + edition.get("picks", [])   # 분석·해설(S22c)·지정 칼럼(S22d) 제목도
+              + edition.get("analysis", [])   # 분석·해설(S22c) 제목도
               if o.get("lang") not in ("ko", "en", None)]
+    op_all += [o for o in edition.get("picks", []) if o.get("lang") not in ("ko", None)]   # 지정 칼럼은 영어도 (S23b — 칼럼 칸 맨 앞)
     want_ids = sorted({o["id"] for o in op_all})
     if want_ids and not set(want_ids) <= set(cache.get("op_title", {})):
         rows = [{"id": i, "제목": next(o["title"] for o in op_all if o["id"] == i)} for i in want_ids]

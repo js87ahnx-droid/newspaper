@@ -163,15 +163,17 @@
 
 {% if opinion or picks %}
   <section class="sec sec-opinion" data-section="opinion" data-title="{{ opinion_title }}">
-  {% if picks %}{# 지정 칼럼 (S22d): 사용자가 고른 연재 — 날짜와 상관없이 최근 것 #}
-    <article class="item oppick" data-issue="op-pick">
-      <h3 class="hl">지정 칼럼</h3>
-      {% for p in picks %}
-      <div class="pick"><p><span class="src">{{ p.source }}</span> {% if p.time %}<time class="tm">{{ p.time }}</time>{% endif %}</p>
-        <p class="pick-t"><a href="{{ real_url(p.url) }}" target="_blank" rel="noopener noreferrer"{{ art(p.url, p.source, p.lang) }}>{{ p.ko_title or p.title }}</a></p>
+  {% if picks %}{# 지정 칼럼 (S22d·S23b): 사용자가 고른 연재마다 최근 1편 — 4편씩 끊어 쪽 나누기가 되게 #}
+  {% for chunk in picks|batch(4) %}
+    <article class="item oppick" data-issue="op-pick{{ '' if loop.first else '-' ~ loop.index }}">
+      {% if loop.first %}<h3 class="hl">지정 칼럼</h3>{% endif %}
+      {% for p in chunk %}
+      <div class="pick"><p>{% if p.series and p.series not in p.title %}<span class="series">{{ p.series }}</span> {% endif %}<span class="src">{{ p.source }}</span> {% if p.time %}<time class="tm">{{ p.time }}</time>{% endif %}{% if p.paywall %} <small>(유료)</small>{% endif %}</p>
+        <p class="pick-t"><a href="{{ real_url(p.url) }}" target="_blank" rel="noopener noreferrer"{{ art(p.url, p.source, p.lang) }}>{{ p.ko_title or p.title }}</a>{% if p.ko_title %} <small class="orig" lang="{{ p.lang }}">{{ p.title }}</small>{% endif %}</p>
         {% if p.lead %}<p class="oplead">{{ p.lead }}</p>{% endif %}</div>
       {% endfor %}
     </article>
+  {% endfor %}
   {% endif %}
   {% if opinion %}
     <p class="disclaimer">사설은 그 매체의 공식 입장, 칼럼은 필자 개인의 의견입니다. 성향 라벨은 일반적인 평가일 뿐 글마다 다를 수 있습니다. 제목과 요약만 싣고 본문은 원문 링크로 봅니다.</p>

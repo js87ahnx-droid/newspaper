@@ -59,7 +59,41 @@ def test_organize_analysis_mixes_sources():
     out = organize_analysis(arts)
     from collections import Counter
     assert max(Counter(a["source"] for a in out).values()) <= ANALYSIS_PER_SOURCE and len({a["source"] for a in out}) == 2
-    assert recent_picks([{"u": 1}, {"u": 2}, {"u": 3}]) == [{"u": 1}, {"u": 2}]
+
+
+
+def test_pick_series_and_recent_per_series():
+    """S23b: 연재 이름은 피드 section "column_pick:<연재>", 연재마다 최근 1편, 15일 지난 것은 뺀다 (최신순 유지)."""
+    from pipeline.prepare import pick_series
+    assert pick_series(["opinion", "column_pick:만물상"]) == ["만물상"] and pick_series(["column_pick"]) == [""]
+    assert pick_series(["top"]) == []
+    rows = [{"source": "조선일보", "sections": ["column_pick:만물상"], "published": "2026-10-17T10:00:00+00:00", "title": "a"},
+            {"source": "Financial Times", "sections": ["column_pick:Martin Wolf"], "published": "2026-10-16T04:00:00+00:00", "title": "b"},
+            {"source": "조선일보", "sections": ["column_pick:만물상"], "published": "2026-10-16T10:00:00+00:00", "title": "c"},
+            {"source": "The Economist", "sections": ["column_pick:Banyan (아시아)"], "published": "2026-09-20T10:00:00+00:00", "title": "d"}]
+    out = recent_picks(rows, date(2026, 10, 18))
+    assert [r["title"] for r in out] == ["a", "b"] and [r["series"] for r in out] == ["만물상", "Martin Wolf"]
+
+
+def test_pick_claimed_by_two_series_is_dropped_and_not_in_opinions():
+    """S23b: 같은 매체의 두 연재 검색에 걸린 글은 빼고, 지정 칼럼으로 받은 글은 논평 칼럼 목록에 안 나온다."""
+    store = {a.id: a for a in [
+        _art(1, "The Economist", "Will bonds blow up?", "https://www.economist.com/x1", ["column_pick:Chaguan (중국)", "column_pick:Free exchange (경제)"]),
+        _art(2, "The Economist", "China's hidden levies", "https://www.economist.com/x2", ["column_pick:Chaguan (중국)"]),
+        _art(3, "조선일보", "[만물상] 하늘을 나는 자동차", "https://www.chosun.com/opinion/x3", ["opinion", "column_pick:만물상"], lang="ko"),
+    ]}
+    picks = prepare_side(store, date(2026, 10, 18), CFG, SRC, "pick")
+    ops = prepare_opinions(store, date(2026, 10, 18), CFG, SRC)
+    assert sorted(a.id for a in picks) == ["a2", "a3"] and not ops
+
+
+def test_pick_feeds_configured():
+    """S23b: 고른 연재가 설정에 있다 (분수대는 피드를 못 찾아 보류)."""
+    from pipeline.prepare import pick_series
+    names = {n for s in SRC.sources for f in s.feeds for n in pick_series([f.section])}
+    want = {"만물상", "천자칼럼", "天声人語", "Martin Wolf", "Gideon Rachman", "Money Stuff (Matt Levine)", "김지수의 인터스텔라",
+            "Lexington (미국)", "Bagehot (영국)", "Charlemagne (유럽)", "Chaguan (중국)", "Banyan (아시아)", "Free exchange (경제)"}
+    assert want <= names
 
 
 def test_analysis_page_and_pick_box_render(browser, tmp_path):  # noqa: F811
@@ -100,3 +134,34 @@ def test_detect_analysis_skips_breaking_roundups_and_sports():
     assert not detect_analysis("What to know: NCAA's 5-in-5 eligibility rule", "https://apnews.com/x")
     assert detect_analysis("What to Know About the Violent Protests in Albania", "https://www.nytimes.com/x")
     assert not detect_analysis("Analysis | A unified front won't save Commanders", "https://www.washingtonpost.com/sports/2026/10/17/x/")
+
+
+def test_many_pick_series_split_and_labelled(browser, tmp_path):  # noqa: F811
+    """S23b: 연재 13개가 4편씩 끊겨 논평면에 넘침 없이, 연재명(제목에 없을 때)·한국어 제목(원 제목 작게)."""
+    names = ["Lexington (미국)", "Bagehot (영국)", "Charlemagne (유럽)", "Chaguan (중국)", "Banyan (아시아)", "Free exchange (경제)",
+             "Martin Wolf", "Gideon Rachman", "Money Stuff (Matt Levine)", "만물상", "천자칼럼", "天声人語", "김지수의 인터스텔라"]
+
+    def mut(out):
+        out["picks"] = [{"id": f"p{i}", "source": "The Economist", "lean": "경제지", "country": "UK", "lang": "en", "series": n,
+                         "title": f"A fairly long column headline about the world economy number {i}", "ko_title": f"세계 경제 칼럼 {i}",
+                         "lead": "The lead of the column runs on for a while to see that it is clamped to two lines. " * 3,
+                         "paywall": True, "url": f"https://www.economist.com/x/{i}", "published": "2026-10-16T10:00:00+00:00"}
+                        for i, n in enumerate(names)]
+    index = make_site(tmp_path, mutate=mut)
+    ctx = browser.new_context(viewport={"width": 1180, "height": 820}, reduced_motion="reduce")
+    ctx.add_init_script("try{localStorage.setItem('news.survey', '2099-W01');}catch(e){}")
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(index.as_uri())
+    page.wait_for_function("window.NEWS && window.NEWS.state().pages > 0")
+    m = page.evaluate("""() => { const ps = [...document.querySelectorAll('#book .page.sec-opinion')];
+      const picks = ps.flatMap(p => [...p.querySelectorAll('.oppick .pick')]);
+      return {blocks: document.querySelectorAll('#flow .oppick').length, n: picks.length,
+              series: picks.map(p => (p.querySelector('.series') || {}).textContent || ''),
+              ko: picks.every(p => p.querySelector('.pick-t a').textContent.startsWith('세계 경제') && p.querySelector('.orig')),
+              state: NEWS.state()}; }""")
+    ctx.close()
+    assert not errors and m["state"]["overflow"] == []
+    # 순서는 쪽 나누기가 빈자리를 뒤 묶음으로 채우며 바뀔 수 있다 (기존 동작)
+    assert m["blocks"] == 4 and m["n"] == len(names) and sorted(m["series"]) == sorted(names) and m["ko"], m

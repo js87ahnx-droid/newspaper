@@ -25,6 +25,8 @@ sources:
       - {section: economy, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/economy/?outputType=xml"}
       - {section: international, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/international/?outputType=xml"}
       - {section: opinion, url: "https://www.chosun.com/arc/outboundfeeds/rss/category/opinion/?outputType=xml"}
+      # 지정 칼럼 (S23b): 만물상 — 의견 피드에서 머리말로 (같은 글은 지정 칼럼 칸에만 나온다)
+      - {section: "column_pick:만물상", url: "https://www.chosun.com/arc/outboundfeeds/rss/category/opinion/?outputType=xml", title_must: "[만물상]"}
 
   - name: 중앙일보
     country: KR
@@ -106,6 +108,7 @@ sources:
       - {section: markets, url: "https://www.hankyung.com/feed/finance"}
       - {section: tech, url: "https://www.hankyung.com/feed/it"}
       - {section: opinion, url: "https://www.hankyung.com/feed/opinion"}
+      - {section: "column_pick:천자칼럼", url: "https://www.hankyung.com/feed/opinion", title_must: "[천자칼럼]"}   # 지정 칼럼 (S23b)
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://news.google.com/rss/search?q=site:hankyung.com+%22%EB%B6%84%EC%84%9D%2B%22+when:2d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[분석+]"}
 
@@ -122,7 +125,7 @@ sources:
     feeds:
       - {section: analysis, url: "https://news.google.com/rss/search?q=site:chosun.com+%22%5BWhy%5D%22+when:3d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[Why]"}
       # 지정 칼럼: 김지수의 인터스텔라 (격주 토요일 인터뷰). site: 를 빼면 네이트·브런치 사본도 걸림
-      - {section: column_pick, url: "https://news.google.com/rss/search?q=site:biz.chosun.com+%22%EA%B9%80%EC%A7%80%EC%88%98%EC%9D%98+%EC%9D%B8%ED%84%B0%EC%8A%A4%ED%85%94%EB%9D%BC%22+when:7d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[김지수의 인터스텔라]"}
+      - {section: "column_pick:김지수의 인터스텔라", url: "https://news.google.com/rss/search?q=site:biz.chosun.com+%22%EA%B9%80%EC%A7%80%EC%88%98%EC%9D%98+%EC%9D%B8%ED%84%B0%EC%8A%A4%ED%85%94%EB%9D%BC%22+when:7d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[김지수의 인터스텔라]"}
 
   - name: 매일경제
     country: KR
@@ -276,6 +279,8 @@ sources:
       - {section: politics, url: "https://feeds.bloomberg.com/politics/news.rss", url_must: "/(news|opinion)/articles/"}
       - {section: tech, url: "https://feeds.bloomberg.com/technology/news.rss", url_must: "/(news|opinion)/articles/"}
       - {section: opinion, url: "https://feeds.bloomberg.com/bview/news.rss", url_must: "/(news|opinion)/articles/"}
+      # 지정 칼럼 (S23b): Matt Levine "Money Stuff" — 필자 피드가 없어 Google 뉴스. 뉴스레터 목록 쪽 제목은 거름
+      - {section: "column_pick:Money Stuff (Matt Levine)", url: "https://news.google.com/rss/search?q=site%3Abloomberg.com%20%22Matt%20Levine%22%20when%3A7d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^Money Stuff"}
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://news.google.com/rss/search?q=site:bloomberg.com+intitle:%22big+take%22+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_must: "Big Take", title_not: "^Watch"}
 
@@ -384,6 +389,9 @@ sources:
       - {section: economy, url: "https://www.ft.com/companies?format=rss"}
       - {section: opinion, url: "https://www.ft.com/opinion?format=rss"}
       - {section: opinion, url: "https://www.ft.com/ft-view?format=rss"}   # FT 사설(The FT View)
+      # 지정 칼럼 (S23b): 필자 피드 (2026-10-18 실측 — 오늘자까지)
+      - {section: "column_pick:Martin Wolf", url: "https://www.ft.com/martin-wolf?format=rss", title_not: "Martin Wolf on "}   # 같은 글의 영상판 제목은 거름
+      - {section: "column_pick:Gideon Rachman", url: "https://www.ft.com/gideon-rachman?format=rss"}
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://www.ft.com/analysis?format=rss"}
       - {section: analysis, url: "https://www.ft.com/the-big-read?format=rss"}
@@ -404,6 +412,14 @@ sources:
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://www.economist.com/briefing/rss.xml"}
       - {section: analysis, url: "https://www.economist.com/graphic-detail/rss.xml"}
+      # 지정 칼럼 (S23b): 칼럼 피드는 403·2009년 것뿐, 섹션 피드엔 칼럼 표시가 없어 Google 뉴스 검색. 칼럼 목록 쪽 제목은 거르고,
+      # 두 칼럼 검색에 같은 글이 걸리면(어느 칼럼인지 모름) 지정 칼럼 칸에서 뺀다
+      - {section: "column_pick:Lexington (미국)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Lexington%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      - {section: "column_pick:Bagehot (영국)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Bagehot%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      - {section: "column_pick:Charlemagne (유럽)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Charlemagne%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      - {section: "column_pick:Chaguan (중국)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Chaguan%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      - {section: "column_pick:Banyan (아시아)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Banyan%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      - {section: "column_pick:Free exchange (경제)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Free%20exchange%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
 
   # ---------------- 유럽 ----------------
   - name: Politico Europe
@@ -498,6 +514,8 @@ sources:
       - {section: international, url: "https://www.asahi.com/rss/asahi/international.rdf"}
       - {section: tech, url: "https://www.asahi.com/rss/asahi/science.rdf"}
       - {section: opinion, url: "https://news.google.com/rss/search?q=site:asahi.com+%EF%BC%88%E7%A4%BE%E8%AA%AC%EF%BC%89+when:1d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "（社説）"}
+      # 지정 칼럼 (S23b): 天声人語 (1면 단평, 매일). 같은 글이 닛칸스포츠에도 실려 site: 로 한정. 학습지 쪽은 거름
+      - {section: "column_pick:天声人語", url: "https://news.google.com/rss/search?q=site%3Aasahi.com%20%E5%A4%A9%E5%A3%B0%E4%BA%BA%E8%AA%9E%20when%3A7d&hl=ja&gl=JP&ceid=JP%3Aja", kind: google_news, title_must: "天声人語）", title_not: "まなび場|漢字ドリル|VOX POPULI"}
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://news.google.com/rss/search?q=site:asahi.com+%E6%99%82%E6%99%82%E5%88%BB%E5%88%BB+when:2d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "（時時刻刻）"}
 

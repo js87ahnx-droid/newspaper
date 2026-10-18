@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import re
+from datetime import date, datetime
 
 from .collect import Article
 from .lexical import drop_source_templates, tfidf_similarity, tokens
@@ -201,6 +202,22 @@ def organize_analysis(arts: list[Article]) -> list[dict]:
     return [_side_row(a) for a in out[:ANALYSIS_MAX]]
 
 
-def recent_picks(picks: list[dict], n: int = 2) -> list[dict]:
-    """지정 칼럼 최근 n 편 (S22d). picks.json 은 이미 최신순."""
-    return picks[:n]
+PICK_MAX_DAYS = 15   # 지정 칼럼은 연재마다 이 날수 안의 최근 1편 (격주 연재 김지수의 인터스텔라도 들어가게)
+
+
+def recent_picks(picks: list[dict], edition: date | None = None, per_series: int = 1) -> list[dict]:
+    """지정 칼럼: 연재마다 최근 per_series 편, 호 날짜에서 PICK_MAX_DAYS 안, 최신순 (S22d·S23b). picks.json 은 최신순."""
+    from .prepare import pick_series
+
+    out, seen = [], {}
+    for p in picks:
+        series = (pick_series(p.get("sections") or []) or [""])[0]
+        key = (p.get("source"), series)
+        if seen.get(key, 0) >= per_series:
+            continue
+        if edition and p.get("published"):
+            if (edition - datetime.fromisoformat(p["published"]).date()).days > PICK_MAX_DAYS:
+                continue
+        seen[key] = seen.get(key, 0) + 1
+        out.append({**p, "series": series})
+    return out
