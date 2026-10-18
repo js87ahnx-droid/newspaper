@@ -28,6 +28,18 @@ TOPIC_SECTION = {
     "society": "society",   # 사회·과학 면 (S21c — 전에는 자기 면이 없어 단신으로)
     "science": "society",
 }
+# 면별 최소 기사 수(S23a)를 지키는 뉴스 면
+MIN_SECTIONS = ("politics", "economy", "international", "society", "interest")
+
+
+def fits_section(s: ScoredIssue, sec: str, interest_topics: set[str]) -> bool:
+    """이 기사가 그 뉴스 면에 갈 수 있나 (arrange 의 배정 규칙과 같게 — 반도체·AI 가 관심 분야면 관심면)."""
+    semis_interest = s.topic == "semis_ai" and "semis_ai" in interest_topics
+    if sec == "interest":
+        return s.interest_hit or semis_interest
+    return not semis_interest and TOPIC_SECTION.get(s.topic) == sec
+
+
 # 입장 비교 유형 → 분야
 COMPARE_TOPIC_MAP = {
     "diplomacy_security": {"politics", "international"},
@@ -47,6 +59,7 @@ class Placed:
     guaranteed: bool = False  # 다양성·연속성으로 들어온 기사 — 넘침 정리 때 빼지 않는다
     merged: list[ScoredIssue] = field(default_factory=list)  # 같은 사건 이웃 이슈 (따로 싣지 않고 이 기사에 합침)
     reserve: bool = False     # 예비 기사 — 쪽이 남을 때만 단신으로 실린다 (S15)
+    filler: bool = False      # 면 최소 후보 (S23a) — 모자란 면을 채울 때만 쓰고, 안 쓰면 지면에 안 나간다
     related: list["Placed"] = field(default_factory=list)  # 관련 기사 (S22b) — 단신에서 옮겨 와 이 기사 아래에
 
 
@@ -139,6 +152,21 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
             continue
         reserves.append(Placed(s, ["예비: 쪽이 남으면 단신"], reserve=True))
         taken.add(s.issue.id)
+    # 면 최소 후보 (S23a): 면마다 그 면에 갈 다음 순위 기사를 몇 건씩 (예비에 없을 때 arrange 가 쓴다)
+    fillers: list[Placed] = []
+    if ed.section_min:
+        interest_topics = {t for t, w in interests.topics.items() if w >= 1}
+        rest = [s for s in sorted(scored, key=lambda s: (-s.final, s.issue.id)) if s.issue.id not in taken]
+        for sec in MIN_SECTIONS:
+            got = 0
+            for s in rest:
+                if got >= ed.section_min * 3:   # 같은 사건 이웃으로 몇 건 빠져도 되게 여유
+                    break
+                if s.issue.id in taken or not fits_section(s, sec, interest_topics):
+                    continue
+                fillers.append(Placed(s, [f"면 최소 후보: {sec}"], reserve=True, filler=True))
+                taken.add(s.issue.id)
+                got += 1
     stats = {
         "target": n,
         "reserve": len(reserves),
@@ -149,7 +177,8 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
         "continuity_guaranteed": sum(1 for p in placed.values() if any(r.startswith("연속") for r in p.reasons)),
         "merged_duplicates": len(merged_into),
     }
-    return list(placed.values()) + reserves, stats
+    stats["section_fillers"] = len(fillers)
+    return list(placed.values()) + reserves + fillers, stats
 
 
 def pick_photo(p: Placed, articles: dict[str, Article]) -> None:
@@ -166,7 +195,8 @@ def pick_photo(p: Placed, articles: dict[str, Article]) -> None:
 
 
 def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: dict[str, Article]) -> Edition:
-    reserves = sorted((p for p in placed if p.reserve), key=lambda p: (-p.scored.final, p.scored.issue.id))
+    reserves = sorted((p for p in placed if p.reserve and not p.filler), key=lambda p: (-p.scored.final, p.scored.issue.id))
+    fillers = sorted((p for p in placed if p.filler), key=lambda p: (-p.scored.final, p.scored.issue.id))
     placed = [p for p in placed if not p.reserve]
     caps = {s.id: s.max_articles for s in cfg.sections}
     sections: dict[str, list[Placed]] = {s.id: [] for s in cfg.sections}
@@ -201,6 +231,31 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
         else:
             p.section = "briefs"
         sections[p.section].append(p)
+
+    # 면별 최소 (S23a): 모자란 뉴스 면은 그 면에 갈 기사 중 점수 높은 것으로 — 예비 기사 먼저, 없으면 면 최소 후보.
+    # 1면으로 올라간 기사는 그 면 몫에 안 셈. 같은 사건이 이미 실린 후보는 건너뛴다. 채운 기사는 보장(넘침 정리에서 안 뺌)
+    filled = 0
+    want = cfg.editing.section_min
+    if want:
+        on_page = {q.scored.issue.id for q in placed} | {m.issue.id for q in placed for m in q.merged}
+        for sec in MIN_SECTIONS:
+            if sec not in caps:
+                continue
+            for src in (reserves, fillers):
+                for p in list(src):
+                    if len(sections[sec]) >= min(want, caps[sec]):
+                        break
+                    if not fits_section(p.scored, sec, interest_topics) or set(p.scored.issue.extra.get("near", [])) & on_page:
+                        continue
+                    src.remove(p)
+                    p.reserve = p.filler = False
+                    p.guaranteed = True
+                    p.section = sec
+                    p.reasons.append(f"면 최소 {want}건")
+                    sections[sec].append(p)
+                    placed.append(p)
+                    on_page.add(p.scored.issue.id)
+                    filled += 1
 
     # 단신은 다른 면에서 넘친 기사를 받는 면이다. 전체가 하루 분량(target)을 넘지 않으면 상한을 넘어도 받고,
     # 넘을 때만 보장되지 않은 기사부터 점수 낮은 순으로 뺀다
@@ -251,6 +306,7 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
     moved = attach_related(sections)
     stats = {
         "related_moved": moved,
+        "section_min_filled": filled,
         "dropped_overflow": dropped,
         "photos": sum(1 for ps in sections.values() for p in ps if p.photo),
         "by_section": {**{k: len(v) for k, v in sections.items()}, "compare": len(compare)},

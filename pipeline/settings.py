@@ -83,6 +83,8 @@ class Editing(Strict):
             raise ValueError(f"topic_max_ratio: 알 수 없는 분야 {bad} 또는 0~1 밖의 비율")
         return v
     history_days: int = Field(ge=1, le=60)
+    # 뉴스 면(정치·경제·국제·사회·과학·관심)마다 최소 기사 수 (S23a "면마다 최소 2건") — 모자라면 그 면 분야의 다음 순위 기사로 채운다
+    section_min: int = Field(default=0, ge=0, le=10)
     # driven: 관심도 덕분에 들어온 기사(관심도를 빼고 골랐다면 빠졌을 기사)만 상한에 셈 (2026-10-16 사용자 결정)
     # topic: 관심 분야 기사 전체를 상한에 셈
     interest_cap_mode: Literal["driven", "topic"] = "driven"

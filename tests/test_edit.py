@@ -106,9 +106,11 @@ def test_extreme_interest_keeps_diversity_and_cap(mode):
     _, scored, placed, stats, ed, it = run("extreme", mode=mode)
     n = it.daily_articles
     in_paper = [p for sid, ps in ed.sections.items() for p in ps if not p.reserve]   # 예비 기사는 하루 분량 밖
-    assert len(in_paper) == n
+    filled = [p for p in in_paper if any(r.startswith("면 최소") for r in p.reasons)]   # S23a: 면 최소로 하루 분량 밖에서 채운 것
+    assert len(in_paper) - len(filled) == n and len(filled) == ed.stats["section_min_filled"]
+    in_paper = [p for p in in_paper if p not in filled]
     reserves = [p for ps in ed.sections.values() for p in ps if p.reserve]
-    assert len(reserves) == CFG.editing.reserve and all(p.section == "briefs" for p in reserves)
+    assert CFG.editing.reserve - len(filled) <= len(reserves) <= CFG.editing.reserve and all(p.section == "briefs" for p in reserves)
     assert min(p.scored.final for p in in_paper if not p.guaranteed) >= max(p.scored.final for p in reserves) - 1e-9 or mode == "topic"
     diverse = [p for p in in_paper if any(r.startswith(("다양성", "1면 톱")) for r in p.reasons)]
     assert len(diverse) / n >= CFG.editing.diversity_ratio
@@ -341,6 +343,71 @@ def test_continuity_guarantee_capped_and_skips_less_topics():
     import math
     assert 0 < len(cont) <= math.floor(CFG.editing.continuity_max_ratio * it.daily_articles)
     assert not any(p.scored.topic in it.less for p in cont)
+
+
+# ---------- S23a 면별 최소 ----------
+
+def _weak_society(keep: int | None = None):
+    """사회 기사 점수를 바닥으로 (주말 10/18호처럼 하루 분량·예비에 못 듦). keep 이면 사회 기사를 그 수만 남긴다."""
+    arts, issues = build(260)
+    it = interests_variant("default")
+    scored = score_issues(issues, arts, CFG, build_interest_table(it), [])
+    soc = [s for s in scored if s.topic in ("society", "science")]
+    if keep is not None:
+        drop = {s.issue.id for s in soc[keep:]}
+        scored = [s for s in scored if s.issue.id not in drop]
+        soc = soc[:keep]
+    for k, s in enumerate(soc):
+        s.final = s.final_no_interest = -1.0 - k * 0.01
+        s.attention = s.frontline = -1.0
+        s.interest_hit = False
+        s.days = 1
+    return arts, it, scored
+
+
+def _edit(arts, it, scored, section_min):
+    cfg = CFG.model_copy(deep=True)
+    cfg.editing.section_min = section_min
+    placed, stats = choose(scored, cfg, it)
+    return arrange(placed, cfg, it, arts), stats
+
+
+def test_section_min_fills_short_section_from_candidates():
+    """S23a: 점수가 낮아 비던 사회·과학 면도 2건. 채운 기사는 보장, 예비·단신에 두 번 나오지 않음."""
+    arts, it, scored = _weak_society()
+    ed0, _ = _edit(arts, it, scored, 0)
+    assert len(ed0.sections["society"]) == 0          # 최소가 없으면 빈다 (재현)
+    ed, stats = _edit(arts, it, scored, 2)
+    from pipeline.edit import MIN_SECTIONS
+    for sec in MIN_SECTIONS:
+        assert len(ed.sections[sec]) >= 2, (sec, len(ed.sections[sec]))
+    soc = ed.sections["society"]
+    assert all(p.guaranteed and not p.reserve and "면 최소 2건" in p.reasons for p in soc)
+    assert [p.scored.final for p in soc] == sorted((p.scored.final for p in soc), reverse=True)
+    assert soc[0].scored.final == max(s.final for s in scored if s.topic in ("society", "science"))   # 그 면 최고점부터
+    ids = [p.scored.issue.id for ps in ed.sections.values() for p in ps]
+    assert len(ids) == len(set(ids))
+    assert ed.stats["section_min_filled"] >= 2 and stats["section_fillers"] >= 2
+
+
+@pytest.mark.parametrize("keep,expect", [(1, 1), (0, 0)])
+def test_section_min_with_too_few_candidates(keep, expect):
+    """S23a: 그 분야 후보가 1건뿐이면 1건, 없으면 0건 (오류 없음)."""
+    arts, it, scored = _weak_society(keep)
+    ed, _ = _edit(arts, it, scored, 2)
+    assert len(ed.sections["society"]) == expect
+
+
+def test_section_min_skips_same_event_neighbours():
+    """S23a: 같은 사건이 이미 실린 후보는 채우지 않는다."""
+    arts, it, scored = _weak_society()
+    ed0, _ = _edit(arts, it, scored, 0)
+    host = ed0.sections["politics"][0].scored.issue.id
+    soc = sorted((s for s in scored if s.topic in ("society", "science")), key=lambda s: -s.final)
+    soc[0].issue.extra["near"] = [host]               # 사회 1위 후보는 정치면 기사와 같은 사건
+    ed, _ = _edit(arts, it, scored, 2)
+    got = [p.scored.issue.id for p in ed.sections["society"]]
+    assert soc[0].issue.id not in got and len(got) == 2
 
 
 # ---------- S22b 관련 기사 ----------
