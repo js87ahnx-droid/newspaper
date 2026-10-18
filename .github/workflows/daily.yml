@@ -1,6 +1,7 @@
-# 아침 발행: 06:00 KST 본 실행 + 06:30 KST 예비 실행 (Actions 예약은 늦거나 빠질 수 있어서).
-# 시간창이 06:00 에 닫히므로 그 뒤에 시작해야 오늘 호가 된다 (05:55 에 시작하면 어제 호로 판정).
-# 예비 실행은 이미 발행된 호면 건너뛴다. 지면은 암호화(StaticCrypt)한 뒤에만 커밋한다.
+# 아침 발행: 06:07 KST 본 실행 + 예비 실행 여러 번 (Actions 예약은 늦거나 빠질 수 있어서).
+# 10/19 에는 06:00·06:30 예약이 둘 다 시작조차 안 됐고 수집 예약도 2~3시간 늦었다 — 붐비는 정각·30분을 피하고
+# 오전 내내 예비 실행을 둔다. 시간창이 06:00 에 닫히므로 그 뒤에 시작해야 오늘 호가 된다.
+# 이미 발행된 호면 check 단계에서 바로 끝난다 (몇 초). 지면은 암호화(StaticCrypt)한 뒤에만 커밋한다.
 #
 # 필요한 저장소 Secrets
 #   NEWS_PASSWORD            지면 비밀번호 (필수 — 없으면 발행하지 않음)
@@ -10,8 +11,12 @@ name: daily
 
 on:
   schedule:
-    - cron: "0 21 * * *"    # 06:00 KST
-    - cron: "30 21 * * *"   # 06:30 KST (예비)
+    - cron: "7 21 * * *"    # 06:07 KST
+    - cron: "41 21 * * *"   # 06:41 KST (예비)
+    - cron: "19 22 * * *"   # 07:19 KST (예비)
+    - cron: "53 22 * * *"   # 07:53 KST (예비)
+    - cron: "37 23 * * *"   # 08:37 KST (예비)
+    - cron: "23 1 * * *"    # 10:23 KST (예비)
   workflow_dispatch:
     inputs:
       date:
@@ -30,7 +35,31 @@ permissions:
   contents: write   # 지면(docs/)·연속성 기록(data/history) 커밋
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: docs/archive
+      - id: check
+        env:
+          SKIP_IF_PUBLISHED: ${{ (github.event_name == 'schedule' || !inputs.force) && '1' || '0' }}
+          EDITION_DATE: ${{ inputs.date }}
+        run: |
+          # 가장 최근에 닫힌 시간창(06:00 KST) 의 호 — daily.sh 의 current_edition 과 같은 날짜
+          DATE="${EDITION_DATE:-$(TZ=Asia/Seoul date -d '6 hours ago' +%F)}"
+          if [ "$SKIP_IF_PUBLISHED" = "1" ] && [ -f "docs/archive/$DATE/index.html" ]; then
+            echo "$DATE 호는 이미 발행됨 — 건너뜀"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
   publish:
+    needs: check
+    if: needs.check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
