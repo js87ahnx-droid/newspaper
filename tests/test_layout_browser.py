@@ -130,3 +130,26 @@ def test_briefs_grouped_by_topic(browser, tmp_path, w, h):  # noqa: F811
     fresh = [h for h in m["heads"] if not h.endswith("(이어서)")]
     assert fresh == [m["names"].get(t, "기타") for t in runs]
     assert m["lone"] == 0 and all(m["firsts"])                              # 소제목만 남은 곳 없음, 쪽 첫 단신엔 소제목
+
+
+def _thin_day(out):
+    """얇은 날 흉내: 관심면을 비워 쪽을 남긴다 (그 기사는 지면에서 뺌). """
+    out["sections"]["interest"] = []
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (390, 844)])
+def test_spare_pages_get_more_articles_not_blank(browser, tmp_path, w, h):  # noqa: F811
+    """S21c: 남는 쪽은 예비 기사를 일반 기사 모양으로 '더 읽을 기사' 면에 — 끝 빈 쪽 없음, 단신은 정해진 쪽 안."""
+    index = make_site(tmp_path, mutate=_thin_day, n_issues=200)   # 예비 60건이 다 차도록
+    ctx, page, errors = open_page(browser, index, w, h)
+    m = page.evaluate("""() => { const ps = [...document.querySelectorAll('#book .page')];
+      const more = ps.filter(p => p.classList.contains('sec-more'));
+      return {end: ps.filter(p => p.classList.contains('endpage')).length, more: more.length,
+              briefs: ps.filter(p => p.classList.contains('sec-briefs')).length,
+              full: more.flatMap(p => [...p.querySelectorAll('article.item')]).every(a => !a.classList.contains('brief') && a.dataset.reserve === '1'),
+              title: more.length ? more[0].querySelector('.sec-title').textContent : ''}; }""")
+    st = page.evaluate(STATE)
+    ctx.close()
+    assert not errors and st["overflow"] == []
+    assert m["end"] == 0 and m["more"] >= 1 and m["full"] and m["title"].startswith("더 읽을 기사"), m
+    assert m["briefs"] <= next(s.pages for s in load_config().sections if s.id == "briefs")

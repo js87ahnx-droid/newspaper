@@ -35,7 +35,7 @@ SYSTEM = (
 
 
 class Budget:
-    """하루 호출 수 기록 (data/raw/llm-usage.json)."""
+    """호(edition) 하나의 호출 수 기록 (data/raw/llm-usage.json, 키 = 호 날짜). S21a 전에는 실행한 날(UTC)로 셌다."""
 
     def __init__(self, path: Path, day: date, limit: int):
         self.path, self.day, self.limit = path, day.isoformat(), limit

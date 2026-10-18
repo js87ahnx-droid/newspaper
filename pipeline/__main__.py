@@ -158,6 +158,9 @@ def cmd_cluster(args: argparse.Namespace) -> int:
     return 0
 
 
+AI_TOPIC_CANDIDATES = 200   # AI 분야 분류 후보 (S21b): 점수 상위 — 지면 60 + 예비 60 + 여유. 50건씩 4회
+
+
 def cmd_edit(args: argparse.Namespace) -> int:
     from .cluster import Issue
     from .collect import Article
@@ -175,7 +178,39 @@ def cmd_edit(args: argparse.Namespace) -> int:
     prev_date, previous = load_previous(history_dir, edition)
     hl_path = raw / f"{args.date}.headlines.json"
     headlines = json.loads(hl_path.read_text(encoding="utf-8")) if hl_path.exists() else []
-    scored = score_issues(issues, articles, cfg, build_interest_table(interests), previous, headlines)
+    table = build_interest_table(interests)
+    scored = score_issues(issues, articles, cfg, table, previous, headlines)
+    topic_note = "규칙"
+    if cfg.llm.enabled and not getattr(args, "no_llm", False):
+        # AI 분야 분류 (S21b): 점수 상위 후보만, 제목으로. 실패하면 키워드 규칙 그대로
+        from .llm import Budget, available, call  # 켜져 있을 때만 불러온다
+        from .topics import ai_topics
+
+        if available()[0]:
+            cand = sorted(scored, key=lambda s: -s.final)[:AI_TOPIC_CANDIDATES]
+            rows = []
+            for s in cand:
+                arts = [articles[i] for i in s.issue.article_ids]
+                by_lang = sorted(arts, key=lambda a: (a.lang != "ko", a.lang != "en"))   # 한국어·영어 제목 먼저
+                rows.append({"id": s.issue.id, "titles": list(dict.fromkeys(a.title for a in by_lang))})
+            cache_path = raw / f"{args.date}.topics.json"
+            cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
+            budget = Budget(raw / "llm-usage.json", edition, cfg.llm.max_calls_per_day)
+            why: list[str] = []   # 실패한 호출의 이유 (S21b 평가: "응답 없음"만으로는 원인을 몰랐음)
+
+            def ask(p: str):
+                res, st = call(p, cfg.llm, budget, timeout=240)   # 50건 분류는 120초를 넘기기도 함 (S21b 평가)
+                if res is None:
+                    why.append(st[:60])
+                return res
+            override, topic_note = ai_topics(rows, ask, cache)
+            if why:
+                topic_note += f" — {'; '.join(why)}"
+            cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+            if override:
+                changed = sum(1 for s in cand if override.get(s.issue.id, s.topic) != s.topic)
+                scored = score_issues(issues, articles, cfg, table, previous, headlines, topic_override=override)
+                topic_note = f"AI {len(override)}/{len(cand)} ({topic_note}), 규칙과 다름 {changed}"
     placed, cstats = choose(scored, cfg, interests)
     ed = arrange(placed, cfg, interests, articles)
     out = edition_to_json(ed, args.date, articles, cstats)
@@ -189,7 +224,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
         f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "
         f"관심 {st['interest_counted']}/{st['interest_cap']}(제외 {st['interest_skipped']}), 연속 보장 {st['continuity_guaranteed']}, "
         f"사진 {st['photos']}, 전날 기록 {st['history_previous']}, 같은 사건 합침 {st.get('merged_duplicates', 0)}, "
-        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건"
+        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건 | 분야 분류 {topic_note}"
     )
     from .render import headline_label
 
@@ -232,7 +267,7 @@ def cmd_headlines(args: argparse.Namespace) -> int:
         from .llm import Budget, available, call
 
         if available()[0]:
-            budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
+            budget = Budget(raw / "llm-usage.json", _date.fromisoformat(args.date), cfg.llm.max_calls_per_day)  # 호 단위 (S21a — UTC 오늘이면 전날 재발행 호출까지 합쳐짐)
             # 묶기는 판단이 들어가므로 분석과 같은 모델로 (10/17 러너에서 haiku 가 다른 사건을 섞어 11묶음을 만듦)
             ask = lambda prompt: call(prompt, cfg.llm, budget, model=cfg.llm.analysis_model)[0]  # noqa: E731
     how = group(heads, arts, vecs, ask)
@@ -291,7 +326,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
         from .llm import available
 
-        budget = Budget(raw / "llm-usage.json", _date.today(), cfg.llm.max_calls_per_day)
+        budget = Budget(raw / "llm-usage.json", _date.fromisoformat(args.date), cfg.llm.max_calls_per_day)  # 호 단위 (S21a — UTC 오늘이면 전날 재발행 호출까지 합쳐짐)
         bodies: dict[str, str | None] = {}
         if cfg.llm.analysis_issues > 0 and available()[0]:
             # 본문은 이 변수(메모리)에만 있다 — 파일·캐시로 쓰지 않는다 (D16)
@@ -383,6 +418,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--no-llm", action="store_true", help="같은 기사거리 묶기를 LLM 없이 (임베딩)")
     p.set_defaults(func=cmd_headlines)
     p = sub.add_parser("edit", help="점수 계산과 지면 편집 (data/raw/<호>.edition.json)")
+    p.add_argument("--no-llm", action="store_true", help="분야 분류를 키워드 규칙으로만 (AI 분류 건너뜀)")
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--write-history", action="store_true", help="연속성 기록(data/history)에 이 호를 저장")
     p.set_defaults(func=cmd_edit)

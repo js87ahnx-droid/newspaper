@@ -87,7 +87,7 @@
     if (el.classList.contains("brief")) return el.cloneNode(true);
     var b = document.createElement("article");
     Array.prototype.forEach.call(el.attributes, function (a) { b.setAttribute(a.name, a.value); });
-    b.className = "item brief demoted";
+    b.className = "item brief" + (el.getAttribute("data-reserve") === "1" ? "" : " demoted");   // 예비 기사는 내려온 기사가 아니다 (S21c)
     var hl = el.querySelector(".hl");
     if (hl) b.appendChild(hl.cloneNode(true));
     var t = el.getAttribute("data-brief");
@@ -235,6 +235,31 @@
       built.opinion = more.pages;
       spare -= more.pages.length - had;
       dropped += more.rest.length - opRest;
+    }
+    // 남는 쪽은 예비 기사를 일반 기사 모양으로 "더 읽을 기사" 면에 (S21c — 단신을 줄이자 얇은 날 끝 빈 쪽이 생김).
+    // 원래 단신·내려온 기사가 단신 쪽에 다 들어갈 만큼은 남겨 두고, 그 나머지 쪽만 쓴다
+    var reservesEl = pool.filter(function (el) { return el.getAttribute("data-reserve") === "1"; });
+    if (budgets.briefs && spare > 0 && reservesEl.length) {
+      var must = pool.filter(function (el) { return el.getAttribute("data-reserve") !== "1"; });
+      var need = 0;
+      if (must.length) {
+        var trial = placeSection(stage, g, briefSec, false, 0, groupBriefs(must), null, { grouped: true });
+        need = trial.pages.length;
+        trial.pages.forEach(function (p) { p.remove(); });
+      }
+      var moreBudget = Math.min(spare, budgets.briefs + spare - need);
+      if (moreBudget > 0) {
+        var moreSec = document.createElement("section");
+        moreSec.className = "sec sec-more"; moreSec.setAttribute("data-section", "more");
+        moreSec.setAttribute("data-title", "더 읽을 기사");
+        var mres = placeSection(stage, g, moreSec, false, moreBudget,
+          reservesEl.map(function (el) { return { el: el, node: el.cloneNode(true) }; }), null);
+        var placedMore = reservesEl.filter(function (el) { return !mres.rest.some(function (r) { return r.el === el; }); });
+        built.more = mres.pages;
+        spare -= mres.pages.length;
+        pool = pool.filter(function (el) { return placedMore.indexOf(el) < 0; });
+        if (order.indexOf("more") < 0) order.splice(order.indexOf("briefs") >= 0 ? order.indexOf("briefs") : (order.indexOf("opinion") >= 0 ? order.indexOf("opinion") : order.length), 0, "more");
+      }
     }
     var bBudget = budgets.briefs ? budgets.briefs + spare : 0;
     if (pool.length) {

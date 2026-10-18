@@ -146,7 +146,9 @@ def score_issues(
     table: InterestTable,
     previous: list[dict],
     headlines: list[dict] | None = None,
+    topic_override: dict[str, str] | None = None,
 ) -> list[ScoredIssue]:
+    """topic_override: 이슈 id → 분야 (S21b AI 분류). 없는 이슈는 키워드 규칙(classify)."""
     from .headlines import RANK_WEIGHT, group_members, issue_headlines
 
     # 같은 기사거리 묶음에 든 이슈끼리는 같은 사건 이웃(near)으로 — 편집에서 한 기사로 합친다
@@ -165,7 +167,7 @@ def score_issues(
     df = title_df(all_arts)
     for iss in issues:
         arts = [articles[i] for i in iss.article_ids]
-        topic = classify(arts)
+        topic = (topic_override or {}).get(iss.id) or classify(arts)
         by_source: dict[str, Article] = {}
         for a in arts:
             by_source.setdefault(a.source, a)

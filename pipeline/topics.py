@@ -142,3 +142,58 @@ def classify(articles: list[Article]) -> str:
         return "international" if all(a.country != "KR" for a in articles) else "society"
     best = max(total.items(), key=lambda kv: (kv[1], -list(TOPICS).index(kv[0])))
     return best[0]
+
+
+# ---------- AI 분야 분류 (S21b) ----------
+# 키워드 규칙은 한·영 단어뿐이라 일본어·중국어·프랑스어·독일어 기사와 단어가 안 걸리는 기사를 못 가른다
+# (10/18호: 지면 기사 34건이 단신으로). 편집 전에 점수 상위 후보만 LLM 이 제목으로 분류한다
+AI_TOPIC_RULES = """분야:
+- politics: 한국 정치·행정·국회·선거·검찰 수사(정치), 북한, 한국의 외교·안보·국방
+- economy: 거시경제·금리·물가·환율·증시·부동산·무역·관세·정부 경제정책 (나라 무관)
+- industry: 개별 기업·산업(자동차·조선·배터리·에너지·유통·통신 등) 소식 (나라 무관)
+- semis_ai: 반도체·인공지능·데이터센터·빅테크의 AI 사업 (나라 무관)
+- international: 외국의 정치·외교·전쟁·분쟁·선거·시위·외국 사회 문제 (한국이 직접 당사자가 아니면)
+- society: 한국 사회 — 교육·노동·복지·의료·법원 판결·인권·주거·환경
+- incidents: 한국의 사건·사고·범죄·재난
+- science: 과학·우주·기후 연구·의학 연구
+- entertainment_sports: 연예·스포츠
+- lifestyle_culture: 생활·문화·여행·음식·날씨·책·전시
+외국에서 일어난 사건·사고·재난(태풍·산불·지진)·사회 문제는 international, 단 그 나라 경제·기업·반도체·과학 연구·스포츠·연예는 해당 분야
+- science 는 연구·발견·우주 탐사만 — 재난 소식 자체는 science 가 아니다"""
+
+AI_TOPIC_PROMPT = """아래는 오늘 뉴스 이슈 목록이다(번호 id, 기사 제목들 — 여러 언어). 각 이슈를 분야 하나로 분류하라.
+{rules}
+출력 형식: {{"topics": {{"<id>": "<분야 id>"}}}} — 분야 id 는 위 목록의 영문 그대로
+{data}"""
+
+AI_TOPIC_BATCH = 50   # S21b 평가: 100건씩이면 3번 중 2번 응답 없음
+
+
+def ai_topics(rows: list[dict], ask, cache: dict) -> tuple[dict[str, str], str]:
+    """rows: [{"id", "titles": [..]}] (점수 순). ask(prompt) → dict|None. cache(이슈 id → 분야)에 없는 것만 묻는다.
+    돌려주는 값: (이슈 id → 분야, 상태). 틀린 분야 이름·빠진 이슈는 키워드 규칙에 맡긴다."""
+    todo = [r for r in rows if r["id"] not in cache]
+    sts = []
+
+    def one(part: list[dict], retry: bool) -> None:
+        lines = [f'{r["id"]}\t' + " / ".join(t[:90] for t in r["titles"][:2]) for r in part]
+        data = "<data>\n" + "\n".join(lines) + "\n</data>"
+        res = ask(AI_TOPIC_PROMPT.format(rules=AI_TOPIC_RULES, data=data))
+        got = res.get("topics") if isinstance(res, dict) else None
+        if not isinstance(got, dict):
+            if retry and len(part) > 10:   # 실패하면 반으로 나눠 한 번 더 (S21b 평가: 50건 묶음도 가끔 시간 초과)
+                h = len(part) // 2
+                one(part[:h], False)
+                one(part[h:], False)
+            else:
+                sts.append("응답 없음")
+            return
+        ids = {r["id"] for r in part}
+        ok = {str(k): v for k, v in got.items() if v in TOPICS and str(k) in ids}
+        cache.update(ok)
+        sts.append(f"{len(ok)}/{len(part)}")
+
+    for i in range(0, len(todo), AI_TOPIC_BATCH):
+        one(todo[i:i + AI_TOPIC_BATCH], True)
+    out = {r["id"]: cache[r["id"]] for r in rows if r["id"] in cache}
+    return out, (", ".join(sts) if sts else "캐시")

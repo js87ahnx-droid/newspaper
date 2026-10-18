@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import math
+from collections import Counter
 from dataclasses import dataclass, field
 
 from .collect import Article
@@ -24,6 +25,8 @@ TOPIC_SECTION = {
     "industry": "economy",
     "semis_ai": "economy",
     "international": "international",
+    "society": "society",   # 사회·과학 면 (S21c — 전에는 자기 면이 없어 단신으로)
+    "science": "society",
 }
 # 입장 비교 유형 → 분야
 COMPARE_TOPIC_MAP = {
@@ -90,9 +93,11 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
         put(s, "다양성: 주목도 상위", guaranteed=True)
 
     # 3. 연속 이슈
-    for s in sorted(scored, key=lambda s: (-s.days, -s.final)):
-        if s.days >= ed.continuity_min_days:
-            put(s, f"연속 보도 {s.days}일째", guaranteed=True)
+    # S21c: '덜 보기' 분야(연예·스포츠·사건 등)는 빼고, 지면의 continuity_max_ratio 까지만 (점수 높은 순)
+    less = set(interests.less)
+    cont = [s for s in scored if s.days >= ed.continuity_min_days and s.topic not in less]
+    for s in sorted(cont, key=lambda s: (-s.final, -s.days))[: math.floor(ed.continuity_max_ratio * n)]:
+        put(s, f"연속 보도 {s.days}일째", guaranteed=True)
 
     # 4. 나머지: 최종 점수 순, 관심 상한
     remaining = n - len(placed)
@@ -105,9 +110,14 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
     cap = math.floor(ed.interest_cap * n)
     interest_count = sum(1 for p in placed.values() if ed.interest_cap_mode == "topic" and p.scored.interest_hit)
     skipped = 0
+    # 분야별 상한 (S21c): 해외 매체가 많아 국제 이슈가 지면을 독점하지 않게 (10/18 미리보기: 국제 40/60, 넘친 16건이 단신)
+    topic_cap = {t: math.floor(r * n) for t, r in ed.topic_max_ratio.items()}
+    topic_count = Counter(p.scored.topic for p in placed.values())
     for s in sorted(pool, key=lambda s: (-s.final, s.issue.id)):
         if len(placed) >= n:
             break
+        if s.topic in topic_cap and topic_count[s.topic] >= topic_cap[s.topic]:
+            continue
         if is_interest(s):
             if interest_count >= cap:
                 skipped += 1
@@ -116,15 +126,15 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
             put(s, "관심도 반영")
         else:
             put(s, "종합 점수")
-    # 예비: 하루 분량 다음 순위 (관심 상한은 그대로 지킨다). 같은 사건 이웃이 이미 실렸으면 건너뛴다
+        topic_count[s.topic] += 1
+    # 예비: 하루 분량 다음 순위. 같은 사건 이웃이 이미 실렸으면 건너뛴다. 쪽이 남을 때만 한 줄 단신으로 실리므로
+    # 관심 상한은 적용하지 않는다 (S21c — 관심 분야가 넓어 상한에 걸리면 예비가 16건뿐이었음)
     reserves: list[Placed] = []
     taken = set(placed) | set(merged_into)
     for s in sorted(scored, key=lambda s: (-s.final, s.issue.id)):
         if len(reserves) >= ed.reserve:
             break
         if s.issue.id in taken or set(s.issue.extra.get("near", [])) & taken:
-            continue
-        if is_interest(s) and interest_count >= cap:
             continue
         reserves.append(Placed(s, ["예비: 쪽이 남으면 단신"], reserve=True))
         taken.add(s.issue.id)
@@ -181,8 +191,12 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
             sec = "interest"
         elif kw_hit or ("관심도 반영" in p.reasons and sec is None):
             sec = "interest"
-        if sec and len(sections[sec]) < caps[sec]:
+        if sec and sec in caps and len(sections[sec]) < caps[sec]:
             p.section = sec
+        elif (p.scored.interest_hit and "interest" in caps and len(sections["interest"]) < caps["interest"]
+              and (p.scored.topic != "international"   # 관심면의 국제 기사는 절반까지 — 국제면과 겹치지 않게 (S21c)
+                   or sum(q.scored.topic == "international" for q in sections["interest"]) < caps["interest"] // 2)):
+            p.section = "interest"   # 자기 면이 다 찬 관심 분야 기사는 관심면으로 (S21c — 전에는 단신으로)
         else:
             p.section = "briefs"
         sections[p.section].append(p)
@@ -226,8 +240,8 @@ def arrange(placed: list[Placed], cfg: Config, interests: Interests, articles: d
             break
         pick_photo(p, articles)
         photos_front += bool(p.photo)
-    for sid in ("politics", "economy", "international", "interest"):
-        for p in sections[sid][: cfg.photos.per_section]:
+    for sid in ("politics", "economy", "international", "society", "interest"):
+        for p in sections.get(sid, [])[: cfg.photos.per_section]:
             pick_photo(p, articles)
 
     for p in reserves:  # 단신 맨 뒤에 (지면 쪽이 남을 때만 보인다)

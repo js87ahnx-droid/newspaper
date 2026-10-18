@@ -148,7 +148,8 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
         # 단신 분야 묶음 순서 (S19c): 분야 중요도 순, 같으면 TOPICS 순
         "briefTopics": sorted(TOPICS, key=lambda k: -cfg.importance.topic_weights.get(k, 0)),
         "topics": TOPICS, "topicSection": {"politics": "politics", "economy": "economy", "industry": "economy",
-                                           "semis_ai": "economy", "international": "international"},
+                                           "semis_ai": "economy", "international": "international",
+                                           "society": "society", "science": "society"},
         "sectionTitles": {s.id: s.title for s in cfg.sections},
         "sectionCaps": {s.id: s.max_articles for s in cfg.sections},
         "sectionPages": {s.id: s.pages for s in cfg.sections},

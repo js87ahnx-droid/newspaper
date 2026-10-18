@@ -70,6 +70,18 @@ class Editing(Strict):
     diversity_ratio: float = Field(ge=0, le=1)
     interest_cap: float = Field(ge=0, le=1)
     continuity_min_days: int = Field(ge=1)
+    # 연속 보장 상한 (S21c): 지면의 이 비율까지만. 10/18호는 30/60 이 연속 보장(매일 나오는 경기 결과 포함)이라 분야면이 비었음
+    continuity_max_ratio: float = Field(default=1.0, ge=0, le=1)
+    # 분야별 지면 상한 비율 (S21c). 예: {international: 0.4}. 1면 톱·다양성·연속 보장 기사도 셈에 들어간다
+    topic_max_ratio: dict[str, float] = Field(default_factory=dict)
+
+    @field_validator("topic_max_ratio")
+    @classmethod
+    def _topic_ratio(cls, v: dict[str, float]) -> dict[str, float]:
+        bad = sorted(set(v) - set(TOPICS))
+        if bad or any(not 0 < r <= 1 for r in v.values()):
+            raise ValueError(f"topic_max_ratio: 알 수 없는 분야 {bad} 또는 0~1 밖의 비율")
+        return v
     history_days: int = Field(ge=1, le=60)
     # driven: 관심도 덕분에 들어온 기사(관심도를 빼고 골랐다면 빠졌을 기사)만 상한에 셈 (2026-10-16 사용자 결정)
     # topic: 관심 분야 기사 전체를 상한에 셈
@@ -89,7 +101,7 @@ class Editing(Strict):
         return self
 
 
-SectionId = Literal["front", "politics", "economy", "international", "interest", "compare", "briefs", "opinion", "guide"]
+SectionId = Literal["front", "politics", "economy", "international", "society", "interest", "compare", "briefs", "opinion", "guide"]
 
 
 class Section(Strict):

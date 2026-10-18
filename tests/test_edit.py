@@ -256,3 +256,88 @@ def test_outlet_headlines_raise_front_and_final():
     assert low.issue.id in front   # 세 곳 1면 머리면 1면에 오른다
     ed0 = arrange(choose(base, CFG, it)[0], CFG, it, arts)
     assert low.issue.id not in {p.scored.issue.id for p in ed0.sections["front"]}   # 머리기사 정보 없이는 1면 밖
+
+
+# ---------- S21 분야 분류·면 구성·호 단위 예산 ----------
+def test_ai_topics_override_cache_and_fallback():
+    """AI 분류(S21b): 틀린 분야 이름·목록에 없는 id 는 버리고(규칙에 맡김), 캐시된 이슈는 다시 묻지 않으며, 100건씩 나눈다."""
+    from pipeline.topics import AI_TOPIC_BATCH, ai_topics
+    rows = [{"id": f"i{k}", "titles": [f"t{k}"]} for k in range(AI_TOPIC_BATCH + 5)]
+    asked = []
+
+    def ask(prompt):
+        asked.append(prompt)
+        ids = [l.split("\t")[0] for l in prompt.split("<data>\n")[1].split("\n</data>")[0].split("\n")]
+        out = {i: "society" for i in ids}
+        out[ids[0]] = "weird"          # 없는 분야 → 버림
+        out["zzz"] = "politics"        # 묻지 않은 id → 버림
+        return {"topics": out}
+    cache = {"i3": "science"}
+    got, st = ai_topics(rows, ask, cache)
+    assert len(asked) == 2                                   # 104건 → 100 + 4
+    assert "\ni3\t" not in asked[0] and got["i3"] == "science"  # 캐시
+    assert "i0" not in got and "zzz" not in got and got["i1"] == "society"
+    assert st.count("/") == 2
+    got2, _ = ai_topics(rows, lambda p: None, cache)
+    assert got2 == {k: v for k, v in cache.items() if k in {r["id"] for r in rows}}   # 실패해도 캐시분은 쓴다
+    assert ai_topics(rows[:3], lambda p: None, {})[0] == {}                          # 응답 없음 → 규칙
+
+
+def test_topic_override_moves_issue_to_new_section_and_score():
+    arts, issues = build()
+    it = interests_variant("default")
+    table = build_interest_table(it)
+    base = score_issues(issues, arts, CFG, table, [])
+    victim = next(s for s in base if s.topic == "politics")
+    over = score_issues(issues, arts, CFG, table, [], topic_override={victim.issue.id: "science"})
+    s2 = next(s for s in over if s.issue.id == victim.issue.id)
+    assert s2.topic == "science" and s2.importance != victim.importance
+    assert all(a.topic == b.topic for a, b in zip(base, over) if a.issue.id != victim.issue.id)
+
+
+def test_society_section_and_interest_overflow():
+    """S21c: 사회·과학 기사는 사회·과학 면으로, 자기 면이 다 찬 관심 분야 기사는 단신 대신 관심면으로."""
+    _, scored, placed, stats, ed, it = run("default")
+    soc = ed.sections.get("society", [])
+    assert soc and all(p.scored.topic in ("society", "science") for p in soc)
+    caps = {s.id: s.max_articles for s in CFG.sections}
+    for sid in ("politics", "economy", "international"):
+        if len(ed.sections[sid]) < caps[sid]:
+            continue
+        spill = [p for p in ed.sections["briefs"] if not p.reserve and p.scored.interest_hit
+                 and p.scored.topic in ("politics", "economy", "international")]
+        assert not spill or len(ed.sections["interest"]) >= caps["interest"]   # 관심면이 다 차야만 단신으로
+    # 단신으로 간 지면 기사는 자기 면이 없는 분야이거나, 자기 면이 다 차고(관심 기사면 관심면까지) 넘친 것뿐
+    from pipeline.edit import TOPIC_SECTION
+    full = lambda sid: len(ed.sections.get(sid, [])) >= caps.get(sid, 0)  # noqa: E731
+    for p in (p for p in ed.sections["briefs"] if not p.reserve):
+        sec = TOPIC_SECTION.get(p.scored.topic)
+        assert sec is None or (full(sec) and (not p.scored.interest_hit or full("interest"))), (p.scored.topic, sec)
+
+
+def test_llm_budget_is_per_edition_not_utc_today(tmp_path):
+    """S21a: 호출 상한은 호 날짜로 센다 — 전날(UTC) 재발행이 쓴 호출이 다음 호를 막지 않는다."""
+    from datetime import date as _d
+    from pathlib import Path as _P
+    from pipeline.llm import Budget
+    b = Budget(tmp_path / "u.json", _d(2026, 10, 17), 2)
+    assert b.take() and b.take() and not b.take()
+    assert Budget(tmp_path / "u.json", _d(2026, 10, 18), 2).take()
+    src = (_P(__file__).parent.parent / "pipeline" / "__main__.py").read_text(encoding="utf-8")
+    assert "Budget(" in src and "_date.today()" not in src and "date.today()" not in src
+
+
+def test_continuity_guarantee_capped_and_skips_less_topics():
+    """S21c: 연속 보장은 지면의 continuity_max_ratio 까지, '덜 보기' 분야는 보장하지 않는다."""
+    arts, issues = build(260)
+    it = interests_variant("default")
+    prev = [{"id": f"p{k}", "title": "t", "topic": s_topic, "days": 5, "signature": [], "date": "2026-10-17", "timeline": []}
+            for k, s_topic in enumerate(["x"])]
+    scored = score_issues(issues, arts, CFG, build_interest_table(it), prev)
+    for s in scored:          # 모든 이슈가 5일째 이어졌다고 치면
+        s.days = 5
+    placed, _ = choose(scored, CFG, it)
+    cont = [p for p in placed if any(r.startswith("연속") for r in p.reasons)]
+    import math
+    assert 0 < len(cont) <= math.floor(CFG.editing.continuity_max_ratio * it.daily_articles)
+    assert not any(p.scored.topic in it.less for p in cont)

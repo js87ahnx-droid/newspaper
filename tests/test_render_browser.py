@@ -26,9 +26,9 @@ pw = pytest.importorskip("playwright.sync_api")
 IPADS = [(1024, 768), (1180, 820), (1194, 834), (1366, 1024)]
 
 
-def make_site(tmp_path: Path, edition_date="2026-10-16", broken_photo=False, previous=None, mutate=None) -> Path:
+def make_site(tmp_path: Path, edition_date="2026-10-16", broken_photo=False, previous=None, mutate=None, n_issues=90) -> Path:
     cfg, interests, sources = load_config(), load_interests(), load_sources()
-    arts, issues = build()
+    arts, issues = build(n_issues)
     for a in arts.values():  # 리드는 RSS 상한까지 긴 것으로 (쪽 넘침을 잘 드러내도록)
         a.lead = ("긴 리드 문장입니다. " * 40)[:LEAD_MAX]
         if broken_photo and a.image:

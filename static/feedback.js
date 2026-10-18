@@ -76,7 +76,7 @@
 
     var briefs = sectionEl("briefs");
     // 내리기: 많이 "덜 보기" 한 분야의 보장 안 된 기사
-    ["politics", "economy", "international", "interest"].forEach(function (id) {
+    ["politics", "economy", "international", "society", "interest"].forEach(function (id) {
       var sec = sectionEl(id);
       if (!sec || !briefs) return;
       Array.prototype.slice.call(sec.querySelectorAll("article.item")).forEach(function (a) {

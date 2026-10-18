@@ -46,7 +46,7 @@ $PY -m pipeline prepare --date "$DATE"
 $PY -m pipeline embed --date "$DATE"
 $PY -m pipeline cluster --date "$DATE"
 $PY -m pipeline headlines --date "$DATE" $LLM_FLAG || echo "::warning::매체 머리기사를 받지 못했습니다 (머리기사 가중 없이 편집)"
-$PY -m pipeline edit --date "$DATE" --write-history
+$PY -m pipeline edit --date "$DATE" --write-history $LLM_FLAG   # 분야 분류도 LLM (S21b)
 
 $PY -m pipeline enrich --date "$DATE" $LLM_FLAG
 $PY -m pipeline publish --date "$DATE" --site docs
