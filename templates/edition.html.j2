@@ -58,7 +58,7 @@
   <section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">
   {% for it in sec["items"] %}
     {% set v = it.view %}
-    {% set brief = sec.id == 'briefs' and not it.reserve %}{# 예비 기사는 일반 기사 모양으로 — 남는 쪽엔 '더 읽을 기사', 아니면 쪽 나누기가 단신으로 줄인다 (S21c) #}
+    {% set brief = false %}{# 단신도 원본은 일반 기사 모양 — 쪽 나누기(app.js asBrief)가 한 줄로 줄이고, 누르면 요약·AI 정리가 보인다 (S22a; S21c 예비 기사도) #}
     <article class="item{% if sec.id == 'front' and loop.first %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}"
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
              data-section="{{ sec.id }}" data-lang="{{ v.lang }}"

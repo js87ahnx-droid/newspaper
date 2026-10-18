@@ -153,3 +153,20 @@ def test_spare_pages_get_more_articles_not_blank(browser, tmp_path, w, h):  # no
     assert not errors and st["overflow"] == []
     assert m["end"] == 0 and m["more"] >= 1 and m["full"] and m["title"].startswith("더 읽을 기사"), m
     assert m["briefs"] <= next(s.pages for s in load_config().sections if s.id == "briefs")
+
+
+def test_brief_click_shows_summary_not_just_title(browser, tmp_path):  # noqa: F811
+    """S22a: 단신 제목을 누르면 자세히 창에 리드(요약)까지 — 전에는 지면 원본도 한 줄 꼴이라 제목만 보였다."""
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, 1180, 820)
+    r = page.evaluate("""() => {
+      const b = [...document.querySelectorAll('#book .page.sec-briefs article.item.brief')]
+        .find(a => { const f = document.querySelector('#flow [data-issue="' + a.dataset.issue + '"] .lead'); return f && f.textContent.trim(); });
+      if (!b) return null;
+      b.closest('.page').style.display = ''; const a = b.querySelector('.hl a'); a.scrollIntoView(); a.click();
+      const body = document.querySelector('#reader .reader-body');
+      return {open: !document.getElementById('reader').hidden, lead: (body.querySelector('.lead') || {}).textContent || '',
+              oneLine: b.getBoundingClientRect().height}; }""")
+    ctx.close()
+    assert r, "요약이 있는 단신이 없음"
+    assert r["open"] and len(r["lead"].strip()) > 10 and r["oneLine"] <= 36 and not errors

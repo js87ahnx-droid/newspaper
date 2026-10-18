@@ -87,7 +87,8 @@
     if (el.classList.contains("brief")) return el.cloneNode(true);
     var b = document.createElement("article");
     Array.prototype.forEach.call(el.attributes, function (a) { b.setAttribute(a.name, a.value); });
-    b.className = "item brief" + (el.getAttribute("data-reserve") === "1" ? "" : " demoted");   // 예비 기사는 내려온 기사가 아니다 (S21c)
+    // "내려온 기사" 표시는 다른 면에서 넘쳐 온 것만 — 예비 기사(S21c)·원래 단신(S22a: 원본도 일반 기사 꼴)은 아님
+    b.className = "item brief" + (el.getAttribute("data-reserve") === "1" || el.getAttribute("data-section") === "briefs" ? "" : " demoted");
     var hl = el.querySelector(".hl");
     if (hl) b.appendChild(hl.cloneNode(true));
     var t = el.getAttribute("data-brief");
