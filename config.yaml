@@ -90,7 +90,7 @@ photos:
 llm:
   enabled: true
   model: haiku
-  max_calls_per_day: 40   # S20: 분석 14 + 비교 1 + 요약·번역 6까지 + 같은 사건 2 + 사설 제목 1 + 헤드라인 1 ≈ 25, 재실행 여유
+  max_calls_per_day: 50   # 호 단위(S21a). 분석 14 + 분야 분류 4 + 관련 기사 2 + 비교 1 + 요약·번역 6까지 + 같은 사건 2 + 사설 제목 1 + 분석 요약 1 + 헤드라인 1 ≈ 32, 재시도 여유 (S22)
   timeout_sec: 120
   analysis_model: sonnet
   analysis_issues: 70   # 지면 60건 + 예비 10건 (S19d, 14회)
