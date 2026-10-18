@@ -49,9 +49,33 @@ class Budget:
         if self.used >= self.limit:
             return False
         self.data[self.day] = self.used + 1
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(self.data), encoding="utf-8")
+        self._save()
         return True
+
+    def record(self, model: str, envelope: dict) -> None:
+        """CLI 응답 봉투의 사용량을 호 단위로 쌓는다 (S23c "50회·100회가 얼마인지"). total_cost_usd 는 API 요금으로 환산한 값 —
+        구독 토큰(CLAUDE_CODE_OAUTH_TOKEN)이면 실제 청구가 아니라 구독 사용 한도에서 빠진다."""
+        u = envelope.get("usage") or {}
+        c = self.data.setdefault("cost", {}).setdefault(self.day, {"usd": 0.0, "in": 0, "out": 0, "cache_read": 0, "by_model": {}})
+        usd = float(envelope.get("total_cost_usd") or 0)
+        inp = int(u.get("input_tokens") or 0) + int(u.get("cache_creation_input_tokens") or 0)
+        c["usd"] = round(c["usd"] + usd, 4)
+        c["in"] += inp
+        c["out"] += int(u.get("output_tokens") or 0)
+        c["cache_read"] += int(u.get("cache_read_input_tokens") or 0)
+        real = sorted((envelope.get("modelUsage") or {}).keys())   # 별칭(haiku·sonnet)이 실제로 가리킨 모델
+        m = c["by_model"].setdefault("+".join(real) or model, {"calls": 0, "usd": 0.0})
+        m["calls"] += 1
+        m["usd"] = round(m["usd"] + usd, 4)
+        self._save()
+
+    @property
+    def spent(self) -> dict:
+        return self.data.get("cost", {}).get(self.day) or {"usd": 0.0, "in": 0, "out": 0, "cache_read": 0, "by_model": {}}
+
+    def _save(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text(json.dumps(self.data, ensure_ascii=False), encoding="utf-8")
 
 
 def available() -> tuple[bool, str]:
@@ -92,6 +116,8 @@ def call(prompt: str, cfg: Llm, budget: Budget, runner=None, model: str | None =
         return None, f"호출 실패: {str(e)[:200]}"
     try:
         envelope = json.loads(out)
+        if isinstance(envelope, dict):
+            budget.record(model or cfg.model, envelope)
         text = envelope.get("result", "") if isinstance(envelope, dict) else out
         if isinstance(envelope, dict) and envelope.get("is_error"):
             return None, f"CLI 오류: {text[:200]}"
@@ -478,7 +504,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             cache["same_event"] = {"key": key, "groups": groups}
             cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     dups = merge_duplicates(edition, groups)
-    edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "analysis": astats,
+    edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "spent_today": budget.spent, "analysis": astats,
                                               "merged_duplicates": dups}
     return edition
 

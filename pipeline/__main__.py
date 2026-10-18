@@ -403,7 +403,11 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies)
         del bodies
         st = edition["stats"]["llm"]
-        llm_note = f"{st['status']} (오늘 {st['calls_today']}회)"
+        sp = st.get("spent_today") or {}
+        models = ", ".join(f"{k} {v['calls']}회 ${v['usd']:.2f}" for k, v in sorted((sp.get("by_model") or {}).items()))
+        llm_note = (f"{st['status']} (오늘 {st['calls_today']}회, API 요금 환산 ${sp.get('usd', 0):.2f} — "
+                    f"입력 {sp.get('in', 0):,}·캐시 읽기 {sp.get('cache_read', 0):,}·출력 {sp.get('out', 0):,} 토큰"
+                    f"{' | ' + models if models else ''})")
         if st.get("analysis") and st["analysis"]["rejected"]:
             llm_note += f" | 분석 버림 {st['analysis']['rejected']}"
         if st.get("merged_duplicates"):

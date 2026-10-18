@@ -155,3 +155,20 @@ def test_llm_analysis_merges_same_event_across_languages():
     assert [x["issue_id"] for x in ed["sections"]["politics"]] == ["t1"]
     host = ed["sections"]["front"][0]
     assert host["merged"] == ["k1"] and host["coverage"]["sources"] == 2 and host["coverage"]["countries"] == 2
+
+
+def test_call_records_usage_per_edition(tmp_path):
+    """S23c: CLI 응답 봉투의 토큰·API 환산 금액을 호 단위로 쌓는다 (호출 수 상한과 같은 파일, 호가 다르면 따로)."""
+    from pipeline.llm import call
+    env = {"result": '{"ok": 1}', "total_cost_usd": 0.0123,
+           "usage": {"input_tokens": 100, "cache_creation_input_tokens": 50, "cache_read_input_tokens": 7, "output_tokens": 30}}
+    b = Budget(tmp_path / "u.json", date(2026, 10, 19), 10)
+    for model in (None, "sonnet"):
+        res, st = call("p", cfg(), b, runner=lambda _: json.dumps(env), model=model)
+        assert res == {"ok": 1} and st == "ok"
+    sp = Budget(tmp_path / "u.json", date(2026, 10, 19), 10).spent
+    assert sp["usd"] == 0.0246 and sp["in"] == 300 and sp["out"] == 60 and sp["cache_read"] == 14
+    assert sp["by_model"] == {"haiku": {"calls": 1, "usd": 0.0123}, "sonnet": {"calls": 1, "usd": 0.0123}}
+    assert b.used == 2 and Budget(tmp_path / "u.json", date(2026, 10, 20), 10).spent["usd"] == 0
+    call("p", cfg(), b, runner=lambda _: json.dumps({**env, "modelUsage": {"claude-haiku-5-5": {}}}))
+    assert b.spent["by_model"]["claude-haiku-5-5"]["calls"] == 1   # 봉투가 실제 모델을 알려 주면 그 이름으로
