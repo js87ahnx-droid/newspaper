@@ -2,6 +2,44 @@
  "edition": "2026-10-18",
  "issues": [
   {
+   "id": "cca1a163c28fcdaa",
+   "title": "Pope Leo discharged from hospital after lung cancer surgery",
+   "topic": "international",
+   "days": 3,
+   "signature": [
+    "leo",
+    "pope",
+    "hospital",
+    "surgery",
+    "lung",
+    "cancer",
+    "discharged",
+    "vatican",
+    "leave",
+    "day",
+    "saturday",
+    "operation"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": null,
+     "title": "\"'폐암 진단' 교황 수술 후 회복 순조\"…신자들 쾌유 빌어",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "Pope Leo to lead Sunday prayers as he recovers from lung surgery, Vatican says",
+     "summary": "폐암 수술 교황, 순조로운 회복 속 일요일 복귀"
+    },
+    {
+     "date": "2026-10-18",
+     "title": "Pope Leo discharged from hospital after lung cancer surgery",
+     "summary": "폐암 수술 교황, 나흘 만에 퇴원해 바티칸 복귀"
+    }
+   ]
+  },
+  {
    "id": "991507a27402a9da",
    "title": "Israeli settlers attack group of European diplomats in the occupied West Bank",
    "topic": "international",
@@ -35,44 +73,6 @@
    ]
   },
   {
-   "id": "cca1a163c28fcdaa",
-   "title": "Pope Leo discharged from hospital after lung cancer surgery",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "lung",
-    "hospital",
-    "surgery",
-    "pope",
-    "leo",
-    "cancer",
-    "discharged",
-    "leave",
-    "saturday",
-    "day",
-    "vatican",
-    "operation"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "\"'폐암 진단' 교황 수술 후 회복 순조\"…신자들 쾌유 빌어",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Pope Leo to lead Sunday prayers as he recovers from lung surgery, Vatican says",
-     "summary": "폐암 수술 교황, 순조로운 회복 속 일요일 복귀"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Pope Leo discharged from hospital after lung cancer surgery",
-     "summary": "폐암 수술 교황, 나흘 만에 퇴원해 바티칸 복귀"
-    }
-   ]
-  },
-  {
    "id": "da19a9ed13ebd373",
    "title": "Three men sentenced to more than 158 years for the killings of Australian, US surfers in Mexico",
    "topic": "international",
@@ -81,8 +81,8 @@
     "surfer",
     "australian",
     "year",
-    "three",
     "men",
+    "three",
     "mexican",
     "each",
     "killing",
@@ -108,7 +108,7 @@
   {
    "id": "8223ea5198941f0c",
    "title": "李대통령, 부천 화재 순직 소방관 조문…“희생 영원히 기억할 것”",
-   "topic": "politics",
+   "topic": "incidents",
    "days": 1,
    "signature": [
     "대통",
@@ -140,17 +140,17 @@
    "days": 3,
    "signature": [
     "빨대",
-    "사과",
     "발언",
+    "사과",
     "재정",
+    "미애",
+    "추미",
     "의도",
     "폄훼",
     "민석",
     "도와",
     "르게",
-    "전달",
-    "전혀",
-    "김민"
+    "전달"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -205,6 +205,39 @@
    ]
   },
   {
+   "id": "b9bfe6ecb8fe7c88",
+   "title": "취임 나흘 만에 경질된 백악관 대변인… 허위 경력 논란에 ‘최단명’ 불명예",
+   "topic": "international",
+   "days": 2,
+   "signature": [
+    "백악",
+    "악관",
+    "대변",
+    "변인",
+    "경질",
+    "변호",
+    "호사",
+    "나흘",
+    "논란",
+    "katie",
+    "zacharia",
+    "단명"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "백악관 대변인 나흘 만에 경질…허위경력·자질 논란에 하차(종합)",
+     "summary": null
+    },
+    {
+     "date": "2026-10-18",
+     "title": "취임 나흘 만에 경질된 백악관 대변인… 허위 경력 논란에 ‘최단명’ 불명예",
+     "summary": "재커라이어 대변인, 허위 경력·미숙 대응에 나흘 만에 해임"
+    }
+   ]
+  },
+  {
    "id": "de268f73d4edac0a",
    "title": "다카이치, 야스쿠니 신사에 공물 봉납…\"참배는 보류할 듯\"",
    "topic": "international",
@@ -238,39 +271,6 @@
    ]
   },
   {
-   "id": "b9bfe6ecb8fe7c88",
-   "title": "취임 나흘 만에 경질된 백악관 대변인… 허위 경력 논란에 ‘최단명’ 불명예",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "백악",
-    "악관",
-    "대변",
-    "변인",
-    "경질",
-    "변호",
-    "호사",
-    "나흘",
-    "katie",
-    "논란",
-    "zacharia",
-    "단명"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "백악관 대변인 나흘 만에 경질…허위경력·자질 논란에 하차(종합)",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "취임 나흘 만에 경질된 백악관 대변인… 허위 경력 논란에 ‘최단명’ 불명예",
-     "summary": "재커라이어 대변인, 허위 경력·미숙 대응에 나흘 만에 해임"
-    }
-   ]
-  },
-  {
    "id": "db907e6684a2aa78",
    "title": "경찰, 인천 흉기난동범 최충락 주거지 압수수색",
    "topic": "incidents",
@@ -283,9 +283,9 @@
     "동범",
     "수색",
     "수수",
+    "인천",
     "거지",
     "주거",
-    "인천",
     "흉기",
     "경찰"
    ],
@@ -299,7 +299,7 @@
     {
      "date": "2026-10-18",
      "title": "경찰, 인천 흉기난동범 최충락 주거지 압수수색",
-     "summary": null
+     "summary": "인천 난동범 자택서 메모 확보, 계획성 수사"
     }
    ]
   },
@@ -332,22 +332,78 @@
    ]
   },
   {
+   "id": "8d157df6a4d03f6c",
+   "title": "At least 10 killed in fire at Bangladesh beach resort",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "resort",
+    "beach",
+    "fire",
+    "bangladesh",
+    "bangladeshi",
+    "gut",
+    "killing",
+    "people",
+    "killed",
+    "bangladesch",
+    "bazar",
+    "cox'"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "At least 10 killed in fire at Bangladesh beach resort",
+     "summary": "방글라데시 콕스바자르 리조트 화재, 10명 숨져"
+    }
+   ]
+  },
+  {
+   "id": "c2718d459bba9d51",
+   "title": "'급식 색감 내려 물감' 中유치원 집단 납중독 책임자에 무기징역",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "기징",
+    "물감",
+    "임자",
+    "치원",
+    "무기",
+    "유치",
+    "중독",
+    "징역",
+    "책임",
+    "납중",
+    "급식",
+    "집단"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "'급식 색감 내려 물감' 中유치원 집단 납중독 책임자에 무기징역",
+     "summary": "물감 섞은 급식, 유치원 운영자 무기징역"
+    }
+   ]
+  },
+  {
    "id": "5cc8e9b3c7507ea7",
    "title": "Trump fires Katie Zacharia as White House press secretary after five days, advisers say | CNN Politics",
    "topic": "international",
    "days": 3,
    "signature": [
-    "secretary",
     "pres",
+    "secretary",
+    "zacharia",
     "katie",
     "white",
-    "zacharia",
-    "house",
     "five",
     "day",
-    "politic",
-    "cnn",
+    "house",
     "fire",
+    "cnn",
+    "politic",
     "vet"
    ],
    "date": "2026-10-18",
@@ -382,9 +438,9 @@
     "egypt",
     "sisi",
     "집트",
-    "이집",
     "사우",
     "우디",
+    "이집",
     "군사",
     "청시"
    ],
@@ -436,37 +492,70 @@
    ]
   },
   {
-   "id": "cc9a5113f3f370fb",
-   "title": "A fire guts a Bangladeshi beach resort, killing 10 people",
+   "id": "2de218d13de444db",
+   "title": "Kenya confirms four more Ebola cases, bringing total to seven",
    "topic": "international",
+   "days": 2,
+   "signature": [
+    "ebola",
+    "kenya",
+    "case",
+    "confirm",
+    "four",
+    "cared",
+    "total",
+    "bringing",
+    "including",
+    "seven",
+    "worker",
+    "patient"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-17",
+     "title": "Kenya confirms third Ebola case, a relative of the first patient who died",
+     "summary": "케냐에서 에볼라 세 번째 확진, 첫 환자의 친척"
+    },
+    {
+     "date": "2026-10-18",
+     "title": "Kenya confirms four more Ebola cases, bringing total to seven",
+     "summary": "케냐 에볼라 확진 7명으로 늘어, 의료진 포함"
+    }
+   ]
+  },
+  {
+   "id": "fe2614776898fda7",
+   "title": "'충격, 머리를 다쳤다' 아르헨티나 국대 수문장 첼시 마르티네스, 공중볼 경합 중 머리 부상→교체→병원 후송..알론소 감독 \"의식을 찾고 경기장 떠났다\"",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
-    "resort",
-    "beach",
-    "fire",
-    "bangladesh",
-    "bangladeshi",
-    "gut",
-    "killing",
-    "people",
-    "killed",
-    "bangladesch",
-    "bazar",
-    "cox'"
+    "chelsea'",
+    "martinez",
+    "consciou",
+    "hospitalized",
+    "following",
+    "head",
+    "clash",
+    "league",
+    "premier",
+    "game",
+    "alonso",
+    "collision"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "A fire guts a Bangladeshi beach resort, killing 10 people",
-     "summary": "콕스바자르 리조트 화재로 10명 사망, 무허가 영업 드러나"
+     "title": "'충격, 머리를 다쳤다' 아르헨티나 국대 수문장 첼시 마르티네스, 공중볼 경합 중 머리 부상→교체→병원 후송..알론소 감독 \"의식을 찾고 경기장 떠났다\"",
+     "summary": "첼시 마르티네스 뇌진탕, 병원서 정밀검사"
     }
    ]
   },
   {
-   "id": "16a553730d69e830",
+   "id": "0be29923bbb12397",
    "title": "New Mexico judge tosses charges against actor Timothy Busfield, citing prosecutor misconduct",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "busfield",
@@ -474,8 +563,8 @@
     "actor",
     "judge",
     "charge",
-    "citing",
     "against",
+    "citing",
     "child",
     "misconduct",
     "prosecutor",
@@ -487,35 +576,45 @@
     {
      "date": "2026-10-18",
      "title": "New Mexico judge tosses charges against actor Timothy Busfield, citing prosecutor misconduct",
-     "summary": "법원, 대배심 절차 하자로 버스필드 기소 기각"
+     "summary": null
     }
    ]
   },
   {
-   "id": "c2718d459bba9d51",
-   "title": "'급식 색감 내려 물감' 中유치원 집단 납중독 책임자에 무기징역",
+   "id": "53c64b6339271353",
+   "title": "美오리건 초교 총격범은 16세 졸업생…학부모가 쏜 총탄에 사망",
    "topic": "international",
-   "days": 1,
+   "days": 3,
    "signature": [
-    "기징",
-    "물감",
-    "임자",
-    "치원",
-    "무기",
-    "유치",
-    "중독",
-    "징역",
-    "책임",
-    "납중",
-    "급식",
-    "집단"
+    "격범",
+    "총격",
+    "학부",
+    "범은",
+    "부모",
+    "리건",
+    "모가",
+    "오리",
+    "졸업",
+    "업생",
+    "교사",
+    "초교"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
+     "date": null,
+     "title": "밀양 어린이보호구역서 우회전 차량에 초등 2학년 치여 숨져",
+     "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "美오리건주 초등학교서 대낮 수업중 총격…어린이 등 5명 숨져",
+     "summary": null
+    },
+    {
      "date": "2026-10-18",
-     "title": "'급식 색감 내려 물감' 中유치원 집단 납중독 책임자에 무기징역",
-     "summary": "물감 섞은 급식, 유치원 운영자 무기징역"
+     "title": "美오리건 초교 총격범은 16세 졸업생…학부모가 쏜 총탄에 사망",
+     "summary": null
     }
    ]
   },
@@ -525,8 +624,8 @@
    "topic": "international",
    "days": 3,
    "signature": [
-    "teacher",
     "oregon",
+    "teacher",
     "school",
     "dad",
     "shooter",
@@ -554,6 +653,62 @@
      "date": "2026-10-18",
      "title": "Oregon school shooter was former special needs student, police say",
      "summary": "오리건 초등학교 총격으로 4명 사망, 학부모가 범인 사살"
+    }
+   ]
+  },
+  {
+   "id": "166238443bc88536",
+   "title": "경기도, 부천 공장화재 순직 소방관 장례위 구성…위원장 추미애",
+   "topic": "incidents",
+   "days": 1,
+   "signature": [
+    "장례",
+    "애도",
+    "조문",
+    "장화",
+    "위원",
+    "빈소",
+    "원장",
+    "기도",
+    "당부",
+    "소홀",
+    "여야",
+    "홀함"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "경기도, 부천 공장화재 순직 소방관 장례위 구성…위원장 추미애",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "f64e62a7256f55f7",
+   "title": "인도 힌두교 축제서 압사 사고…최소 17명 사망",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "least",
+    "东部",
+    "印度",
+    "度东",
+    "踏事",
+    "踩",
+    "踩踏",
+    "部踩",
+    "festival",
+    "故致",
+    "踏",
+    "crush"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "인도 힌두교 축제서 압사 사고…최소 17명 사망",
+     "summary": "콜카타 힌두 축제서 압사, 최소 17명 사망"
     }
    ]
   },
@@ -598,8 +753,8 @@
    "signature": [
     "부캉",
     "캉이",
-    "만명",
     "북항",
+    "만명",
     "인기",
     "달살",
     "르는",
@@ -649,7 +804,7 @@
   {
    "id": "5192da90c4ac2c00",
    "title": "엄지성 인종차별한 영국 남성 경찰에 체포",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "인종",
@@ -677,7 +832,7 @@
   {
    "id": "1259c2cafe85bfca",
    "title": "트럼프 “현대, 조지아주에 7486억원 투자 발표”",
-   "topic": "international",
+   "topic": "industry",
    "days": 2,
    "signature": [
     "조지",
@@ -703,7 +858,7 @@
     {
      "date": "2026-10-18",
      "title": "트럼프 “현대, 조지아주에 7486억원 투자 발표”",
-     "summary": "트럼프, 현대트랜시스 7486억 투자를 유세 성과로 강조"
+     "summary": null
     }
    ]
   },
@@ -759,40 +914,7 @@
     {
      "date": "2026-10-18",
      "title": "Buildings and cars set on fire as cost of living protests rock France",
-     "summary": "프랑스 물가 시위가 방화·약탈로 격화, 수백 명 체포"
-    }
-   ]
-  },
-  {
-   "id": "2de218d13de444db",
-   "title": "Kenya confirms four more Ebola cases, bringing total to seven",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "ebola",
-    "kenya",
-    "case",
-    "confirm",
-    "four",
-    "cared",
-    "total",
-    "bringing",
-    "including",
-    "seven",
-    "worker",
-    "patient"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Kenya confirms third Ebola case, a relative of the first patient who died",
-     "summary": "케냐에서 에볼라 세 번째 확진, 첫 환자의 친척"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Kenya confirms four more Ebola cases, bringing total to seven",
-     "summary": "케냐 에볼라 확진 7명으로 늘어, 의료진 포함"
+     "summary": null
     }
    ]
   },
@@ -838,10 +960,10 @@
     "detention",
     "simmer",
     "voter-list",
-    "印",
     "레당",
     "립자",
-    "창립"
+    "창립",
+    "퀴벌"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -854,34 +976,6 @@
      "date": "2026-10-18",
      "title": "'印선관위원장 퇴진 시위 주도' 바퀴벌레당 창립자 또 체포",
      "summary": "딥케 석방, 유권자 명단 논란은 계속"
-    }
-   ]
-  },
-  {
-   "id": "fe2614776898fda7",
-   "title": "'충격, 머리를 다쳤다' 아르헨티나 국대 수문장 첼시 마르티네스, 공중볼 경합 중 머리 부상→교체→병원 후송..알론소 감독 \"의식을 찾고 경기장 떠났다\"",
-   "topic": "entertainment_sports",
-   "days": 1,
-   "signature": [
-    "chelsea'",
-    "martinez",
-    "consciou",
-    "hospitalized",
-    "following",
-    "head",
-    "clash",
-    "league",
-    "premier",
-    "game",
-    "kopfzusammensto",
-    "precautionary"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "'충격, 머리를 다쳤다' 아르헨티나 국대 수문장 첼시 마르티네스, 공중볼 경합 중 머리 부상→교체→병원 후송..알론소 감독 \"의식을 찾고 경기장 떠났다\"",
-     "summary": null
     }
    ]
   },
@@ -949,7 +1043,7 @@
   {
    "id": "0ddbebcee38b2d9e",
    "title": "North Korea tests new AI-equipped torpedo, KCNA says",
-   "topic": "semis_ai",
+   "topic": "politics",
    "days": 2,
    "signature": [
     "torpedo",
@@ -963,7 +1057,7 @@
     "を実",
     "メデ",
     "北朝",
-    "型"
+    "型魚"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -980,40 +1074,30 @@
    ]
   },
   {
-   "id": "53c64b6339271353",
-   "title": "美오리건 초교 총격범은 16세 졸업생…학부모가 쏜 총탄에 사망",
+   "id": "5b1093aafc069013",
+   "title": "아마존 파괴속도 사상 최저…룰라 환경치적에 표심 움직일까",
    "topic": "international",
-   "days": 3,
+   "days": 1,
    "signature": [
-    "격범",
-    "총격",
-    "학부",
-    "범은",
-    "부모",
-    "리건",
-    "모가",
-    "오리",
-    "졸업",
-    "美",
-    "업생",
-    "교사"
+    "amazon",
+    "deforestation",
+    "brazil",
+    "fall",
+    "record",
+    "lowest",
+    "亚马",
+    "区毁",
+    "孙地",
+    "巴西",
+    "年最",
+    "最低"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
-     "date": null,
-     "title": "밀양 어린이보호구역서 우회전 차량에 초등 2학년 치여 숨져",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "美오리건주 초등학교서 대낮 수업중 총격…어린이 등 5명 숨져",
-     "summary": null
-    },
-    {
      "date": "2026-10-18",
-     "title": "美오리건 초교 총격범은 16세 졸업생…학부모가 쏜 총탄에 사망",
-     "summary": null
+     "title": "아마존 파괴속도 사상 최저…룰라 환경치적에 표심 움직일까",
+     "summary": "아마존 벌채 42% 감소로 역대 최저, 25일 결선 변수"
     }
    ]
   },
@@ -1041,6 +1125,34 @@
     {
      "date": "2026-10-18",
      "title": "교황, 폐 수술 5일 만에 퇴원…주일 삼종기도 주례 예정(종합)",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "3d5026c95dcbaa0e",
+   "title": "Neto double fires Chelsea past Everton but Martinez injury mars win",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "neto",
+    "everton",
+    "chelsea",
+    "injury",
+    "mar",
+    "past",
+    "martinez",
+    "win",
+    "double",
+    "head",
+    "fire",
+    "marred"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Neto double fires Chelsea past Everton but Martinez injury mars win",
      "summary": null
     }
    ]
@@ -1097,7 +1209,7 @@
     {
      "date": "2026-10-18",
      "title": "코스피 7거래일 하락에 ‘빚투’ 직격탄…반대매매 3000억 육박",
-     "summary": null
+     "summary": "코스피 급락에 빚투 반대매매 3천억원 육박"
     }
    ]
   },
@@ -1135,58 +1247,30 @@
    ]
   },
   {
-   "id": "f64e62a7256f55f7",
-   "title": "인도 힌두교 축제서 압사 사고…최소 17명 사망",
+   "id": "8b39ba9b02767842",
+   "title": "엘시시 이집트대통령 \"2030년 이후 집권 안해…추가 개헌 없다\"",
    "topic": "international",
    "days": 1,
    "signature": [
-    "least",
-    "festival",
-    "crush",
-    "india",
-    "gathering",
-    "hindu",
-    "kolkata",
-    "religiou",
-    "stampede",
-    "두교",
-    "압사",
-    "제서"
+    "presidency",
+    "于",
+    "及总",
+    "埃及",
+    "塞西",
+    "将于",
+    "年结",
+    "束任",
+    "示将",
+    "结",
+    "结束",
+    "统塞"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "인도 힌두교 축제서 압사 사고…최소 17명 사망",
-     "summary": "콜카타 힌두 축제서 압사, 최소 17명 사망"
-    }
-   ]
-  },
-  {
-   "id": "4a08259ccb945073",
-   "title": "Neto double fires Chelsea past Everton but Martinez head injury mars win",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "neto",
-    "everton",
-    "chelsea",
-    "injury",
-    "head",
-    "mar",
-    "win",
-    "past",
-    "martinez",
-    "double",
-    "fire",
-    "marred"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Neto double fires Chelsea past Everton but Martinez head injury mars win",
-     "summary": null
+     "title": "엘시시 이집트대통령 \"2030년 이후 집권 안해…추가 개헌 없다\"",
+     "summary": "엘시시, 3선 임기 끝나는 2030년 퇴임 공언"
     }
    ]
   },
@@ -1232,8 +1316,8 @@
     "guam",
     "heavy",
     "typhoon",
-    "rain",
     "toward",
+    "rain",
     "way",
     "make"
    ],
@@ -1254,7 +1338,7 @@
   {
    "id": "2bd39143981c3552",
    "title": "Actor Selma Blair did not intend harm on flight, spokesperson says",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 2,
    "signature": [
     "intend",
@@ -1290,8 +1374,8 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "arabia",
     "houthi",
+    "arabia",
     "saudi",
     "rebel",
     "strength",
@@ -1315,7 +1399,7 @@
   {
    "id": "3f84c0cae476fd67",
    "title": "프랑스 냉장설비 해킹에 불안감 확산…우리집 냉장고는 안전할까",
-   "topic": "economy",
+   "topic": "international",
    "days": 1,
    "signature": [
     "cyberattack",
@@ -1402,14 +1486,14 @@
     {
      "date": "2026-10-18",
      "title": "'서해 공무원 피격사건' 관련 전현희·노영민·이인영 불기소",
-     "summary": null
+     "summary": "서해 피격 고발 전현희·노영민·이인영 불기소"
     }
    ]
   },
   {
    "id": "c1ee86521c42fc2a",
    "title": "It's over: Canada ends England's 41-match unbeaten streak in women's rugby by 24-21",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "unbeaten",
@@ -1479,7 +1563,7 @@
     "드스",
     "로드",
     "스터",
-    "다시"
+    "나는"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -1496,34 +1580,6 @@
    ]
   },
   {
-   "id": "5b1093aafc069013",
-   "title": "아마존 파괴속도 사상 최저…룰라 환경치적에 표심 움직일까",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "amazon",
-    "deforestation",
-    "brazil",
-    "fall",
-    "record",
-    "lowest",
-    "경치",
-    "괴속",
-    "마존",
-    "아마",
-    "움직",
-    "직일"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "아마존 파괴속도 사상 최저…룰라 환경치적에 표심 움직일까",
-     "summary": "아마존 벌채 42% 감소로 역대 최저, 25일 결선 변수"
-    }
-   ]
-  },
-  {
    "id": "9f5797c2de9b9a29",
    "title": "토요일 낮 최고 27도 ‘포근’, 일요일엔 전국에 가을비",
    "topic": "lifestyle_culture",
@@ -1534,13 +1590,13 @@
     "일엔",
     "토요",
     "일요",
+    "전국",
     "근한",
     "강한",
     "최고",
     "서울",
     "기온",
-    "을비",
-    "을날"
+    "을비"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -1557,29 +1613,29 @@
    ]
   },
   {
-   "id": "166238443bc88536",
-   "title": "경기도, 부천 공장화재 순직 소방관 장례위 구성…위원장 추미애",
-   "topic": "politics",
+   "id": "df54aebf17c79351",
+   "title": "A first-time WNBA champion awaits as the Valkyries and Dream open the Finals",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
-    "장례",
-    "장화",
-    "위원",
-    "원장",
-    "애도",
-    "조문",
-    "기도",
-    "당부",
-    "소홀",
-    "여야",
-    "홀함",
-    "경기"
+    "valkyrie",
+    "dream",
+    "wnba",
+    "final",
+    "allisha",
+    "first-time",
+    "gray",
+    "await",
+    "forward",
+    "expected",
+    "play",
+    "open"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "경기도, 부천 공장화재 순직 소방관 장례위 구성…위원장 추미애",
+     "title": "A first-time WNBA champion awaits as the Valkyries and Dream open the Finals",
      "summary": null
     }
    ]
@@ -1592,11 +1648,11 @@
    "signature": [
     "강인",
     "이강",
+    "연승",
     "레티",
     "아틀",
     "틀레",
     "티코",
-    "연승",
     "마드",
     "에스",
     "파뇰",
@@ -1689,34 +1745,6 @@
    ]
   },
   {
-   "id": "98f41ced1db66e79",
-   "title": "Dream forward Allisha Gray expected to play in Game 1 of WNBA Finals against Valkyries",
-   "topic": "entertainment_sports",
-   "days": 1,
-   "signature": [
-    "valkyrie",
-    "dream",
-    "wnba",
-    "final",
-    "allisha",
-    "gray",
-    "forward",
-    "expected",
-    "play",
-    "game",
-    "against",
-    "anthem"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Dream forward Allisha Gray expected to play in Game 1 of WNBA Finals against Valkyries",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "45087d2446f34679",
    "title": "전국에 천둥·번개 동반 강한 비…수도권 최대 80㎜",
    "topic": "lifestyle_culture",
@@ -1726,14 +1754,14 @@
     "강한",
     "도권",
     "날씨",
+    "전국",
     "수도",
     "번개",
     "천둥",
     "흐리",
     "리고",
     "충청",
-    "동반",
-    "일요"
+    "동반"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -1745,34 +1773,6 @@
     {
      "date": "2026-10-18",
      "title": "전국에 천둥·번개 동반 강한 비…수도권 최대 80㎜",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "08bcbdd38c2da718",
-   "title": "이스라엘 정착촌 주민, 서안서 유럽 외교관 공격…피해국 격앙(종합)",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "교관",
-    "라엘",
-    "서안",
-    "스라",
-    "안서",
-    "정착",
-    "착촌",
-    "외교",
-    "유럽",
-    "공격",
-    "주민",
-    "격앙"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "이스라엘 정착촌 주민, 서안서 유럽 외교관 공격…피해국 격앙(종합)",
      "summary": null
     }
    ]
@@ -1793,8 +1793,8 @@
     "러제",
     "에너",
     "너지",
-    "푸틴",
-    "러시"
+    "러시",
+    "푸틴"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -1857,6 +1857,34 @@
     {
      "date": "2026-10-18",
      "title": "프랑스서 이번엔 고물가 항의 대규모 시위…곳곳서 격렬 충돌",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "612bba1043c31296",
+   "title": "ローマ教皇、プーチン氏に「深い懸念」 ウクライナの人道危機めぐり",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "教皇",
+    "皇",
+    "チン",
+    "プー",
+    "ーチ",
+    "マ教",
+    "ーマ",
+    "ン氏",
+    "教",
+    "ロー",
+    "氏",
+    "がプ"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "ローマ教皇、プーチン氏に「深い懸念」 ウクライナの人道危機めぐり",
      "summary": null
     }
    ]
@@ -1928,6 +1956,34 @@
    ]
   },
   {
+   "id": "756eea26b3f65491",
+   "title": "India, West Indies draw T20 series after rain washes out decider",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "indie",
+    "india",
+    "west",
+    "decider",
+    "draw",
+    "rain",
+    "serie",
+    "denied",
+    "finale",
+    "rain-hit",
+    "result",
+    "thrilling"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "India, West Indies draw T20 series after rain washes out decider",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "cc2f43ba9154082a",
    "title": "England stunned by Tonga in World Cup opener",
    "topic": "entertainment_sports",
@@ -1971,8 +2027,8 @@
     "자사",
     "억원",
     "최대",
-    "比",
-    "메모"
+    "메모",
+    "모리"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -1986,7 +2042,7 @@
   {
    "id": "f73d0dbaa393f92c",
    "title": "1246회 로또 1등 16명…당첨금 각 18억8천만원(종합)",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "로또",
@@ -2043,18 +2099,18 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "国神",
     "奉",
     "奉納",
     "榊",
     "真",
     "真榊",
+    "納",
+    "高市",
+    "首相",
     "神社",
     "靖",
     "靖国",
-    "納",
-    "高市",
-    "首相"
+    "国神"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2149,7 +2205,7 @@
     {
      "date": "2026-10-18",
      "title": "미국 재정적자 2조 달러 육박…팬데믹 이후 최대 규모",
-     "summary": null
+     "summary": "미 회계연도 적자 1.99조 달러, 이자와 관세 환급이 겹쳤다"
     }
    ]
   },
@@ -2167,10 +2223,10 @@
     "고속",
     "밀유",
     "지능",
-    "北",
     "공지",
     "정밀",
-    "인공"
+    "인공",
+    "도입"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2184,7 +2240,7 @@
   {
    "id": "8f798a02dccc55b0",
    "title": "No. 4 Ohio State takes advantage of No. 5 Indiana's miscue to hold on for 19-15 victory",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "ohio",
@@ -2210,7 +2266,7 @@
    ]
   },
   {
-   "id": "6831c65e96543af7",
+   "id": "f4a8fa34992d08cf",
    "title": "Trump touts his power at Kentucky rally to energize voters ahead of midterm elections",
    "topic": "international",
    "days": 2,
@@ -2238,6 +2294,34 @@
     {
      "date": "2026-10-18",
      "title": "Trump touts his power at Kentucky rally to energize voters ahead of midterm elections",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "5726bc2a6456180b",
+   "title": "Pakistani forces, Afghan Taliban exchange fire after militants attempt to infiltrate Pakistan",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "afghan",
+    "attempt",
+    "exchange",
+    "infiltrate",
+    "militant",
+    "pakistani",
+    "taliban",
+    "pakistan",
+    "force",
+    "fire",
+    "人士",
+    "军营"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Pakistani forces, Afghan Taliban exchange fire after militants attempt to infiltrate Pakistan",
      "summary": null
     }
    ]
@@ -2355,34 +2439,6 @@
    ]
   },
   {
-   "id": "8b39ba9b02767842",
-   "title": "엘시시 이집트대통령 \"2030년 이후 집권 안해…추가 개헌 없다\"",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "presidency",
-    "개헌",
-    "시시",
-    "안해",
-    "트대",
-    "egypt'",
-    "엘시",
-    "집권",
-    "egypt",
-    "office",
-    "sisi",
-    "president"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "엘시시 이집트대통령 \"2030년 이후 집권 안해…추가 개헌 없다\"",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "7775658d7f110ec9",
    "title": "Trio of Republicans bashes Trump’s sanctions pullback",
    "topic": "international",
@@ -2422,12 +2478,12 @@
     "敷き",
     "西条",
     "副",
-    "西",
-    "条",
     "死亡",
-    "下",
     "亡",
-    "死"
+    "市長",
+    "条",
+    "西",
+    "下"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2462,35 +2518,7 @@
     {
      "date": "2026-10-18",
      "title": "Au Brésil, le camp du président Lula accuse Meta d’« ingérence » électorale en faveur de son opposant d’extrême droite Flavio Bolsonaro",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "4b163ec5062be268",
-   "title": "Yemen Fighting Rages as Civilian Toll From Houthi-Saudi Conflict Worsens",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "conflict",
-    "yemen",
-    "besieged",
-    "encircle",
-    "escalating",
-    "houthi-saudi",
-    "saudi-backed",
-    "taiz",
-    "toll",
-    "healthcare",
-    "worsen",
-    "target"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Yemen Fighting Rages as Civilian Toll From Houthi-Saudi Conflict Worsens",
-     "summary": null
+     "summary": "메타, 룰라 계정 제한 인정 보도에도 편향 부인"
     }
    ]
   },
@@ -2525,7 +2553,7 @@
   {
    "id": "1697b13bc068fdd1",
    "title": "Davidovich Fokina upsets future No. 1 Zverev to reach the Shanghai Masters final against Jodar",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "davidovich",
@@ -2559,6 +2587,7 @@
     "saied",
     "biggest",
     "against",
+    "protest",
     "autokraten",
     "kai",
     "kritik",
@@ -2566,8 +2595,7 @@
     "tunesien",
     "tunisia",
     "tunisian",
-    "gegen",
-    "stage"
+    "gegen"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2605,6 +2633,34 @@
    ]
   },
   {
+   "id": "f61d91a8ffbbe835",
+   "title": "Corrupt officials have nowhere to hide, China’s anti-graft watchdog warns",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "corrupt",
+    "official",
+    "warn",
+    "china",
+    "anti-graft",
+    "expect",
+    "landing",
+    "nowhere",
+    "不论",
+    "与否",
+    "中央",
+    "了腐"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Corrupt officials have nowhere to hide, China’s anti-graft watchdog warns",
+     "summary": "中 사정당국, 퇴직 간부도 부패하면 안전 착륙 없다 경고"
+    }
+   ]
+  },
+  {
    "id": "1a35b6db09e63c2e",
    "title": "일은 총재 \"물가 이 이상 상승 용납 못해\"…금리 인상 지속 방침",
    "topic": "economy",
@@ -2628,7 +2684,7 @@
     {
      "date": "2026-10-18",
      "title": "일은 총재 \"물가 이 이상 상승 용납 못해\"…금리 인상 지속 방침",
-     "summary": null
+     "summary": "일은 총재, 금리인상 기조 유지…12월 인상 주목"
     }
    ]
   },
@@ -2661,29 +2717,29 @@
    ]
   },
   {
-   "id": "612bba1043c31296",
-   "title": "ローマ教皇、プーチン氏に「深い懸念」 ウクライナの人道危機めぐり",
+   "id": "42bbf8272ec38997",
+   "title": "Saudi-Arabien: Tankschiffe im Persischen Golf attackiert",
    "topic": "international",
    "days": 1,
    "signature": [
-    "教皇",
-    "皇",
-    "チン",
-    "プー",
-    "ーチ",
-    "教",
-    "がプ",
-    "の人",
-    "マ教",
-    "ーマ",
-    "人道",
-    "氏に"
+    "arabie",
+    "attackiert",
+    "attaque",
+    "frappe",
+    "houthiste",
+    "persischen",
+    "roport",
+    "saoudite",
+    "tankschiffe",
+    "visant",
+    "两艘",
+    "在沙"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "ローマ教皇、プーチン氏に「深い懸念」 ウクライナの人道危機めぐり",
+     "title": "Saudi-Arabien: Tankschiffe im Persischen Golf attackiert",
      "summary": null
     }
    ]
@@ -2719,7 +2775,7 @@
   {
    "id": "7f357f3a85d12041",
    "title": "DeNAが2年ぶり日本シリーズ進出 CSファイナル 阪神に4連勝",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "シリ",
@@ -2727,13 +2783,13 @@
     "阪神",
     "ーズ",
     "阪",
-    "日本",
     "リー",
-    "神",
+    "日本",
     "連",
     "神に",
-    "連勝",
-    "本"
+    "神",
+    "cs",
+    "が日"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2803,28 +2859,28 @@
   {
    "id": "f1138131dfc610c0",
    "title": "ＷＴＩ原油先物、１か月ぶりに１バレル＝１００ドル突破…供給停滞への懸念強まる",
-   "topic": "international",
+   "topic": "economy",
    "days": 1,
    "signature": [
-    "ドル",
     "バレ",
     "レル",
     "原油",
-    "油",
+    "ドル",
     "懸",
     "懸念",
-    "原",
+    "油",
     "念",
+    "原",
     "ny",
-    "供",
-    "供給"
+    "供給",
+    "月ぶ"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
      "title": "ＷＴＩ原油先物、１か月ぶりに１バレル＝１００ドル突破…供給停滞への懸念強まる",
-     "summary": null
+     "summary": "중동 긴장에 WTI 101달러, 한 달 만에 100달러 넘어"
     }
    ]
   },
@@ -2845,7 +2901,7 @@
     "퍼진",
     "공연",
     "도쿄",
-    "진다"
+    "방송"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -2969,14 +3025,14 @@
     {
      "date": "2026-10-18",
      "title": "‘수사 대상 기업서 상품권 수수’ 감찰받던 수사관, 중수청 팀장 임용",
-     "summary": null
+     "summary": "감찰받던 수사관이 중수청 팀장으로, 인사검증 구멍"
     }
    ]
   },
   {
    "id": "6396cb90ba070183",
    "title": "경복궁서 '한푸' 입고 중국 문화 홍보?…인플루언서 영상 논란",
-   "topic": "international",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "경복",
@@ -2987,8 +3043,8 @@
     "플루",
     "한푸",
     "궁서",
-    "영상",
     "입고",
+    "영상",
     "중국",
     "문화"
    ],
@@ -3153,9 +3209,9 @@
     "등까",
     "욕증",
     "뉴욕",
+    "증시",
     "급등",
     "등에",
-    "증시",
     "경고",
     "유가",
     "려에"
@@ -3259,7 +3315,7 @@
     {
      "date": "2026-10-18",
      "title": "교황, 병상에서 피란민 걱정…폐암수술 후 회복중 푸틴과 통화",
-     "summary": null
+     "summary": "교황 푸틴과 통화, 러 구호 협력은 수용하나 휴전은 침묵"
     }
    ]
   },
@@ -3284,6 +3340,34 @@
     {
      "date": "2026-10-18",
      "title": "Anthropic quietly pitches its own AI safety bill to lawmakers, Politico reports",
+     "summary": "앤트로픽, 출시 차단 제한·주법 우선 법안 제시"
+    }
+   ]
+  },
+  {
+   "id": "94e3b048955d9bef",
+   "title": "李强同乌兹别克斯坦总理阿里波夫会谈",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "乌兹",
+    "克斯",
+    "兹别",
+    "别克",
+    "别",
+    "兹",
+    "坦",
+    "斯坦",
+    "李强",
+    "乌",
+    "斯",
+    "克"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "李强同乌兹别克斯坦总理阿里波夫会谈",
      "summary": null
     }
    ]
@@ -3388,6 +3472,62 @@
    ]
   },
   {
+   "id": "08bcbdd38c2da718",
+   "title": "이스라엘 정착촌 주민, 서안서 유럽 외교관 공격…피해국 격앙(종합)",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "교관",
+    "라엘",
+    "서안",
+    "스라",
+    "안서",
+    "정착",
+    "착촌",
+    "외교",
+    "유럽",
+    "공격",
+    "주민",
+    "격앙"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "이스라엘 정착촌 주민, 서안서 유럽 외교관 공격…피해국 격앙(종합)",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "de649d7a054db2ec",
+   "title": "李强出席2026世界传统医药大会开幕式并致辞",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "医药",
+    "界传",
+    "药大",
+    "统医",
+    "药",
+    "传统",
+    "致辞",
+    "医",
+    "大会",
+    "传",
+    "幕",
+    "辞"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "李强出席2026世界传统医药大会开幕式并致辞",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "4c07bf1f6ec8bf9f",
    "title": "Iran's Guards say two tankers hit mines in Strait of Hormuz",
    "topic": "international",
@@ -3416,29 +3556,29 @@
    ]
   },
   {
-   "id": "91475478bf8b28dd",
-   "title": "India and West Indies draw T20 cricket series 2-2 after no result in rain-hit decider",
+   "id": "0bc6a317b8398c2b",
+   "title": "辺野古沖転覆事故、死亡した女子高生の両親が沖縄知事と面会…修学旅行の安全な実施を要望",
    "topic": "international",
    "days": 1,
    "signature": [
-    "indie",
-    "india",
-    "west",
-    "decider",
-    "denied",
-    "finale",
-    "rain-hit",
-    "result",
-    "thrilling",
-    "cricket",
-    "fifth",
-    "international"
+    "と面",
+    "事と",
+    "縄知",
+    "転覆",
+    "辺野",
+    "野古",
+    "辺",
+    "覆",
+    "知事",
+    "沖縄",
+    "縄",
+    "転"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "India and West Indies draw T20 cricket series 2-2 after no result in rain-hit decider",
+     "title": "辺野古沖転覆事故、死亡した女子高生の両親が沖縄知事と面会…修学旅行の安全な実施を要望",
      "summary": null
     }
    ]
@@ -3454,13 +3594,13 @@
     "france",
     "acros",
     "set",
+    "protest",
     "demonstration",
     "nationwide",
     "spread",
     "join",
     "trade",
-    "union",
-    "during"
+    "union"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -3556,8 +3696,8 @@
    ]
   },
   {
-   "id": "fb9f7f9e0e2a3659",
-   "title": "Yemen’s government says Houthis fired two missiles at Aden airport",
+   "id": "95d1d7ae89b8b1a7",
+   "title": "Houthis Hit Yemen Airport as Saudi Arabia Intercepts Attacks",
    "topic": "international",
    "days": 3,
    "signature": [
@@ -3588,15 +3728,15 @@
     },
     {
      "date": "2026-10-18",
-     "title": "Yemen’s government says Houthis fired two missiles at Aden airport",
-     "summary": "후티, 아덴 대통령궁·공항 잇따라 타격"
+     "title": "Houthis Hit Yemen Airport as Saudi Arabia Intercepts Attacks",
+     "summary": "후티, 아덴 대통령궁·공항 타격하며 교전 격화"
     }
    ]
   },
   {
    "id": "ef579c7b49c75f7a",
    "title": "최혜진·양희영, LPGA 상하이 대회 3R서 나란히 1·2위",
-   "topic": "economy",
+   "topic": "entertainment_sports",
    "days": 2,
    "signature": [
     "상하",
@@ -3627,6 +3767,34 @@
    ]
   },
   {
+   "id": "79f20672e99cbbd4",
+   "title": "雅万高铁开通三年累计发送旅客超1800万人次",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "万高",
+    "雅万",
+    "雅",
+    "高铁",
+    "铁",
+    "万",
+    "三年",
+    "发送",
+    "客超",
+    "年累",
+    "开通",
+    "旅客"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "雅万高铁开通三年累计发送旅客超1800万人次",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "dea28484f051b64b",
    "title": "장윤주, 런던 살더니 과감해졌다..♥남편에 \"노브라 괜찮아?\"[핫피플]",
    "topic": "entertainment_sports",
@@ -3636,8 +3804,8 @@
     "런던",
     "윤주",
     "과감",
-    "장윤",
     "브라",
+    "장윤",
     "남편",
     "감한",
     "따라",
@@ -3655,42 +3823,14 @@
    ]
   },
   {
-   "id": "559dbc2a25ab48f1",
-   "title": "[속보] 추미애, 부천 화재 순직 소방관 애도…\"헌신 잊지 않겠다\"",
-   "topic": "incidents",
-   "days": 1,
-   "signature": [
-    "속보",
-    "겠다",
-    "살피",
-    "저히",
-    "철저",
-    "피겠",
-    "근무",
-    "환경",
-    "비통",
-    "않겠",
-    "직접",
-    "잊지"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "[속보] 추미애, 부천 화재 순직 소방관 애도…\"헌신 잊지 않겠다\"",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "022effd28cab849e",
    "title": "\"홈런 치면 감독님 세리머니 따라하겠다\" 첫 가을야구 임하는 KIA의 무서운 20살, 20-20 놓쳤지만 \"아쉬움 1도 없다\" [인터뷰]",
    "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "독님",
-    "치면",
     "을야",
+    "치면",
     "리머",
     "세리",
     "머니",
@@ -3706,6 +3846,34 @@
     {
      "date": "2026-10-18",
      "title": "\"홈런 치면 감독님 세리머니 따라하겠다\" 첫 가을야구 임하는 KIA의 무서운 20살, 20-20 놓쳤지만 \"아쉬움 1도 없다\" [인터뷰]",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "9b83c2bf8eb379da",
+   "title": "福岡県議会の金銭授受疑惑の百条委設置議案、各議員の思惑が交錯し…緊急動議や度重なる本会議",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "授受",
+    "条委",
+    "百条",
+    "議案",
+    "銭授",
+    "金銭",
+    "銭",
+    "授",
+    "百",
+    "岡県",
+    "議会",
+    "県議"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "福岡県議会の金銭授受疑惑の百条委設置議案、各議員の思惑が交錯し…緊急動議や度重なる本会議",
      "summary": null
     }
    ]
@@ -3797,7 +3965,7 @@
   {
    "id": "21c4108417e1b596",
    "title": "앤트로픽 공동창업자 \"AI로 4년간 美GDP 50%↑…30조→44조달러\"",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 2,
    "signature": [
     "gdp",
@@ -3823,7 +3991,7 @@
     {
      "date": "2026-10-18",
      "title": "앤트로픽 공동창업자 \"AI로 4년간 美GDP 50%↑…30조→44조달러\"",
-     "summary": null
+     "summary": "앤트로픽 창업자, 2030년 美 GDP 44조 달러 전망"
     }
    ]
   },
@@ -3840,8 +4008,8 @@
     "upset",
     "start",
     "texa",
-    "lead",
     "florida",
+    "lead",
     "first",
     "win"
    ],
@@ -3924,7 +4092,8 @@
     "milan",
     "during",
     "set",
-    "fire"
+    "fire",
+    "protest"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -3942,10 +4111,10 @@
    "days": 1,
    "signature": [
     "に襲",
-    "クマ",
     "マに",
     "秋田",
     "襲わ",
+    "クマ",
     "襲",
     "田",
     "われ",
@@ -3979,7 +4148,8 @@
     "further",
     "taken",
     "government",
-    "pm"
+    "pm",
+    "police"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -4026,7 +4196,7 @@
   {
    "id": "3241b446d7e08938",
    "title": "US and China must ensure AI dialogue is more than just hot air",
-   "topic": "international",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "chine",
@@ -4057,14 +4227,14 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "就",
     "就任",
     "日で",
     "道官",
     "報道",
-    "任",
+    "就",
     "官",
     "道",
+    "任",
     "報",
     "ずか",
     "で辞",
@@ -4080,16 +4250,69 @@
    ]
   },
   {
+   "id": "a7bace2050e1d1cb",
+   "title": "自民 小林政調会長 消費税減税法案成立へ多くの野党に働きかけ",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "きか",
+    "に働",
+    "働き",
+    "税減",
+    "費税",
+    "野党",
+    "かけ",
+    "働",
+    "消費",
+    "減税",
+    "減",
+    "費"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "自民 小林政調会長 消費税減税法案成立へ多くの野党に働きかけ",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "48d9edb8dd7272fd",
+   "title": "Ryan Leonard scores highlight-reel goal, leads the Capitals over the Devils 4-2",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "devil",
+    "highlight-reel",
+    "leonard",
+    "ryan",
+    "goal",
+    "capital",
+    "score",
+    "lead"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Ryan Leonard scores highlight-reel goal, leads the Capitals over the Devils 4-2",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "8a010733ba010cb6",
    "title": "- 중앙일보",
-   "topic": "international",
+   "topic": "politics",
    "days": 2,
    "signature": [
+    "导读",
     "앙일",
     "일보",
     "중앙",
-    "ap",
-    "new"
+    "读",
+    "导"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -4101,7 +4324,7 @@
     {
      "date": "2026-10-18",
      "title": "- 중앙일보",
-     "summary": null
+     "summary": "중앙일보 인수전, 이번 기사에선 새 내용 없음"
     }
    ]
   },
@@ -4164,7 +4387,7 @@
   {
    "id": "39a5718a14a80816",
    "title": "Tributes to Andrews before Champions Cup matches",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 2,
    "signature": [
     "andrew",
@@ -4175,8 +4398,8 @@
     "emotional",
     "fan",
     "player",
-    "champion",
     "rugby",
+    "champion",
     "cup",
     "game"
    ],
@@ -4281,7 +4504,7 @@
   {
    "id": "b153035c8331fa1e",
    "title": "Mal embarqué à Strasbourg, le PSG s’impose grâce à Ousmane Dembélé et rejoint Monaco en tête de la Ligue 1",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "az-hattrick",
@@ -4302,6 +4525,34 @@
     {
      "date": "2026-10-18",
      "title": "Mal embarqué à Strasbourg, le PSG s’impose grâce à Ousmane Dembélé et rejoint Monaco en tête de la Ligue 1",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "38c92b4c8b8fca16",
+   "title": "Explosion at Iraqi paramilitary alliance base kills one member, sources say",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "iraqi",
+    "paramilitary",
+    "人受",
+    "克民",
+    "兵武",
+    "受伤",
+    "堆",
+    "堆爆",
+    "弹",
+    "弹药",
+    "民兵",
+    "炸致"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Explosion at Iraqi paramilitary alliance base kills one member, sources say",
      "summary": null
     }
    ]
@@ -4330,32 +4581,6 @@
     {
      "date": "2026-10-18",
      "title": "U.S. Floats Lifeline to Russia: Allowing More Gas Sales to Europe",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "abdb2094dcae1f9c",
-   "title": "Pakistani forces, Afghan Taliban exchange fire after militants attempt to infiltrate Pakistan",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "afghan",
-    "attempt",
-    "exchange",
-    "infiltrate",
-    "militant",
-    "pakistani",
-    "taliban",
-    "pakistan",
-    "force",
-    "fire"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Pakistani forces, Afghan Taliban exchange fire after militants attempt to infiltrate Pakistan",
      "summary": null
     }
    ]
@@ -4447,7 +4672,7 @@
   {
    "id": "ac8084c0193055cd",
    "title": "A bitter Michigan Senate race rattles Jewish and Muslim voters already on edge over the war in Gaza",
-   "topic": "international",
+   "topic": "politics",
    "days": 2,
    "signature": [
     "rattle",
@@ -4456,8 +4681,8 @@
     "edge",
     "gaza",
     "jewish",
-    "michigan",
     "muslim",
+    "michigan",
     "voter",
     "senate",
     "race",
@@ -4473,7 +4698,7 @@
     {
      "date": "2026-10-18",
      "title": "A bitter Michigan Senate race rattles Jewish and Muslim voters already on edge over the war in Gaza",
-     "summary": null
+     "summary": "미시간 상원 접전, 가자 전쟁에 유권자 동요"
     }
    ]
   },
@@ -4508,7 +4733,7 @@
   {
    "id": "8836c3bc46785d14",
    "title": "As Ukraine worries about Starlink access, Russia is developing a system to match it",
-   "topic": "international",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "starlink",
@@ -4562,6 +4787,62 @@
    ]
   },
   {
+   "id": "4b163ec5062be268",
+   "title": "Yemen Fighting Rages as Civilian Toll From Houthi-Saudi Conflict Worsens",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "yemen",
+    "besieged",
+    "escalating",
+    "houthi-saudi",
+    "taiz",
+    "toll",
+    "healthcare",
+    "worsen",
+    "conflict",
+    "civilian",
+    "rage",
+    "fighting"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Yemen Fighting Rages as Civilian Toll From Houthi-Saudi Conflict Worsens",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "52ac93d6fff7cce8",
+   "title": "2026年“一带一路”记者组织论坛聚焦“交汇融通·向新向前·世界变局中的媒体变革”",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "一带",
+    "一路",
+    "交汇",
+    "体变",
+    "变局",
+    "变革",
+    "向前",
+    "向新",
+    "坛聚",
+    "媒体",
+    "局中",
+    "带一"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "2026年“一带一路”记者组织论坛聚焦“交汇融通·向新向前·世界变局中的媒体变革”",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "a6cd985c9e5e3d98",
    "title": "Big earnings reports, homebuilding and the mood of consumers up front next week",
    "topic": "economy",
@@ -4606,6 +4887,62 @@
     {
      "date": "2026-10-18",
      "title": "US senator accuses Turkey of ‘thuggish behavior’ toward Greece and Cyprus",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "1f46656259ef2970",
+   "title": "中国驻日使馆：日当政者参拜靖国神社亵渎历史正义",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "义",
+    "亵",
+    "亵渎",
+    "使馆",
+    "史正",
+    "国驻",
+    "当政",
+    "政者",
+    "日使",
+    "日当",
+    "正义",
+    "渎"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "中国驻日使馆：日当政者参拜靖国神社亵渎历史正义",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "0e134d94393d3da9",
+   "title": "帮扶振兴启新程——写在第十三个国家扶贫日之际",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "三个",
+    "个国",
+    "兴",
+    "兴启",
+    "十三",
+    "在第",
+    "家扶",
+    "扶振",
+    "扶贫",
+    "振",
+    "振兴",
+    "日之"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "帮扶振兴启新程——写在第十三个国家扶贫日之际",
      "summary": null
     }
    ]
@@ -4669,7 +5006,7 @@
   {
    "id": "a20daf900bd79587",
    "title": "7,000-year-old bones uncovered at construction site in startling find",
-   "topic": "international",
+   "topic": "science",
    "days": 1,
    "signature": [
     "andertalien",
@@ -4697,7 +5034,7 @@
   {
    "id": "76f9519427c55aa2",
    "title": "Kartal battles past Ostapenko in Wuhan to secure spot in first WTA 1000 final",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "kartal",
@@ -4711,7 +5048,7 @@
     "spot",
     "battle",
     "continue",
-    "past"
+    "winning"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -4753,7 +5090,7 @@
   {
    "id": "b85f2a2373067b86",
    "title": "Rare pink diamond goes on display in France 100 years after amateur heist",
-   "topic": "international",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "amateur",
@@ -4781,7 +5118,7 @@
   {
    "id": "595d5b00687ac828",
    "title": "Do you need to wash these foods? Take our quiz.",
-   "topic": "international",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "alter",
@@ -4900,14 +5237,14 @@
     "surge",
     "growth",
     "canada",
-    "price"
+    "bank"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
      "title": "Macklem Sees Higher Oil Prices Boosting Growth, Inflation",
-     "summary": null
+     "summary": "캐나다 중앙은행, 유가 급등으로 물가 전망 상향 예고"
     }
    ]
   },
@@ -4938,9 +5275,37 @@
    ]
   },
   {
+   "id": "c4a94ce515bfe6fe",
+   "title": "从2026世界航海装备大会看海洋科技前沿",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "会看",
+    "前沿",
+    "备大",
+    "技前",
+    "洋科",
+    "海洋",
+    "海装",
+    "界航",
+    "看海",
+    "航海",
+    "装备",
+    "备"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "从2026世界航海装备大会看海洋科技前沿",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "0686895acc54d22d",
    "title": "緊急地震速報が配信されなかったドコモ「エリアメール」、不具合解消",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "コモ",
@@ -4949,12 +5314,12 @@
     "信さ",
     "具合",
     "急地",
+    "配信",
+    "具",
     "緊",
     "緊急",
-    "配信",
-    "信",
-    "具",
-    "速報"
+    "速報",
+    "震速"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5111,6 +5476,34 @@
    ]
   },
   {
+   "id": "d2681ff4dcb20f2a",
+   "title": "Russian defence ministry says it hit Ukrainian steel plants, power infrastructure overnight",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "infrastructure",
+    "ministry",
+    "overnight",
+    "plant",
+    "steel",
+    "兰能",
+    "基称",
+    "斯基",
+    "模袭",
+    "泽连",
+    "源系",
+    "称乌"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Russian defence ministry says it hit Ukrainian steel plants, power infrastructure overnight",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "05c1a7f706d03cf9",
    "title": "유노윤호, 버블 두달 부재중 후 소통 지적 받았다..“서운할 수 있어” [Oh!쎈 이슈]",
    "topic": "entertainment_sports",
@@ -5134,6 +5527,62 @@
     {
      "date": "2026-10-18",
      "title": "유노윤호, 버블 두달 부재중 후 소통 지적 받았다..“서운할 수 있어” [Oh!쎈 이슈]",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "d64c91c4c2749316",
+   "title": "克罗地亚总理普连科维奇会见王毅",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "亚总",
+    "克罗",
+    "地亚",
+    "奇会",
+    "普连",
+    "王毅",
+    "理普",
+    "科维",
+    "维奇",
+    "罗",
+    "罗地",
+    "见王"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "克罗地亚总理普连科维奇会见王毅",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "66ccd83d106601c5",
+   "title": "En Albanie, la solidarité s’organise face aux violences policières",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "organise",
+    "polici",
+    "solidarit",
+    "亚抗",
+    "力冲",
+    "发暴",
+    "威引",
+    "尔巴",
+    "巴尼",
+    "抗议",
+    "示威",
+    "议示"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "En Albanie, la solidarité s’organise face aux violences policières",
      "summary": null
     }
    ]
@@ -5208,7 +5657,8 @@
     "draw",
     "republican",
     "fight",
-    "hold"
+    "hold",
+    "house"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5263,13 +5713,13 @@
     "strain",
     "tackle",
     "wave",
-    "french",
     "social",
     "street",
+    "french",
     "take",
-    "price",
     "protester",
-    "france"
+    "france",
+    "price"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5281,9 +5731,93 @@
    ]
   },
   {
+   "id": "fd0ce2887c9a092b",
+   "title": "学习手记丨饮水思源 勿忘老区",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "勿",
+    "勿忘",
+    "忘老",
+    "思源",
+    "水思",
+    "老区",
+    "饮",
+    "饮水",
+    "忘",
+    "习手",
+    "学习",
+    "思"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "学习手记丨饮水思源 勿忘老区",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "d4d9b4a6e7ba7f24",
+   "title": "“有高远目标，更有耐心有定力”——习近平总书记在内蒙古乌兰察布考察纪实",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "古乌",
+    "在内",
+    "布考",
+    "乌兰",
+    "兰察",
+    "察布",
+    "考察",
+    "内蒙",
+    "蒙",
+    "蒙古",
+    "习近",
+    "近平"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "“有高远目标，更有耐心有定力”——习近平总书记在内蒙古乌兰察布考察纪实",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "a22bd41d3c47960d",
+   "title": "写在APEC领导人非正式会议倒计时一个月之际",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "个月",
+    "倒计",
+    "计时",
+    "倒",
+    "导人",
+    "领导",
+    "apec",
+    "领",
+    "导",
+    "计",
+    "个",
+    "时"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "写在APEC领导人非正式会议倒计时一个月之际",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "4965ac75caef54c0",
    "title": "US Interest Costs Hit Record $1 Trillion, Risking Debt Snowball",
-   "topic": "international",
+   "topic": "economy",
    "days": 1,
    "signature": [
     "nf-jahres-hoch",
@@ -5393,7 +5927,7 @@
     {
      "date": "2026-10-18",
      "title": "與김병주 \"주한미군 사령관, 대한민국 영토주권 침해 사과해야\"(종합)",
-     "summary": null
+     "summary": "김병주 등 與, 브런슨 발언 철회·사과 촉구"
     }
    ]
   },
@@ -5529,7 +6063,7 @@
     "볼까",
     "승해",
     "어투",
-    "와이"
+    "위와"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5568,7 +6102,7 @@
   {
    "id": "ecccf67ca9d00f6c",
    "title": "“순직 소방관 딸이 일곱살”... 李대통령 말 잇지 못했다",
-   "topic": "politics",
+   "topic": "society",
    "days": 1,
    "signature": [
     "잇지",
@@ -5652,7 +6186,7 @@
   {
    "id": "8ca38f9f0395880f",
    "title": "Dubois v Wardley 2 - heavyweight title fight predictions",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "duboi",
@@ -5705,56 +6239,29 @@
    ]
   },
   {
-   "id": "e2fdf31965e857a5",
-   "title": "China Warns Corrupt Officials Can’t Expect a Safe Landing",
+   "id": "55d34171a49bbfb8",
+   "title": "总书记讲述的长征故事丨断肠明志 铁血忠魂",
    "topic": "international",
    "days": 1,
    "signature": [
-    "corrupt",
-    "official",
-    "warn",
-    "china",
-    "anti-graft",
-    "expect",
-    "landing",
-    "nowhere",
-    "hide",
-    "safe",
-    "watchdog"
+    "血",
+    "记讲",
+    "魂",
+    "征故",
+    "讲",
+    "的长",
+    "故事",
+    "总书",
+    "书记",
+    "故",
+    "征",
+    "长征"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "China Warns Corrupt Officials Can’t Expect a Safe Landing",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "0bc6a317b8398c2b",
-   "title": "辺野古沖転覆事故、死亡した女子高生の両親が沖縄知事と面会…修学旅行の安全な実施を要望",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "が沖",
-    "た女",
-    "と面",
-    "事と",
-    "亡し",
-    "子高",
-    "縄知",
-    "覆事",
-    "親が",
-    "転覆",
-    "辺野",
-    "野古"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "辺野古沖転覆事故、死亡した女子高生の両親が沖縄知事と面会…修学旅行の安全な実施を要望",
+     "title": "总书记讲述的长征故事丨断肠明志 铁血忠魂",
      "summary": null
     }
    ]
@@ -5804,7 +6311,7 @@
     "die",
     "people",
     "two",
-    "killed"
+    "man"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5844,6 +6351,34 @@
    ]
   },
   {
+   "id": "0aa7714645d8c273",
+   "title": "제자 오디션 후 금품 수수 혐의…서울대 성악과 교수 1심 무죄",
+   "topic": "society",
+   "days": 1,
+   "signature": [
+    "乐老",
+    "声乐",
+    "学里",
+    "年大",
+    "老师",
+    "무죄",
+    "성악",
+    "악과",
+    "울대",
+    "乐",
+    "后",
+    "师"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "제자 오디션 후 금품 수수 혐의…서울대 성악과 교수 1심 무죄",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "36250b6027a52cd0",
    "title": "Wall-to-wall Top 25 showdowns, with 6 ranked matchups on tap starting with Ohio State at Indiana",
    "topic": "international",
@@ -5872,7 +6407,7 @@
   {
    "id": "7e64dea693299c92",
    "title": "Tesla unveils its new Roadster sports car, which can thrust itself into the air",
-   "topic": "international",
+   "topic": "industry",
    "days": 3,
    "signature": [
     "roadster",
@@ -5903,7 +6438,35 @@
     {
      "date": "2026-10-18",
      "title": "Tesla unveils its new Roadster sports car, which can thrust itself into the air",
-     "summary": "테슬라 로드스터 공개, 비행차 경쟁 점화"
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "034ee310c16d3f7d",
+   "title": "Asean climate monitor issues highest alert level over toxic haze",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "asean",
+    "haze",
+    "monitor",
+    "toxic",
+    "上空",
+    "丹",
+    "丹岛",
+    "产生",
+    "加达",
+    "加里",
+    "印尼",
+    "尼加"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Asean climate monitor issues highest alert level over toxic haze",
+     "summary": null
     }
    ]
   },
@@ -5913,16 +6476,16 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "根駅",
     "選会",
+    "根駅",
     "駅伝",
     "駅",
     "予選",
     "伝",
-    "根",
     "箱",
     "箱根",
     "予",
+    "根",
     "選",
     "いの"
    ],
@@ -5945,9 +6508,9 @@
     "calgary",
     "carney",
     "crowd",
-    "prime",
     "separation",
     "canadian",
+    "prime",
     "succession",
     "unite",
     "referendum",
@@ -5969,37 +6532,9 @@
    ]
   },
   {
-   "id": "ec93de2dd0557d10",
-   "title": "Au Yémen, des frappes houthistes près de l’aéroport d’Aden ; l’Iran nie tout rôle dans les attaques visant l’Arabie saoudite",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "arabie",
-    "attackiert",
-    "attaque",
-    "frappe",
-    "houthiste",
-    "persischen",
-    "roport",
-    "saoudite",
-    "tankschiffe",
-    "visant",
-    "nie",
-    "saudi-arabien"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Au Yémen, des frappes houthistes près de l’aéroport d’Aden ; l’Iran nie tout rôle dans les attaques visant l’Arabie saoudite",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "0aaab2158606ae98",
    "title": "벨라루스, 주북한대사관 개설…\"호혜적 관계 발전 주력\"",
-   "topic": "politics",
+   "topic": "international",
    "days": 1,
    "signature": [
     "개설",
@@ -6053,6 +6588,34 @@
    ]
   },
   {
+   "id": "f1b28046cfef9056",
+   "title": "The Washington Ballet turns 50. It was built on taking chances.",
+   "topic": "lifestyle_culture",
+   "days": 1,
+   "signature": [
+    "ballet",
+    "团成",
+    "大剧",
+    "家大",
+    "舞团",
+    "芭",
+    "芭蕾",
+    "蕾",
+    "蕾舞",
+    "院芭",
+    "built",
+    "剧院"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "The Washington Ballet turns 50. It was built on taking chances.",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "8d506f0ec306021e",
    "title": "愛子さまが初めて鳥取県を訪問、「鳥取砂丘コナン空港」の展示を見て回られる",
    "topic": "international",
@@ -6069,13 +6632,69 @@
     "子さ",
     "愛子",
     "取",
-    "示"
+    "問"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
      "title": "愛子さまが初めて鳥取県を訪問、「鳥取砂丘コナン空港」の展示を見て回られる",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "ec8f1bb470b7bf8c",
+   "title": "Russland: Kreml feiert Aussetzung von US-Sanktionen durch Donald Trump als »historischen Moment«",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "durch",
+    "feiert",
+    "historischen",
+    "kreml",
+    "us-sanktionen",
+    "令豁",
+    "俄多",
+    "免对",
+    "对俄",
+    "政令",
+    "普签",
+    "签"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Russland: Kreml feiert Aussetzung von US-Sanktionen durch Donald Trump als »historischen Moment«",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "d5ef0961bfe4be52",
+   "title": "王沪宁在四川调研时强调 坚持为推进中国式现代化凝心聚力 扎实做好新时代党的民族宗教工作",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "为推",
+    "代党",
+    "代化",
+    "党的",
+    "凝",
+    "凝心",
+    "化凝",
+    "四川",
+    "国式",
+    "在四",
+    "坚持",
+    "好新"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "王沪宁在四川调研时强调 坚持为推进中国式现代化凝心聚力 扎实做好新时代党的民族宗教工作",
      "summary": null
     }
    ]
@@ -6153,7 +6772,7 @@
     "세계",
     "국체",
     "체전",
-    "강현"
+    "전국"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6200,7 +6819,7 @@
   {
    "id": "6de519033b5c174a",
    "title": "도롱뇽 알집인 줄…북한강서 발견된 징그러운 덩어리 정체 충격",
-   "topic": "politics",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "견된",
@@ -6294,7 +6913,7 @@
   {
    "id": "0f08f5444c042a3c",
    "title": "주북中대사, 신압록강대교 북중시설 방문…\"경제 협력 확대\"",
-   "topic": "politics",
+   "topic": "international",
    "days": 2,
    "signature": [
     "강대",
@@ -6375,7 +6994,7 @@
   {
    "id": "d0c11eae6d4a5c09",
    "title": "Retail price impacts from the Iran war are uneven but add up for US households before midterms",
-   "topic": "international",
+   "topic": "economy",
    "days": 2,
    "signature": [
     "household",
@@ -6384,9 +7003,9 @@
     "impact",
     "add",
     "iran",
-    "price",
     "war",
-    "midterm"
+    "midterm",
+    "price"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6398,6 +7017,34 @@
     {
      "date": "2026-10-18",
      "title": "Retail price impacts from the Iran war are uneven but add up for US households before midterms",
+     "summary": "이란전 장기화로 연료비 상승, 가계 부담 누적"
+    }
+   ]
+  },
+  {
+   "id": "6ab43c2b943641bb",
+   "title": "Près de 8,6 tonnes de stupéfiants saisies par la marine nationale lors de plusieurs opérations dans les Caraïbes et l’Atlantique",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "atlantique",
+    "bes",
+    "cara",
+    "fiant",
+    "lor",
+    "marine",
+    "op",
+    "saisie",
+    "stup",
+    "tonne",
+    "上执",
+    "业协"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Près de 8,6 tonnes de stupéfiants saisies par la marine nationale lors de plusieurs opérations dans les Caraïbes et l’Atlantique",
      "summary": null
     }
    ]
@@ -6441,13 +7088,13 @@
     "法政",
     "秒差",
     "秒",
-    "政",
     "差",
     "予選",
-    "法",
-    "根",
     "箱",
-    "箱根"
+    "箱根",
+    "予",
+    "根",
+    "法"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6461,7 +7108,7 @@
   {
    "id": "eb6596c3603ca5da",
    "title": "110달러 육박한 유가에…트럼프, 대러 제재 면제 발표",
-   "topic": "economy",
+   "topic": "international",
    "days": 1,
    "signature": [
     "대러",
@@ -6512,6 +7159,34 @@
    ]
   },
   {
+   "id": "fec8ea6b7adc778a",
+   "title": "2026年“铸牢共同体 中华一家亲”主题宣传活动云南集中采访启动",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "一家",
+    "中华",
+    "中采",
+    "主题",
+    "传活",
+    "共同",
+    "动云",
+    "华一",
+    "南集",
+    "同体",
+    "启动",
+    "宣传"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "2026年“铸牢共同体 中华一家亲”主题宣传活动云南集中采访启动",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "259e3b6480cf4420",
    "title": "광주서 승합차·시내버스·오토바이 추돌…2명 경상",
    "topic": "incidents",
@@ -6528,7 +7203,7 @@
     "승합",
     "합차",
     "불에",
-    "차로"
+    "잇단"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6550,13 +7225,13 @@
     "간선",
     "중간",
     "선거",
-    "美",
     "괴우",
     "배달",
     "백색",
     "사무",
     "색가",
-    "소포"
+    "소포",
+    "실로"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6636,7 +7311,7 @@
   {
    "id": "15eed61c93d5cd71",
    "title": "Figueroa loses WBA featherweight title after missing weight",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "featherweight",
@@ -6723,18 +7398,18 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "事国",
     "任理",
     "務総",
     "反対",
     "常任",
     "理事",
     "総長",
-    "航",
     "連事",
     "難航",
     "事務",
-    "国連"
+    "事国",
+    "国連",
+    "難"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6776,7 +7451,7 @@
   {
    "id": "407471340316fbd3",
    "title": "끊이지 않는 딥페이크 성범죄물…8개월만에 작년 심의 건수 추월",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "딥페",
@@ -6802,30 +7477,30 @@
    ]
   },
   {
-   "id": "e08e0298578d02d5",
-   "title": "福岡県議会「百条委」議案可決 金銭授受問題や海外視察調査へ",
-   "topic": "international",
+   "id": "b3cab51499395c91",
+   "title": "BOJ may need to tighten faster if inflation beats forecast, IMF says",
+   "topic": "economy",
    "days": 1,
    "signature": [
-    "授受",
-    "条委",
-    "百",
-    "百条",
-    "議案",
-    "銭授",
-    "委",
-    "授",
-    "金銭",
-    "銭",
-    "可決",
-    "決"
+    "imf",
+    "boj",
+    "tighten",
+    "专访",
+    "临",
+    "临紧",
+    "告全",
+    "员警",
+    "官员",
+    "政挑",
+    "济面",
+    "球经"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "福岡県議会「百条委」議案可決 金銭授受問題や海外視察調査へ",
-     "summary": null
+     "title": "BOJ may need to tighten faster if inflation beats forecast, IMF says",
+     "summary": "IMF, 세계 공공부채 2030년 GDP 100% 초과 전망"
     }
    ]
   },
@@ -6952,6 +7627,62 @@
    ]
   },
   {
+   "id": "fccd1092ddf73a39",
+   "title": "鲁班工坊系列国家标准公布",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "公布",
+    "准公",
+    "列国",
+    "坊",
+    "坊系",
+    "家标",
+    "工坊",
+    "班",
+    "班工",
+    "鲁班",
+    "系列",
+    "鲁"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "鲁班工坊系列国家标准公布",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "e654d0f96f540a27",
+   "title": "International Olympic Committee scraps gender equality, diversity and inclusion panel in major reshuffle",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "diversity",
+    "equality",
+    "gender",
+    "inclusion",
+    "panel",
+    "scrap",
+    "个委",
+    "会撤",
+    "向更",
+    "员会",
+    "奥委",
+    "委员"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "International Olympic Committee scraps gender equality, diversity and inclusion panel in major reshuffle",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "7e41c4563b2bb073",
    "title": "베스티, '연애의 조건' 역주행 힘입어 4인조 완전체 재결합",
    "topic": "society",
@@ -7036,6 +7767,34 @@
    ]
   },
   {
+   "id": "0b9ed873a0f5d945",
+   "title": "총 든 로봇개·대테러 휴머노이드까지…中 대테러 작전도 AI가 맡는다 [차이나 워치]",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "全新",
+    "带来",
+    "新挑",
+    "来网",
+    "络",
+    "络安",
+    "网络",
+    "虫",
+    "虫带",
+    "蠕",
+    "蠕虫",
+    "노이"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "총 든 로봇개·대테러 휴머노이드까지…中 대테러 작전도 AI가 맡는다 [차이나 워치]",
+     "summary": "중국, 무인·AI 장비 앞세워 대테러 작전 전환"
+    }
+   ]
+  },
+  {
    "id": "ccf4ac842aa71fcd",
    "title": "California officials who process ballots from suspected noncitizens risk prosecution, US warns",
    "topic": "international",
@@ -7076,7 +7835,7 @@
   {
    "id": "d266f36dc0241b66",
    "title": "SoftBank weighs $18 billion acquisition of Allied Universal, source says",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "allied",
@@ -7123,6 +7882,34 @@
     {
      "date": "2026-10-18",
      "title": "LG·삼성·KT 최다 10명 후보 배출…KBO 골든글러브 후보 발표",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "b2378280f2fb7705",
+   "title": "我国技能人才新增劳动力平均受教育年限超14年",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "力平",
+    "动力",
+    "劳",
+    "劳动",
+    "受教",
+    "国技",
+    "均",
+    "均受",
+    "增劳",
+    "平均",
+    "年限",
+    "才新"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "我国技能人才新增劳动力平均受教育年限超14年",
      "summary": null
     }
    ]
@@ -7217,6 +8004,34 @@
    ]
   },
   {
+   "id": "6a57b52b0beaffec",
+   "title": "新华社权威快报丨《世界职业技术教育标准框架》发布",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "准框",
+    "框架",
+    "育标",
+    "业技",
+    "技术",
+    "术教",
+    "框",
+    "界职",
+    "职业",
+    "教育",
+    "架",
+    "标准"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "新华社权威快报丨《世界职业技术教育标准框架》发布",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "0335715d2bd74d2e",
    "title": "どうなる横浜市長選 熱を帯びる最終盤の舌戦、前新7候補が支持訴え",
    "topic": "international",
@@ -7227,13 +8042,13 @@
     "横",
     "浜",
     "訴え",
-    "候",
     "候補",
     "訴",
     "長選",
-    "補",
+    "候",
     "市長",
-    "新"
+    "補",
+    "選"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -7259,9 +8074,9 @@
     "双",
     "埼",
     "朝",
-    "玉",
     "発言",
-    "謝"
+    "謝",
+    "玉"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -7296,6 +8111,34 @@
     {
      "date": "2026-10-18",
      "title": "'11세 연하♥' 김종민, 임신 소감 밝혔다..\"든든한 평생 친구 생겨\"('1박2일')",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "699200970fc9ecac",
+   "title": "U.S. Stocks Fall as Credit Fears Haunt Tech Sector",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "haunt",
+    "sector",
+    "一年",
+    "单周",
+    "周跌",
+    "型科",
+    "多来",
+    "大单",
+    "大型",
+    "幅",
+    "年多",
+    "技股"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "U.S. Stocks Fall as Credit Fears Haunt Tech Sector",
      "summary": null
     }
    ]
@@ -7339,13 +8182,13 @@
     "football",
     "agreement",
     "handshake",
-    "money",
     "espn",
     "expanding",
     "some",
     "ap",
     "bring",
-    "closer"
+    "closer",
+    "money"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -7497,7 +8340,7 @@
     {
      "date": "2026-10-18",
      "title": "불황 장기화에 빚 감당 못하는 기업…법인파산 4년새 2.4배로",
-     "summary": null
+     "summary": "법인파산 2021년 955건→지난해 2,282건"
     }
    ]
   },
@@ -7535,6 +8378,34 @@
     {
      "date": "2026-10-18",
      "title": "Teacher Killed in Oregon School Shooting Was Working Her ‘Dream Job,’ Family Says",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "47bcb361022d6f8d",
+   "title": "Trump in Georgia Touts Manufacturing Gains as GOP Targets Ossoff",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "ossoff",
+    "georgia",
+    "falsely",
+    "illegitimate",
+    "jon",
+    "manufacturing",
+    "target",
+    "gain",
+    "gop",
+    "tout",
+    "claim",
+    "election"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Trump in Georgia Touts Manufacturing Gains as GOP Targets Ossoff",
      "summary": null
     }
    ]
@@ -7584,7 +8455,7 @@
     "価指",
     "務な",
     "指数",
-    "株"
+    "株価"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -7598,7 +8469,7 @@
   {
    "id": "d12e59646ead8760",
    "title": "Sean ‘Diddy’ Combs moved to new prison after reports of a luxury lifestyle behind bars",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 2,
    "signature": [
     "bar",
@@ -7629,7 +8500,7 @@
   {
    "id": "66229112c403cf9b",
    "title": "The World’s Oldest Shipwreck? Maybe, but ‘We’re All Excited by Maybe.’",
-   "topic": "international",
+   "topic": "science",
    "days": 1,
    "signature": [
     "excited",
@@ -7683,7 +8554,7 @@
     {
      "date": "2026-10-18",
      "title": "국내 기름값 22주 연속 하락…휘발유·경유 1천800원대 지속",
-     "summary": null
+     "summary": "휘발유 22주째 하락, 최고가격 11차도 동결"
     }
    ]
   },
@@ -7718,7 +8589,7 @@
   {
    "id": "c432b5fcff8ffd7e",
    "title": "[르포] “갤럭시Z 폴드8, 기기변경 시 138만원 할인”… 아이폰 듀오 사전예약 시작일에 통신 대리점 가보니",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "foldable",
@@ -7739,82 +8610,6 @@
     {
      "date": "2026-10-18",
      "title": "[르포] “갤럭시Z 폴드8, 기기변경 시 138만원 할인”… 아이폰 듀오 사전예약 시작일에 통신 대리점 가보니",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "e4d06631bd4715f5",
-   "title": "Trump Fires WH Press Secretary",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "secretary",
-    "pres",
-    "white",
-    "cnn",
-    "fire",
-    "hiring",
-    "kaitlan",
-    "collin",
-    "firing",
-    "podcast",
-    "rash",
-    "wh"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "White House press secretary Katie Zacharia says she did not pass bar exam",
-     "summary": "재커라이어 백악관 대변인, 5일 만에 퇴진"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Trump Fires WH Press Secretary",
-     "summary": "대변인 교체보다 트럼프의 언론 압박이 본질"
-    }
-   ]
-  },
-  {
-   "id": "db93af1d042c307b",
-   "title": "Fourth-grader recounts Oregon school shooting",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "oregon",
-    "school",
-    "attended",
-    "fourth-grader",
-    "identify",
-    "recount",
-    "shellshocked",
-    "speak",
-    "mother",
-    "gunman",
-    "shooter",
-    "shooting"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "파키스탄 사립학교 지붕 붕괴… 학생 34명-교사 1명 숨져",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Teen shooter kills 3 children, teacher at Oregon elementary school",
-     "summary": "오리건 초등학교서 10대 총격, 4명 숨지고 주민 추모"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Fourth-grader recounts Oregon school shooting",
      "summary": null
     }
    ]
@@ -7843,35 +8638,7 @@
     {
      "date": "2026-10-18",
      "title": "[다음주 경제] 기준금리 3연속 인상할까…생산자 물가도 발표",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "5673c735d8d1a4a7",
-   "title": "Tish James confronted on camera over Trump's accusation of bias in Cornell rape case",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "jame",
-    "cornell",
-    "boot",
-    "client",
-    "confronted",
-    "fraternity",
-    "letitia",
-    "tish",
-    "accusation",
-    "bia",
-    "camera",
-    "fair"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Tish James confronted on camera over Trump's accusation of bias in Cornell rape case",
-     "summary": null
+     "summary": "전문가 6명 전원 \"22일 동결, 11월 인상\" 전망"
     }
    ]
   },
@@ -7963,34 +8730,6 @@
    ]
   },
   {
-   "id": "d9fb5c2bd11b737a",
-   "title": "EU, 중국 의식해 무역전쟁 발발시 시장접근 신속제한 추진",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "발발",
-    "속제",
-    "식해",
-    "장접",
-    "무역",
-    "발시",
-    "신속",
-    "제한",
-    "의식",
-    "접근",
-    "전쟁",
-    "중국"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "EU, 중국 의식해 무역전쟁 발발시 시장접근 신속제한 추진",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "7363760ba3331431",
    "title": "台風30号 急速に発達 23日に沖縄の南海上へ 今後の情報注意",
    "topic": "international",
@@ -8006,8 +8745,8 @@
     "台風",
     "報注",
     "急速",
-    "海上",
-    "発達"
+    "発達",
+    "縄の"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -8048,6 +8787,34 @@
      "date": "2026-10-18",
      "title": "금감원 '2차 해킹' OK저축은행 현장점검…금주 업권 간담회도",
      "summary": null
+    }
+   ]
+  },
+  {
+   "id": "503c99f7a84b0812",
+   "title": "국민소득 4만달러 눈앞인데…올해 증가분 80%는 기업 몫",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "가분",
+    "만달",
+    "민소",
+    "소득",
+    "눈앞",
+    "앞인",
+    "증가",
+    "국민",
+    "인데",
+    "달러",
+    "기업",
+    "올해"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "국민소득 4만달러 눈앞인데…올해 증가분 80%는 기업 몫",
+     "summary": "상반기 GNI 증가분의 79%가 기업·자영업자 소득"
     }
    ]
   },
@@ -8144,7 +8911,7 @@
     {
      "date": "2026-10-18",
      "title": "한국 잠재성장률 '대반전'…40년 만에 연속 반등 전망",
-     "summary": null
+     "summary": "IMF, 한국 잠재성장률 올해 2.14%·내년 2.20% 전망"
     }
    ]
   },
@@ -8232,81 +8999,7 @@
     {
      "date": "2026-10-18",
      "title": "빚 갚는 데 15년, 1.7억에 산 대치동 아파트 40억 되자 든 생각",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "f80cf90a6cbbee48",
-   "title": "新たな教科書は「紙中心」、デジタルは補助的扱いに…小４以下は完全デジタル認めず",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "いに",
-    "な教",
-    "は完",
-    "は補",
-    "めず",
-    "ジタ",
-    "タル",
-    "デジ",
-    "ルは",
-    "ル認",
-    "下は",
-    "中心"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "新たな教科書は「紙中心」、デジタルは補助的扱いに…小４以下は完全デジタル認めず",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "cc894bfa8dc20a5c",
-   "title": "Will the EU come to Ukraine’s rescue in war against Russia?",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "come",
-    "rescue",
-    "eu",
-    "war",
-    "ukraine"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Will the EU come to Ukraine’s rescue in war against Russia?",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "b94524dc06f54b1c",
-   "title": "Israeli drone attacks kill six Palestinians across Gaza despite ‘ceasefire’",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "ceasefire",
-    "gaza",
-    "despite",
-    "six",
-    "palestinian",
-    "drone",
-    "acros",
-    "kill",
-    "israeli"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Israeli drone attacks kill six Palestinians across Gaza despite ‘ceasefire’",
-     "summary": null
+     "summary": "집값 급등 속 세대별 내 집 마련 경험담"
     }
    ]
   },
@@ -8349,6 +9042,32 @@
    ]
   },
   {
+   "id": "77feb4f73223d7da",
+   "title": "美 ‘중간 선거’로 증시 강세 유력… 한국도 흐름 탈 가능성",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "강세",
+    "유력",
+    "국도",
+    "흐름",
+    "증시",
+    "능성",
+    "중간",
+    "가능",
+    "선거",
+    "한국"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "美 ‘중간 선거’로 증시 강세 유력… 한국도 흐름 탈 가능성",
+     "summary": "중간선거 전후 미 증시 강세 전망, 한국 동조 가능성"
+    }
+   ]
+  },
+  {
    "id": "3994d72cfd5143fc",
    "title": "Japan set to move forward with Bangladesh's first economic pact",
    "topic": "economy",
@@ -8356,8 +9075,8 @@
    "signature": [
     "bangladesh'",
     "pact",
-    "economic",
     "forward",
+    "economic",
     "japan",
     "move",
     "set",
@@ -8373,220 +9092,58 @@
    ]
   },
   {
-   "id": "2d37090a077a89ba",
-   "title": "Hong Kong orders lift contractors to review doors installed over past 10 years",
-   "topic": "international",
+   "id": "d119091c368210c0",
+   "title": "[TSMC 실적] ‘검은 목요일’에 묻힌 역대급 실적, 다시 뜯어봤습니다｜Global Money Club",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
-    "contractor",
-    "door",
-    "installed",
-    "past",
-    "review",
-    "lift",
-    "hong",
-    "kong",
-    "order"
+    "tsmc",
+    "검은",
+    "뜯어",
+    "목요",
+    "묻힌",
+    "봤습",
+    "어봤",
+    "실적",
+    "대급",
+    "습니",
+    "club",
+    "money"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "Hong Kong orders lift contractors to review doors installed over past 10 years",
-     "summary": null
+     "title": "[TSMC 실적] ‘검은 목요일’에 묻힌 역대급 실적, 다시 뜯어봤습니다｜Global Money Club",
+     "summary": "급락장에 묻힌 TSMC 실적을 재조명"
     }
    ]
   },
   {
-   "id": "c51d1f091d76663c",
-   "title": "빚투 3천억 강제청산…\"증시 무너져도 정부 '예의 주시' 말뿐\" [분석+]",
+   "id": "ede59a9fc076f9eb",
+   "title": "两年债务规模下降18% 柳州原市委书记撰文谈化债细节",
    "topic": "economy",
-   "days": 3,
-   "signature": [
-    "말뿐",
-    "예의",
-    "져도",
-    "제청",
-    "청산",
-    "너져",
-    "분석",
-    "천억",
-    "주시",
-    "증시",
-    "무너",
-    "빚투"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "국내 증시 7% 넘게 ‘곤두박질’",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "코스피 7% 급락한 '검은 목요일'에 800억원대 또 강제청산",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "빚투 3천억 강제청산…\"증시 무너져도 정부 '예의 주시' 말뿐\" [분석+]",
-     "summary": "코스피 7연속 하락, 반대매매 3천억 육박"
-    }
-   ]
-  },
-  {
-   "id": "b50d7831a9c919c8",
-   "title": "How Taiwan’s new AI satellite system aims to speed up early warning against PLA moves",
-   "topic": "international",
    "days": 1,
    "signature": [
-    "pla",
-    "aim",
-    "satellite",
-    "early",
-    "speed",
-    "taiwan",
-    "warning",
-    "system",
-    "move"
+    "下降",
+    "两年",
+    "债",
+    "债务",
+    "债细",
+    "务规",
+    "化债",
+    "原市",
+    "州原",
+    "年债",
+    "撰文",
+    "文谈"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "How Taiwan’s new AI satellite system aims to speed up early warning against PLA moves",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "a3f64622a1ab3039",
-   "title": "Press Freedom This Week: Washington Post photographer attacked by Israeli settlers in West Bank",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "freedom",
-    "photographer",
-    "attacked",
-    "post",
-    "washington",
-    "week",
-    "settler",
-    "pres",
-    "israeli",
-    "west",
-    "bank"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "Israeli settlers attack Palestinians in West Bank during olive harvest",
-     "summary": "서안 올리브 수확 중 정착민 습격, 미 기자 부상"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Press Freedom This Week: Washington Post photographer attacked by Israeli settlers in West Bank",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "a46e652c67fe8980",
-   "title": "More NHS staff sacked over attacks victims' records",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "nhs",
-    "sacked",
-    "victim",
-    "staff",
-    "record"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "More NHS staff sacked over attacks victims' records",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "b13e7be8bfb72fd8",
-   "title": "China’s embassy issues fresh Thailand travel alert over kidnappings, job scams",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "fresh",
-    "kidnapping",
-    "scam",
-    "embassy",
-    "alert",
-    "thailand",
-    "travel",
-    "issue",
-    "job",
-    "china"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "China’s embassy issues fresh Thailand travel alert over kidnappings, job scams",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "ba97eb87b33fd5c2",
-   "title": "Mother of 8-year-old killed in a 2020 Georgia shooting remembers her daughter.",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "remember",
-    "daughter",
-    "mother",
-    "year-old",
-    "georgia",
-    "shooting",
-    "killed"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Mother of 8-year-old killed in a 2020 Georgia shooting remembers her daughter.",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "80e876d005ebb717",
-   "title": "秋の夜空に大輪、なにわ淀川花火大会 暑さ避けて今年も10月開催",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "けて",
-    "さ避",
-    "て今",
-    "にわ",
-    "の夜",
-    "わ淀",
-    "今年",
-    "催",
-    "夜",
-    "夜空",
-    "大輪",
-    "川花"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "秋の夜空に大輪、なにわ淀川花火大会 暑さ避けて今年も10月開催",
-     "summary": null
+     "title": "两年债务规模下降18% 柳州原市委书记撰文谈化债细节",
+     "summary": "류저우 부채 2023년 말 대비 18% 감소, 전 서기가 공개"
     }
    ]
   },
@@ -8623,55 +9180,35 @@
    ]
   },
   {
-   "id": "c5922f7b83e7d94b",
-   "title": "« Beaucoup de gens ne mangeraient pas s’ils ne venaient pas là » : à Alès, une cantine solidaire contre la vie chère",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "beaucoup",
-    "cantine",
-    "ch",
-    "mangeraient",
-    "pas",
-    "solidaire",
-    "venaient",
-    "contre",
-    "ils",
-    "vie",
-    "gen",
-    "al"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "« Beaucoup de gens ne mangeraient pas s’ils ne venaient pas là » : à Alès, une cantine solidaire contre la vie chère",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "ce7b917a1c3b0c0b",
-   "title": "Detective suspected in girl’s murder may have killed others, former investigator fears",
+   "id": "89963c1ecd6a44f0",
+   "title": "Police, demonstrators clash on sidelines of mass French protests",
    "topic": "international",
-   "days": 1,
+   "days": 3,
    "signature": [
-    "investigator",
-    "detective",
-    "suspected",
-    "girl",
-    "other",
-    "fear",
-    "murder",
-    "former",
-    "killed"
+    "demonstrator",
+    "sideline",
+    "mas",
+    "french",
+    "clash",
+    "police",
+    "protest"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
-     "date": "2026-10-18",
-     "title": "Detective suspected in girl’s murder may have killed others, former investigator fears",
+     "date": null,
+     "title": "Albania’s prime minister vows not to resign over student-led protests",
      "summary": null
+    },
+    {
+     "date": "2026-10-17",
+     "title": "Youths clash with police for a 3rd day in Albania’s anti-government protests",
+     "summary": null
+    },
+    {
+     "date": "2026-10-18",
+     "title": "Police, demonstrators clash on sidelines of mass French protests",
+     "summary": "프랑스 50만 시위, 곳곳 폭력·400여 명 체포"
     }
    ]
   },
@@ -8706,121 +9243,6 @@
     {
      "date": "2026-10-18",
      "title": "한동훈 \"추미애는 민주당의 감출 수 없는 본심\"",
-     "summary": "한동훈 \"추미애, 민주당 본심\"…소방예산 삭감 부각"
-    }
-   ]
-  },
-  {
-   "id": "d166563aaf20f9a8",
-   "title": "父親に固く抱き締められる男児、６年の生涯の「しあわせな瞬間」綴ったＣＭ再放送へ",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "き締",
-    "く抱",
-    "しあ",
-    "せな",
-    "な瞬",
-    "に固",
-    "の生",
-    "めら",
-    "児",
-    "再放",
-    "固く",
-    "抱き"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "父親に固く抱き締められる男児、６年の生涯の「しあわせな瞬間」綴ったＣＭ再放送へ",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "41cd0dc2fe2882e3",
-   "title": "Sally Rooney’s books pulled from UK over Palestine Action support",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "rooney",
-    "sally",
-    "book",
-    "pulled",
-    "palestine",
-    "action",
-    "support",
-    "uk"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "UK bookstores scramble as Sally Rooney's novels are withdrawn because she supports Palestine Action",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "[시스루피플] 판매보다 팔레스타인 지지 신념···‘노멀 피플’ 작가 샐리 루니 “영국에서 책 안 팔겠다”",
-     "summary": "루니 책, 팔레스타인 액션 지지로 영국 서점서 철수"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Sally Rooney’s books pulled from UK over Palestine Action support",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "ab8fee2341350fc8",
-   "title": "How Jane Seymour and Owen Wilson pulled off one of comedy’s most awkward encounters",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "comedy",
-    "encounter",
-    "owen",
-    "seymour",
-    "wilson",
-    "awkward",
-    "jane",
-    "pulled",
-    "one"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "How Jane Seymour and Owen Wilson pulled off one of comedy’s most awkward encounters",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "26d07ffa07c33545",
-   "title": "どの州で司法試験に合格したか問われ、米大統領報道官「中国に移住したとき」…就任５日で退任へ",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "か問",
-    "で司",
-    "とき",
-    "に移",
-    "の州",
-    "任へ",
-    "住し",
-    "司法",
-    "合格",
-    "州で",
-    "格し",
-    "法試"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "どの州で司法試験に合格したか問われ、米大統領報道官「中国に移住したとき」…就任５日で退任へ",
      "summary": null
     }
    ]
@@ -8849,62 +9271,7 @@
     {
      "date": "2026-10-18",
      "title": "\"세금 6억 썼는데\"…노원구 축제에 등장한 '北 인공기 미사일'",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "d79bde61383a352e",
-   "title": "Solar power booms in Philippines as war on Iran spikes energy costs",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "solar",
-    "spike",
-    "boom",
-    "philippine",
-    "energy",
-    "power",
-    "cost",
-    "iran",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "How Iran messaging highlights cost of war ahead of US midterm elections",
-     "summary": "이란, 중간선거 앞두고 미국 내 전쟁 비용 논란 부추겨"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Solar power booms in Philippines as war on Iran spikes energy costs",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "6c5bc1b328403824",
-   "title": "'No Kings' foot soldiers ignore organizers' warning, go all in for Democrats",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "organizer",
-    "soldier",
-    "ignore",
-    "go",
-    "foot",
-    "warning",
-    "democrat",
-    "king",
-    "all"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "'No Kings' foot soldiers ignore organizers' warning, go all in for Democrats",
-     "summary": null
+     "summary": "노원 축제 미사일 조형물에 7개국 국기, 가림 조치"
     }
    ]
   },
@@ -8917,9 +9284,9 @@
     "firework",
     "informed",
     "reich",
+    "debate",
     "deliver",
     "third",
-    "debate",
     "senate",
     "midterm"
    ],
@@ -8928,148 +9295,6 @@
     {
      "date": "2026-10-18",
      "title": "From ‘Third Reich’ to ‘not that informed’: Senate debates deliver fireworks before midterms",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "7a647a12c7b74f72",
-   "title": "Strangers and railway staff help Chinese couple bring quintuplets home by train",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "quintuplet",
-    "railway",
-    "couple",
-    "stranger",
-    "train",
-    "bring",
-    "staff",
-    "chinese",
-    "help",
-    "home"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Strangers and railway staff help Chinese couple bring quintuplets home by train",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "c14b9e0717faddb5",
-   "title": "Is China’s Shenzhen ready to host Xi, Trump and Putin during Apec summit?",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "shenzhen",
-    "apec",
-    "host",
-    "xi",
-    "ready",
-    "putin",
-    "summit",
-    "during",
-    "china"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Is China’s Shenzhen ready to host Xi, Trump and Putin during Apec summit?",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "cc76f36456499606",
-   "title": "As Israel blocks PA funding, the West Bank’s healthcare system is failing",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "failing",
-    "pa",
-    "block",
-    "funding",
-    "healthcare",
-    "israel",
-    "system",
-    "west",
-    "bank"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "China tells Israel to stop 'forced establishment' of West Bank settlements",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "As Israel blocks PA funding, the West Bank’s healthcare system is failing",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "e56f59c520b89d46",
-   "title": "Sudan’s army claims dozens of RSF fighters killed in Nyala attack",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "nyala",
-    "rsf",
-    "sudan",
-    "dozen",
-    "fighter",
-    "army",
-    "claim",
-    "killed"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Sudan’s army claims dozens of RSF fighters killed in Nyala attack",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "a6d7f6765288263c",
-   "title": "[프로농구 대구전적] 한국가스공사 85-75 LG",
-   "topic": "entertainment_sports",
-   "days": 3,
-   "signature": [
-    "가스",
-    "구전",
-    "스공",
-    "대구",
-    "공사",
-    "전적",
-    "국가",
-    "농구",
-    "로농",
-    "프로",
-    "한국"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "'만년 꼴찌' 꼬리표 뗀 프로농구 삼성, LG도 잡고 개막 4연승",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "프로농구 소노, 현대모비스 꺾고 4연패 탈출…3점슛 16개",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "[프로농구 대구전적] 한국가스공사 85-75 LG",
      "summary": null
     }
    ]
@@ -9096,148 +9321,7 @@
     {
      "date": "2026-10-18",
      "title": "IMF urges support for poorer nations facing high inflation, war spillovers",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "1d363262192e9c95",
-   "title": "中 반도체 이 정도였나…'없어서 못 판다' 삼전닉스 맹추격",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "도였",
-    "였나",
-    "판다",
-    "어서",
-    "정도",
-    "맹추",
-    "도체",
-    "삼전",
-    "전닉",
-    "추격",
-    "닉스",
-    "반도"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "AI·반도체주 4일간 시총 1조달러 증발",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "中 반도체 이 정도였나…'없어서 못 판다' 삼전닉스 맹추격",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "773bdc7b03a71983",
-   "title": "Hegseth Singled Out in Democrats’ Campaign Attacks for War and High Prices",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "singled",
-    "hegseth",
-    "campaign",
-    "democrat",
-    "high",
-    "price",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Hegseth Singled Out in Democrats’ Campaign Attacks for War and High Prices",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "12180a3d0ea8d9c8",
-   "title": "I’ve spent most of the year talking to MAGA supporters. Here are 5 things I’ve learned",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "supporter",
-    "talking",
-    "thing",
-    "learned",
-    "spent",
-    "maga",
-    "ve",
-    "here"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "I’ve spent most of the year talking to MAGA supporters. Here are 5 things I’ve learned",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "be98b69fd9a66f3d",
-   "title": "All the president’s women: a familiar downward trajectory in Trump’s cabinet",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "cabinet",
-    "downward",
-    "trajectory",
-    "familiar",
-    "president",
-    "women",
-    "all"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "All the president’s women: a familiar downward trajectory in Trump’s cabinet",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "821835dfc1fb884e",
-   "title": "“어린이집 등하원 중”…차량 곳곳 안내문 붙인 ‘초보운전’ 엄마",
-   "topic": "society",
-   "days": 3,
-   "signature": [
-    "내문",
-    "등하",
-    "보운",
-    "붙인",
-    "초보",
-    "안내",
-    "하원",
-    "엄마",
-    "운전",
-    "곳곳",
-    "린이",
-    "어린"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "밀양 어린이보호구역서 우회전 차량에 초등 2학년 치여 숨져",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "美오리건주 초등학교서 대낮 수업중 총격…어린이 등 5명 숨져",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "“어린이집 등하원 중”…차량 곳곳 안내문 붙인 ‘초보운전’ 엄마",
-     "summary": null
+     "summary": "IMF, 전쟁·고물가에 시달리는 빈국 지원 강조"
     }
    ]
   },
@@ -9289,8 +9373,8 @@
     "족해",
     "조건",
     "작권",
-    "변화",
     "與",
+    "변화",
     "해야"
    ],
    "date": "2026-10-18",
@@ -9308,7 +9392,7 @@
     {
      "date": "2026-10-18",
      "title": "與, 美 '전작권 전환조건 변화'에 \"조건 빨리 충족해 전환해야\"",
-     "summary": "민주당, 브런슨 발언 반박…\"전환 입장 불변\""
+     "summary": null
     }
    ]
   },
@@ -9363,184 +9447,22 @@
    ]
   },
   {
-   "id": "e01dbbbea36b96f2",
-   "title": "‘We had won a World Cup for heaven’s sake’: Chris Woakes on the curfew that killed England’s party",
+   "id": "75ac145fcd75b085",
+   "title": "The Israeli politicians seeking to replace Netanyahu",
    "topic": "international",
    "days": 1,
    "signature": [
-    "chri",
-    "curfew",
-    "heaven",
-    "sake",
-    "woake",
-    "won",
-    "party",
-    "england",
-    "cup",
-    "world",
-    "killed"
+    "politician",
+    "seeking",
+    "netanyahu",
+    "replace",
+    "israeli"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "‘We had won a World Cup for heaven’s sake’: Chris Woakes on the curfew that killed England’s party",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "5d9c6ecca22e4831",
-   "title": "[프로농구 안양전적] 정관장 89-69 kt",
-   "topic": "entertainment_sports",
-   "days": 3,
-   "signature": [
-    "관장",
-    "양전",
-    "정관",
-    "안양",
-    "kt",
-    "전적",
-    "농구",
-    "로농",
-    "프로"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "'만년 꼴찌' 꼬리표 뗀 프로농구 삼성, LG도 잡고 개막 4연승",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "프로농구 소노, 현대모비스 꺾고 4연패 탈출…3점슛 16개",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "[프로농구 안양전적] 정관장 89-69 kt",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "d3b39546d4558783",
-   "title": "Can Yemen’s government forces sustain their offensive against the Houthis?",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "offensive",
-    "sustain",
-    "government",
-    "force",
-    "yemen",
-    "houthi"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "Houthis launch deadly attack on presidential palace in Yemen’s Aden",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Houthi Missiles Strike Government Headquarters in Yemen",
-     "summary": "후티가 아덴 대통령궁을 타격해 5명이 숨졌다"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Can Yemen’s government forces sustain their offensive against the Houthis?",
-     "summary": "아덴 공격 속 예멘 정부군 공세 지속 여부 주목"
-    }
-   ]
-  },
-  {
-   "id": "8daa95d68b22299c",
-   "title": "\"의무는 나라가 정하고 돈은 지방이\"…저상버스 '재정 딜레마'",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "돈은",
-    "딜레",
-    "상버",
-    "의무",
-    "저상",
-    "라가",
-    "레마",
-    "방이",
-    "나라",
-    "무는",
-    "지방",
-    "정하"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "중노위원장 \"공공기관 지방이전·통폐합, 노조법상 교섭 대상\"(종합)",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "\"의무는 나라가 정하고 돈은 지방이\"…저상버스 '재정 딜레마'",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "b2fb0134f5f0d9bd",
-   "title": "김민석 “추미애 발언 당을 대신해 사과···당사자에도 사과 요청”",
-   "topic": "politics",
-   "days": 2,
-   "signature": [
-    "당을",
-    "신해",
-    "당사",
-    "사자",
-    "자에",
-    "민석",
-    "대신",
-    "요청",
-    "김민",
-    "에도",
-    "발언"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "김민석 “조희대 탄핵 모든 방법 논의” 당 차원 추진 공식화",
-     "summary": "김민석, 조희대 탄핵 논의 시작 선언…野 반발"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "김민석 “추미애 발언 당을 대신해 사과···당사자에도 사과 요청”",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "fe215db33cb806e3",
-   "title": "How the US-Iran war upended two critical global trade routes",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "route",
-    "upended",
-    "us-iran",
-    "critical",
-    "global",
-    "trade",
-    "two",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "How the US-Iran war upended two critical global trade routes",
+     "title": "The Israeli politicians seeking to replace Netanyahu",
      "summary": null
     }
    ]
@@ -9579,29 +9501,6 @@
    ]
   },
   {
-   "id": "b1c0deeea5b0029a",
-   "title": "Blind date: ‘Most awkward moment? When I accidentally called her Melissa’",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "accidentally",
-    "blind",
-    "melissa",
-    "awkward",
-    "called",
-    "date",
-    "moment"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Blind date: ‘Most awkward moment? When I accidentally called her Melissa’",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "bc1e3aa1b4b44970",
    "title": "BNK부산은행 임직원 200여명, 가을철 일손돕기 봉사활동",
    "topic": "economy",
@@ -9635,161 +9534,6 @@
    ]
   },
   {
-   "id": "b42e9b9ca0dbdb42",
-   "title": "SK하이닉스 청주 공사현장서 끊어진 케이블에 근로자 2명 다쳐",
-   "topic": "semis_ai",
-   "days": 1,
-   "signature": [
-    "근로",
-    "끊어",
-    "다쳐",
-    "로자",
-    "사현",
-    "이닉",
-    "블에",
-    "장서",
-    "어진",
-    "sk",
-    "이블",
-    "청주"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "SK하이닉스 청주 공사현장서 끊어진 케이블에 근로자 2명 다쳐",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "8dea1c005784ce95",
-   "title": "Iran war votes in Congress become a focal point for campaign ad attacks",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "focal",
-    "ad",
-    "become",
-    "campaign",
-    "congres",
-    "point",
-    "vote",
-    "iran",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Iran war votes in Congress become a focal point for campaign ad attacks",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "f28fcaa00345a72b",
-   "title": "Margaret Hamilton, software engineer, 1936-2026",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "hamilton",
-    "margaret",
-    "software",
-    "engineer"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Margaret Hamilton, software engineer, 1936-2026",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "1e5d58b688d57875",
-   "title": "Are we sleepwalking into World War III?",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "iii",
-    "sleepwalking",
-    "war",
-    "world"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Are we sleepwalking into World War III?",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "a18110e82714e8ff",
-   "title": "Shunned in the West, Ye hands Indonesia a rare mega-tour coup",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "coup",
-    "indonesia",
-    "mega-tour",
-    "shunned",
-    "ye",
-    "rare",
-    "hand",
-    "west"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Shunned in the West, Ye hands Indonesia a rare mega-tour coup",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "d0f8a19acea2ec7f",
-   "title": "후티 반군, 예멘 제3도시 타이즈 포위 항복 압박…내전 중대 기로",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "내전",
-    "반군",
-    "예멘",
-    "이즈",
-    "중대",
-    "포위",
-    "항복",
-    "압박",
-    "기로",
-    "도시",
-    "후티",
-    "타이"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "사우디 \"후티 반군, 10월 리야드 공항 20회 공격…17명 사망\"(종합)",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "후티, 예멘 대통령궁 미사일 공격 “20여명 사상”",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "후티 반군, 예멘 제3도시 타이즈 포위 항복 압박…내전 중대 기로",
-     "summary": "후티 반군, 예멘 타이즈 포위해 투항 요구"
-    }
-   ]
-  },
-  {
    "id": "d2769cee164b3b95",
    "title": "與 \"曺책임 끝까지 묻겠다\"…국힘 \"탄핵, 정권몰락 신호탄될 것\"",
    "topic": "politics",
@@ -9813,208 +9557,35 @@
     {
      "date": "2026-10-18",
      "title": "與 \"曺책임 끝까지 묻겠다\"…국힘 \"탄핵, 정권몰락 신호탄될 것\"",
-     "summary": null
+     "summary": "민주당 조희대 탄핵 추진에 국힘 정권 몰락 경고"
     }
    ]
   },
   {
-   "id": "49059afd64eff942",
-   "title": "미 채권시장이 보내는 신호, 어떻게 읽어야 할까",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "권시",
-    "읽어",
-    "내는",
-    "보내",
-    "채권",
-    "장이",
-    "신호",
-    "떻게",
-    "시장",
-    "어떻",
-    "어야",
-    "할까"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "9월 증권시장서 외국인 8개월째 매도 우위…주식도 순유출 전환",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "미 채권시장이 보내는 신호, 어떻게 읽어야 할까",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "0c4fdf7e125a6e28",
-   "title": "A Wayward Shark Becomes a Celebrity in South Korea",
-   "topic": "international",
+   "id": "2494d79a092db815",
+   "title": "我们的长征路丨觉悟看似无形，关键时就会显现出强大力量",
+   "topic": "politics",
    "days": 1,
    "signature": [
-    "shark",
-    "wayward",
-    "celebrity",
-    "south",
-    "become",
-    "korea"
+    "丨觉",
+    "会显",
+    "似",
+    "似无",
+    "关键",
+    "出强",
+    "大力",
+    "就会",
+    "强大",
+    "悟看",
+    "无形",
+    "时就"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "A Wayward Shark Becomes a Celebrity in South Korea",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "ac748beaa331e071",
-   "title": "이태원참사 유족, 4주기 앞 진상규명 촉구…\"안전사회 되길\"",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "규명",
-    "상규",
-    "원참",
-    "진상",
-    "되길",
-    "전사",
-    "태원",
-    "이태",
-    "참사",
-    "촉구",
-    "유족",
-    "사회"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "이태원참사 유족, 4주기 앞 진상규명 촉구…\"안전사회 되길\"",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "86c4ddf9c7c3297c",
-   "title": "Scott Jennings on the once-again vacant White House Press Secretary job",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "once-again",
-    "scott",
-    "vacant",
-    "jenning",
-    "job",
-    "secretary",
-    "pres",
-    "white"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "White House press secretary Katie Zacharia says she did not pass bar exam",
-     "summary": "재커라이어 백악관 대변인, 5일 만에 퇴진"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Scott Jennings on the once-again vacant White House Press Secretary job",
-     "summary": "대변인 공석, 후임 조건 놓고 CNN 논평"
-    }
-   ]
-  },
-  {
-   "id": "b03640ce613dc013",
-   "title": "‘골드러시의 삽’인 줄 알았는데…네오클라우드 종말론 왜 나올까[딥다이브]",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "골드",
-    "네오",
-    "딥다",
-    "라우",
-    "말론",
-    "시의",
-    "오클",
-    "종말",
-    "나올",
-    "았는",
-    "우드",
-    "드러"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "‘골드러시의 삽’인 줄 알았는데…네오클라우드 종말론 왜 나올까[딥다이브]",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "e042b70d331d449f",
-   "title": "Bangladesh is battling measles. It's a 'real warning' to other nations",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "measle",
-    "battling",
-    "bangladesh",
-    "it'",
-    "other",
-    "warning",
-    "nation",
-    "real"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Bangladesh is battling measles. It's a 'real warning' to other nations",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "731dad19ed745efa",
-   "title": "North Korea gets closer to China and Russia with new bridges",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "bridge",
-    "closer",
-    "north",
-    "korea",
-    "get",
-    "china"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "Long-delayed China-North Korea bridge officially opens",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "China, N.Korea open cross-border bridge | NHK WORLD-JAPAN News",
-     "summary": "북중 신압록강대교 완공 12년 만에 개통"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "North Korea gets closer to China and Russia with new bridges",
-     "summary": "새 다리로 북한, 중·러 의존 심화 전망"
+     "title": "我们的长征路丨觉悟看似无形，关键时就会显现出强大力量",
+     "summary": "신화통신, 장정 90주년 맞아 당 중심 단결 강조"
     }
    ]
   },
@@ -10032,8 +9603,8 @@
     "재촉",
     "촉하",
     "희도",
-    "대급",
     "봐주",
+    "대급",
     "동훈",
     "한동"
    ],
@@ -10053,32 +9624,6 @@
      "date": "2026-10-18",
      "title": "‘딸 의혹 재수사’ 재촉하는 한동훈 입…김건희도 못 누린 ‘역대급 봐주기’ [논썰]",
      "summary": "한겨레, 한동훈 딸 의혹 '봐주기 수사' 지적"
-    }
-   ]
-  },
-  {
-   "id": "c72ab94c23ac033c",
-   "title": "Iran war live: Trump claims US Navy blockade stops Iranian ships in Hormuz",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "blockade",
-    "ship",
-    "iranian",
-    "navy",
-    "stop",
-    "hormuz",
-    "claim",
-    "iran",
-    "live",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Iran war live: Trump claims US Navy blockade stops Iranian ships in Hormuz",
-     "summary": null
     }
    ]
   },
@@ -10111,130 +9656,9 @@
    ]
   },
   {
-   "id": "a6d0038832bbf864",
-   "title": "The Papers: 'Mystery drones over UK' and 'Troops heading to Poland for war games'",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "heading",
-    "poland",
-    "troop",
-    "mystery",
-    "paper",
-    "drone",
-    "uk",
-    "game",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "The Papers: 'Mystery drones over UK' and 'Troops heading to Poland for war games'",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "2690ccf2380f78c8",
-   "title": "Ex-Trump lawyer Ty Cobb slams Press Secretary ouster, alleges White House 'double standard'",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "cobb",
-    "ouster",
-    "slam",
-    "standard",
-    "ty",
-    "allege",
-    "ex-trump",
-    "lawyer",
-    "double",
-    "secretary",
-    "pres",
-    "white"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "“변호사”라던 백악관 새 대변인… 美시험 붙은 적 없어 허위 논란",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "White House press secretary Katie Zacharia says she did not pass bar exam",
-     "summary": "재커라이어 백악관 대변인, 5일 만에 퇴진"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Ex-Trump lawyer Ty Cobb slams Press Secretary ouster, alleges White House 'double standard'",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "7eb366bf922a7447",
-   "title": "US Navy sailor returns from war with a new mission: bringing her deported father back",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "sailor",
-    "navy",
-    "bringing",
-    "deported",
-    "mission",
-    "father",
-    "return",
-    "back",
-    "war"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "US Navy sailor returns from war with a new mission: bringing her deported father back",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "436227c10fc15bfc",
-   "title": "中 CXMT 차세대 D램 공포인가 위협인가 [한경 반도체포커스]",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "차세",
-    "포인",
-    "한경",
-    "협인",
-    "공포",
-    "세대",
-    "인가",
-    "cxmt",
-    "도체",
-    "커스",
-    "포커",
-    "반도"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "AI·반도체주 4일간 시총 1조달러 증발",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "中 CXMT 차세대 D램 공포인가 위협인가 [한경 반도체포커스]",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "b0f1f5dcfffdb8df",
    "title": "“부정선거 막겠다”더니 유권자가 사라졌다…세계 곳곳 ‘투표권 전쟁’",
-   "topic": "politics",
+   "topic": "international",
    "days": 2,
    "signature": [
     "권자",
@@ -10265,44 +9689,6 @@
    ]
   },
   {
-   "id": "1db122909852d5a9",
-   "title": "Fox News Entertainment newsletter: Prince Edward wanted 'two wives'; Harry, Meghan accused of 'royal theatre'",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "edward",
-    "entertainment",
-    "meghan",
-    "royal",
-    "theatre",
-    "wanted",
-    "wive",
-    "harry",
-    "newsletter",
-    "prince",
-    "accused",
-    "fox"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "해리 왕자 부부, 영국 복귀 후 '왕실 스타일' 첫 공개 행사",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "해리·메건, 英 돌아온 후 첫 공개 행보… 자선단체 찾아 [뉴시스Pic]",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Fox News Entertainment newsletter: Prince Edward wanted 'two wives'; Harry, Meghan accused of 'royal theatre'",
-     "summary": "영국 돌아온 해리·메건, 공개 행보 두고 논쟁"
-    }
-   ]
-  },
-  {
    "id": "5fffb1c2aed1a85d",
    "title": "“금리 올려도 못 잡는다”…美 물가 밀어올린 두 가지 변수",
    "topic": "economy",
@@ -10318,15 +9704,14 @@
     "금리",
     "물가",
     "잡는",
-    "는다",
-    "美"
+    "는다"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
      "title": "“금리 올려도 못 잡는다”…美 물가 밀어올린 두 가지 변수",
-     "summary": null
+     "summary": "美 CPI 3.7%, 금리 인상만으론 한계 지적"
     }
    ]
   },
@@ -10358,101 +9743,6 @@
     {
      "date": "2026-10-18",
      "title": "Bystander Who Killed School Shooter Is Father of 2 Students",
-     "summary": "오리건 학교 총격범 제압한 시민, 재학생 아버지"
-    }
-   ]
-  },
-  {
-   "id": "ec184d34b901bec2",
-   "title": "◇오늘의 경기(17일)",
-   "topic": "society",
-   "days": 3,
-   "signature": [
-    "늘의",
-    "오늘",
-    "경기"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "[오늘의 운세] 10월 16일",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "[오늘의 운세] 10월 17일",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "◇오늘의 경기(17일)",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "78017967acdbc978",
-   "title": "“나 떨고 있냐” 드라마가 아니다…美 뒤흔든 ‘사형 생중계’ 파문",
-   "topic": "entertainment_sports",
-   "days": 3,
-   "signature": [
-    "떨고",
-    "사형",
-    "있냐",
-    "파문",
-    "뒤흔",
-    "마가",
-    "생중",
-    "중계",
-    "흔든",
-    "라마",
-    "드라",
-    "아니"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "[속보] 트럼프 \"미군기지 난사범 총살형 생중계되지 않을 것\"",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "총살형 생중계 철회해놓고 또 ‘사형’ 언급···트럼프 “소방관 살해범도 사형해야” 지시",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "“나 떨고 있냐” 드라마가 아니다…美 뒤흔든 ‘사형 생중계’ 파문",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "5078f0c09021d9f7",
-   "title": "“체포는커녕 도망갈 판”…경광봉 들고 테러 막는 경찰기동대",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "경광",
-    "광봉",
-    "기동",
-    "는커",
-    "도망",
-    "망갈",
-    "찰기",
-    "포는",
-    "동대",
-    "들고",
-    "커녕",
-    "테러"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "“체포는커녕 도망갈 판”…경광봉 들고 테러 막는 경찰기동대",
      "summary": null
     }
    ]
