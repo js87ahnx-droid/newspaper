@@ -200,7 +200,7 @@
     {
      "date": "2026-10-18",
      "title": "[속보]부천 공장 화재 심정지 상태 40대 소방관 끝내 숨져",
-     "summary": null
+     "summary": "부천 화재 진압 소방관 숨져, 올해 4번째 순직"
     }
    ]
   },
@@ -2035,7 +2035,7 @@
     {
      "date": "2026-10-18",
      "title": "CXMT, 3분기 매출 600%대 급증 전망…최대 4천억원 자사주 매입",
-     "summary": null
+     "summary": "CXMT 3분기 매출 600%대 급증, 4천억 자사주 추진"
     }
    ]
   },
@@ -2439,8 +2439,8 @@
    ]
   },
   {
-   "id": "7775658d7f110ec9",
-   "title": "Trio of Republicans bashes Trump’s sanctions pullback",
+   "id": "ad3b9f8b455cec9f",
+   "title": "Trump faces bipartisan backlash over Russia sanctions waiver",
    "topic": "international",
    "days": 1,
    "signature": [
@@ -2461,7 +2461,7 @@
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "Trio of Republicans bashes Trump’s sanctions pullback",
+     "title": "Trump faces bipartisan backlash over Russia sanctions waiver",
      "summary": null
     }
    ]
@@ -3528,6 +3528,34 @@
    ]
   },
   {
+   "id": "071bc8a5eb72da44",
+   "title": "Buildings torched and over 1,000 detained after half a million protesters sweep France",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "france",
+    "sweep",
+    "building",
+    "half",
+    "million",
+    "protester",
+    "ablaze",
+    "detained",
+    "torched",
+    "looting",
+    "arrested",
+    "clashe"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Buildings torched and over 1,000 detained after half a million protesters sweep France",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "4c07bf1f6ec8bf9f",
    "title": "Iran's Guards say two tankers hit mines in Strait of Hormuz",
    "topic": "international",
@@ -4278,6 +4306,34 @@
    ]
   },
   {
+   "id": "40e97bd6a1ce09ca",
+   "title": "Violent Protests Rip Through Cities Across France",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "chaotique",
+    "citie",
+    "cour",
+    "incendi",
+    "lyon",
+    "rip",
+    "tourisme",
+    "journ",
+    "mobilisation",
+    "octobre",
+    "through",
+    "office"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Violent Protests Rip Through Cities Across France",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "48d9edb8dd7272fd",
    "title": "Ryan Leonard scores highlight-reel goal, leads the Capitals over the Devils 4-2",
    "topic": "entertainment_sports",
@@ -4484,13 +4540,13 @@
     "cherchent",
     "exploited",
     "institution",
-    "mobilisation",
     "nes",
     "nonce",
     "nos",
-    "octobre",
     "saccage",
-    "semeur"
+    "semeur",
+    "ville",
+    "emmanuel"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5429,9 +5485,9 @@
     "threat",
     "adviser",
     "protect",
-    "office",
     "security",
-    "foreign"
+    "foreign",
+    "office"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -6307,8 +6363,8 @@
     "light",
     "near",
     "boy",
-    "year-old",
     "die",
+    "year-old",
     "people",
     "two",
     "man"
@@ -8643,32 +8699,6 @@
    ]
   },
   {
-   "id": "4b00acc26b122851",
-   "title": "Trump Signs Order Exempting Russia From Sanctions Law",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "law",
-    "sanction",
-    "russia",
-    "brother",
-    "championed",
-    "exempting",
-    "graham",
-    "break",
-    "sign",
-    "order"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Trump Signs Order Exempting Russia From Sanctions Law",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "91be8b79df2cf44a",
    "title": "Hardline Israeli rabbi ruling on stolen Palestinian olives prompts uproar",
    "topic": "international",
@@ -8754,67 +8784,6 @@
      "date": "2026-10-18",
      "title": "台風30号 急速に発達 23日に沖縄の南海上へ 今後の情報注意",
      "summary": null
-    }
-   ]
-  },
-  {
-   "id": "cb35bc98b51825ba",
-   "title": "금감원 '2차 해킹' OK저축은행 현장점검…금주 업권 간담회도",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "ok",
-    "업권",
-    "장점",
-    "저축",
-    "축은",
-    "회도",
-    "간담",
-    "담회",
-    "점검",
-    "감원",
-    "금감",
-    "금주"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "OK저축은행서 '또 해킹' 고객 268명 정보 추가 유출",
-     "summary": "OK저축은행 예금 고객 268명 추가 유출, 총 518명"
-    },
-    {
-     "date": "2026-10-18",
-     "title": "금감원 '2차 해킹' OK저축은행 현장점검…금주 업권 간담회도",
-     "summary": null
-    }
-   ]
-  },
-  {
-   "id": "503c99f7a84b0812",
-   "title": "국민소득 4만달러 눈앞인데…올해 증가분 80%는 기업 몫",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "가분",
-    "만달",
-    "민소",
-    "소득",
-    "눈앞",
-    "앞인",
-    "증가",
-    "국민",
-    "인데",
-    "달러",
-    "기업",
-    "올해"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "국민소득 4만달러 눈앞인데…올해 증가분 80%는 기업 몫",
-     "summary": "상반기 GNI 증가분의 79%가 기업·자영업자 소득"
     }
    ]
   },
@@ -8980,26 +8949,30 @@
    ]
   },
   {
-   "id": "b3c75af3c9e5b878",
-   "title": "빚 갚는 데 15년, 1.7억에 산 대치동 아파트 40억 되자 든 생각",
-   "topic": "economy",
+   "id": "1b1dac437da18185",
+   "title": "Künstliche Intelligenz – Deutscher Kulturrat zu KI: »Das ist eine Schönfärberei, wie ich sie noch nie erlebt habe«",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
-    "갚는",
-    "대치",
-    "되자",
-    "치동",
-    "억에",
-    "생각",
-    "아파",
-    "파트"
+    "deutscher",
+    "erlebt",
+    "habe",
+    "ki",
+    "kulturrat",
+    "noch",
+    "rberei",
+    "sch",
+    "das",
+    "ich",
+    "intelligenz",
+    "ist"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "빚 갚는 데 15년, 1.7억에 산 대치동 아파트 40억 되자 든 생각",
-     "summary": "집값 급등 속 세대별 내 집 마련 경험담"
+     "title": "Künstliche Intelligenz – Deutscher Kulturrat zu KI: »Das ist eine Schönfärberei, wie ich sie noch nie erlebt habe«",
+     "summary": "독일문화평의회, 정부 AI 문서를 '포장'이라 비판"
     }
    ]
   },
@@ -9243,7 +9216,7 @@
     {
      "date": "2026-10-18",
      "title": "한동훈 \"추미애는 민주당의 감출 수 없는 본심\"",
-     "summary": null
+     "summary": "한동훈 \"추미애, 민주당 본심\"…소방예산 삭감 부각"
     }
    ]
   },
@@ -9392,7 +9365,7 @@
     {
      "date": "2026-10-18",
      "title": "與, 美 '전작권 전환조건 변화'에 \"조건 빨리 충족해 전환해야\"",
-     "summary": null
+     "summary": "민주당, 브런슨 발언 반박…\"전환 입장 불변\""
     }
    ]
   },
@@ -9417,7 +9390,7 @@
     {
      "date": "2026-10-18",
      "title": "ECB Leans Toward December Hike as Bangkok Talks Expose Risks",
-     "summary": null
+     "summary": "ECB, 12월 올해 세 번째 인상 가닥"
     }
    ]
   },
@@ -9562,30 +9535,58 @@
    ]
   },
   {
-   "id": "2494d79a092db815",
-   "title": "我们的长征路丨觉悟看似无形，关键时就会显现出强大力量",
-   "topic": "politics",
+   "id": "3775abd4d6dcb256",
+   "title": "静岡新聞で氏名や電話番号など最大３０００件漏えいか…掲載申し込みフォーム利用の企業や個人、デーリー東北新聞は４２３件",
+   "topic": "international",
    "days": 1,
    "signature": [
-    "丨觉",
-    "会显",
-    "似",
-    "似无",
-    "关键",
-    "出强",
-    "大力",
-    "就会",
-    "强大",
-    "悟看",
-    "无形",
-    "时就"
+    "えい",
+    "し込",
+    "で氏",
+    "ど最",
+    "の企",
+    "みフ",
+    "や個",
+    "や電",
+    "ォー",
+    "デー",
+    "ム利",
+    "ーリ"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "我们的长征路丨觉悟看似无形，关键时就会显现出强大力量",
-     "summary": "신화통신, 장정 90주년 맞아 당 중심 단결 강조"
+     "title": "静岡新聞で氏名や電話番号など最大３０００件漏えいか…掲載申し込みフォーム利用の企業や個人、デーリー東北新聞は４２３件",
+     "summary": null
+    }
+   ]
+  },
+  {
+   "id": "ef7a8773b6e24c86",
+   "title": "警察官・職員２０００人の個人情報が流出した可能性…「アルカディア」不正アクセス、現時点で業務への影響なし",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "が流",
+    "た可",
+    "で業",
+    "の個",
+    "の影",
+    "アク",
+    "アル",
+    "カデ",
+    "クセ",
+    "セス",
+    "ルカ",
+    "・職"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "警察官・職員２０００人の個人情報が流出した可能性…「アルカディア」不正アクセス、現時点で業務への影響なし",
+     "summary": null
     }
    ]
   },
