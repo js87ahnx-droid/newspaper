@@ -713,6 +713,34 @@
    ]
   },
   {
+   "id": "7969f85974bc1411",
+   "title": "Protesters across France rally over rising living costs, joining students’ grievances",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "france",
+    "joining",
+    "rising",
+    "protester",
+    "living",
+    "rally",
+    "cost",
+    "acros",
+    "student",
+    "fire",
+    "protest",
+    "grievance"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Protesters across France rally over rising living costs, joining students’ grievances",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "54b6afa61f809b79",
    "title": "'악마의 바람'에 美캘리포니아 산불 확산…주민 1만6천명 대피령",
    "topic": "international",
@@ -887,34 +915,6 @@
      "date": "2026-10-18",
      "title": "Man shot, killed on subway platform in midtown Manhattan",
      "summary": "뉴욕 지하철역 총격으로 1명 사망, 용의자 추적"
-    }
-   ]
-  },
-  {
-   "id": "50c3df3139153231",
-   "title": "Buildings and cars set on fire as cost of living protests rock France",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "france",
-    "joining",
-    "protester",
-    "living",
-    "rally",
-    "cost",
-    "acros",
-    "student",
-    "fire",
-    "grievance",
-    "krawalle",
-    "protesten"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "Buildings and cars set on fire as cost of living protests rock France",
-     "summary": null
     }
    ]
   },
@@ -1857,7 +1857,7 @@
     {
      "date": "2026-10-18",
      "title": "프랑스서 이번엔 고물가 항의 대규모 시위…곳곳서 격렬 충돌",
-     "summary": null
+     "summary": "프랑스 50만 시위가 밤사이 폭력으로 번져 1천여 명 체포"
     }
    ]
   },
@@ -2439,8 +2439,8 @@
    ]
   },
   {
-   "id": "7775658d7f110ec9",
-   "title": "Trio of Republicans bashes Trump’s sanctions pullback",
+   "id": "ad3b9f8b455cec9f",
+   "title": "Trump faces bipartisan backlash over Russia sanctions waiver",
    "topic": "international",
    "days": 1,
    "signature": [
@@ -2461,7 +2461,7 @@
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "Trio of Republicans bashes Trump’s sanctions pullback",
+     "title": "Trump faces bipartisan backlash over Russia sanctions waiver",
      "summary": null
     }
    ]
@@ -4306,6 +4306,34 @@
    ]
   },
   {
+   "id": "f4b9fb357eb90349",
+   "title": "Violent protests in France as police battle demonstrators, in photos",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "france",
+    "police",
+    "ramp",
+    "demonstration",
+    "demonstrator",
+    "tear",
+    "photo",
+    "battle",
+    "gas",
+    "throw",
+    "violent",
+    "protester"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "Violent protests in France as police battle demonstrators, in photos",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "40e97bd6a1ce09ca",
    "title": "Violent Protests Rip Through Cities Across France",
    "topic": "international",
@@ -5102,9 +5130,9 @@
     "secure",
     "wta",
     "spot",
-    "battle",
     "continue",
-    "winning"
+    "winning",
+    "battle"
    ],
    "date": "2026-10-18",
    "timeline": [
@@ -5759,34 +5787,6 @@
    ]
   },
   {
-   "id": "997af9a5aa1a2f5d",
-   "title": "France tackles new wave of nationwide protests",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "nationwide",
-    "rising",
-    "strain",
-    "tackle",
-    "wave",
-    "social",
-    "street",
-    "french",
-    "take",
-    "protester",
-    "france",
-    "price"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-18",
-     "title": "France tackles new wave of nationwide protests",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "fd0ce2887c9a092b",
    "title": "学习手记丨饮水思源 勿忘老区",
    "topic": "international",
@@ -5845,7 +5845,7 @@
   {
    "id": "a22bd41d3c47960d",
    "title": "写在APEC领导人非正式会议倒计时一个月之际",
-   "topic": "international",
+   "topic": "economy",
    "days": 1,
    "signature": [
     "个月",
@@ -5866,7 +5866,7 @@
     {
      "date": "2026-10-18",
      "title": "写在APEC领导人非正式会议倒计时一个月之际",
-     "summary": null
+     "summary": "APEC 정상회의 D-30, 중국이 개방·협력 기조 강조"
     }
    ]
   },
@@ -6681,11 +6681,11 @@
     "訪問",
     "コナ",
     "ナン",
-    "展示",
     "鳥",
     "鳥取",
     "さま",
     "子さ",
+    "展示",
     "愛子",
     "取",
     "問"
@@ -8699,6 +8699,34 @@
    ]
   },
   {
+   "id": "45db338d76d2bcda",
+   "title": "学习进行时丨推动高质量发展，总书记强调因地制宜",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "动高",
+    "制宜",
+    "因地",
+    "地制",
+    "宜",
+    "质量",
+    "量发",
+    "高质",
+    "推动",
+    "因",
+    "质",
+    "总书"
+   ],
+   "date": "2026-10-18",
+   "timeline": [
+    {
+     "date": "2026-10-18",
+     "title": "学习进行时丨推动高质量发展，总书记强调因地制宜",
+     "summary": null
+    }
+   ]
+  },
+  {
    "id": "21ed037b8d51da79",
    "title": "최휘영, 여수서 문화의달 기념식…문화·관광 현장 의견 청취",
    "topic": "politics",
@@ -8981,29 +9009,29 @@
    ]
   },
   {
-   "id": "e07b8bddd62b5fbf",
-   "title": "［人生案内］父の介護 前向きになれず",
+   "id": "e4075b508e384094",
+   "title": "［ルポ裁判］６８歳 同学年にはねられ 「タクシー会社、安全対策を」",
    "topic": "international",
    "days": 1,
    "signature": [
-    "なれ",
-    "の介",
-    "れず",
-    "介護",
-    "前向",
-    "案内",
-    "父の",
-    "生案",
-    "向き",
-    "父",
-    "護",
-    "きに"
+    "には",
+    "はね",
+    "クシ",
+    "タク",
+    "ポ裁",
+    "ルポ",
+    "ー会",
+    "全対",
+    "同学",
+    "学年",
+    "策を",
+    "ねら"
    ],
    "date": "2026-10-18",
    "timeline": [
     {
      "date": "2026-10-18",
-     "title": "［人生案内］父の介護 前向きになれず",
+     "title": "［ルポ裁判］６８歳 同学年にはねられ 「タクシー会社、安全対策を」",
      "summary": null
     }
    ]
@@ -9213,39 +9241,6 @@
    ]
   },
   {
-   "id": "89963c1ecd6a44f0",
-   "title": "Police, demonstrators clash on sidelines of mass French protests",
-   "topic": "international",
-   "days": 3,
-   "signature": [
-    "demonstrator",
-    "sideline",
-    "mas",
-    "french",
-    "clash",
-    "police",
-    "protest"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": null,
-     "title": "Albania’s prime minister vows not to resign over student-led protests",
-     "summary": null
-    },
-    {
-     "date": "2026-10-17",
-     "title": "Youths clash with police for a 3rd day in Albania’s anti-government protests",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "Police, demonstrators clash on sidelines of mass French protests",
-     "summary": "프랑스 50만 시위, 곳곳 폭력·400여 명 체포"
-    }
-   ]
-  },
-  {
    "id": "cbe4f54fcdbaf78f",
    "title": "한동훈 \"추미애는 민주당의 감출 수 없는 본심\"",
    "topic": "politics",
@@ -9335,39 +9330,6 @@
    ]
   },
   {
-   "id": "1d363262192e9c95",
-   "title": "中 반도체 이 정도였나…'없어서 못 판다' 삼전닉스 맹추격",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "도였",
-    "였나",
-    "판다",
-    "어서",
-    "정도",
-    "맹추",
-    "도체",
-    "삼전",
-    "전닉",
-    "추격",
-    "닉스",
-    "반도"
-   ],
-   "date": "2026-10-18",
-   "timeline": [
-    {
-     "date": "2026-10-17",
-     "title": "AI·반도체주 4일간 시총 1조달러 증발",
-     "summary": null
-    },
-    {
-     "date": "2026-10-18",
-     "title": "中 반도체 이 정도였나…'없어서 못 판다' 삼전닉스 맹추격",
-     "summary": null
-    }
-   ]
-  },
-  {
    "id": "5ac1ba233bc273d3",
    "title": "홍준표 “한동훈이라는 친구, 깐죽댄다”… 윤석열과 일화도 공개",
    "topic": "politics",
@@ -9434,7 +9396,7 @@
     {
      "date": "2026-10-18",
      "title": "與, 美 '전작권 전환조건 변화'에 \"조건 빨리 충족해 전환해야\"",
-     "summary": null
+     "summary": "민주당, 브런슨 발언 반박…\"전환 입장 불변\""
     }
    ]
   },
