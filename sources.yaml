@@ -54,6 +54,8 @@ sources:
       - {section: economy, url: "https://rss.donga.com/economy.xml"}
       - {section: international, url: "https://rss.donga.com/international.xml"}
       - {section: opinion, url: "https://rss.donga.com/editorials.xml"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:donga.com+%EB%94%A5%EB%8B%A4%EC%9D%B4%EB%B8%8C+when:3d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[딥다이브]"}
 
   - name: 한겨레
     country: KR
@@ -86,6 +88,8 @@ sources:
       - {section: economy, url: "https://www.khan.co.kr/rss/rssdata/economy_news.xml"}
       - {section: international, url: "https://www.khan.co.kr/rss/rssdata/kh_world.xml"}
       - {section: opinion, url: "https://www.khan.co.kr/rss/rssdata/opinion_news.xml"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:khan.co.kr+%EA%B2%BD%EC%A0%9C%EB%AD%94%EB%8D%B0+when:7d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[경제뭔데]"}
 
   - name: 한국경제
     country: KR
@@ -102,6 +106,23 @@ sources:
       - {section: markets, url: "https://www.hankyung.com/feed/finance"}
       - {section: tech, url: "https://www.hankyung.com/feed/it"}
       - {section: opinion, url: "https://www.hankyung.com/feed/opinion"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:hankyung.com+%22%EB%B6%84%EC%84%9D%2B%22+when:2d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[분석+]"}
+
+  - name: 조선비즈
+    country: KR
+    lean: 경제지
+    type: 경제지
+    weight: 0.5
+    paywall: false
+    enabled: true
+    site: [biz.chosun.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [ko]
+    # S22c·S22d (2026-10-18): 뉴스는 받지 않고 분석 [Why] 와 지정 칼럼만. 공식 RSS 는 몇 시간치뿐이라 Google 뉴스(D6)
+    feeds:
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:chosun.com+%22%5BWhy%5D%22+when:3d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[Why]"}
+      # 지정 칼럼: 김지수의 인터스텔라 (격주 토요일 인터뷰). site: 를 빼면 네이트·브런치 사본도 걸림
+      - {section: column_pick, url: "https://news.google.com/rss/search?q=site:biz.chosun.com+%22%EA%B9%80%EC%A7%80%EC%88%98%EC%9D%98+%EC%9D%B8%ED%84%B0%EC%8A%A4%ED%85%94%EB%9D%BC%22+when:7d&hl=ko&gl=KR&ceid=KR:ko", kind: google_news, title_must: "[김지수의 인터스텔라]"}
 
   - name: 매일경제
     country: KR
@@ -255,6 +276,8 @@ sources:
       - {section: politics, url: "https://feeds.bloomberg.com/politics/news.rss", url_must: "/(news|opinion)/articles/"}
       - {section: tech, url: "https://feeds.bloomberg.com/technology/news.rss", url_must: "/(news|opinion)/articles/"}
       - {section: opinion, url: "https://feeds.bloomberg.com/bview/news.rss", url_must: "/(news|opinion)/articles/"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:bloomberg.com+intitle:%22big+take%22+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_must: "Big Take", title_not: "^Watch"}
 
   - name: Washington Post
     country: US
@@ -272,6 +295,8 @@ sources:
       - {section: international, url: "https://www.washingtonpost.com/arcio/rss/category/world/"}
       - {section: economy, url: "https://www.washingtonpost.com/arcio/rss/category/business/"}
       - {section: opinion, url: "https://www.washingtonpost.com/arcio/rss/category/opinions/"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:washingtonpost.com+%22Analysis+%7C%22+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_must: "Analysis |"}
 
   - name: Politico
     country: US
@@ -323,6 +348,10 @@ sources:
       - {section: economy, url: "https://www.theguardian.com/business/rss"}
       - {section: opinion, url: "https://www.theguardian.com/profile/editorial/rss"}
       - {section: opinion, url: "https://www.theguardian.com/commentisfree/rss"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://www.theguardian.com/tone/analysis/rss", url_must: "^(?!.*/(sport|football)/)"}
+      - {section: analysis, url: "https://www.theguardian.com/tone/explainers/rss", url_must: "^(?!.*/(sport|football)/)", title_not: "war briefing|what we know so far"}
+      - {section: analysis, url: "https://www.theguardian.com/news/series/the-long-read/rss", title_not: "podcast|^From the archive"}
 
   - name: Reuters
     country: UK
@@ -335,6 +364,8 @@ sources:
     reader: false   # 원문 재배열 실측 실패 2026-10-17: 봇 차단(401) → 원문 링크로
     feeds:
       - {section: top, url: "https://news.google.com/rss/search?q=site:reuters.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:reuters.com+intitle:explainer+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_must: "Explainer"}
 
   - name: Financial Times
     country: UK
@@ -353,6 +384,9 @@ sources:
       - {section: economy, url: "https://www.ft.com/companies?format=rss"}
       - {section: opinion, url: "https://www.ft.com/opinion?format=rss"}
       - {section: opinion, url: "https://www.ft.com/ft-view?format=rss"}   # FT 사설(The FT View)
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://www.ft.com/analysis?format=rss"}
+      - {section: analysis, url: "https://www.ft.com/the-big-read?format=rss"}
 
   - name: The Economist
     country: UK
@@ -367,6 +401,9 @@ sources:
     feeds:
       - {section: top, url: "https://www.economist.com/latest/rss.xml", main: true, url_must: "^(?!.*/podcasts/)"}
       - {section: opinion, url: "https://www.economist.com/leaders/rss.xml"}   # 사설(Leaders), 주 1회
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://www.economist.com/briefing/rss.xml"}
+      - {section: analysis, url: "https://www.economist.com/graphic-detail/rss.xml"}
 
   # ---------------- 유럽 ----------------
   - name: Politico Europe
@@ -422,6 +459,8 @@ sources:
       - {section: economy, url: "https://www.lemonde.fr/economie/rss_full.xml", lang: fr, url_must: "^(?!.*/(idees|live)/)"}
       - {section: politics, url: "https://www.lemonde.fr/politique/rss_full.xml", lang: fr, url_must: "^(?!.*/(idees|live)/)"}
       - {section: opinion, url: "https://www.lemonde.fr/en/opinion/rss_full.xml"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://www.lemonde.fr/les-decodeurs/rss_full.xml", lang: fr, title_not: "^Ce qu.il faut retenir"}
 
   # ---------------- 일본 ----------------
   - name: 요미우리신문
@@ -459,6 +498,8 @@ sources:
       - {section: international, url: "https://www.asahi.com/rss/asahi/international.rdf"}
       - {section: tech, url: "https://www.asahi.com/rss/asahi/science.rdf"}
       - {section: opinion, url: "https://news.google.com/rss/search?q=site:asahi.com+%EF%BC%88%E7%A4%BE%E8%AA%AC%EF%BC%89+when:1d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "（社説）"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:asahi.com+%E6%99%82%E6%99%82%E5%88%BB%E5%88%BB+when:2d&hl=ja&gl=JP&ceid=JP:ja", kind: google_news, title_must: "（時時刻刻）"}
 
   - name: Nikkei Asia
     country: JP
@@ -576,6 +617,8 @@ sources:
       - {section: top, url: "https://news.google.com/rss/search?q=site:news.cn+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
       - {section: politics, url: "https://news.google.com/rss/search?q=site:news.cn/politics+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
       - {section: international, url: "https://news.google.com/rss/search?q=site:news.cn/world+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_not: "微视频|精彩视频|MV"}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:news.cn+%E5%9B%BD%E9%99%85%E8%A7%82%E5%AF%9F+when:2d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans", kind: google_news, title_must: "国际观察"}
 
   - name: 차이신
     country: CN
@@ -605,3 +648,5 @@ sources:
     headline: [{kind: homepage, url: "https://www.aljazeera.com/"}]
     feeds:
       - {section: top, url: "https://www.aljazeera.com/xml/rss/all.xml", main: true}
+      # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
+      - {section: analysis, url: "https://news.google.com/rss/search?q=site:aljazeera.com/news-analysis+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "^Al Jazeera$"}

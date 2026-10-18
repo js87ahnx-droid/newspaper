@@ -176,3 +176,31 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
         "stats": {"editorials": len(editorials), "columns_total": len(columns), "columns_shown": len(picked),
                   "linked": sum(1 for o in opinions if o.id in links), "compare_issues": len(compare)},
     }
+
+
+# ---------- 분석·해설 (S22c) / 지정 칼럼 (S22d) ----------
+ANALYSIS_MAX, ANALYSIS_PER_SOURCE = 14, 2   # 후보 14 → AI 가 스포츠·연예를 뺀 뒤 10 (llm.ANALYSIS_SHOW)
+
+
+def _side_row(a: Article) -> dict:
+    return {"id": a.id, "source": a.source, "lean": a.lean, "country": a.country, "lang": a.lang, "title": a.title,
+            "lead": a.lead, "url": a.url, "paywall": a.paywall, "published": a.published}
+
+
+def organize_analysis(arts: list[Article]) -> list[dict]:
+    """매체가 쓴 분석·해설 (S22c). 최신순 목록에서 매체마다 ANALYSIS_PER_SOURCE 편까지, 매체 가중치가 높은 곳부터 번갈아
+    ANALYSIS_MAX 편. 한 매체가 칸을 다 차지하지 않게 한다."""
+    by_src: dict[str, list[Article]] = {}
+    for a in sorted(arts, key=lambda a: a.published or "", reverse=True):
+        if len(by_src.setdefault(a.source, [])) < ANALYSIS_PER_SOURCE:
+            by_src[a.source].append(a)
+    order = sorted(by_src, key=lambda s: (-by_src[s][0].weight, s))
+    out: list[Article] = []
+    for k in range(ANALYSIS_PER_SOURCE):
+        out += [by_src[s][k] for s in order if len(by_src[s]) > k]
+    return [_side_row(a) for a in out[:ANALYSIS_MAX]]
+
+
+def recent_picks(picks: list[dict], n: int = 2) -> list[dict]:
+    """지정 칼럼 최근 n 편 (S22d). picks.json 은 이미 최신순."""
+    return picks[:n]

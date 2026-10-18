@@ -103,6 +103,8 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
     if feed.kind == "google_news":
         # Google 뉴스 제목은 "제목 - 매체명" 형식이고 요약은 제목을 되풀이한 링크뿐이다
         title = _PEOPLE_SUFFIX.sub("", _GNEWS_SUFFIX.sub("", title))
+        # "제목 - 조선비즈 - Chosunbiz" 처럼 매체 이름이 한 번 더 붙은 것 (S22d)
+        title = re.sub(rf"\s+-\s+{re.escape(src.name)}$", "", title)
     if feed.title_must and feed.title_must not in title:
         return None
     if feed.url_must and not re.search(feed.url_must, link):

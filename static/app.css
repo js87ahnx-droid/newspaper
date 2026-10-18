@@ -285,3 +285,12 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .rel-arts h4 { font-size: 0.8em; margin: 0 0 2px; color: var(--muted); }
 .rel-arts p { margin: 1px 0; font-size: 0.9em; line-height: 1.45; }
 .item.brief .rel-arts { display: none; }
+
+/* 분석·해설 (S22c) · 지정 칼럼 (S22d) */
+.item.an .hl { font-size: calc(17px * var(--fs)); }
+.item.oppick { border: 1px solid var(--rule, #c9bfae); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; }
+.item.oppick .hl { font-size: 0.95em; color: var(--accent); margin: 0 0 4px; }
+.oppick .pick { margin: 4px 0 8px; }
+.oppick .pick p { margin: 0; }
+.oppick .pick-t { font-weight: 700; font-size: 1.02em; line-height: 1.4; margin: 1px 0 2px !important; }
+.oppick .pick-t a { color: var(--ink); }

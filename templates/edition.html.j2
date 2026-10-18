@@ -56,6 +56,22 @@
 
 {% for sec in sections %}
   <section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">
+  {% if sec.analysis %}{# 분석·해설 (S22c): 매체가 쓴 분석 기사 — 제목·요약 → 원문 창 #}
+    <p class="disclaimer">각 매체가 직접 쓴 분석·해설 기사입니다(AI 가 쓴 글이 아님). 외국어 기사의 한국어 제목·요약만 AI 번역입니다.</p>
+    {% for a in sec.analysis %}
+    <article class="item an" data-issue="an-{{ loop.index }}" data-section="analysis" data-lang="{{ a.lang }}">
+      <h3 class="hl"><a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.ko_title or a.title }}</a></h3>
+      {% if a.ko_title %}<p class="orig" lang="{{ a.lang }}">{{ a.title }}</p>{% endif %}
+      {% if a.ko_summary or a.lead %}<p class="lead"{% if a.ko_summary %} data-note="AI 요약"{% endif %}>{{ a.ko_summary or a.lead }}</p>{% endif %}
+      <div class="meta">
+        {% if a.time %}<time class="tm">{{ a.time }}</time>{% endif %}
+        <span class="src">{{ a.source }}</span> <span class="badge lean-{{ a.cls }}">{{ a.lean }}</span>
+        <button type="button" class="orig-btn" data-href="{{ real_url(a.url) }}"{{ art(a.url, a.source, a.lang) }}>원문{% if a.paywall %} (유료){% endif %}</button>
+        <a class="link-btn" href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer">링크</a>
+      </div>
+    </article>
+    {% endfor %}
+  {% endif %}
   {% for it in sec["items"] %}
     {% set v = it.view %}
     {% set brief = false %}{# 단신도 원본은 일반 기사 모양 — 쪽 나누기(app.js asBrief)가 한 줄로 줄이고, 누르면 요약·AI 정리가 보인다 (S22a; S21c 예비 기사도) #}
@@ -145,8 +161,19 @@
   </section>
 {% endfor %}
 
-{% if opinion %}
+{% if opinion or picks %}
   <section class="sec sec-opinion" data-section="opinion" data-title="{{ opinion_title }}">
+  {% if picks %}{# 지정 칼럼 (S22d): 사용자가 고른 연재 — 날짜와 상관없이 최근 것 #}
+    <article class="item oppick" data-issue="op-pick">
+      <h3 class="hl">지정 칼럼</h3>
+      {% for p in picks %}
+      <div class="pick"><p><span class="src">{{ p.source }}</span> {% if p.time %}<time class="tm">{{ p.time }}</time>{% endif %}</p>
+        <p class="pick-t"><a href="{{ real_url(p.url) }}" target="_blank" rel="noopener noreferrer"{{ art(p.url, p.source, p.lang) }}>{{ p.ko_title or p.title }}</a></p>
+        {% if p.lead %}<p class="oplead">{{ p.lead }}</p>{% endif %}</div>
+      {% endfor %}
+    </article>
+  {% endif %}
+  {% if opinion %}
     <p class="disclaimer">사설은 그 매체의 공식 입장, 칼럼은 필자 개인의 의견입니다. 성향 라벨은 일반적인 평가일 뿐 글마다 다를 수 있습니다. 제목과 요약만 싣고 본문은 원문 링크로 봅니다.</p>
   {% for c in opinion.compare %}
     <article class="item opcmp" data-issue="op-cmp-{{ loop.index }}">
@@ -187,6 +214,7 @@
       </ul>
     </article>
   {% endif %}
+  {% endif %}{# opinion #}
   </section>
 {% endif %}
 

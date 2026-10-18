@@ -405,6 +405,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설 — 영어는 지금처럼 원문)
     op = edition.get("opinion") or {}
     op_all = [o for o in op.get("editorials", []) + op.get("columns", []) + [e for c in op.get("compare", []) for g in c["groups"] for e in g["editorials"]]
+              + edition.get("analysis", []) + edition.get("picks", [])   # 분석·해설(S22c)·지정 칼럼(S22d) 제목도
               if o.get("lang") not in ("ko", "en", None)]
     want_ids = sorted({o["id"] for o in op_all})
     if want_ids and not set(want_ids) <= set(cache.get("op_title", {})):
@@ -418,6 +419,28 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     for o in op_all:
         if o["id"] in cache.get("op_title", {}):
             o["ko_title"] = cache["op_title"][o["id"]]
+
+    # 5. 분석·해설 한국어 요약 (S22c): 한국어가 아닌 분석 기사는 리드를 한두 문장 한국어로 (리드가 없으면 제목으로)
+    #    같은 호출에서 스포츠·연예 분석을 가려낸다 (S22c 평가: Google 뉴스 경유 WaPo NFL 분석은 주소·제목 규칙으로 못 거름)
+    all_an = edition.get("analysis", [])
+    an = [a for a in all_an if a.get("lang") != "ko"]
+    if all_an and not ({a["id"] for a in an} <= set(cache.get("an_summary", {})) and "an_skip" in cache):
+        rows = [{"id": a["id"], "제목": a["title"], "요약": (a.get("lead") or "")[:300]} for a in all_an]
+        prompt = ("아래는 분석·해설 기사 목록이다. (1) 한국어가 아닌 기사마다 무엇을 분석하는지 한국어 한두 문장으로 요약하라 "
+                  "(제목·요약에 있는 내용만). (2) 스포츠·연예를 다루는 기사의 id 를 skip 에 넣어라.\n"
+                  '출력 형식: {"summaries": {"<id>": "한국어"}, "skip": ["<id>"]}\n' + _data_block(rows))
+        res, st = guarded(prompt)
+        status["an_summary"] = st
+        if res and isinstance(res.get("summaries"), dict):
+            cache["an_summary"] = {**cache.get("an_summary", {}), **{k: str(v) for k, v in res["summaries"].items()}}
+        if res and isinstance(res.get("skip"), list):
+            cache["an_skip"] = sorted(set(cache.get("an_skip", [])) | {str(x) for x in res["skip"]})
+    for a in an:
+        if a["id"] in cache.get("an_summary", {}):
+            a["ko_summary"] = cache["an_summary"][a["id"]]
+    if all_an:
+        skip = set(cache.get("an_skip", []))
+        edition["analysis"] = [a for a in all_an if a["id"] not in skip][:ANALYSIS_SHOW]
 
     cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items + related + edition.get("compare", []):
@@ -459,6 +482,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     return edition
 
 
+ANALYSIS_SHOW = 10              # 분석·해설 면에 싣는 수 (S22c) — 후보는 opinion.ANALYSIS_MAX 만큼 받아 스포츠·연예를 뺀 뒤 자른다
 BATCH, MAX_BATCHES = 40, 3      # 요약·제목 번역 한 번에 40건, 3번까지 (S20: 24쪽에서 한 번에 보내면 시간 초과)
 
 

@@ -164,3 +164,31 @@ def detect_opinion(title: str, url: str, feed_section: str = "") -> str | None:
 
 # 제목 번역 + 한국어 요약을 둘 다 받는 언어 (S20b 프랑스어·독일어, S20d 중국어) — 리드를 읽을 수 없으므로
 TRANSLATE_BOTH = {"fr", "de", "zh"}
+
+
+# ---------- 분석·해설 기사 (S22c, 2026-10-18 사용자 요청: 매체가 쓴 분석) ----------
+# 규칙은 10/18 누적분 6,617건 실측(정밀도 높은 것만): 제목 머리말·꼬리말, 주소. "Why/How" 같은 질문형 제목은 잡음이 많아 뺐다
+_AN_TITLE = [
+    re.compile(r"^(News\s+)?Analysis\s*[:|]|^(Explainer|Insight|Big Take|Fact check|FACT FOCUS)\s*[:|\-–]"
+               r"|(?:[-–—|]\s*|\()(Analysis|Explainer)\)?\s*$", re.I),
+    # "What we know about ~" 는 사건 사실 정리(속보)가 많아 뺀다 (S22c 평가: CNN 총격범 기사)
+    re.compile(r"\bWhat you need to know\b|\bwhat to know\b|\btakeaways\b|(,|:)\s*explained\b|^Explained\b", re.I),
+    re.compile(r"[\[〈<]\s*(뉴스\s?분석|분석\+?|해설|뉴스\s?해설|이슈\s?분석|딥\s?다이브|심층(\s?분석)?|Why|줌인|이슈\+|경제뭔데|점선면"
+               r"|뉴스\s?다이브|팩트\s?체크|이슈\s?In|이슈\s?추적)\s*[\]〉>]"),
+    re.compile(r"（時時刻刻）|[［【\[]\s*(解説|深層|核心|スキャナー|ニュースQ＋?|視点)\s*[］】\]]|^解説[：:]"),
+    re.compile(r"^(国际观察|新华述评|深度观察|财新观察|热点观察|国际热评|述评)\s*[丨｜|:：]"),
+    re.compile(r"^(Analyse|Décryptage|Récit|Enquête)\s*[:|]|[-–]\s*(analyse|décryptage)\s*$", re.I),
+    re.compile(r"[-–]\s*(eine\s+)?Analyse\s*$|^Analyse\s*:"),
+]
+_AN_URL = re.compile(r"economist\.com/(interactive/)?(briefing|graphic-detail)/|aljazeera\.com/(news-analysis|explainer)/"
+                     r"|lemonde\.fr/les-decodeurs/|ft\.com/the-big-read", re.I)
+_AN_NOT = re.compile(r"\bpodcast\b|^Watch\b|\bquiz\b|war briefing|^Live\b|\bLIVE\b|^From the archive|Match of the Day"
+                     r"|\b(NCAA|NFL|NBA|MLB|NHL|Premier League|World Cup|Olympics?)\b|야구|축구|농구|골프"   # 스포츠 해설 (S22c 평가)
+                     r"|Latest Articles, Analysis|News & Analysis|바둑 해설|해설사", re.I)
+
+
+def detect_analysis(title: str, url: str, feed_section: str = "") -> bool:
+    """매체가 쓴 분석·해설 기사인가 (S22c). 전용 피드(section: analysis)이거나 제목·주소 표시가 있으면."""
+    if _AN_NOT.search(title) or re.search(r"/sports?/|/football/", url, re.I):   # 스포츠 면 주소 (S22c 평가: WaPo NFL 분석)
+        return False
+    return feed_section == "analysis" or bool(_AN_URL.search(url)) or any(p.search(title) for p in _AN_TITLE)

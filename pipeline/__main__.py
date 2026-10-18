@@ -84,13 +84,30 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     )
     report["opinions"] = {"editorial": sum(a.opinion == "editorial" for a in opinions),
                           "column": sum(a.opinion == "column" for a in opinions)}
+    # 분석·해설 (S22c) / 지정 칼럼 (S22d) — 지정 칼럼은 격주 연재라 누적 파일(picks.json)에 최근 10편을 남긴다
+    from .prepare import prepare_side
+
+    store = load_store(raw / "store.jsonl")
+    analysis = prepare_side(store, edition, cfg, sources, "analysis", hist)
+    (raw / f"{edition.isoformat()}.analysis.json").write_text(
+        json.dumps(to_jsonable(analysis), ensure_ascii=False, indent=1), encoding="utf-8"
+    )
+    picks_path = raw / "picks.json"
+    picks = {p["url"]: p for p in (json.loads(picks_path.read_text(encoding="utf-8")) if picks_path.exists() else [])}
+    for a in to_jsonable(prepare_side(store, edition, cfg, sources, "pick", hist)):
+        picks[a["url"]] = a
+    edition_end = edition_window(edition, cfg, hist)[1].isoformat()
+    kept = sorted((p for p in picks.values() if (p.get("published") or "") < edition_end),
+                  key=lambda p: p.get("published") or "", reverse=True)[:10]
+    picks_path.write_text(json.dumps(kept, ensure_ascii=False, indent=1), encoding="utf-8")
+    report["analysis"], report["picks"] = len(analysis), len(kept)
     Path(args.data, "run-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(
         f"{edition} 호: 기사 {report['articles']}건 "
         f"(시간창 밖 {report['dropped_out_of_window']}, 시각 없음 {report['dropped_no_date']}, "
         f"꺼진 매체 {report['dropped_source_disabled']}, 언어 제외 {report['dropped_wrong_lang']}, "
         f"논평·사설 분리 {report['opinion_separated']} (사설 {report['opinions']['editorial']}·칼럼 {report['opinions']['column']}), "
-        f"같은 제목 병합 {report['merged_same_title']}), 수집 실행 {len(runs)}회"
+        f"같은 제목 병합 {report['merged_same_title']}), 분석·해설 {report['analysis']}, 지정 칼럼 {report['picks']}, 수집 실행 {len(runs)}회"
     )
     return 0 if articles else 1
 
@@ -345,6 +362,15 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
         opinions = [Article.from_dict(d) for d in json.loads(op_path.read_text(encoding="utf-8"))]
         edition["opinion"] = organize(opinions, edition, day_articles)
+    # 분석·해설 (S22c) / 지정 칼럼 (S22d)
+    from .opinion import organize_analysis, recent_picks
+
+    an_path = raw / f"{args.date}.analysis.json"
+    if an_path.exists():
+        edition["analysis"] = organize_analysis([Article.from_dict(d) for d in json.loads(an_path.read_text(encoding="utf-8"))])
+    picks_path = raw / "picks.json"
+    if picks_path.exists():
+        edition["picks"] = recent_picks(json.loads(picks_path.read_text(encoding="utf-8")))
     llm_note = "꺼짐"
     if cfg.llm.enabled and not args.no_llm:
         from datetime import date as _date

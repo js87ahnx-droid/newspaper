@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from .collect import Article
 from .settings import ROOT, Config, Sources
-from .textutil import cap_lead, clean_lead, detect_opinion, title_key
+from .textutil import cap_lead, clean_lead, detect_analysis, detect_opinion, title_key
 
 
 DEFAULT_HISTORY = ROOT / "data" / "history"
@@ -74,7 +74,7 @@ def prepare(
         if not (start <= t < end):
             out_of_window += 1
             continue
-        if _is_opinion(a):  # 논평·사설은 뉴스 이슈·점수에 섞지 않는다 (prepare_opinions 가 따로 모은다)
+        if _is_opinion(a) or _side_kind(a):  # 논평·사설, 분석·해설(S22c), 지정 칼럼(S22d)은 뉴스 이슈·점수에 섞지 않는다
             opinion += 1
             continue
         a = copy.deepcopy(a)  # 누적 저장소의 원본은 건드리지 않는다
@@ -126,7 +126,51 @@ def _opinion_kind(a: Article) -> str | None:
 
 
 def _is_opinion(a: Article) -> bool:
-    return _opinion_kind(a) is not None
+    return _side_kind(a) is None and _opinion_kind(a) is not None
+
+
+def _side_kind(a: Article) -> str | None:
+    """뉴스·논평 말고 따로 싣는 것: 'pick'(지정 칼럼, S22d) / 'analysis'(분석·해설, S22c) / None."""
+    if "column_pick" in a.sections:
+        return "pick"
+    if _opinion_kind(a) is None and detect_analysis(a.title, a.url, "analysis" if "analysis" in a.sections else ""):
+        return "analysis"
+    return None
+
+
+def _side_copy(a: Article, src) -> Article:
+    a = copy.deepcopy(a)
+    a.country, a.lean, a.media_type, a.weight, a.paywall = src.country, src.lean, src.type, src.weight, src.paywall
+    a.lead = clean_lead(cap_lead(a.lead))
+    if a.lead and title_key(a.lead).startswith(title_key(a.title)[:20]):
+        a.lead = ""
+    return a
+
+
+ANALYSIS_EXTRA_HOURS = 24   # 분석 기사는 하루 늦게 읽어도 되므로 시간창 앞으로 하루 더
+
+
+def prepare_side(store: dict[str, Article], edition: date, cfg: Config, sources: Sources, kind: str,
+                 history_dir: Path | None = None) -> list[Article]:
+    """분석·해설(kind='analysis'): 시간창 + 앞 하루, 같은 매체 같은 제목은 하나, 매체 가중치·최신순.
+    지정 칼럼(kind='pick'): 누적분 전체(격주 연재라 하루 창엔 없을 때가 많음), 최신순."""
+    start, end = edition_window(edition, cfg, history_dir)
+    start -= timedelta(hours=ANALYSIS_EXTRA_HOURS)
+    by_name = {s.name: s for s in sources.sources}
+    seen: dict[tuple[str, str], Article] = {}
+    for a in store.values():
+        src = by_name.get(a.source)
+        if src is None or not src.enabled or (src.langs and a.lang not in src.langs) or not a.published:
+            continue
+        if _side_kind(a) != kind:
+            continue
+        t = datetime.fromisoformat(a.published)
+        if t >= end or (kind == "analysis" and t < start):
+            continue
+        key = (a.source, title_key(a.title))
+        if key not in seen:
+            seen[key] = _side_copy(a, src)
+    return sorted(seen.values(), key=lambda a: (a.published or ""), reverse=True)
 
 
 def prepare_opinions(

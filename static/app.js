@@ -212,7 +212,7 @@
       var b = budgets[id] || 0;
       var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
       built[id] = res.pages;
-      if (id !== "opinion" && id !== "guide") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
+      if (id !== "opinion" && id !== "guide" && id !== "analysis") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       if (b) spare += Math.max(0, b - res.pages.length);
     });
@@ -315,7 +315,7 @@
     clipped = stage.querySelectorAll(".item.clip").length;
     demotedCount = stage.querySelectorAll(".item.demoted").length;
     briefCount = stage.querySelectorAll(".item.brief").length;
-    emptySummary = Array.prototype.filter.call(stage.querySelectorAll(".item:not(.oplist):not(.opcmp):not(.guide-intro):not(.guide-table)"), function (el) {
+    emptySummary = Array.prototype.filter.call(stage.querySelectorAll(".item:not(.oplist):not(.opcmp):not(.oppick):not(.an):not(.guide-intro):not(.guide-table)"), function (el) {
       return !el.querySelector(".lead");
     }).length;
     stage.remove();

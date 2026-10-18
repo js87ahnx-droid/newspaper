@@ -219,6 +219,12 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
     for s in cfg.sections:
         if s.id in ("compare", "guide", "opinion"):
             continue
+        if s.id == "analysis":   # 매체가 쓴 분석·해설 (S22c) — 이슈 기사가 아니라 따로 모은 목록
+            an = [{**a, "cls": LEAN_CLASS.get(a.get("lean"), "mid"), "time": time_label(a.get("published"), cfg.timezone)}
+                  for a in (edition.get("analysis") or [])[:10]]   # AI 가 걸러 내지 못했을 때(LLM 꺼짐)도 10편까지
+            if an:
+                sections.append({"id": "analysis", "title": titles[s.id], "items": [], "analysis": an})
+            continue
         items = edition["sections"].get(s.id, [])
         if not items:
             continue
@@ -273,6 +279,9 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         "sections": sections, "compare": compare, "compare_title": titles.get("compare", "입장 비교"),
         "guide": guide, "guide_title": titles.get("guide", "매체 성향 가이드·출처"),
         "opinion": _opinion_view(edition.get("opinion")), "opinion_title": titles.get("opinion", "논평·사설"),
+        # 지정 칼럼 (S22d): 논평면 맨 앞 칸
+        "picks": [{**p, "cls": LEAN_CLASS.get(p.get("lean"), "mid"), "time": time_label(p.get("published"), cfg.timezone)}
+                  for p in edition.get("picks") or []],
         "lean_class": LEAN_CLASS, "stats": edition.get("stats", {}), "lead_max": LEAD_MAX,
         "edition_json": json.dumps(_client_config(edition, cfg, interests, d), ensure_ascii=False).replace("</", "<\\/"),  # 스크립트 안 "</script>" 방지
     }

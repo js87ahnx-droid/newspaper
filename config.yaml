@@ -34,7 +34,7 @@ editing:
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
-# pages: 고정 쪽 수 (S15). 합 24쪽(펼침 12면 — S19d "지면 좀 더 많이") — 짝수여야 펼침면이 맞는다.
+# pages: 고정 쪽 수 (S15). 합 26쪽(펼침 13면 — S22c 분석·해설 2쪽 추가 — S19d "지면 좀 더 많이") — 짝수여야 펼침면이 맞는다.
 # S21c(10/18호 "단신이 너무 많다"): 사회·과학 면을 새로, 관심면 확대, 단신 5 → 3쪽. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 논평·단신이 쓴다
 sections:
   - {id: front, title: "1면", max_articles: 5, pages: 2}
@@ -43,6 +43,7 @@ sections:
   - {id: international, title: "국제", max_articles: 12, pages: 4}
   - {id: society, title: "사회·과학", max_articles: 7, pages: 2}
   - {id: interest, title: "관심", max_articles: 14, pages: 3}
+  - {id: analysis, title: "분석·해설", max_articles: 0, pages: 2}  # 매체가 쓴 분석·해설 기사 (S22c — AI 글 아님). 뉴스 기사 수에는 안 셈
   - {id: compare, title: "입장 비교", max_articles: 4}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
   - {id: briefs, title: "단신", max_articles: 30, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (가로 한 줄 — S17e, 분야별 묶음 — S19c)
   - {id: opinion, title: "논평·사설", max_articles: 0, pages: 3}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
