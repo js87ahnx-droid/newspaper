@@ -461,8 +461,11 @@
 - worker/src/domains.json 에 biz.chosun.com — Worker 재배포 필요
 - pytest 263건 통과
 
+### 배포 (2026-10-18)
+- main 푸시(S21a~c·S22a~d·호출 상한 50, pytest 263건 통과) → Pages 빌드 성공. 새 지면 구성은 다음 daily 발행부터
+- Worker 재배포 완료(버전 482ef0be): S20d news.cn·people.com.cn·본문 칸·공백 문자, S22d biz.chosun.com. 키 없는 요청 401 확인
+
 ### 다음에 이어서 할 일
-1. Worker 재배포 (S20d: news.cn·people.com.cn 허용, 본문 칸·공백 문자)
-2. S18 통합 평가 — 실제 발행 지면(GitHub Pages)에서 원문 보기 동작, Worker 한도 초과 수 관찰, 새 매체 5곳·24쪽 확인
+1. S18 통합 평가 — 실제 발행 지면(GitHub Pages)에서 원문 보기 동작, Worker 한도 초과 수 관찰, 새 매체 5곳·24쪽 확인
 
 ### 아직 사용자 작업
