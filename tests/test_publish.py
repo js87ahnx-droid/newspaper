@@ -28,9 +28,23 @@ def test_publish_layout_and_archive(tmp_path):
     assert [f.relative_to(site).as_posix() for f in files] == ["index.html", "archive/2026-10-16/index.html", "archive/index.html"]
     assert (site / ".nojekyll").exists() and (site / "static" / "app.js").exists()
     arch = (site / "archive" / "2026-10-16" / "index.html").read_text(encoding="utf-8")
-    assert 'href="../../static/app.css"' in arch and '"base": "../../"' in arch
+    assert 'href="../../static/app.css?v=' in arch and '"base": "../../"' in arch
     listing = (site / "archive" / "index.html").read_text(encoding="utf-8")
     assert listing.index("10월 16일자 뉴스") < listing.index("10월 15일자 뉴스")  # 최신이 위
+
+
+def test_static_urls_and_sw_cache_are_versioned(tmp_path):
+    """S18: 정적 파일 주소 ?v=<해시> 와 서비스 워커 캐시 이름이 같은 해시 — 고정 이름(news-v1)이면 한 번 연 기기가 옛 app.js 를 계속 썼다."""
+    from pipeline.render import asset_version
+
+    site = tmp_path / "docs"
+    publish(edition(), load_config(), load_interests(), load_sources(), site)
+    v = asset_version()
+    html = (site / "index.html").read_text(encoding="utf-8")
+    sw = (site / "sw.js").read_text(encoding="utf-8")
+    assert f'static/app.js?v={v}"' in html and f'static/app.css?v={v}"' in html
+    assert f'const VER = "{v}";' in sw and "__VER__" not in sw
+    assert len(v) == 10
 
 
 def test_old_archives_pruned(tmp_path):

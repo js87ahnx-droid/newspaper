@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="{{ base }}static/app.css">
+<link rel="stylesheet" href="{{ base }}static/app.css?v={{ ver }}">
 </head>
 <body>
 <div id="toolbar" role="toolbar" aria-label="보기 설정">
@@ -239,8 +239,8 @@
 </div>
 
 <script>window.EDITION = {{ edition_json|safe }};</script>
-<script src="{{ base }}static/vendor/page-flip/page-flip.browser.js"></script>
-<script src="{{ base }}static/feedback.js"></script>
-<script src="{{ base }}static/app.js"></script>
+<script src="{{ base }}static/vendor/page-flip/page-flip.browser.js?v={{ ver }}"></script>
+<script src="{{ base }}static/feedback.js?v={{ ver }}"></script>
+<script src="{{ base }}static/app.js?v={{ ver }}"></script>
 </body>
 </html>

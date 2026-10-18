@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import shutil
@@ -288,9 +289,22 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
     }
 
 
+def asset_version() -> str:
+    """정적 파일 내용의 짧은 해시. 지면의 CSS·JS 주소 뒤 ?v= 와 서비스 워커 캐시 이름에 쓴다 —
+    캐시 이름이 고정(news-v1)이고 정적 파일을 캐시 먼저 내주어, 한 번 연 기기는 새 app.js 를 받지 못했다 (S18)."""
+    h = hashlib.sha1()
+    for f in sorted(p for p in (ROOT / "static").rglob("*") if p.is_file()):
+        h.update(f.relative_to(ROOT).as_posix().encode())
+        h.update(f.read_bytes())
+    h.update((ROOT / "templates" / "sw.js").read_bytes())
+    return h.hexdigest()[:10]
+
+
 def _env() -> Environment:
-    return Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html", "j2"]),
-                       trim_blocks=True, lstrip_blocks=True)
+    env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html", "j2"]),
+                      trim_blocks=True, lstrip_blocks=True)
+    env.globals["ver"] = asset_version()
+    return env
 
 
 def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "") -> str:
@@ -321,7 +335,8 @@ def write_assets(site: Path, masthead_name: str) -> None:
                   {"src": "static/icon-512.png", "sizes": "512x512", "type": "image/png"}],
     }
     (site / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
-    shutil.copy(ROOT / "templates" / "sw.js", site / "sw.js")
+    sw = (ROOT / "templates" / "sw.js").read_text(encoding="utf-8").replace("__VER__", asset_version())
+    (site / "sw.js").write_text(sw, encoding="utf-8")
 
 
 def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path) -> Path:
