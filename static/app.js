@@ -770,8 +770,7 @@
     var art = b.closest("[data-issue]");
     document.dispatchEvent(new CustomEvent("news:feedback", {
       detail: { kind: b.getAttribute("data-fb"), issue: art.getAttribute("data-issue"), topic: art.getAttribute("data-topic") }
-    }));
-    b.classList.add("pressed");
+    }));   // 누른 표시(다시 누르면 취소, S24b)도 feedback.js 가 정한다
   });
 
   if ("serviceWorker" in navigator && location.protocol === "https:") {

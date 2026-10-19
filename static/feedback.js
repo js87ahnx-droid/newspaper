@@ -151,22 +151,28 @@
   document.addEventListener("news:feedback", function (e) {
     var d = e.detail, p = prefs();
     var label = (E.topics || {})[d.topic] || d.topic;
-    p.delta[d.topic] = (p.delta[d.topic] || 0) + (d.kind === "more" ? STEP : -STEP);
-    store.set("news.prefs", p);
-    var log = store.get("news.fbLog", []) || [];
-    log.push({ t: new Date().toISOString(), edition: E.edition, issue: d.issue, topic: d.topic, kind: d.kind });
-    store.set("news.fbLog", log.slice(-500));
     var all = store.get("news.pressed", {}) || {};
     var keep = {};
     Object.keys(all).sort().slice(-2).forEach(function (k) { keep[k] = all[k]; });  // 최근 두 호만 보관
     keep[E.edition] = keep[E.edition] || {};
-    keep[E.edition][d.issue] = d.kind;
+    var before = keep[E.edition][d.issue];
+    var undo = before === d.kind;   // 같은 단추를 다시 누르면 취소 (S24b)
+    // 앞서 누른 것은 되돌리고(반대 단추로 바꿀 때도), 취소가 아니면 새로 누른 것을 더한다
+    var change = (before === "more" ? -STEP : before === "less" ? STEP : 0) + (undo ? 0 : (d.kind === "more" ? STEP : -STEP));
+    p.delta[d.topic] = Math.round(((p.delta[d.topic] || 0) + change) * 1000) / 1000;
+    if (!p.delta[d.topic]) delete p.delta[d.topic];
+    store.set("news.prefs", p);
+    var log = store.get("news.fbLog", []) || [];
+    log.push({ t: new Date().toISOString(), edition: E.edition, issue: d.issue, topic: d.topic, kind: undo ? "undo" : d.kind });
+    store.set("news.fbLog", log.slice(-500));
+    if (undo) delete keep[E.edition][d.issue]; else keep[E.edition][d.issue] = d.kind;
     store.set("news.pressed", keep);
-    // 같은 기사의 반대 버튼 표시 지우기
+    // 같은 기사의 단추 표시: 누른 것만 (취소면 모두 지움)
     document.querySelectorAll('[data-issue="' + d.issue + '"] [data-fb]').forEach(function (b) {
-      b.classList.toggle("pressed", b.getAttribute("data-fb") === d.kind);
+      b.classList.toggle("pressed", !undo && b.getAttribute("data-fb") === d.kind);
     });
-    toast(label + " 분야를 " + (d.kind === "more" ? "더" : "덜") + " 보도록 기억했습니다 · 다음에 열 때 반영");
+    toast(undo ? label + " 분야 " + (d.kind === "more" ? "더" : "덜") + " 보기를 취소했습니다"
+      : label + " 분야를 " + (d.kind === "more" ? "더" : "덜") + " 보도록 기억했습니다 · 다음에 열 때 반영");
   });
 
   // ---------- 주간 설문 ----------

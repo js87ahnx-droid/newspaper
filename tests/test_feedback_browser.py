@@ -45,6 +45,12 @@ def press(page, issue, kind, times=1):
         page.evaluate(f"""() => document.querySelector('#book [data-issue="{issue}"] [data-fb="{kind}"]').click()""")
 
 
+def learn(page, topic, delta):
+    """학습된 가중치를 바로 넣는다 — 같은 단추를 다시 누르면 취소라(S24b) 여러 번 눌러 쌓을 수 없다."""
+    page.evaluate(f"""() => {{ const p = NEWS_FB.prefs(); p.delta["{topic}"] = {delta};
+                             localStorage.setItem('news.prefs', JSON.stringify(p)); }}""")
+
+
 def no_survey(page):
     if page.is_visible("#survey"):
         page.click('#survey [data-s="later"]')
@@ -56,11 +62,12 @@ def test_feedback_changes_layout_on_next_open(browser, tmp_path):
     page.wait_for_timeout(800)
     no_survey(page)
     before = page.evaluate(FLOW)
-    # 정치·안보 섹션의 보장 안 된 기사에 "덜 보기" 4번 → 정치 가중치 1.0 → 0
+    # 정치·안보 섹션의 보장 안 된 기사에 "덜 보기" → 정치 가중치 1.0 → 0 까지 학습된 것으로
     target = page.evaluate("""() => [...document.querySelectorAll('#flow section[data-section="politics"] > article.item')]
                                      .find(a => a.dataset.guaranteed === '0').dataset.issue""")
-    press(page, target, "less", 4)
+    press(page, target, "less")
     assert page.evaluate(FLOW) == before          # 누르는 즉시 지면이 튀지 않는다
+    learn(page, "politics", -1.0)
     reload_(page)
     after = page.evaluate(FLOW)
     ctx.close()
@@ -80,11 +87,10 @@ def test_more_feedback_promotes_within_cap(browser, tmp_path):
     interest_topics = page.evaluate("""() => [...new Set([...document.querySelectorAll('#flow section[data-section="interest"] > article.item')]
                                               .map(a => a.dataset.topic))]""")
     for t in interest_topics:
-        iss = page.evaluate(f"document.querySelector('#book article.item[data-topic=\"{t}\"]').dataset.issue")
-        press(page, iss, "less", 8)
+        learn(page, t, -2.0)
     target = page.evaluate("""() => [...document.querySelectorAll('#flow section[data-section="briefs"] > article.item')]
                                      .find(a => a.dataset.guaranteed === '0' && a.dataset.topic === 'society').dataset.issue""")
-    press(page, target, "more", 3)                # 사회 0.5 → 1.25 (기본보다 +0.75)
+    learn(page, "society", 0.75)                  # 사회 0.5 → 1.25 (기본보다 +0.75)
     reload_(page)
     moved = page.evaluate("window.NEWS_FB_LAST")
     after = page.evaluate(FLOW)
@@ -104,9 +110,7 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     topics = page.evaluate("[...new Set([...document.querySelectorAll('#flow article.item')].map(a => a.dataset.topic))]")
     # 지면에 나온 모든 분야에 "덜 보기" 30번씩 (극단)
     for t in topics:
-        issue = page.evaluate(f"document.querySelector('#book article.item[data-topic=\"{t}\"]')?.dataset.issue || null")
-        if issue:
-            press(page, issue, "less", 30)
+        learn(page, t, -7.5)
     reload_(page)
     book = set(page.evaluate(BOOK_IDS))
     first = page.evaluate("document.querySelector('#book article.item').dataset.issue")
@@ -116,6 +120,32 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     assert set(guaranteed) <= book                 # 다양성·연속 보장 기사 모두 지면에
     assert len(guaranteed) / total >= 0.3          # 다양성 30% 이상 유지
     assert total == CFG.editing.total_articles     # 기사가 지면에서 사라지지 않음 (단신으로만 내려감)
+
+
+def test_press_again_cancels(browser, tmp_path):
+    """S24b: 같은 단추를 다시 누르면 취소, 반대 단추로 바꾸면 앞 것을 되돌리고 새 것만."""
+    index = make_site(tmp_path)
+    ctx, page, errs = open_(browser, index)
+    page.wait_for_timeout(800)
+    no_survey(page)
+    issue, topic = page.evaluate("(() => { const a = document.querySelector('#book article.item[data-topic]'); return [a.dataset.issue, a.dataset.topic]; })()")
+    on = f"""() => [...document.querySelectorAll('#book [data-issue="{issue}"] [data-fb].pressed')].map(b => b.dataset.fb)"""
+    delta = f"NEWS_FB.prefs().delta['{topic}'] || 0"
+    press(page, issue, "more")
+    first = (page.evaluate(on), page.evaluate(delta))
+    press(page, issue, "more")
+    undone = (page.evaluate(on), page.evaluate(delta), page.evaluate("JSON.parse(localStorage.getItem('news.pressed'))[EDITION.edition]"))
+    press(page, issue, "more")
+    press(page, issue, "less")
+    switched = (page.evaluate(on), page.evaluate(delta))
+    reload_(page)
+    kept = page.evaluate(on)
+    ctx.close()
+    assert not errs, errs
+    assert set(first[0]) == {"more"} and first[1] == 0.25
+    assert undone[0] == [] and undone[1] == 0 and issue not in undone[2]
+    assert set(switched[0]) == {"less"} and switched[1] == -0.25
+    assert set(kept) == {"less"}                  # 다시 열어도 덜 보기만 표시
 
 
 def test_survey_once_per_week(browser, tmp_path):
@@ -149,8 +179,7 @@ def test_export_learned_weights(browser, tmp_path):
     ctx, page, _ = open_(browser, index)
     page.wait_for_timeout(800)
     no_survey(page)
-    issue = page.evaluate("document.querySelector('#book article.item[data-topic=\"politics\"]').dataset.issue")
-    press(page, issue, "less", 4)
+    learn(page, "politics", -1.0)
     page.click('[data-act="settings"]')
     with page.expect_download() as dl:
         page.click('#settings [data-x="export"]')
