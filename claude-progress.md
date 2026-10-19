@@ -531,7 +531,7 @@
 - 10/20 도 daily 예약(05:33·06:07·06:41)이 07:04 까지 하나도 시작 안 됨, 수집 예약은 1~2시간 늦음 → 07:05 수동 발행(run 39332626545) 성공
 - S25a collect 마지막 단계: 05:30~정오 KST 에 오늘 호가 없으면 daily 를 부름 (GITHUB_TOKEN, actions: write)
 - S25b Worker scheduled: 05:33·06:03·06:33 KST 에 daily 를 workflow_dispatch. 배포 완료(버전 b4ee4733, 예약 3개 등록). Worker 테스트 12건 통과
-- **사용자 작업 남음**: GitHub fine-grained 토큰(이 저장소만, Actions 읽기·쓰기)을 만들어 `cd worker && npx wrangler secret put GH_TOKEN` — 없으면 Worker 예약은 아무것도 안 부름
+- GH_TOKEN 사용자가 등록(2026-10-20, `wrangler secret list` 에 GH_TOKEN·READER_KEY). Windows PowerShell 은 npx.ps1 이 막혀 `npx.cmd`, worker 폴더에서 실행해야 함. 처음 붙여 넣은 토큰은 노출돼 사용자에게 폐기 안내
 
 ### 다음에 이어서 할 일
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
