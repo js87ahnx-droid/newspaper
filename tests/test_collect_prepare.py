@@ -13,7 +13,9 @@ from pipeline.prepare import current_edition, edition_window, prepare, target_ed
 from pipeline.settings import ROOT, Sources, load_config
 
 UTC = timezone.utc
-CFG = load_config()
+_cfg = load_config()
+# 시간창 경계 테스트는 06:00 마감을 기준으로 짠 것 — 설정의 마감(지금 05:30)과 무관하게 고정
+CFG = _cfg.model_copy(update={"window": _cfg.window.model_copy(update={"end": "06:00"})})
 
 
 def rss(items: list[tuple[str, str, str | None]]) -> bytes:
@@ -260,7 +262,7 @@ def test_prepare_cli_writes_report(tmp_path):
     raw.mkdir()
     art = {
         "id": "x1", "url": "https://a.test/1", "source": "A", "country": "KR", "lean": "중도",
-        "media_type": "종합지", "weight": 1.0, "paywall": False, "kind": "rss", "title": "기사",
+        "media_type": "종합지", "weight": 1.0, "paywall": False, "kind": "rss", "title": "시험 기사 제목",
         "lead": "", "lang": "ko", "published": "2026-10-15T12:00:00+00:00", "date_source": "feed",
         "sections": ["top"], "main": False, "first_seen": "2026-10-15T12:30:00+00:00",
     }
