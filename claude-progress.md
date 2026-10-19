@@ -527,8 +527,14 @@
 - pytest 284건 통과. 10/19호 재발행(run 39249728719): 빈 제목 49건 거름, 관련 기사 규칙 10 + AI 3, 26쪽·넘친 쪽 0, 단신에 앞 기사 되풀이 0, 사설 비교 2묶음 모두 같은 사안, 실제 지면에서 단추 취소 확인. AI 40회·$1.79(같은 날 두 번째 발행이라 상한 50에 가까움)
 - 한계: 프랑스 폭동 사설 묶음이 1면 톱 이슈에 안 이어져 "같은 주제"로 표시
 
+### S25 아침 발행을 GitHub 예약에 기대지 않기 (2026-10-20)
+- 10/20 도 daily 예약(05:33·06:07·06:41)이 07:04 까지 하나도 시작 안 됨, 수집 예약은 1~2시간 늦음 → 07:05 수동 발행(run 39332626545) 성공
+- S25a collect 마지막 단계: 05:30~정오 KST 에 오늘 호가 없으면 daily 를 부름 (GITHUB_TOKEN, actions: write)
+- S25b Worker scheduled: 05:33·06:03·06:33 KST 에 daily 를 workflow_dispatch. 배포 완료(버전 b4ee4733, 예약 3개 등록). Worker 테스트 12건 통과
+- **사용자 작업 남음**: GitHub fine-grained 토큰(이 저장소만, Actions 읽기·쓰기)을 만들어 `cd worker && npx wrangler secret put GH_TOKEN` — 없으면 Worker 예약은 아무것도 안 부름
+
 ### 다음에 이어서 할 일
-1. 10/20 아침 예약이 몇 시 실행으로 발행됐는지(05:33 목표), 나머지 예비 실행이 check 에서 건너뛰는지 확인
+1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
 2. 그래도 빠지면 Cloudflare Worker cron 으로 workflow_dispatch 부르기 (GitHub 토큰을 Worker 비밀값으로 — 사용자 작업)
 
 ### 아직 사용자 작업
