@@ -96,6 +96,18 @@ def title_key(title: str) -> str:
     return t.lower()
 
 
+EMPTY_TITLE_MIN = 3   # 말머리·매체 이름·기호를 뺀 글자가 이보다 적으면 내용 없는 제목 ("[사설] 국감 파행"처럼 짧은 제목은 남게)
+
+
+def empty_title(title: str, source_names: set[str] | frozenset[str] = frozenset()) -> bool:
+    """제목이 매체 이름·말머리·기호뿐인가 (S24d: 10/19호 "- 중앙일보" 가 사흘째 이어진 이슈로 지면에 실림)."""
+    t = re.sub(r"[\[\(（【][^\]\)）】]{0,12}[\]\)）】]", " ", title)   # [속보]·(종합) 같은 말머리
+    for name in sorted(source_names, key=len, reverse=True):
+        if name:
+            t = t.replace(name, " ")
+    return len(re.sub(r"[\W_]+", "", t, flags=re.UNICODE)) < EMPTY_TITLE_MIN
+
+
 _HANGUL = re.compile(r"[가-힣]")
 _KANA = re.compile(r"[぀-ヿ]")
 _HAN = re.compile(r"[一-鿿]")

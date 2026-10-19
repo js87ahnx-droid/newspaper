@@ -157,9 +157,20 @@ ANALYSIS_PROMPT = """각 이슈(id)마다 여러 매체 기사(본문 또는 요
 - points: 쟁점이나 지켜볼 점 1~3개 (짧은 구)
 - stances: 매체가 둘 이상이고 관점·강조점이 실제로 다를 때만, 매체별로 [{{"source": 매체 이름, "view": 그 매체가 강조하는 점 한 문장}}]. 차이가 없으면 빈 배열
 - brief: 한 줄 요약 (40자 안팎)
+- empty: 기사에 실제 내용이 없거나(제목이 매체 이름뿐 등) 지난 경과에 비해 새로 알려진 사실이 없으면 true, 아니면 false
 "본문 없음"인 기사는 제목·요약만 근거로 쓴다. 근거가 부족한 항목은 짧게 쓰거나 비운다.
-출력 형식: {{"issues": {{"<id>": {{"headline": "", "summary": "", "background": "", "points": [], "stances": [], "brief": ""}}}}}}
+출력 형식: {{"issues": {{"<id>": {{"headline": "", "summary": "", "background": "", "points": [], "stances": [], "brief": "", "empty": false}}}}}}
 {data}"""
+
+# AI 가 "새 내용 없음"이라고 쓴 정리 (S24d: 10/19호 "중앙일보 인수전 관련 새 정보 없음") — empty 를 빠뜨려도 잡는다
+_NO_NEWS = re.compile(r"새(?:로운|로|\s)*(?:내용|정보|소식|사실|진전|전개)\S{0,3}\s*(?:은|는|이|가)?\s*(?:없|확인\s*(?:안|되지|불가)|드러나지)")
+
+
+def no_news(out: dict) -> bool:
+    """분석 결과가 '오늘 새로 알려진 것 없음'인가."""
+    if out.get("empty") is True:
+        return True
+    return any(_NO_NEWS.search(str(out.get(k, ""))) for k in ("brief", "summary", "headline"))
 
 
 def _bigrams(s: str) -> set[str]:
@@ -230,6 +241,10 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
             out = res["issues"].get(it["issue_id"])
             if not isinstance(out, dict):
                 stats["rejected"][it["issue_id"]] = "응답 없음"
+                continue
+            if no_news(out):   # 지면에서 내린다 (enrich) — 정리도 경과 기록도 남기지 않음
+                done[it["issue_id"]] = {"empty": True}
+                stats["rejected"][it["issue_id"]] = "새 내용 없음"
                 continue
             why = check_summary(str(out.get("summary", "")), [a["title"] for a in it["articles"]])
             texts = [str(out.get(k, "")) for k in ("summary", "background", "brief")] + [
@@ -376,6 +391,18 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     if cfg.analysis_issues > 0:
         analysis, astats = analyze(items, bodies or {}, cfg, cache, guarded)
         status["analysis"] = f"{astats['ok']}/{astats['asked']} ok" if astats["asked"] else "캐시"
+        # 새 내용 없는 이슈는 지면에서 내린다 (S24d). 1면 톱은 그대로
+        empty = {k for k, v in analysis.items() if v.get("empty")}
+        analysis = {k: v for k, v in analysis.items() if k not in empty}
+        dropped = []
+        for sec, ps in edition["sections"].items():
+            keep = [it for n, it in enumerate(ps) if it["issue_id"] not in empty or (sec == "front" and n == 0)]
+            dropped += [it["issue_id"] for it in ps if it not in keep]
+            edition["sections"][sec] = keep
+        if dropped:
+            status["analysis"] += f", 새 내용 없음 {len(dropped)}건 내림"
+            items = [it for ps in edition["sections"].values() for it in ps]
+            related = [r for it in items for r in it.get("related", [])]
 
     # 1. 입장 비교 프레임 요약
     if "compare" not in cache and edition.get("compare"):

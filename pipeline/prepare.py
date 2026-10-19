@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from .collect import Article
 from .settings import ROOT, Config, Sources
-from .textutil import cap_lead, clean_lead, detect_analysis, detect_opinion, title_key
+from .textutil import cap_lead, clean_lead, detect_analysis, detect_opinion, empty_title, title_key
 
 
 DEFAULT_HISTORY = ROOT / "data" / "history"
@@ -57,12 +57,16 @@ def prepare(
     """sources 는 수집 뒤 바뀌었을 수 있으므로(성향 라벨·가중치 수정, 매체 끄기) 여기서 다시 적용한다."""
     start, end = edition_window(edition, cfg, history_dir)
     by_name = {s.name: s for s in sources.sources}
-    no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = 0
+    names = frozenset(by_name)
+    no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = empty = 0
     in_window: list[Article] = []
     for a in store.values():
         src = by_name.get(a.source)
         if src is None or not src.enabled:
             disabled += 1
+            continue
+        if empty_title(a.title, names):   # 제목이 "- 중앙일보" 처럼 매체 이름·기호뿐 (S24d)
+            empty += 1
             continue
         if src.langs and a.lang not in src.langs:
             wrong_lang += 1
@@ -109,6 +113,7 @@ def prepare(
         "store_total": len(store),
         "dropped_source_disabled": disabled,
         "dropped_wrong_lang": wrong_lang,
+        "dropped_empty_title": empty,
         "dropped_no_date": no_date,
         "opinion_separated": opinion,
         "dropped_out_of_window": out_of_window,
