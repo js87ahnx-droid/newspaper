@@ -7,6 +7,12 @@ workers_dev = true
 [vars]
 # 지면 주소 (GitHub Pages). 로컬 시험 주소는 .dev.vars 에
 ALLOWED_ORIGINS = "https://js87ahnx-droid.github.io"
+# 아침 발행을 부를 저장소 (S25b). 토큰은 npx wrangler secret put GH_TOKEN
+GH_REPO = "js87ahnx-droid/newspaper"
+
+# 아침 발행 시작 (S25b) — UTC. 05:33·06:03·06:33 KST. 이미 발행됐으면 daily 의 check 작업이 바로 끝낸다
+[triggers]
+crons = ["33 20 * * *", "3 21 * * *", "33 21 * * *"]
 
 # 한국어 번역 (S17b) — Workers AI 무료 할당량, 저장 안 함
 [ai]

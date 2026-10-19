@@ -472,3 +472,11 @@ S11(공식 API 본문 열람)은 D14로 대체한다. S12(7일 시범 운영)는
   - [x] 사슬 연결 테스트에서 틀린 묶음 0, 맞는 묶음 유지 (10/19 원래 묶음은 지면이 덮어써져 재현 못 함)
   - [x] 실제 지면에서 묶음 안 사설이 모두 같은 사안 (추미애 사과 논란 조선·경향 / 프랑스 청년 폭동 조선·한경)
 
+### S25. 아침 발행을 GitHub 예약에 기대지 않기 (2026-10-20, 사용자 선택 "Worker 예약 + 수집 연결")
+10/20 도 05:33·06:07·06:41 daily 예약이 하나도 시작 안 됨(07:04 확인, 수동 발행). 수집 예약도 1~2시간 늦음
+- S25a: collect 마지막 단계 — 05:30 뒤 정오 전, 오늘 호가 없으면 `gh workflow run daily.yml` (GITHUB_TOKEN, actions: write)
+- S25b: Worker `scheduled` — 05:33·06:03·06:33 KST 에 daily 를 workflow_dispatch. GH_TOKEN(이 저장소만, Actions 읽기·쓰기) 은 사용자가 만들어 `wrangler secret put GH_TOKEN`
+- **기준**
+  - [ ] Worker 단위 테스트: 부르는 주소·머리글·본문, 토큰 없으면 안 부름, 거절이면 ok false
+  - [ ] 실제: Worker 예약이 05:33 KST 전후에 daily 를 시작(Actions 기록의 event workflow_dispatch, 시작 시각), 뒤 예약은 check 에서 건너뜀
+  - [ ] collect 단계: 발행된 날은 "발행됨", 안 된 날 아침은 daily 시작

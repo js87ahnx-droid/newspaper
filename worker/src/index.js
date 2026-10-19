@@ -13,6 +13,7 @@
 import DOMAINS from "./domains.json";
 import { extract } from "./extract.js";
 import { translate, validate } from "./translate.js";
+import { dispatchDaily } from "./morning.js";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 const MAX_REDIRECTS = 5;
@@ -95,6 +96,11 @@ async function fetchArticle(url) {
 }
 
 export default {
+  // 아침 발행 시작 (S25b, wrangler.toml [triggers]) — 결과는 상태 코드만 남긴다
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispatchDaily(env).then((r) => console.log("daily dispatch", event.cron, JSON.stringify(r))));
+  },
+
   async fetch(req, env) {
     const h = cors(req, env);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
