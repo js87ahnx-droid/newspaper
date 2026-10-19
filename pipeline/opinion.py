@@ -20,6 +20,7 @@ from .stance import LEAN_ORDER, words
 # 영어 맞는 연결 0.33~0.50 / 틀린 연결 ≤0.16). 하루치로 정한 값이라 시범 운영(S12)에서 재검증
 LINK_MIN = {"ko": 0.12, "en": 0.20}
 LINK_MIN_DEFAULT = 0.20
+LINK_STRONG = 1.5   # 다른 사설과 직접 묶이지 않은 사설은 이슈 연결이 기준의 이 배 이상일 때만 "같은 이슈" 비교에 (S24e)
 # 사설끼리 같은 주제로 묶는 최소 유사도 (같은 매체 사설끼리는 묶지 않는다). 10/16호: 같은 주제 쌍 ≥0.086, 다른 주제 ≤0.069
 EDITORIAL_GROUP_MIN = 0.08
 MAX_COLUMNS = 10
@@ -81,30 +82,41 @@ def link_to_issues(opinions: list[Article], items: list[dict], common_by_lang: d
     return links
 
 
-def group_editorials(editorials: list[Article]) -> list[list[Article]]:
-    """같은 주제의 사설끼리 묶는다 (같은 언어, 다른 매체끼리만, 단일 연결). 지면 이슈와 무관하게 사설 사이에서 직접."""
+def _pair_ok(sim: float, wi: set[str], wj: set[str], common: set[str]) -> bool:
+    """두 사설이 같은 사안인가: 유사도 + 그날 흔하지 않은 낱말 두 개 이상 공유 (S24e — 유사도만으로는 "정부"·"국민"
+    같은 말이 겹친 다른 사설이 묶였다)."""
+    return sim >= EDITORIAL_GROUP_MIN and len((wi & wj) - common) >= 2
+
+
+def group_editorials(editorials: list[Article], common_by_lang: dict[str, set[str]] | None = None) -> list[list[Article]]:
+    """같은 사안의 사설끼리 묶는다 (같은 언어, 다른 매체끼리만). 지면 이슈와 무관하게 사설 사이에서 직접.
+    완전 연결: 묶음 안 모든 사설 쌍이 기준을 넘어야 한다 (S24e — 전에는 단일 연결이라 A~B, B~C 만 닮아도 A·C 가
+    한 묶음이 됐다). 가장 닮은 쌍부터 합친다. 같은 매체 사설은 한 묶음에 넣지 않는다."""
     groups: list[list[Article]] = []
     for lang in sorted({e.lang for e in editorials}):
         eds = [e for e in editorials if e.lang == lang]
         if len(eds) < 2:
             continue
         sim = tfidf_similarity(drop_source_templates([tokens(_doc(e)) for e in eds], [e.source for e in eds]))
-        parent = list(range(len(eds)))
-
-        def find(x):
-            while parent[x] != x:
-                parent[x] = parent[parent[x]]
-                x = parent[x]
-            return x
-
-        for i in range(len(eds)):
-            for j in range(i + 1, len(eds)):
-                if eds[i].source != eds[j].source and sim[i, j] >= EDITORIAL_GROUP_MIN:
-                    parent[find(i)] = find(j)
-        by_root: dict[int, list[Article]] = {}
-        for i, e in enumerate(eds):
-            by_root.setdefault(find(i), []).append(e)
-        groups += [g for g in by_root.values() if len(g) > 1]
+        ws = [set(words(_doc(e), lang)) for e in eds]
+        common = (common_by_lang or {}).get(lang, set())
+        ok = [[i != j and eds[i].source != eds[j].source and _pair_ok(float(sim[i, j]), ws[i], ws[j], common)
+               for j in range(len(eds))] for i in range(len(eds))]
+        member = {i: {i} for i in range(len(eds))}   # 묶음 대표 → 사설 번호들
+        pairs = sorted(((float(sim[i, j]), i, j) for i in range(len(eds)) for j in range(i + 1, len(eds)) if ok[i][j]),
+                       reverse=True)
+        root = list(range(len(eds)))
+        for _, i, j in pairs:
+            ri, rj = root[i], root[j]
+            if ri == rj:
+                continue
+            a, b = member[ri], member[rj]
+            if all(ok[x][y] for x in a for y in b):
+                a |= b
+                for y in b:
+                    root[y] = ri
+                del member[rj]
+        groups += [[eds[i] for i in sorted(m)] for m in member.values() if len(m) > 1]
     return groups
 
 
@@ -127,21 +139,32 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
     items = [it for ps in edition["sections"].values() for it in ps]
     order = {it["issue_id"]: i for i, it in enumerate(items)}  # 지면 순서 = 대략 중요도 순
     titles = {it["issue_id"]: it["title"] for it in items}
-    links = link_to_issues(opinions, items, common_words(day_articles) if day_articles else None)
+    common = common_words(day_articles) if day_articles else None
+    links = link_to_issues(opinions, items, common)
     editorials = [o for o in opinions if o.opinion == "editorial"]
     columns = [o for o in opinions if o.opinion == "column"]
 
-    # 1. 같은 주제, 다른 사설: 사설끼리 주제로 묶고, 같은 지면 이슈에 이어진 사설도 합친다
-    groups = group_editorials(editorials)
+    # 1. 같은 주제, 다른 사설: 사설끼리 사안으로 묶고, 같은 지면 이슈에 이어진 사설도 합친다
+    groups = group_editorials(editorials, common)
     grouped = {e.id for g in groups for e in g}
     by_issue: dict[str, list[Article]] = {}
     for e in editorials:
         if e.id in links and e.id not in grouped:
             by_issue.setdefault(links[e.id][0], []).append(e)
-    for g in groups:  # 묶음 안 사설이 이은 이슈가 있으면 그 이슈 이름을 쓴다
-        iids = [links[e.id][0] for e in g if e.id in links]
-        key = iids[0] if iids else "topic:" + g[0].id
+    for g in groups:  # 묶음 안 사설이 가장 많이 이은 이슈(같으면 더 닮은 쪽)의 이름을 쓴다
+        votes: dict[str, float] = {}
+        for e in g:
+            if e.id in links:
+                votes[links[e.id][0]] = votes.get(links[e.id][0], 0) + 1 + links[e.id][1]
+        key = max(votes, key=votes.get) if votes else "topic:" + g[0].id
         by_issue.setdefault(key, []).extend(g)
+    # 이슈만 거쳐 모인 사설(다른 사설과 직접 묶이지 않은 것)은 이슈 연결이 강할 때만 남긴다 — 연결이 약하면
+    # 다른 사안의 사설이 "같은 이슈"로 나란히 놓였다 (S24e). 빠진 사설은 "오늘의 사설"로
+    for key in list(by_issue):
+        eds = by_issue[key]
+        if key.startswith("topic:") or len(eds) < 2:
+            continue
+        by_issue[key] = [e for e in eds if e.id in grouped or links.get(e.id, ("", 0.0))[1] >= LINK_STRONG * LINK_MIN.get(e.lang, LINK_MIN_DEFAULT)]
     compare = []
     used: set[str] = set()
     for key, eds in sorted(by_issue.items(), key=lambda kv: (order.get(kv[0], 999), kv[0])):
