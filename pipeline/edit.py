@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import math
+import re
 from collections import Counter
 from dataclasses import dataclass, field
 
@@ -318,10 +319,38 @@ RELATED_MAX = 3          # 기사 하나에 붙이는 관련 기사 수
 RELATED_HOSTS = ("front", "politics", "economy", "international", "society", "interest")
 
 
-def related_score(a: ScoredIssue, b: ScoredIssue) -> float:
-    """두 이슈의 관련 정도 (S22b). 같은 사건 이웃(near)이면 확실, 아니면 연속성 판정과 같은 드문 토큰 공유 점수."""
+_TITLE_WORD = re.compile(r"[가-힣]{2,}|[a-z]{3,}|\d+")
+_TITLE_TAG = re.compile(r"[\[\(（【][^\]\)）】]{0,12}[\]\)）】]")
+TITLE_SAME = 0.5    # 짧은 쪽 제목 낱말의 이 비율 이상(2개 이상)을 공유하면 같은 기사로 본다 (S24c)
+TITLE_COMMON = 3    # 그날 지면 제목 이만큼에 나온 낱말은 단서로 안 친다 ("부고 … 장모상", "premier league live")
+
+
+def title_words(t: str) -> set[str]:
+    return set(_TITLE_WORD.findall(_TITLE_TAG.sub(" ", t).lower()))
+
+
+def same_title(a: str, b: str, common: set[str] | frozenset[str] = frozenset()) -> bool:
+    """제목 낱말이 크게 겹치는가 — 다른 이슈로 갈라졌지만 같은 기사 (10/19호: KIA·LG 준PO 2연승 두 건,
+    순직 소방관 딸의 손편지 두 건)."""
+    ta, tb = title_words(a) - common, title_words(b) - common
+    shared = ta & tb
+    return len(shared) >= 2 and len(shared) >= TITLE_SAME * min(len(ta), len(tb))
+
+
+def common_title_words(titles: list[str]) -> set[str]:
+    df: dict[str, int] = {}
+    for t in titles:
+        for w in title_words(t):
+            df[w] = df.get(w, 0) + 1
+    return {w for w, c in df.items() if c >= TITLE_COMMON}
+
+
+def related_score(a: ScoredIssue, b: ScoredIssue, common: set[str] | frozenset[str] = frozenset()) -> float:
+    """두 이슈의 관련 정도 (S22b). 같은 사건 이웃(near)이나 같은 제목이면 확실, 아니면 연속성 판정과 같은 드문 토큰 공유 점수."""
     if b.issue.id in a.issue.extra.get("near", []) or a.issue.id in b.issue.extra.get("near", []):
         return 99.0
+    if same_title(a.issue.title, b.issue.title, common):
+        return 98.0
     shared = set(a.signature) & set(b.signature)
     if not shared or (all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN):
         return 0.0
@@ -332,28 +361,33 @@ def related_score(a: ScoredIssue, b: ScoredIssue) -> float:
 def attach_related(sections: dict[str, list[Placed]], links: dict[str, str] | None = None) -> int:
     """단신(예비 포함) 중 앞 면 기사와 이어진 것을 그 기사 아래 '관련 기사'로 옮긴다 (S22b, 2026-10-18 사용자 요청).
     links(단신 이슈 id → 본 기사 이슈 id, AI 판정)가 있으면 그것을, 없으면 규칙(related_score)을 쓴다.
-    점수 높은 단신부터, 가장 가까운 기사에, 기사당 RELATED_MAX 건까지. 옮긴 수를 돌려준다."""
+    점수 높은 단신부터, 가장 가까운 기사에, 기사당 RELATED_MAX 건까지. 옮긴 수를 돌려준다.
+    이어진 기사가 이미 RELATED_MAX 건을 달았으면 그 단신은 지면에서 뺀다 — 앞에 나온 기사를 단신에 되풀이하지 않게 (S24c)."""
     hosts = [p for sid in RELATED_HOSTS for p in sections.get(sid, [])]
     by_id = {h.scored.issue.id: h for h in hosts}
+    common = common_title_words([p.scored.issue.title for ps in sections.values() for p in ps])
     moved = 0
     for b in sorted(sections.get("briefs", []), key=lambda p: (p.reserve, -p.scored.final)):
         best, best_sc = None, 0.0
         if links is not None:
-            h = by_id.get(links.get(b.scored.issue.id, ""))
-            if h is not None and len(h.related) < RELATED_MAX:
-                best = h
+            best = by_id.get(links.get(b.scored.issue.id, ""))
         else:
             for h in hosts:
-                if len(h.related) >= RELATED_MAX:
-                    continue
-                sc = related_score(b.scored, h.scored)
-                if sc > best_sc:
+                sc = related_score(b.scored, h.scored, common)
+                if sc > best_sc or (sc == best_sc and sc > 0 and len(h.related) < len(best.related)):
                     best, best_sc = h, sc
-        if best is not None:
+            if best is not None and len(best.related) >= RELATED_MAX:   # 가장 가까운 기사가 찼으면 다른 이어진 기사에
+                room = [h for h in hosts if len(h.related) < RELATED_MAX and related_score(b.scored, h.scored, common) > 0]
+                best = max(room, key=lambda h: related_score(b.scored, h.scored, common)) if room else best
+        if best is None:
+            continue
+        sections["briefs"].remove(b)
+        if len(best.related) < RELATED_MAX:
             best.related.append(b)
-            sections["briefs"].remove(b)
             b.section = best.section
             moved += 1
+        else:
+            b.section = ""
     return moved
 
 

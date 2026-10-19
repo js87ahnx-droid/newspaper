@@ -421,7 +421,9 @@ def test_attach_related_moves_brief_under_host():
     n = attach_related(ed.sections, links)
     assert n == RELATED_MAX and len(host.related) == RELATED_MAX           # 기사당 상한
     moved = {r.scored.issue.id for r in host.related}
-    assert not moved & {b.scored.issue.id for b in ed.sections["briefs"]}  # 단신에서 빠짐
+    left = {b.scored.issue.id for b in ed.sections["briefs"]}
+    assert not moved & left                                                # 단신에서 빠짐
+    assert not {b.scored.issue.id for b in briefs[: RELATED_MAX + 2]} & left  # 상한을 넘은 이어진 기사도 단신에 안 남음 (S24c)
     out = edition_to_json(ed, "2026-10-18", _arts_of(ed), stats)
     rel = next(i for i in out["sections"]["politics"] if i["issue_id"] == host.scored.issue.id)["related"]
     assert {r["issue_id"] for r in rel} == moved
