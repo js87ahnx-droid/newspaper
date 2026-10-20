@@ -182,6 +182,71 @@ def josa_ro(word: str) -> str:
     return "로"
 
 
+NEWS_SECTIONS = ("front", "politics", "economy", "international", "society", "interest")
+
+
+def lead_story(cands: list[dict], country: dict[str, str]) -> dict:
+    """A안 1면 메인 기사 (S26e, 사용자: "신문을 보는 사람이 알아야 할 가장 중요한 기사. 한국 뉴스 우선,
+    전세계가 주목하는 해외 이슈가 있으면 그것").
+    - 전세계 주목 = 한국 매체 기사가 절반 미만이고, 해외 매체 3곳 이상이 홈페이지·피드 헤드라인으로 올리고 4개국 이상 보도,
+      또는 6개국 이상 보도 → 해외 헤드라인 수·주목도 순
+    - 없으면 한국 기사(한국 매체 기사가 절반 이상) 중 그날 한국 신문 1면에 가장 많이 오른 것 → 1면 후보 → 주목도
+    - 둘 다 없으면 1면 1위"""
+    def kr_share(it):
+        arts = it.get("articles") or []
+        return sum(country.get(a.get("source")) == "KR" for a in arts) / max(1, len(arts))
+
+    heads = lambda it: (it.get("headline_by") or {}).items()
+    a1 = lambda it: sum(1 for _, v in heads(it) if v[1] == "naver_a1")
+    foreign = lambda it: sum(1 for n, v in heads(it) if v[1] != "naver_a1" and country.get(n) != "KR")
+    countries = lambda it: (it.get("coverage") or {}).get("countries", 0)
+    att = lambda it: (it.get("scores") or {}).get("attention", 0)
+
+    glob = [it for it in cands if kr_share(it) < 0.5 and ((foreign(it) >= 3 and countries(it) >= 4) or countries(it) >= 6)]
+    if glob:
+        return max(glob, key=lambda it: (foreign(it), att(it)))
+    kr = [it for it in cands if kr_share(it) >= 0.5]
+    if kr:
+        return max(kr, key=lambda it: (a1(it), it.get("_front", False), att(it)))
+    return cands[0]
+
+
+def front_single(sections: list[dict], titles: dict, country: dict[str, str]) -> None:
+    """A안 1면 (S26e): 좌우로 나누지 않고 한 단 — 메인 기사(사진) 1건 + 자리가 있으면 사진 기사 1건 더(최대 2건).
+    두 기사의 분석은 분야 면 맨 위 이어받는 칸으로. 나머지 1면 기사는 1면 둘째 쪽에 그대로."""
+    front = next((s for s in sections if s["id"] == "front"), None)
+    if not front or not front["items"]:
+        return
+    for r in front["items"]:
+        r["_front"] = True
+    cands = [r for s in sections if s["id"] in NEWS_SECTIONS for r in s["items"] if not r.get("reserve")]
+    lead = lead_story(cands, country)
+    for s in sections:   # 다른 면에 있던 기사가 메인이 되면 그 면에서 뺀다
+        if s["id"] != "front":
+            s["items"] = [r for r in s["items"] if r is not lead]
+    rows = [r for r in front["items"] if r is not lead]
+    second = next((r for r in rows if r.get("photo")), None) or (rows[0] if rows else None)
+    zone = [("lead", lead)] + ([("second", second)] if second else [])
+    front["items"] = [r for r in rows if r is not second]
+    present = [s["id"] for s in sections]
+    conts: dict[str, list[dict]] = {}
+    for role, it in zone:
+        cont = {**it, "cont": True}
+        sid = TOPIC_SECTION.get(it.get("topic"), "society")
+        if sid not in present:
+            sid = next((x for x in NEWS_SECTIONS[1:] if x in present), None)
+        label = titles.get(sid, "") if sid else ""
+        an = it["view"].get("analysis") or {}
+        sub = an.get("brief") if an.get("brief") and an.get("brief") != it["view"]["title"] else None
+        it.update(role=role, sub=sub, jump={"label": label, "josa": josa_ro(label)} if sid else None)
+        if sid:
+            conts.setdefault(sid, []).append(cont)
+    front["zone"] = {"kind": "single", **dict(zone)}
+    for s in sections:
+        if s["id"] in conts:
+            s["items"] = conts[s["id"]] + s["items"]
+
+
 def front_zone(sections: list[dict], variant: str, titles: dict) -> None:
     """1면 3구역 (S26b) + 이어받는 칸 (A안 S26c: 분야 면 맨 위 / B안 S26d: 1면 뒤 이슈 면).
     글 톱 = 1면 1위(사진 없이), 사진 톱 = 사진 있는 1면 기사 중 최상위(없으면 2위), 아래 띠 = 그다음.
@@ -314,7 +379,9 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
                 "opinions": [o for iid in [it["issue_id"], *it.get("merged", [])] for o in rel_ops.get(iid, [])],
             })
         sections.append({"id": s.id, "title": titles[s.id], "items": rows})
-    if variant in ("a", "b"):
+    if variant == "a":   # S26e: A안 1면은 한 단 (메인 기사 + 최대 1건)
+        front_single(sections, titles, {s.name: s.country for s in sources.sources})
+    elif variant == "b":
         front_zone(sections, variant, titles)
     compare = []
     for it in edition.get("compare", []):

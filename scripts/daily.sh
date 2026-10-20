@@ -3,6 +3,7 @@
 # 사용: NEWS_PASSWORD=… bash scripts/daily.sh
 #   EDITION_DATE=YYYY-MM-DD   호 날짜 (기본: 가장 최근에 끝난 시간창)
 #   SKIP_IF_PUBLISHED=1       이미 발행된 호면 아무것도 안 하고 끝냄 (예비 실행용)
+#   RENDER_ONLY=1             지면 HTML 만 다시 (수집·편집·LLM 없이 data/raw/<호>.edition.json 으로)
 #   CLAUDE_CODE_OAUTH_TOKEN   있으면 LLM 훅 사용 (구독), 없으면 무토큰
 # 암호화(NEWS_PASSWORD)가 없거나 실패하면 중간에 멈춘다 — 평문 지면이 커밋·공개되지 않게.
 set -euo pipefail
@@ -41,6 +42,15 @@ if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || ! command -v claude >/dev/null 2>&1;
 fi
 
 $PY -m pipeline validate
+if [ "${RENDER_ONLY:-0}" = "1" ]; then
+  # 지면만 다시 그리기 (S26e): 수집·편집·AI 호출 없이, 이 호를 만들 때 남긴 data/raw/<호>.edition.json 으로 HTML 만 새로
+  if [ ! -f "data/raw/$DATE.edition.json" ]; then
+    echo "::error::data/raw/$DATE.edition.json 이 없습니다 (누적분 캐시에 없음) — render_only 없이 다시 발행하세요"
+    exit 1
+  fi
+  echo "지면만 다시 그리기: $DATE"
+  $PY -m pipeline publish --date "$DATE" --site docs
+else
 $PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모두 실패했습니다 (누적분으로 발행)"
 $PY -m pipeline prepare --date "$DATE"
 $PY -m pipeline embed --date "$DATE"
@@ -50,6 +60,7 @@ $PY -m pipeline edit --date "$DATE" --write-history $LLM_FLAG   # 분야 분류�
 
 $PY -m pipeline enrich --date "$DATE" $LLM_FLAG
 $PY -m pipeline publish --date "$DATE" --site docs
+fi
 
 # 암호화: 오늘 호·이 호의 보관본·지난 호 목록
 while IFS= read -r f || [ -n "$f" ]; do   # 마지막 줄에 줄바꿈이 없어도 읽는다

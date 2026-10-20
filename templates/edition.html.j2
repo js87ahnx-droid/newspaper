@@ -3,7 +3,7 @@
 {# 1면 3구역의 기사 (S26b): 제목·부제·요약만, 분석은 이어받는 칸에. role = top·photo·bottom #}
 {% macro zart(it, role) %}{% set v = it.view %}
     <article class="fz-art fz-{{ role }}" data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-section="front" data-lang="{{ v.lang }}">
-      {% if role == 'photo' and it.photo %}
+      {% if role in ('photo', 'lead', 'second') and it.photo %}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         <figcaption>사진: {{ it.photo_source }}</figcaption>
@@ -97,7 +97,12 @@
     </article>
     {% endfor %}
   {% endif %}
-  {% if sec.zone %}{# 1면 3구역 (S26b): 한 덩어리로 첫 쪽에 — 왼쪽 글 톱·색인, 오른쪽 사진 톱, 아래 띠 #}
+  {% if sec.zone and sec.zone.kind == 'single' %}{# A안 1면 (S26e): 한 단 — 메인 기사 + 자리가 있으면 1건 더. 첫 쪽은 이 덩어리로 끝 #}
+    <div class="item fz fz-single" data-issue="front-zone" data-page-end="1">
+      {{ zart(sec.zone.lead, 'lead') }}
+      {% if sec.zone.second %}<div class="fz-second">{{ zart(sec.zone.second, 'second') }}</div>{% endif %}
+    </div>
+  {% elif sec.zone %}{# 1면 3구역 (S26b): 한 덩어리로 첫 쪽에 — 왼쪽 글 톱·색인, 오른쪽 사진 톱, 아래 띠 #}
     <div class="item fz" data-issue="front-zone">
       <div class="fz-main">{{ zart(sec.zone.top, 'top') }}
         <div class="fz-index"><b>오늘의 면</b> <span data-index-list></span></div>

@@ -76,6 +76,8 @@
   function fit(inner, node) {
     node.classList.add("compact");
     if (!overflows(inner)) return;
+    var second = node.querySelector(".fz-second");   // A안 1면(S26e): 둘째 기사를 빼고 메인 기사만
+    if (second) { second.remove(); if (!overflows(inner)) return; }
     node.classList.add("tight");
     if (!overflows(inner)) return;
     var room = inner.clientHeight - (node.offsetTop - inner.offsetTop) - 6;
@@ -152,6 +154,13 @@
     nodes.forEach(function (src, k) {
       if (used[k]) return;
       var node = src.node;
+      if (placedOnPage > 0 && inner.querySelector("[data-page-end]")) {   // 이 덩어리로 쪽을 끝낸다 (A안 1면 첫 쪽 — S26e)
+        out.push(page);
+        page = mk(true);
+        stage.appendChild(page);
+        inner = page.firstChild;
+        placedOnPage = 0;
+      }
       inner.appendChild(node);
       if (!overflows(inner)) { placedOnPage++; return; }
       if (placedOnPage === 0) { fit(inner, node); placedOnPage++; return; }   // 한 쪽보다 큰 기사

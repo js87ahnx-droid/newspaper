@@ -26,6 +26,10 @@ on:
         description: "이미 발행된 호도 다시 만들기"
         type: boolean
         default: false
+      render_only:
+        description: "지면만 다시 그리기 (수집·편집·AI 호출 없이, force 와 함께)"
+        type: boolean
+        default: false
 
 concurrency:
   group: newspaper-data
@@ -96,6 +100,7 @@ jobs:
           READER_KEY: ${{ secrets.READER_KEY }}
           EDITION_DATE: ${{ inputs.date }}
           SKIP_IF_PUBLISHED: ${{ (github.event_name == 'schedule' || !inputs.force) && '1' || '0' }}
+          RENDER_ONLY: ${{ inputs.render_only && '1' || '0' }}
         run: bash scripts/daily.sh
       - name: 누적분 저장
         if: always()
