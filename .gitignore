@@ -4,6 +4,26 @@
 secrets*
 *.key
 *.pem
+# API 키·토큰이 들어갈 만한 파일은 위치와 상관없이 막는다 (2026-10-20 사용자 요청)
+**/.env
+**/.env.*
+!.env.example
+**/.dev.vars
+**/.dev.vars.*
+*secret*
+*token*
+*credential*
+*apikey*
+*api_key*
+*api-key*
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+.npmrc
+.netrc
+service-account*.json
+.claude/settings.local.json
 
 # 기사 본문 — 공개 저장소에 절대 올리지 않는다 (지시서 5-5)
 data/bodies/
