@@ -172,6 +172,8 @@ class Config(Strict):
     importance: Importance
     photos: Photos
     llm: Llm
+    # 비교용 판 (S26, 2026-10-20): 기존 판과 함께 a(분야 면 맨 위로 이어받음)·b(1면 뒤 이슈 면) 판을 같이 발행. 빈 목록이면 기존 판만
+    layout_variants: list[Literal["a", "b"]] = Field(default_factory=list)
 
     @field_validator("publish_time")
     @classmethod

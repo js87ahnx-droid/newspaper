@@ -134,7 +134,7 @@ def stance_links(it: dict, analysis: dict | None) -> list[dict]:
     return out
 
 
-def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) -> dict:
+def _client_config(edition: dict, cfg: Config, interests: Interests, d: date, variant: str = "base") -> dict:
     """브라우저의 피드백 재계산(feedback.js)이 쓰는 값. 서버 점수 계산(score.py)과 같은 식을 쓰도록 같은 값을 넘긴다."""
     table = build_interest_table(interests)
     w = cfg.weights
@@ -148,13 +148,76 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
         "interestCap": st.get("interest_cap", 0), "interestCounted": st.get("interest_counted", 0),
         # 단신 분야 묶음 순서 (S19c): 분야 중요도 순, 같으면 TOPICS 순
         "briefTopics": sorted(TOPICS, key=lambda k: -cfg.importance.topic_weights.get(k, 0)),
-        "topics": TOPICS, "topicSection": {"politics": "politics", "economy": "economy", "industry": "economy",
-                                           "semis_ai": "economy", "international": "international",
-                                           "society": "society", "science": "society"},
-        "sectionTitles": {s.id: s.title for s in cfg.sections},
+        "topics": TOPICS, "topicSection": TOPIC_SECTION,
+        "sectionTitles": {s.id: s.title for s in cfg.sections} | ({"issue": ISSUE_TITLE} if variant == "b" else {}),
         "sectionCaps": {s.id: s.max_articles for s in cfg.sections},
-        "sectionPages": {s.id: s.pages for s in cfg.sections},
+        # B안(S26d): 1면 바로 뒤 이슈 면 2쪽
+        "sectionPages": _section_pages(cfg, variant),
+        "variant": variant,
     }
+
+
+def _section_pages(cfg: Config, variant: str) -> dict:
+    out = {}
+    for s in cfg.sections:
+        out[s.id] = s.pages
+        if s.id == "front" and variant == "b":
+            out["issue"] = ISSUE_PAGES
+    return out
+
+
+# 분야 → 분야 면 (피드백 재계산·A안 이어받는 면이 같이 쓴다)
+TOPIC_SECTION = {"politics": "politics", "economy": "economy", "industry": "economy", "semis_ai": "economy",
+                 "international": "international", "society": "society", "science": "society"}
+ISSUE_TITLE, ISSUE_PAGES = "이슈", 2
+VARIANT_LABELS = {"base": "기존", "a": "A안", "b": "B안"}
+
+
+def josa_ro(word: str) -> str:
+    """로/으로: 받침이 있으면(ㄹ 제외) 으로."""
+    c = word.strip()[-1:] if word.strip() else ""
+    if "가" <= c <= "힣":
+        jong = (ord(c) - 0xAC00) % 28
+        return "으로" if jong and jong != 8 else "로"
+    return "로"
+
+
+def front_zone(sections: list[dict], variant: str, titles: dict) -> None:
+    """1면 3구역 (S26b) + 이어받는 칸 (A안 S26c: 분야 면 맨 위 / B안 S26d: 1면 뒤 이슈 면).
+    글 톱 = 1면 1위(사진 없이), 사진 톱 = 사진 있는 1면 기사 중 최상위(없으면 2위), 아래 띠 = 그다음.
+    세 기사의 분석·입장 차이·관련 기사는 1면에서 빼고 이어받는 칸(같은 이슈, cont)에 싣는다. sections 를 고친다."""
+    front = next((s for s in sections if s["id"] == "front"), None)
+    if not front or len(front["items"]) < 2:
+        return
+    rows = front["items"]
+    top = rows[0]
+    photo = next((r for r in rows[1:5] if r.get("photo")), None) or rows[1]
+    rest = [r for r in rows[1:] if r is not photo]
+    bottom = rest[0] if rest else None
+    zone = [("top", top), ("photo", photo)] + ([("bottom", bottom)] if bottom else [])
+    front["items"] = [r for r in rows if all(r is not z for _, z in zone)]
+    present = [s["id"] for s in sections]
+    conts: dict[str, list[dict]] = {}
+    for role, it in zone:
+        cont = {**it, "cont": True}
+        if variant == "a":
+            sid = TOPIC_SECTION.get(it.get("topic"), "society")
+            if sid not in present:
+                sid = next((x for x in ("politics", "economy", "international", "society", "interest") if x in present), None)
+            label = titles.get(sid, "") if sid else ""
+        else:
+            sid, label = "issue", f"{ISSUE_TITLE} 면"
+        an = it["view"].get("analysis") or {}
+        sub = an.get("brief") if an.get("brief") and an.get("brief") != it["view"]["title"] else None
+        it.update(role=role, sub=sub, jump={"label": label, "josa": josa_ro(label)} if sid else None)
+        if sid:
+            conts.setdefault(sid, []).append(cont)
+    front["zone"] = dict(zone)
+    if variant == "b" and conts.get("issue"):
+        sections.insert(present.index("front") + 1, {"id": "issue", "title": ISSUE_TITLE, "items": conts.pop("issue")})
+    for s in sections:
+        if s["id"] in conts:
+            s["items"] = conts[s["id"]] + s["items"]
 
 
 def _opinion_view(op: dict | None) -> dict | None:
@@ -212,7 +275,7 @@ def related_opinions(op: dict | None) -> dict[str, list[dict]]:
     return out
 
 
-def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
+def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources, variant: str = "base") -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
     compare_ids = {it["issue_id"] for it in edition.get("compare", [])}
@@ -251,6 +314,8 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
                 "opinions": [o for iid in [it["issue_id"], *it.get("merged", [])] for o in rel_ops.get(iid, [])],
             })
         sections.append({"id": s.id, "title": titles[s.id], "items": rows})
+    if variant in ("a", "b"):
+        front_zone(sections, variant, titles)
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})
@@ -284,6 +349,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         # 지정 칼럼 (S22d): 논평면 맨 앞 칸
         "picks": [{**p, "cls": LEAN_CLASS.get(p.get("lean"), "mid"), "time": time_label(p.get("published"), cfg.timezone)}
                   for p in edition.get("picks") or []],
+        "variant": variant,
         "lean_class": LEAN_CLASS, "stats": edition.get("stats", {}), "lead_max": LEAD_MAX,
         "edition_json": json.dumps(_client_config(edition, cfg, interests, d), ensure_ascii=False).replace("</", "<\\/"),  # 스크립트 안 "</script>" 방지
     }
@@ -307,11 +373,14 @@ def _env() -> Environment:
     return env
 
 
-def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "") -> str:
-    """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../")."""
-    ctx = build_context(edition, cfg, interests, sources)
+def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "",
+                variant: str = "base", variant_links: list[dict] | None = None) -> str:
+    """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../").
+    variant: 기존(base)·A안(a)·B안(b) 판 (S26), variant_links: 도구 막대의 판 고르기 [{label, href, on}]"""
+    ctx = build_context(edition, cfg, interests, sources, variant)
     ctx["base"] = base
-    client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
+    ctx["variant_links"] = variant_links or []
+    client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]), variant)
     client["base"] = base
     # 원문 재배열 보기 (S17): 중계 서버가 설정됐을 때만. 키는 이 HTML(암호화됨) 안에만 들어간다
     rc = reader_mod.config()
