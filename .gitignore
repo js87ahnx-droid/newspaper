@@ -43,3 +43,22 @@ build/
 worker/node_modules/
 worker/.wrangler/
 worker/.dev.vars
+
+# --- 비밀값(API 키·토큰·인증서) — 절대 커밋하지 않는다 (2026-10-20 공통 규칙) ---
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+secrets/
+secrets.*
+*secret*.json
+*credential*.json
+service-account*.json
