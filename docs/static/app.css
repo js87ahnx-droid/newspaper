@@ -335,3 +335,23 @@ body.narrow-page .fz-side .photo img { aspect-ratio: 16 / 9; max-height: 180px; 
 .cont-band { margin: 0 0 6px; padding: 3px 8px; border-left: 4px solid var(--accent); background: var(--card); color: var(--accent); font-weight: 700; font-size: 13px; }
 .cont-band span { color: var(--rule); margin: 0 2px; }
 .item.cont .hl { font-size: calc(22px * var(--fs)); }
+
+/* A안 1면 (S26e): 한 단 — 메인 기사(큰 사진) + 자리가 있으면 1건 더 */
+.item.fz.fz-single { display: block; border-bottom: 0; }
+.fz-lead .hl { font-size: calc(30px * var(--fs)); letter-spacing: -0.6px; line-height: 1.28; }
+.fz-lead .photo img { aspect-ratio: 16 / 9; max-height: 360px; }
+.fz-lead .lead { -webkit-line-clamp: 6; font-size: 1.04em; }
+.fz-second { border-top: 2px solid var(--ink); margin-top: 10px; padding-top: 8px; }
+.fz-second .hl { font-size: calc(20px * var(--fs)); }
+.fz-second .photo img { aspect-ratio: 16 / 9; max-height: 200px; }
+.fz-second .lead { -webkit-line-clamp: 3; }
+.item.fz-single.compact .fz-lead .photo img { max-height: 260px; }
+.item.fz-single.compact .fz-second .photo img { max-height: 130px; }
+.item.fz-single.compact .fz-lead .lead { -webkit-line-clamp: 4; }
+body.narrow-page .fz-lead .hl { font-size: calc(24px * var(--fs)); }
+body.narrow-page .fz-lead .photo img { max-height: 220px; }
+/* 비교 판 고르기가 있는 동안 좁은 화면: 이전·다음은 밀어서 넘기기로 (도구 막대 한 줄 유지) */
+@media (max-width: 520px) {
+  #toolbar:has(.tb-variant) button[data-act="prev"], #toolbar:has(.tb-variant) button[data-act="next"] { display: none; }
+  #toolbar .tb-variant { font-size: 12px; padding: 0 2px; margin-right: 2px; }
+}
