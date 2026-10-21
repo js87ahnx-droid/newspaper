@@ -448,8 +448,8 @@ def cmd_publish(args: argparse.Namespace) -> int:
         ed_path.write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"원문 보기: Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
     day_path = _raw_dir(args) / f"{args.date}.json"
-    if cfg.layout_variants and day_path.exists():
-        # A안 1면 메인 기사 사진 (S26g): 사진 자리가 아닌 기사가 메인으로 올라오면 그 이슈 기사들의 RSS 대표 이미지로
+    if day_path.exists():
+        # 1면 메인 기사 사진 (S26g): 사진 자리가 아닌 기사가 메인으로 올라오면 그 이슈 기사들의 RSS 대표 이미지로
         imgs = {d["id"]: (d["image"], d["source"]) for d in json.loads(day_path.read_text(encoding="utf-8")) if d.get("image")}
         for it in (i for ps in edition["sections"].values() for i in ps):
             alt = next((imgs[a["id"]] for a in it.get("articles", []) if a.get("id") in imgs), None)

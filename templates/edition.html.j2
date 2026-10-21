@@ -1,20 +1,18 @@
 {# 원문 창으로 여는 기사 (S17b): 중계 서버로 읽을 주소(못 읽는 매체면 빈 값)·매체·언어 #}
 {% macro art(url, source, lang) %} data-art data-read="{{ read_url(url, source) }}" data-src="{{ source }}" data-lang="{{ lang }}"{% endmacro %}
-{# 1면 3구역의 기사 (S26b): 제목·부제·요약만, 분석은 이어받는 칸에. role = top·photo·bottom #}
-{% macro zart(it, role) %}{% set v = it.view %}
-    <article class="fz-art fz-{{ role }}" data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-section="front" data-lang="{{ v.lang }}">
-      {% if role in ('photo', 'lead', 'second') and it.photo %}
+{# 1면 메인 기사 (S26): 사진·제목·부제·요약 + "자세히 보기"(각도별 묶음은 자세히 창에) #}
+{% macro lead_art(it) %}{% set v = it.view %}
+    <article class="fz-art fz-lead" data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-section="front" data-lang="{{ v.lang }}">
+      {% if it.photo %}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         <figcaption>사진: {{ it.photo_source }}</figcaption>
       </figure>
       {% endif %}
       <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
-      {% if it.sub and role != 'bottom' %}<p class="fz-sub">{{ it.sub }}</p>{% endif %}
-      {% if role == 'bottom' %}{% if it.brief_text %}<p class="lead brief-line">{{ it.brief_text }}</p>{% endif %}
-      {% elif v.lead %}<p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>{% endif %}
-      {% if it.detail %}<button type="button" class="detail-btn" data-more>자세히 보기 <small>요약·배경·쟁점·입장 차이·사설</small></button>{% endif %}
-      {% if it.jump %}<button type="button" class="jump" data-jump="{{ it.issue_id }}">{% if role == 'bottom' %}관련기사 <span class="jn"></span>{% else %}▶ <span class="jn"></span>{{ it.jump.label }}{{ it.jump.josa }} 계속{% endif %}</button>{% endif %}
+      {% if it.sub %}<p class="fz-sub">{{ it.sub }}</p>{% endif %}
+      {% if v.lead %}<p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>{% endif %}
+      <button type="button" class="detail-btn" data-more>자세히 보기 <small>요약·배경·쟁점·입장 차이·사설</small></button>
       <div class="meta">
         {% if it.time %}<time class="tm">{{ it.time }}</time>{% endif %}
         <span class="src">{{ it.source }}</span>
@@ -49,7 +47,6 @@
   <span class="tb-page" id="pageInfo" aria-live="polite"></span>
   <span class="tb-spacer"></span>
   <a class="tb-link" href="{{ base }}archive/">지난 호</a>
-  {% if variant_links %}<select class="tb-variant" aria-label="비교 판 고르기" onchange="location.href=this.value">{% for l in variant_links %}<option value="{{ l.href }}"{% if l.on %} selected{% endif %}>{{ l.label }}</option>{% endfor %}</select>{% endif %}
   <button type="button" data-act="front" aria-label="1면으로 돌아가기">1면</button>
   <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
   <button type="button" data-act="next" aria-label="다음 쪽">›</button>
@@ -81,7 +78,7 @@
   </div>
 
 {% for sec in sections %}
-  {% if sec.id == 'detail' %}<div class="detail-src" hidden>{# A안(S26h): 1면 메인 기사 "자세히 보기" 원본 — 지면에는 안 실림 #}
+  {% if sec.id == 'detail' %}<div class="detail-src" hidden>{# 1면 메인 기사 "자세히 보기" 원본 (S26) — 지면에는 안 실림 #}
   {% else %}<section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">{% endif %}
   {% if sec.analysis %}{# 분석·해설 (S22c): 매체가 쓴 분석 기사 — 제목·요약 → 원문 창 #}
     <p class="disclaimer">각 매체가 직접 쓴 분석·해설 기사입니다(AI 가 쓴 글이 아님). 외국어 기사의 한국어 제목·요약만 AI 번역입니다.</p>
@@ -99,44 +96,32 @@
     </article>
     {% endfor %}
   {% endif %}
-  {% if sec.zone and sec.zone.kind == 'single' %}{# A안 1면 (S26e): 한 단 — 메인 기사 + 자리가 있으면 1건 더. 첫 쪽은 이 덩어리로 끝 #}
-    <div class="item fz fz-single" data-issue="front-zone" data-page-end="1">
-      {{ zart(sec.zone.lead, 'lead') }}
-      {% if sec.zone.second %}<div class="fz-second">{{ zart(sec.zone.second, 'second') }}</div>{% endif %}
-    </div>
-  {% elif sec.zone %}{# 1면 3구역 (S26b): 한 덩어리로 첫 쪽에 — 왼쪽 글 톱·색인, 오른쪽 사진 톱, 아래 띠 #}
-    <div class="item fz" data-issue="front-zone">
-      <div class="fz-main">{{ zart(sec.zone.top, 'top') }}
-        <div class="fz-index"><b>오늘의 면</b> <span data-index-list></span></div>
-      </div>
-      <div class="fz-side">{{ zart(sec.zone.photo, 'photo') }}</div>
-      {% if sec.zone.bottom %}<div class="fz-bottom">{{ zart(sec.zone.bottom, 'bottom') }}</div>{% endif %}
-    </div>
+  {% if sec.lead %}{# 1면 첫 쪽 (S26): 메인 기사 하나로 끝낸다 #}
+    <div class="item fz" data-issue="front-zone" data-page-end="1">{{ lead_art(sec.lead) }}</div>
   {% endif %}
   {% for it in sec["items"] %}
     {% set v = it.view %}
     {% set brief = false %}{# 단신도 원본은 일반 기사 모양 — 쪽 나누기(app.js asBrief)가 한 줄로 줄이고, 누르면 요약·AI 정리가 보인다 (S22a; S21c 예비 기사도) #}
-    <article class="item{% if sec.id == 'front' and loop.first and not sec.zone %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}{% if it.cont %} cont{% endif %}"
+    <article class="item{% if sec.id == 'front' and loop.first and not sec.lead %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}"
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
              data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
              data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}" data-h="{{ it.scores.headline or 0 }}"
              data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
-             data-top="{{ 1 if (sec.id == 'front' and loop.first) or it.cont else 0 }}"
+             data-top="{{ 1 if (sec.id == 'front' and loop.first and not sec.lead) else 0 }}"
              data-brief="{{ it.brief_text }}" data-reserve="{{ 1 if it.reserve else 0 }}">
-      {% if it.photo and not brief and not (it.cont and variant == 'a') %}{# A안 이어받는 칸: 사진은 1면에 #}
+      {% if it.photo and not brief and not it.detail %}{# 자세히 원본: 사진은 1면에 #}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         <figcaption>사진: {{ it.photo_source }}</figcaption>
       </figure>
       {% endif %}
-      {% if it.cont %}<p class="cont-band">이슈 <span>|</span> 1면에서 이어짐</p>{% endif %}
       <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
-      {% if v.lead and not brief and not (it.cont and (v.analysis or variant == 'a')) %}{# 이어받는 칸(S26): 요약은 1면에 실었으니 분석부터 #}
+      {% if v.lead and not brief and not it.detail %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
       {% endif %}
-      {% set pkg = it.cont and variant == 'a' and not brief %}
-      {% if pkg %}{# A안 이어받는 칸 (S26f·S26g): 요약 / 왜 생겼나(배경) / 쟁점 / 누가 뭐라 하나 / 입장 차이 / 함께 볼 보도 / 사설 #}
+      {% set pkg = it.detail %}
+      {% if pkg %}{# 1면 메인 기사 자세히 (S26): 한 이슈를 각도별로 — 있는 칸만 번호 #}
       {% set n = namespace(i=0) %}
       <div class="pkg">
         {% if v.lead %}{% set n.i = n.i + 1 %}
@@ -154,7 +139,7 @@
           {% if it.llm and it.llm.frame_summary and not it.stance_links %}<p class="frame" data-note="AI 요약">{{ it.llm.frame_summary }}</p>{% endif %}
           {% if it.cmp_groups %}<div class="cmp-inline pkg-cmp" aria-label="성향별 보도">
             {% for g in it.cmp_groups %}<div class="grp"><span class="badge lean-{{ g.cls }}">{{ g.group }}</span>
-              {% for a in g.articles[:1] %}<p><span class="src">{{ a.source }}</span> <a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.title_html }}</a></p>{% endfor %}
+              {% for a in g.articles[:2] %}<p><span class="src">{{ a.source }}</span> <a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.title_html }}</a></p>{% endfor %}
             </div>{% endfor %}
           </div>{% endif %}
         </div>{% endif %}
@@ -165,7 +150,7 @@
         </div>{% endif %}
         {% if it.opinions %}{% set n.i = n.i + 1 %}
         <div class="pkg-part op-rel"><h4><span>{{ n.i }}</span>사설·칼럼은</h4>
-          {% for o in it.opinions[:3] %}<p><span class="badge lean-{{ o.cls }}">{{ o.lean }}</span> <span class="src">{{ o.source }}</span>
+          {% for o in it.opinions %}<p><span class="badge lean-{{ o.cls }}">{{ o.lean }}</span> <span class="src">{{ o.source }}</span>
             <a href="{{ real_url(o.url) }}" target="_blank" rel="noopener noreferrer"{{ art(o.url, o.source, o.lang) }}>{{ o.ko_title or o.title }}</a></p>{% endfor %}
         </div>{% endif %}
       </div>

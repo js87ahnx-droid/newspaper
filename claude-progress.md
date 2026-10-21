@@ -561,8 +561,12 @@
 - 1면 메인 기사 "자세히 보기" → 자세히 창(줄임 없음). 묶음 원본은 #flow 안 숨은 detail-src(쪽 나누기 밖). 분야 면 이어받는 칸 없앰
 - 테스트 41건(S26·publish·layout) 통과
 
+### S26 정리 — A안 확정 (2026-10-21)
+- 사용자 결정: A안. 기본 지면이 A안 꼴, 비교 판(기존·B)·판 고르기·3구역·계속 코드 삭제. 파일은 S26 이전(63d4ff0)으로 되돌린 뒤 A안 부분만 다시 얹음(render.lead_story·front_single, 템플릿 lead_art·detail-src·pkg, app.js data-page-end, CSS)
+- tests/test_s26_variants.py → tests/test_front_lead.py, test_publish 원래대로(HTML 3개)
+- docs/archive/2026-10-21/a·b 삭제, 10/21호 render_only 재발행
+
 ### 다음에 이어서 할 일
-0. 10/21호 기존·A안·B안 비교 → 사용자 결정 → S26 정리
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
 2. 그래도 빠지면 Cloudflare Worker cron 으로 workflow_dispatch 부르기 (GitHub 토큰을 Worker 비밀값으로 — 사용자 작업)
 

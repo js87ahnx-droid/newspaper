@@ -161,8 +161,8 @@ def test_title_opens_ai_detail_and_link_is_plain(browser, tmp_path, monkeypatch)
         return a.closest('[data-issue]').getAttribute('data-issue'); }""")
     st = page.evaluate("""() => ({label: document.getElementById('reader').getAttribute('aria-label'),
         issue: (document.querySelector('.reader-body article.item') || {getAttribute: () => null}).getAttribute('data-issue'),
-        more: document.querySelectorAll('[data-more]').length})""")
-    assert st["label"] == "기사 자세히" and st["issue"] == issue and st["more"] == 0     # "자세히" 단추는 없앴다
+        more: document.querySelectorAll('[data-more]:not(.detail-btn)').length})""")
+    assert st["label"] == "기사 자세히" and st["issue"] == issue and st["more"] == 0     # 기사마다 "자세히" 단추는 없앴다 (1면 메인 기사 "자세히 보기"만 — S26)
     link = page.evaluate("""() => { const a = document.querySelector('#book .page .meta a.link-btn');
         return {href: a.href, target: a.target, art: a.hasAttribute('data-art'), detail: a.hasAttribute('data-detail')}; }""")
     assert link["target"] == "_blank" and link["href"].startswith("http") and not link["art"] and not link["detail"]

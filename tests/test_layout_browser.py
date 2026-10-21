@@ -183,7 +183,9 @@ def test_demoted_front_items_go_to_more_before_reserves(browser, tmp_path):  # n
     ctx.close()
     assert not errors
     k = m["more"].count("front")
-    assert k >= 1 and m["more"][:k] == ["front"] * k, m      # 1면에서 넘친 기사가 더 읽을 기사 맨 앞
+    # 1면에서 넘친 기사가 더 읽을 기사 앞쪽에 (S26: 1면 첫 쪽이 메인 기사 하나라 넘치는 기사가 많아,
+    # 큰 기사 뒤 빈자리를 작은 예비 기사가 채우는 일은 있다 — 앞 2/3 안에 1면 기사가 다 있으면 된다)
+    assert k >= 1 and m["more"][0] == "front" and "front" not in m["more"][max(k, (len(m["more"]) * 2) // 3):], m
     assert m["briefsFront"] == 0, m
 
 

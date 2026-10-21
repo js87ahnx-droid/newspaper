@@ -105,7 +105,7 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     ctx, page, _ = open_(browser, index)
     page.wait_for_timeout(800)
     no_survey(page)
-    top = page.evaluate("document.querySelector('#flow article.item[data-top=\"1\"]').dataset.issue")
+    top = page.evaluate("document.querySelector('#flow .fz-lead').dataset.issue")   # 1면 메인 기사 (S26)
     guaranteed = page.evaluate("[...document.querySelectorAll('#flow article.item[data-guaranteed=\"1\"]')].map(a => a.dataset.issue)")
     topics = page.evaluate("[...new Set([...document.querySelectorAll('#flow article.item')].map(a => a.dataset.topic))]")
     # 지면에 나온 모든 분야에 "덜 보기" 30번씩 (극단)
@@ -113,11 +113,11 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
         learn(page, t, -7.5)
     reload_(page)
     book = set(page.evaluate(BOOK_IDS))
-    first = page.evaluate("document.querySelector('#book article.item').dataset.issue")
+    first = page.evaluate("document.querySelector('#book .page[data-page=\"0\"] .fz-lead').dataset.issue")
     total = len(page.evaluate("[...document.querySelectorAll('#flow article.item[data-a]:not([data-reserve=\"1\"])')]"))
     ctx.close()
     assert first == top                            # 1면 톱 그대로
-    assert set(guaranteed) <= book                 # 다양성·연속 보장 기사 모두 지면에
+    assert set(guaranteed) - {top} <= book         # 다양성·연속 보장 기사 모두 지면에 (메인 기사는 1면 첫 쪽 — 위에서 확인)
     assert len(guaranteed) / total >= 0.3          # 다양성 30% 이상 유지
     assert total == CFG.editing.total_articles     # 기사가 지면에서 사라지지 않음 (단신으로만 내려감)
 
