@@ -324,3 +324,8 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .pkg-part.op-rel { border-left: 0; padding-left: 0; }
 .pkg-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px; }
 .reader-body .pkg .lead, .reader-body .pkg-part.op-rel p { -webkit-line-clamp: unset; display: block; }
+
+/* 인터뷰 (S27) — 분석·해설 면 맨 앞 */
+.item.iv { border-left: 3px solid var(--accent); padding-left: 8px; }
+.iv-who { margin: 0 0 2px; font-size: 0.9em; font-weight: 700; color: var(--ink); }
+.iv-tag { display: inline-block; padding: 0 6px; border-radius: 9px; background: var(--accent); color: var(--paper); font-size: 11px; line-height: 18px; margin-right: 4px; }
