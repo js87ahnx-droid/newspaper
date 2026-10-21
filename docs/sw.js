@@ -1,6 +1,6 @@
 /* 오프라인 캐시 (선택 기능): 지면은 네트워크 먼저, 안 되면 마지막으로 본 지면. 정적 파일은 캐시 먼저.
-   31fed80525 는 발행 때 정적 파일 해시로 바뀐다 — 지면의 정적 파일 주소에도 ?v= 로 붙어, 새로 발행하면 새 파일을 받는다 (S18) */
-const VER = "31fed80525";
+   f766ca8e76 는 발행 때 정적 파일 해시로 바뀐다 — 지면의 정적 파일 주소에도 ?v= 로 붙어, 새로 발행하면 새 파일을 받는다 (S18) */
+const VER = "f766ca8e76";
 const CACHE = "news-" + VER;
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["./"].concat(
