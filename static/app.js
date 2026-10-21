@@ -378,6 +378,8 @@
       showCover: false, usePortrait: !spread, autoSize: false,
       maxShadowOpacity: 0.35, flippingTime: 700, drawShadow: true,
       mobileScrollSupport: false, disableFlipByClick: true, swipeDistance: 20,
+      // 세로(한 쪽) 화면은 라이브러리의 끌기·모서리 넘김이 손가락 밀기를 자주 놓친다 → 아래 손가락 밀기가 넘긴다 (애니메이션은 그대로)
+      useMouseEvents: spread,
       startPage: start, showPageCorners: true
     });
     flip.loadFromHTML(pages);
@@ -521,6 +523,9 @@
 
   function go(delta) {
     if (mode === "scroll") { scrollToPage(current + delta); return; }
+    // 세로 한 쪽 화면에서는 라이브러리의 뒤로 넘기기(flipPrev·flip(번호))가 움직이지 않는다 (2026-10-21 실측 —
+    // 왼쪽 가장자리에서 끄는 흉내라 한 쪽 화면엔 안 맞음) → 앞으로는 넘김 애니메이션, 뒤로는 바로 그 쪽으로
+    if (flip && !spread && delta < 0) { if (current > 0) { flip.turnToPage(current - 1); current = flip.getCurrentPageIndex(); showInfo(); } return; }
     if (flip) { delta > 0 ? flip.flipNext() : flip.flipPrev(); return; }
     simpleShow(current + delta * (spread ? 2 : 1));
   }
@@ -571,13 +576,21 @@
   });
 
   // 동작 줄이기 모드의 손가락 넘기기 (애니메이션 없음)
-  var tx = null;
-  book.addEventListener("touchstart", function (e) { if (!flip && mode !== "scroll" && e.touches.length === 1) tx = e.touches[0].clientX; }, { passive: true });
+  // 손가락 밀기: 오른쪽→왼쪽 = 다음 쪽, 왼쪽→오른쪽 = 이전 쪽 (2026-10-21 "세로에서 넘기기가 잘 안 먹힌다")
+  // 넘김 라이브러리를 안 쓸 때(동작 줄이기)·세로 한 쪽 화면(라이브러리 끌기 끔)·한 면 보기(확대 안 했을 때) 모두.
+  // 가로 이동이 세로 이동보다 뚜렷할 때만 — 세로 스크롤·두 손가락 확대와 겹치지 않게
+  var tx = null, ty = 0;
+  function swipeOn() { return mode === "scroll" ? zoom <= 1.01 : (!flip || !spread); }
+  book.addEventListener("touchstart", function (e) {
+    tx = swipeOn() && e.touches.length === 1 ? e.touches[0].clientX : null;
+    if (tx !== null) ty = e.touches[0].clientY;
+  }, { passive: true });
+  book.addEventListener("touchmove", function (e) { if (e.touches.length > 1) tx = null; }, { passive: true });
   book.addEventListener("touchend", function (e) {
-    if (flip || mode === "scroll" || tx === null) return;
-    var dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+    if (tx === null || !swipeOn()) { tx = null; return; }
+    var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
     tx = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
   });
 
   // 사진이 안 열리면(차단·삭제) 자리를 접는다

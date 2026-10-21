@@ -566,6 +566,11 @@
 - tests/test_s26_variants.py → tests/test_front_lead.py, test_publish 원래대로(HTML 3개)
 - docs/archive/2026-10-21/a·b 삭제, 10/21호 render_only 재발행
 
+### 세로 화면 손가락 넘김 (2026-10-21, 사용자 "세로에서 넘기거나 돌아가는 터치가 잘 안 먹힌다")
+- 원인: 넘김 라이브러리(StPageFlip)의 뒤로 넘기기(flipPrev·flip(번호))가 한 쪽(세로) 화면에서 움직이지 않음 — "‹" 단추도 마찬가지. 끌기도 손가락 밀기를 자주 놓침
+- 고침: 세로 한 쪽 화면은 라이브러리 끌기 끔(useMouseEvents: spread), 직접 손가락 밀기 — 오른쪽→왼쪽 다음 쪽(넘김 애니메이션), 왼쪽→오른쪽 이전 쪽(turnToPage, 애니메이션 없음). 한 면 보기(확대 안 했을 때)·동작 줄이기도 같은 밀기. 세로로 더 움직인 손짓은 무시
+- tests/test_swipe_browser.py 5건(390·375·820 세로, 한 면 보기, 동작 줄이기). 전체 295 통과(Worker 기존 1 실패)
+
 ### 다음에 이어서 할 일
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
 2. 그래도 빠지면 Cloudflare Worker cron 으로 workflow_dispatch 부르기 (GitHub 토큰을 Worker 비밀값으로 — 사용자 작업)
