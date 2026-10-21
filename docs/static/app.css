@@ -376,3 +376,11 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .item.tight .pkg .an-views li:nth-child(n+4), .item.tight .pkg .an-pts li:nth-child(n+3) { display: none; }
 .pkg .an-pts { list-style: none; padding-left: 2px; }
 .pkg .an-pts li::before { content: "· "; color: var(--accent); font-weight: 700; }
+/* S26g: 요약·입장 차이 칸 */
+.pkg-part h4 small { font-weight: 400; color: var(--muted); font-size: 0.85em; }
+.pkg .pkg-sum { -webkit-line-clamp: 5; margin: 2px 0 0; }
+.item.compact .pkg .pkg-sum { -webkit-line-clamp: 3; }
+.item.tight .pkg .pkg-sum { display: -webkit-box; -webkit-line-clamp: 2; }
+.pkg-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px; }
+.pkg-cmp .grp p { margin: 2px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item.tight .pkg-cmp .grp:nth-of-type(n+3) { display: none; }
