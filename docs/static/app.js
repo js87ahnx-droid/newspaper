@@ -45,7 +45,7 @@
     var W = window.innerWidth, H = window.innerHeight - tb;
     spread = W > H && W >= 700;                // 가로 화면이면 두 쪽
     var pw = Math.floor(spread ? W / 2 : W);
-    document.body.classList.toggle("narrow-page", pw < 560);   // 1면 3구역(S26b)을 세로로 쌓는 폭
+    document.body.classList.toggle("narrow-page", pw < 560);   // 1면 메인 기사(S26) 글자·사진 크기
     return { w: pw, h: Math.floor(H), W: W, H: H };
   }
 
@@ -76,8 +76,6 @@
   function fit(inner, node) {
     node.classList.add("compact");
     if (!overflows(inner)) return;
-    var second = node.querySelector(".fz-second");   // A안 1면(S26e): 둘째 기사를 빼고 메인 기사만
-    if (second) { second.remove(); if (!overflows(inner)) return; }
     node.classList.add("tight");
     if (!overflows(inner)) return;
     var room = inner.clientHeight - (node.offsetTop - inner.offsetTop) - 6;
@@ -154,7 +152,7 @@
     nodes.forEach(function (src, k) {
       if (used[k]) return;
       var node = src.node;
-      if (placedOnPage > 0 && inner.querySelector("[data-page-end]")) {   // 이 덩어리로 쪽을 끝낸다 (A안 1면 첫 쪽 — S26e)
+      if (placedOnPage > 0 && inner.querySelector("[data-page-end]")) {   // 1면 첫 쪽은 메인 기사 하나로 끝낸다 (S26)
         out.push(page);
         page = mk(true);
         stage.appendChild(page);
@@ -220,8 +218,7 @@
     order.forEach(function (id) {
       if (id === "briefs") return;
       var b = budgets[id] || 0;
-      // B안 이슈 면(S26d): 1면에서 이어받는 칸은 단신으로 내리지 않는다 — 쪽이 모자라면 쪽을 늘린다
-      var res = placeSection(stage, g, byId[id], id === firstId, id === "issue" ? 0 : b, kids(byId[id]), mast);
+      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
       built[id] = res.pages;
       if (id !== "opinion" && id !== "guide" && id !== "analysis") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
@@ -322,7 +319,6 @@
     }
     if (spread && out.length % 2 === 1) { var bl = newPage(g, "blank", null, false); bl.classList.add("blank"); out.push(bl); }
     out.forEach(function (p, i) { p.querySelector(".folio").textContent = (i + 1) + " / " + out.length; p.setAttribute("data-page", i); });
-    linkPages(out);
     // 모든 쪽이 실제로 배치된 지금 넘침을 센다 (넘김 라이브러리에 넘긴 뒤에는 안 보이는 쪽의 높이가 0으로 재어진다)
     overflowPages = out.filter(function (p) { return overflows(p.querySelector(".page-inner")); }).map(function (p) { return +p.getAttribute("data-page"); });
     clipped = stage.querySelectorAll(".item.clip").length;
@@ -333,39 +329,6 @@
     }).length;
     stage.remove();
     return { pages: out, g: g };
-  }
-
-  // 1면 3구역(S26b): "▶ N쪽 ○○로 계속"·"오늘의 면" 색인의 쪽 번호를 실제로 나뉜 쪽에서 채운다 (기기마다 쪽이 달라서)
-  function linkPages(out) {
-    var pageOf = function (sel) {
-      for (var i = 0; i < out.length; i++) if (out[i].querySelector(sel)) return i;
-      return -1;
-    };
-    out.forEach(function (p) {
-      Array.prototype.forEach.call(p.querySelectorAll(".jump[data-jump]"), function (b) {
-        var id = b.getAttribute("data-jump");
-        var i = pageOf('article.cont[data-issue="' + id + '"]');
-        if (i < 0) i = pageOf('article.item[data-issue="' + id + '"]');   // 이어받는 칸이 단신으로 내려갔을 때
-        var n = b.querySelector(".jn");
-        if (i < 0) { b.hidden = true; return; }
-        b.hidden = false;
-        b.setAttribute("data-page", i);
-        if (n) n.textContent = (i + 1) + "쪽 ";
-      });
-    });
-    var lists = [];
-    out.forEach(function (p) { lists = lists.concat(Array.prototype.slice.call(p.querySelectorAll("[data-index-list]"))); });
-    if (!lists.length) return;
-    var seen = {}, html = [];
-    var extra = { more: "더 읽을 기사", briefs: "단신" };
-    out.forEach(function (p, i) {
-      var m = /(?:^|\s)sec-([\w-]+)/.exec(p.className), id = m && m[1];
-      if (!id || seen[id] || id === "front" || id === "blank" || id === "end") return;
-      seen[id] = true;
-      var t = (E.sectionTitles || {})[id] || extra[id] || id;
-      html.push('<button type="button" class="ix" data-goto="' + i + '">' + t + " <b>" + (i + 1) + "</b></button>");
-    });
-    lists.forEach(function (l) { l.innerHTML = html.join(""); });
   }
 
   // ---------- 넘기기 ----------
@@ -719,7 +682,7 @@
     var back = reader.hidden ? null : Array.prototype.slice.call(body.childNodes);   // 자세히 창에서 열었으면 돌아갈 수 있게
     var url = el.getAttribute("data-read"), href = el.getAttribute("data-href") || el.getAttribute("href");
     var lang = el.getAttribute("data-lang") || "ko", srcName = el.getAttribute("data-src") || "";
-    var art = el.closest("article.item");
+    var art = el.closest("article.item, article.fz-art");   // 1면 메인 기사(S26)도
     var isBtn = el.tagName !== "A";   // 메타 줄 "원문" 단추면 그 기사의 (원)제목·리드를 쓴다
     var titleText = isBtn && art ? ((art.querySelector(".orig") || art.querySelector(".hl a") || el).textContent) : el.textContent;
     var leadEl = isBtn && art ? art.querySelector(".lead") : null;
@@ -802,8 +765,6 @@
     if (d && !mod) { e.preventDefault(); var ai = d.closest("[data-issue]"); if (ai) openReader(ai.getAttribute("data-issue")); return; }
     var o = t.closest("[data-art]");                           // "원문"·작은 제목 → 원문 창
     if (o && !mod) { e.preventDefault(); openArticle(o); return; }
-    var j = t.closest(".jump[data-page], [data-goto]");          // 1면 "계속"·색인 → 그 쪽으로 (S26b)
-    if (j) { e.preventDefault(); goTo(+(j.getAttribute("data-page") || j.getAttribute("data-goto"))); return; }
     var m = t.closest("[data-more]");
     if (m) { var art = m.closest("[data-issue]"); if (art) openReader(art.getAttribute("data-issue")); return; }
     if (t.closest("[data-reader-close]") || t === reader) closeReader();
