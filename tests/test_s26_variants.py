@@ -104,7 +104,7 @@ def test_lead_story_korea_first_unless_global():
 
 
 def test_a_single_front_and_continuation(tmp_path):
-    """A안 1면 (S26e·S26g): 메인 기사 1건만(사진과 함께), 색인·아래 띠 없음, 분야 면 맨 위에서 이어받음."""
+    """A안 1면 (S26e·S26g·S26h): 메인 기사 1건만(사진과 함께), 색인·아래 띠·계속 없음, 묶음은 숨은 자세히 원본으로만."""
     ed = _edition(tmp_path)
     cfg = _cfg(["a"])
     ctx = build_context(ed, cfg, load_interests(), load_sources(), "a")
@@ -113,17 +113,17 @@ def test_a_single_front_and_continuation(tmp_path):
     assert set(zone) == {"kind", "lead"} and zone["kind"] == "single"
     ids = [zone[k]["issue_id"] for k in ("lead", "second") if k in zone]
     assert all(r["issue_id"] not in ids for s in secs for r in s["items"] if not r.get("cont"))   # 1면 기사는 한 번만
-    conts = [r["issue_id"] for s in secs for r in s["items"] if r.get("cont")]
-    assert sorted(conts) == sorted(ids)
-    for s in secs:
-        mine = [r for r in s["items"] if r.get("cont")]
-        if mine:
-            assert s["items"][:len(mine)] == mine
+    conts = [(s["id"], r["issue_id"]) for s in secs for r in s["items"] if r.get("cont")]
+    assert conts == [("detail", ids[0])] and secs[-1]["id"] == "detail"   # 분야 면에 다시 싣지 않음
+    assert zone["lead"].get("detail") and not zone["lead"].get("jump")
     html = render_html(ed, cfg, load_interests(), load_sources(), variant="a")
     flow = html[html.index('<div id="flow"'):]
     z0 = flow.index('class="item fz fz-single"')
     zone_html = flow[z0:flow.index('<article class="item', z0)]
     assert "fz-index" not in zone_html and "fz-bottom" not in zone_html and "an-bg" not in zone_html
+    assert "data-more" in zone_html and 'class="jump"' not in zone_html
+    d0 = flow.index('<div class="detail-src" hidden>')
+    assert 'class="pkg"' in flow[d0:flow.index("</article>", d0)]
     assert zone_html.count('class="fz-art') == len(ids) == 1
 
 
@@ -180,25 +180,34 @@ def test_variant_layout_in_browser(browser, tmp_path, variant, w, h):  # noqa: F
                sw: document.scrollingElement.scrollWidth, iw: innerWidth,
                issueFirst: (pg(2) || pg(1)).className };
     }""")
-    first = m["jumps"][0]
-    page.evaluate("document.querySelector(\"#book .page[data-page='0'] .jump\").click()")   # 주간 설문 창이 덮을 수 있어 직접
-    page.wait_for_timeout(1200)
+    first = m["jumps"][0] if m["jumps"] else None
+    if variant == "a":   # S26h: "자세히 보기" → 자세히 창에 묶음
+        page.evaluate("document.querySelector(\"#book .page[data-page='0'] .detail-btn\").click()")
+        page.wait_for_timeout(300)
+        rd = page.evaluate("({open: !document.getElementById('reader').hidden, pkg: !!document.querySelector('#reader .pkg'), "
+                           "parts: document.querySelectorAll('#reader .pkg-part').length, "
+                           "conts: document.querySelectorAll('#book article.cont').length})")
+    else:
+        page.evaluate("document.querySelector(\"#book .page[data-page='0'] .jump\").click()")   # 주간 설문 창이 덮을 수 있어 직접
+        page.wait_for_timeout(1200)
     cur = page.evaluate("NEWS.state()")
     ctx.close()
     assert not errors, errors
     assert m["st"]["overflow"] == [] and m["sw"] <= m["iw"]
     assert m["zoneOnFirst"] and not m["clip"]
     assert all(not j["hidden"] and j["ok"] for j in m["jumps"])
-    if variant == "a":   # S26e: 첫 쪽은 1면 덩어리(메인 + 최대 1건)뿐, 색인 없음
-        assert m["p0arts"] == 1 and m["p0items"] == 0 and not m["p0index"] and len(m["jumps"]) == m["p0arts"]
+    if variant == "a":   # S26e·h: 첫 쪽은 메인 기사 하나, 색인·계속 없음, 지면에 이어받는 칸 없음, 자세히 창에 묶음
+        assert m["p0arts"] == 1 and m["p0items"] == 0 and not m["p0index"] and m["jumps"] == []
+        assert rd["open"] and rd["pkg"] and rd["parts"] >= 3 and rd["conts"] == 0
     else:
         assert len(m["jumps"]) == 3
         if w >= 700:   # 색인은 넓은 쪽만 (휴대폰은 숨김)
             assert m["ix"] and all(x["first"] for x in m["ix"])
     expected = sum(s.pages for s in cfg.sections) + (2 if variant == "b" else 0)
     assert m["st"]["pages"] == expected
-    step = 2 if cur["spread"] and cur["mode"] == "flip" else 1
-    assert cur["current"] <= first["page"] < cur["current"] + step     # "계속"을 누르면 그 쪽이 보인다
+    if variant == "b":
+        step = 2 if cur["spread"] and cur["mode"] == "flip" else 1
+        assert cur["current"] <= first["page"] < cur["current"] + step     # "계속"을 누르면 그 쪽이 보인다
     if variant == "b":
         assert "sec-issue" in m["issueFirst"]
 

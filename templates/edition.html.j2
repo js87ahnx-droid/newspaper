@@ -13,6 +13,7 @@
       {% if it.sub and role != 'bottom' %}<p class="fz-sub">{{ it.sub }}</p>{% endif %}
       {% if role == 'bottom' %}{% if it.brief_text %}<p class="lead brief-line">{{ it.brief_text }}</p>{% endif %}
       {% elif v.lead %}<p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>{% endif %}
+      {% if it.detail %}<button type="button" class="detail-btn" data-more>자세히 보기 <small>요약·배경·쟁점·입장 차이·사설</small></button>{% endif %}
       {% if it.jump %}<button type="button" class="jump" data-jump="{{ it.issue_id }}">{% if role == 'bottom' %}관련기사 <span class="jn"></span>{% else %}▶ <span class="jn"></span>{{ it.jump.label }}{{ it.jump.josa }} 계속{% endif %}</button>{% endif %}
       <div class="meta">
         {% if it.time %}<time class="tm">{{ it.time }}</time>{% endif %}
@@ -80,7 +81,8 @@
   </div>
 
 {% for sec in sections %}
-  <section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">
+  {% if sec.id == 'detail' %}<div class="detail-src" hidden>{# A안(S26h): 1면 메인 기사 "자세히 보기" 원본 — 지면에는 안 실림 #}
+  {% else %}<section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">{% endif %}
   {% if sec.analysis %}{# 분석·해설 (S22c): 매체가 쓴 분석 기사 — 제목·요약 → 원문 창 #}
     <p class="disclaimer">각 매체가 직접 쓴 분석·해설 기사입니다(AI 가 쓴 글이 아님). 외국어 기사의 한국어 제목·요약만 AI 번역입니다.</p>
     {% for a in sec.analysis %}
@@ -232,7 +234,7 @@
       {% endif %}
     </article>
   {% endfor %}
-  </section>
+  {% if sec.id == 'detail' %}</div>{% else %}</section>{% endif %}
 {% endfor %}
 
 {% if opinion or picks %}

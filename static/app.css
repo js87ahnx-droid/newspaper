@@ -384,3 +384,8 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .pkg-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px; }
 .pkg-cmp .grp p { margin: 2px 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item.tight .pkg-cmp .grp:nth-of-type(n+3) { display: none; }
+/* A안 1면 "자세히 보기" (S26h) — 자세히 창에서는 묶음을 줄이지 않는다 */
+.detail-btn { display: inline-flex; align-items: baseline; gap: 6px; margin: 2px 0 6px; padding: 6px 12px; min-height: 36px; border: 1px solid var(--accent); border-radius: 18px; background: var(--card); color: var(--accent); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.detail-btn small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.reader-body .pkg .an-bg, .reader-body .pkg .pkg-sum, .reader-body .pkg li, .reader-body .pkg-cmp .grp p, .reader-body .pkg-part.op-rel p { -webkit-line-clamp: unset; display: block; }
+.reader-body .cont-band { display: none; }

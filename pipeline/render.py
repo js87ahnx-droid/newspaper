@@ -212,8 +212,9 @@ def lead_story(cands: list[dict], country: dict[str, str]) -> dict:
 
 
 def front_single(sections: list[dict], titles: dict, country: dict[str, str]) -> None:
-    """A안 1면 (S26e·S26g): 첫 쪽은 메인 기사 1건만, 사진과 함께 (사용자 2026-10-21 "가장 메인 기사 하나만 사진과 함께").
-    메인 기사의 분석은 분야 면 맨 위 이어받는 칸으로. 나머지 1면 기사는 1면 둘째 쪽에 그대로.
+    """A안 1면 (S26e·S26g·S26h): 첫 쪽은 메인 기사 1건만, 사진과 함께 (사용자 2026-10-21 "가장 메인 기사 하나만 사진과 함께").
+    메인 기사의 각도별 묶음(요약·배경·쟁점·관점·입장 차이·관련·사설)은 지면에 다시 싣지 않고 "자세히 보기"(자세히 창)로만
+    — 사용자: "그냥 열어서 보면 되는데 ○면으로 계속 눌러서 넘어갈 이유가 있어?". 나머지 1면 기사는 1면 둘째 쪽에 그대로.
     메인 기사에 사진이 없으면(다른 면에서 올라온 기사) 그 이슈 기사들의 RSS 대표 이미지(photo_alt)를 쓴다."""
     front = next((s for s in sections if s["id"] == "front"), None)
     if not front or not front["items"]:
@@ -227,25 +228,14 @@ def front_single(sections: list[dict], titles: dict, country: dict[str, str]) ->
             s["items"] = [r for r in s["items"] if r is not lead]
     if not lead.get("photo") and lead.get("photo_alt"):
         lead["photo"], lead["photo_source"] = larger_photo(lead["photo_alt"]), lead.get("photo_alt_source")
-    zone = [("lead", lead)]
     front["items"] = [r for r in front["items"] if r is not lead]
-    present = [s["id"] for s in sections]
-    conts: dict[str, list[dict]] = {}
-    for role, it in zone:
-        cont = {**it, "cont": True}
-        sid = TOPIC_SECTION.get(it.get("topic"), "society")
-        if sid not in present:
-            sid = next((x for x in NEWS_SECTIONS[1:] if x in present), None)
-        label = titles.get(sid, "") if sid else ""
-        an = it["view"].get("analysis") or {}
-        sub = an.get("brief") if an.get("brief") and an.get("brief") != it["view"]["title"] else None
-        it.update(role=role, sub=sub, jump={"label": label, "josa": josa_ro(label)} if sid else None)
-        if sid:
-            conts.setdefault(sid, []).append(cont)
-    front["zone"] = {"kind": "single", **dict(zone)}
-    for s in sections:
-        if s["id"] in conts:
-            s["items"] = conts[s["id"]] + s["items"]
+    an = lead["view"].get("analysis") or {}
+    sub = an.get("brief") if an.get("brief") and an.get("brief") != lead["view"]["title"] else None
+    detail = {**lead, "cont": True}
+    lead.update(role="lead", sub=sub, jump=None, detail=True)
+    front["zone"] = {"kind": "single", "lead": lead}
+    # 자세히 창이 쓰는 원본 — 쪽 나누기에는 들어가지 않는다 (템플릿이 숨은 칸으로 쓴다)
+    sections.append({"id": "detail", "title": "", "items": [detail]})
 
 
 def front_zone(sections: list[dict], variant: str, titles: dict) -> None:
