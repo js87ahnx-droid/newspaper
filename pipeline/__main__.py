@@ -447,6 +447,14 @@ def cmd_publish(args: argparse.Namespace) -> int:
         st = reader.resolve_google(edition)
         ed_path.write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"원문 보기: Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
+    day_path = _raw_dir(args) / f"{args.date}.json"
+    if cfg.layout_variants and day_path.exists():
+        # A안 1면 메인 기사 사진 (S26g): 사진 자리가 아닌 기사가 메인으로 올라오면 그 이슈 기사들의 RSS 대표 이미지로
+        imgs = {d["id"]: (d["image"], d["source"]) for d in json.loads(day_path.read_text(encoding="utf-8")) if d.get("image")}
+        for it in (i for ps in edition["sections"].values() for i in ps):
+            alt = next((imgs[a["id"]] for a in it.get("articles", []) if a.get("id") in imgs), None)
+            if alt and not it.get("photo"):
+                it["photo_alt"], it["photo_alt_source"] = alt
     files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
     # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
     Path(args.site, ".to-encrypt").write_text("".join(f.as_posix() + "\n" for f in files), encoding="utf-8")

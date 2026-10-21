@@ -130,22 +130,27 @@
       {% if it.cont %}<p class="cont-band">이슈 <span>|</span> 1면에서 이어짐</p>{% endif %}
       <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
-      {% if v.lead and not brief and not (it.cont and v.analysis) %}{# 이어받는 칸(S26): 요약은 1면에 실었으니 분석부터 #}
+      {% if v.lead and not brief and not (it.cont and (v.analysis or variant == 'a')) %}{# 이어받는 칸(S26): 요약은 1면에 실었으니 분석부터 #}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
       {% endif %}
       {% set pkg = it.cont and variant == 'a' and not brief %}
-      {% if pkg %}{# A안 이어받는 칸 (S26f): 한 이슈를 각도별로 — 왜 생겼나 / 쟁점 / 누가 뭐라 하나 / 함께 볼 보도 / 사설은 #}
+      {% if pkg %}{# A안 이어받는 칸 (S26f·S26g): 요약 / 왜 생겼나(배경) / 쟁점 / 누가 뭐라 하나 / 입장 차이 / 함께 볼 보도 / 사설 #}
       {% set n = namespace(i=0) %}
       <div class="pkg">
+        {% if v.lead %}{% set n.i = n.i + 1 %}
+        <div class="pkg-part"><h4><span>{{ n.i }}</span>요약</h4><p class="lead pkg-sum"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p></div>{% endif %}
         {% if v.analysis and v.analysis.background %}{% set n.i = n.i + 1 %}
-        <div class="pkg-part"><h4><span>{{ n.i }}</span>왜 생겼나</h4><p class="an-bg">{{ v.analysis.background }}</p></div>{% endif %}
+        <div class="pkg-part"><h4><span>{{ n.i }}</span>왜 생겼나 <small>배경</small></h4><p class="an-bg">{{ v.analysis.background }}</p></div>{% endif %}
         {% if v.analysis and v.analysis.points %}{% set n.i = n.i + 1 %}
         <div class="pkg-part"><h4><span>{{ n.i }}</span>무엇이 쟁점인가</h4><ul class="an-pts">{% for p in v.analysis.points %}<li>{{ p }}</li>{% endfor %}</ul></div>{% endif %}
-        {% if it.stance_links or it.cmp_groups or (it.llm and it.llm.frame_summary) %}{% set n.i = n.i + 1 %}
-        <div class="pkg-part"><h4><span>{{ n.i }}</span>누가 뭐라 하나</h4>
-          {% if it.stance_links %}<ul class="an-views" aria-label="매체별 관점">{% for s in it.stance_links %}<li><b>{{ s.source }}</b> {{ s.view }}{% if s.article %} <button type="button" class="view-orig" data-href="{{ real_url(s.article.url) }}"{{ art(s.article.url, s.article.source, s.article.lang) }} aria-label="{{ s.source }} 기사 원문">원문</button>{% endif %}</li>{% endfor %}</ul>
-          {% elif it.llm and it.llm.frame_summary %}<p class="frame" data-note="AI 요약">{{ it.llm.frame_summary }}</p>{% endif %}
-          {% if it.cmp_groups and not it.stance_links %}<div class="cmp-inline" aria-label="성향별 보도">{# 매체별 관점이 있으면 그것으로 — 성향별 제목은 자세히 창에 #}
+        {% if it.stance_links %}{% set n.i = n.i + 1 %}
+        <div class="pkg-part"><h4><span>{{ n.i }}</span>누가 뭐라 하나 <small>매체별 관점</small></h4>
+          <ul class="an-views" aria-label="매체별 관점">{% for s in it.stance_links %}<li><b>{{ s.source }}</b> {{ s.view }}{% if s.article %} <button type="button" class="view-orig" data-href="{{ real_url(s.article.url) }}"{{ art(s.article.url, s.article.source, s.article.lang) }} aria-label="{{ s.source }} 기사 원문">원문</button>{% endif %}</li>{% endfor %}</ul>
+        </div>{% endif %}
+        {% if it.cmp_groups or (it.llm and it.llm.frame_summary) %}{% set n.i = n.i + 1 %}
+        <div class="pkg-part"><h4><span>{{ n.i }}</span>입장 차이 <small>성향별 제목</small></h4>
+          {% if it.llm and it.llm.frame_summary and not it.stance_links %}<p class="frame" data-note="AI 요약">{{ it.llm.frame_summary }}</p>{% endif %}
+          {% if it.cmp_groups %}<div class="cmp-inline pkg-cmp" aria-label="성향별 보도">
             {% for g in it.cmp_groups %}<div class="grp"><span class="badge lean-{{ g.cls }}">{{ g.group }}</span>
               {% for a in g.articles[:1] %}<p><span class="src">{{ a.source }}</span> <a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.title_html }}</a></p>{% endfor %}
             </div>{% endfor %}
@@ -161,7 +166,6 @@
           {% for o in it.opinions[:3] %}<p><span class="badge lean-{{ o.cls }}">{{ o.lean }}</span> <span class="src">{{ o.source }}</span>
             <a href="{{ real_url(o.url) }}" target="_blank" rel="noopener noreferrer"{{ art(o.url, o.source, o.lang) }}>{{ o.ko_title or o.title }}</a></p>{% endfor %}
         </div>{% endif %}
-        {% if n.i == 0 and v.lead %}<p class="lead">{{ v.lead }}</p>{% endif %}
       </div>
       {% elif brief %}{% if it.brief_text %}<p class="lead brief-line">{{ it.brief_text }}</p>{% endif %}
       {% elif v.analysis %}

@@ -212,8 +212,9 @@ def lead_story(cands: list[dict], country: dict[str, str]) -> dict:
 
 
 def front_single(sections: list[dict], titles: dict, country: dict[str, str]) -> None:
-    """A안 1면 (S26e): 좌우로 나누지 않고 한 단 — 메인 기사(사진) 1건 + 자리가 있으면 사진 기사 1건 더(최대 2건).
-    두 기사의 분석은 분야 면 맨 위 이어받는 칸으로. 나머지 1면 기사는 1면 둘째 쪽에 그대로."""
+    """A안 1면 (S26e·S26g): 첫 쪽은 메인 기사 1건만, 사진과 함께 (사용자 2026-10-21 "가장 메인 기사 하나만 사진과 함께").
+    메인 기사의 분석은 분야 면 맨 위 이어받는 칸으로. 나머지 1면 기사는 1면 둘째 쪽에 그대로.
+    메인 기사에 사진이 없으면(다른 면에서 올라온 기사) 그 이슈 기사들의 RSS 대표 이미지(photo_alt)를 쓴다."""
     front = next((s for s in sections if s["id"] == "front"), None)
     if not front or not front["items"]:
         return
@@ -224,10 +225,10 @@ def front_single(sections: list[dict], titles: dict, country: dict[str, str]) ->
     for s in sections:   # 다른 면에 있던 기사가 메인이 되면 그 면에서 뺀다
         if s["id"] != "front":
             s["items"] = [r for r in s["items"] if r is not lead]
-    rows = [r for r in front["items"] if r is not lead]
-    second = next((r for r in rows if r.get("photo")), None) or (rows[0] if rows else None)
-    zone = [("lead", lead)] + ([("second", second)] if second else [])
-    front["items"] = [r for r in rows if r is not second]
+    if not lead.get("photo") and lead.get("photo_alt"):
+        lead["photo"], lead["photo_source"] = larger_photo(lead["photo_alt"]), lead.get("photo_alt_source")
+    zone = [("lead", lead)]
+    front["items"] = [r for r in front["items"] if r is not lead]
     present = [s["id"] for s in sections]
     conts: dict[str, list[dict]] = {}
     for role, it in zone:

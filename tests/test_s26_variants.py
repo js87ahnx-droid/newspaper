@@ -104,13 +104,13 @@ def test_lead_story_korea_first_unless_global():
 
 
 def test_a_single_front_and_continuation(tmp_path):
-    """A안 1면 (S26e): 한 단 — 메인 기사 + 최대 1건, 색인·아래 띠 없음, 두 기사는 분야 면 맨 위에서 이어받음."""
+    """A안 1면 (S26e·S26g): 메인 기사 1건만(사진과 함께), 색인·아래 띠 없음, 분야 면 맨 위에서 이어받음."""
     ed = _edition(tmp_path)
     cfg = _cfg(["a"])
     ctx = build_context(ed, cfg, load_interests(), load_sources(), "a")
     secs = ctx["sections"]
     zone = secs[0]["zone"]
-    assert zone["kind"] == "single" and "lead" in zone and set(zone) <= {"kind", "lead", "second"}
+    assert set(zone) == {"kind", "lead"} and zone["kind"] == "single"
     ids = [zone[k]["issue_id"] for k in ("lead", "second") if k in zone]
     assert all(r["issue_id"] not in ids for s in secs for r in s["items"] if not r.get("cont"))   # 1면 기사는 한 번만
     conts = [r["issue_id"] for s in secs for r in s["items"] if r.get("cont")]
@@ -124,7 +124,7 @@ def test_a_single_front_and_continuation(tmp_path):
     z0 = flow.index('class="item fz fz-single"')
     zone_html = flow[z0:flow.index('<article class="item', z0)]
     assert "fz-index" not in zone_html and "fz-bottom" not in zone_html and "an-bg" not in zone_html
-    assert zone_html.count('class="fz-art') == len(ids) <= 2
+    assert zone_html.count('class="fz-art') == len(ids) == 1
 
 
 def test_front_zone_and_continuation(tmp_path):
@@ -190,7 +190,7 @@ def test_variant_layout_in_browser(browser, tmp_path, variant, w, h):  # noqa: F
     assert m["zoneOnFirst"] and not m["clip"]
     assert all(not j["hidden"] and j["ok"] for j in m["jumps"])
     if variant == "a":   # S26e: 첫 쪽은 1면 덩어리(메인 + 최대 1건)뿐, 색인 없음
-        assert 1 <= m["p0arts"] <= 2 and m["p0items"] == 0 and not m["p0index"] and len(m["jumps"]) == m["p0arts"]
+        assert m["p0arts"] == 1 and m["p0items"] == 0 and not m["p0index"] and len(m["jumps"]) == m["p0arts"]
     else:
         assert len(m["jumps"]) == 3
         if w >= 700:   # 색인은 넓은 쪽만 (휴대폰은 숨김)
@@ -210,7 +210,19 @@ def test_a_continuation_is_angle_package(tmp_path):
     flow = html[html.index('<div id="flow"'):]
     c0 = flow.index('class="item sub cont"') if 'class="item sub cont"' in flow else flow.index(' cont"')
     cont = flow[c0:flow.index("</article>", c0)]
-    assert 'class="pkg"' in cont and "<span>1</span>왜 생겼나" in cont and "<span>2</span>무엇이 쟁점인가" in cont
+    assert 'class="pkg"' in cont and "<span>1</span>요약" in cont and "<span>2</span>왜 생겼나 <small>배경</small>" in cont
+    assert "<span>3</span>무엇이 쟁점인가" in cont and cont.count('class="lead') == 1      # 요약은 한 번만
     assert 'class="photo"' not in cont and 'class="an-bg"' in cont
     b = render_html(ed, _cfg(["b"]), load_interests(), load_sources(), variant="b")
     assert 'class="pkg"' not in b                                        # B안은 그대로
+
+
+def test_a_lead_photo_fallback(tmp_path):
+    """S26g: 메인 기사에 사진 자리가 없으면 photo_alt(그 이슈 기사의 RSS 이미지)를 쓴다."""
+    ed = _edition(tmp_path)
+    for it in (i for ps in ed["sections"].values() for i in ps):
+        it["photo"] = None
+        it["photo_alt"], it["photo_alt_source"] = "https://img.test/alt.jpg", "BBC"
+    ctx = build_context(ed, _cfg(["a"]), load_interests(), load_sources(), "a")
+    lead = ctx["sections"][0]["zone"]["lead"]
+    assert lead["photo"] == "https://img.test/alt.jpg" and lead["photo_source"] == "BBC"
