@@ -277,8 +277,12 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         if s.id == "analysis":   # 매체가 쓴 분석·해설 (S22c) — 이슈 기사가 아니라 따로 모은 목록
             an = [{**a, "cls": LEAN_CLASS.get(a.get("lean"), "mid"), "time": time_label(a.get("published"), cfg.timezone)}
                   for a in (edition.get("analysis") or [])[:10]]   # AI 가 걸러 내지 못했을 때(LLM 꺼짐)도 10편까지
-            if an:
-                sections.append({"id": "analysis", "title": titles[s.id], "items": [], "analysis": an})
+            # 인터뷰 (S27): AI 가 고른 석학·사상가·구루·지도자 인터뷰 — 분석과 겹치는 주소는 인터뷰로만
+            iv = [{**a, "cls": LEAN_CLASS.get(a.get("lean"), "mid"), "time": time_label(a.get("published"), cfg.timezone)}
+                  for a in (edition.get("interviews") or [])]
+            an = [a for a in an if a["url"] not in {i["url"] for i in iv}]
+            if an or iv:
+                sections.append({"id": "analysis", "title": titles[s.id], "items": [], "analysis": an, "interviews": iv})
             continue
         items = edition["sections"].get(s.id, [])
         if not items:

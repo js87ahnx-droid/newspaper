@@ -225,6 +225,22 @@ def organize_analysis(arts: list[Article]) -> list[dict]:
     return [_side_row(a) for a in out[:ANALYSIS_MAX]]
 
 
+INTERVIEW_CANDIDATES, INTERVIEW_PER_SOURCE = 40, 3   # AI 검토에 넘기는 인터뷰 후보 (S27)
+
+
+def organize_interviews(arts: list[Article]) -> list[dict]:
+    """인터뷰 후보 (S27): 매체 가중치 높은 곳부터, 매체마다 최신 INTERVIEW_PER_SOURCE 편, INTERVIEW_CANDIDATES 편까지."""
+    by_src: dict[str, list[Article]] = {}
+    for a in sorted(arts, key=lambda a: a.published or "", reverse=True):
+        if len(by_src.setdefault(a.source, [])) < INTERVIEW_PER_SOURCE:
+            by_src[a.source].append(a)
+    order = sorted(by_src, key=lambda s: (-by_src[s][0].weight, s))
+    out: list[Article] = []
+    for k in range(INTERVIEW_PER_SOURCE):
+        out += [by_src[s][k] for s in order if len(by_src[s]) > k]
+    return [_side_row(a) for a in out[:INTERVIEW_CANDIDATES]]
+
+
 PICK_MAX_DAYS = 15   # 지정 칼럼은 연재마다 이 날수 안의 최근 1편 (격주 연재 김지수의 인터스텔라도 들어가게)
 
 

@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 from .collect import Article
 from .settings import ROOT, Config, Sources
-from .textutil import cap_lead, clean_lead, detect_analysis, detect_opinion, empty_title, title_key
+from .textutil import cap_lead, clean_lead, detect_analysis, detect_interview, detect_opinion, empty_title, title_key
 
 
 DEFAULT_HISTORY = ROOT / "data" / "history"
@@ -144,11 +144,14 @@ def pick_series(sections: list[str]) -> list[str]:
 
 
 def _side_kind(a: Article) -> str | None:
-    """뉴스·논평 말고 따로 싣는 것: 'pick'(지정 칼럼, S22d) / 'analysis'(분석·해설, S22c) / None."""
+    """뉴스·논평 말고 따로 싣는 것: 'pick'(지정 칼럼, S22d) / 'analysis'(분석·해설, S22c) / 'interview'(인터뷰 후보, S27) / None.
+    인터뷰 후보는 뉴스에서도 그대로 쓰인다 (뉴스 기사이기도 해서) — 분석·해설 면에 따로 한 번 더 싣는 것은 AI 가 고른 것만."""
     if pick_series(a.sections):
         return "pick"
     if _opinion_kind(a) is None and detect_analysis(a.title, a.url, "analysis" if "analysis" in a.sections else ""):
         return "analysis"
+    if _opinion_kind(a) is None and detect_interview(a.title, a.lead):
+        return "interview"
     return None
 
 
@@ -181,7 +184,7 @@ def prepare_side(store: dict[str, Article], edition: date, cfg: Config, sources:
         if kind == "pick" and len(pick_series(a.sections)) > 1:
             continue   # 같은 매체의 두 연재 검색에 걸린 글 — 어느 연재인지 모른다 (S23b: Economist 칼럼은 Google 뉴스 검색)
         t = datetime.fromisoformat(a.published)
-        if t >= end or (kind == "analysis" and t < start):
+        if t >= end or (kind in ("analysis", "interview") and t < start):
             continue
         key = (a.source, title_key(a.title))
         if key not in seen:

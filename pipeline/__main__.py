@@ -92,6 +92,11 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     (raw / f"{edition.isoformat()}.analysis.json").write_text(
         json.dumps(to_jsonable(analysis), ensure_ascii=False, indent=1), encoding="utf-8"
     )
+    interviews = prepare_side(store, edition, cfg, sources, "interview", hist)   # 인터뷰 후보 (S27)
+    (raw / f"{edition.isoformat()}.interview.json").write_text(
+        json.dumps(to_jsonable(interviews), ensure_ascii=False, indent=1), encoding="utf-8"
+    )
+    report["interview_candidates"] = len(interviews)
     picks_path = raw / "picks.json"
     picks = {p["url"]: p for p in (json.loads(picks_path.read_text(encoding="utf-8")) if picks_path.exists() else [])}
     for a in to_jsonable(prepare_side(store, edition, cfg, sources, "pick", hist)):
@@ -375,6 +380,12 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     an_path = raw / f"{args.date}.analysis.json"
     if an_path.exists():
         edition["analysis"] = organize_analysis([Article.from_dict(d) for d in json.loads(an_path.read_text(encoding="utf-8"))])
+    iv_path = raw / f"{args.date}.interview.json"
+    if iv_path.exists():   # 인터뷰 후보 (S27) — 지면에는 AI 가 고른 것(edition["interviews"])만
+        from .opinion import organize_interviews
+
+        edition["interview_candidates"] = organize_interviews(
+            [Article.from_dict(d) for d in json.loads(iv_path.read_text(encoding="utf-8"))])
     picks_path = raw / "picks.json"
     if picks_path.exists():
         edition["picks"] = recent_picks(json.loads(picks_path.read_text(encoding="utf-8")), date.fromisoformat(args.date))

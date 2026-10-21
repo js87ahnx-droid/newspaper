@@ -199,6 +199,27 @@ _AN_NOT = re.compile(r"\bpodcast\b|^Watch\b|\bquiz\b|war briefing|^Live\b|\bLIVE
                      r"|Latest Articles, Analysis|News & Analysis|바둑 해설|해설사", re.I)
 
 
+# 인터뷰 (S27, 2026-10-21 사용자 요청: 세계 석학·철학자·구루·정치인 인터뷰 중 인사이트 있는 것) — 후보만 넉넉히, 고르기는 AI
+_IV_TITLE = re.compile(
+    r"[\[〈<(（]\s*(?:단독\s?|석학\s?|직격\s?|신년\s?|특별\s?)?(?:인터뷰|대담|interview)\s*[\]〉>)）]|인터뷰\s*[:|]"
+    r"|^(?:Interview|Q&A|Entretien|Interview mit)\b|\bQ&A\b|\bin conversation with\b|\binterview\b"
+    r"|インタビュー|专访|对话|im Interview|\bentretien\b", re.I)
+_IV_LEAD = re.compile(
+    r"(?:와|과)의\s?(?:화상\s?|단독\s?|서면\s?)?인터뷰|인터뷰에서|인터뷰를 통해|대담에서|\bin an interview\b|\binterview with\b"
+    r"|\btold [\w’' .]{2,30} in an interview\b|\bspoke (?:to|with) [\w’' .]{2,30}(?:about|in)\b|インタビューで|接受[^。]{0,12}专访"
+    r"|lors d['’]un entretien|im Interview", re.I)
+_IV_NOT = re.compile(r"\b(NCAA|NFL|NBA|MLB|NHL|Premier League|World Cup|Olympics?)\b|야구|축구|농구|골프|배우|가수|아이돌|드라마|영화감독|컴백"
+                     r"|\bjob interview\b|면접", re.I)
+
+
+def detect_interview(title: str, lead: str = "") -> bool:
+    """인터뷰 기사 후보인가 (S27). 제목 표시(〔인터뷰〕·Q&A·interview) 또는 첫 문단의 "~와의 인터뷰에서"·"in an interview".
+    스포츠·연예·면접은 뺀다. 석학·정치인 등 인사이트 있는 것을 고르는 건 AI 검토(llm.review_interviews)."""
+    if _IV_NOT.search(title):
+        return False
+    return bool(_IV_TITLE.search(title) or _IV_LEAD.search(lead or ""))
+
+
 def detect_analysis(title: str, url: str, feed_section: str = "") -> bool:
     """매체가 쓴 분석·해설 기사인가 (S22c). 전용 피드(section: analysis)이거나 제목·주소 표시가 있으면."""
     if _AN_NOT.search(title) or re.search(r"/sports?/|/football/", url, re.I):   # 스포츠 면 주소 (S22c 평가: WaPo NFL 분석)

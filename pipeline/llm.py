@@ -496,6 +496,12 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         skip = set(cache.get("an_skip", []))
         edition["analysis"] = [a for a in all_an if a["id"] not in skip][:ANALYSIS_SHOW]
 
+    # 6. 인터뷰 고르기 (S27): 세계 석학·철학자·구루·정치 지도자 인터뷰 중 인사이트 있는 것만 (후보 없으면 호출 없음)
+    cands = edition.get("interview_candidates") or []
+    if cands:
+        edition["interviews"], status["interviews"] = review_interviews(
+            cands, lambda p: guarded(p, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec), cache)
+
     cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items + related + edition.get("compare", []):
         llm = {}
@@ -534,6 +540,45 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "spent_today": budget.spent, "analysis": astats,
                                               "merged_duplicates": dups}
     return edition
+
+
+INTERVIEW_SHOW = 4
+INTERVIEW_PROMPT = """아래는 오늘 국내외 매체에 실린 인터뷰 기사 후보다(제목·첫 문단만).
+독자는 세상을 길게 보는 통찰을 원한다. 다음 조건을 모두 갖춘 것만 골라라 (없으면 빈 목록, 많아야 {n}건):
+- 인터뷰 대상이 세계적 석학·학자, 철학자·사상가, 분야의 구루(경영·기술·투자 등), 국가 지도자급 정치인·전직 고위 관료 중 하나
+- 그 사람이 직접 자기 생각(세계관·장기 전망·원칙·해법)을 말하는 인터뷰 — 사건 경위 확인, 짧은 반응 인용, 선거 유세성 발언, 홍보·신상 이야기는 빼라
+- 연예·스포츠·생활 정보는 빼라. 같은 사람 인터뷰가 여러 매체에 있으면 하나만
+고른 것마다: person = "이름 (직함·분야)" 한국어, insight = 이 인터뷰에서 얻을 통찰을 한국어 한두 문장(제목·첫 문단에 있는 내용만, 지어내지 말 것),
+ko_title = 한국어가 아닌 기사의 한국어 제목(한국어 기사는 빈 문자열).
+출력 형식: {{"picks": [{{"id": "<id>", "person": "...", "insight": "...", "ko_title": "..."}}]}}
+"""
+
+
+def review_interviews(cands: list[dict], ask, cache: dict) -> tuple[list[dict], str]:
+    """인터뷰 후보를 AI 가 검토해 INTERVIEW_SHOW 건까지 고른다 (S27). 같은 후보 묶음이면 캐시. 실패하면 싣지 않는다(빈 목록)."""
+    key = ",".join(sorted(c["id"] for c in cands))
+    hit = cache.get("interviews", {})
+    if hit.get("key") == key:
+        picks, st = hit.get("picks", []), "캐시"
+    else:
+        rows = [{"id": c["id"], "매체": c["source"], "제목": c["title"], "첫 문단": (c.get("lead") or "")[:300]} for c in cands]
+        res, st = ask(INTERVIEW_PROMPT.format(n=INTERVIEW_SHOW) + _data_block(rows))
+        if not res or not isinstance(res.get("picks"), list):
+            return [], st if st != "ok" else "응답 형식 오류"
+        picks = [p for p in res["picks"] if isinstance(p, dict) and p.get("id")]
+        cache["interviews"] = {"key": key, "picks": picks}
+    by_id = {c["id"]: c for c in cands}
+    out, seen = [], set()
+    for p in picks:
+        c = by_id.get(str(p["id"]))
+        if not c or c["url"] in seen:
+            continue
+        seen.add(c["url"])
+        out.append({**c, "person": str(p.get("person") or ""), "insight": str(p.get("insight") or ""),
+                    "ko_title": str(p.get("ko_title") or "") if c.get("lang") != "ko" else ""})
+        if len(out) >= INTERVIEW_SHOW:
+            break
+    return out, f"{st} — {len(out)}/{len(cands)}건"
 
 
 ANALYSIS_SHOW = 10              # 분석·해설 면에 싣는 수 (S22c) — 후보는 opinion.ANALYSIS_MAX 만큼 받아 스포츠·연예를 뺀 뒤 자른다

@@ -571,7 +571,14 @@
 - 고침: 세로 한 쪽 화면은 라이브러리 끌기 끔(useMouseEvents: spread), 직접 손가락 밀기 — 오른쪽→왼쪽 다음 쪽(넘김 애니메이션), 왼쪽→오른쪽 이전 쪽(turnToPage, 애니메이션 없음). 한 면 보기(확대 안 했을 때)·동작 줄이기도 같은 밀기. 세로로 더 움직인 손짓은 무시
 - tests/test_swipe_browser.py 5건(390·375·820 세로, 한 면 보기, 동작 줄이기). 전체 295 통과(Worker 기존 1 실패)
 
+### S27 인터뷰 검토 (2026-10-21)
+- 한국경제 2026101421081 은 정기 칼럼 아님(글로벌인재포럼 2026 앞둔 보스트롬 화상 인터뷰, 사회부 교육 기사) — 사용자: 지정 칼럼엔 넣지 말고, 석학·사상가·구루·정치인 인터뷰를 AI 가 검토해 넣도록
+- 후보 규칙(textutil.detect_interview) → prepare 가 <호>.interview.json → enrich 가 interview_candidates → llm.review_interviews(하루 1회) → edition["interviews"] → 분석·해설 면 맨 앞
+- 로컬 10/16 누적분 실측: 후보 10건(젤렌스키, 필라이 노벨평화상, 해리스 전 부통령, 알래스카 가스관공사 전 임원, 배우·야구 인터뷰 등) — 배우·야구는 AI 가 거름
+- 10/22 정기 발행부터 반영(10/21호는 후보 파일이 없어 지면만 다시 그려도 안 나옴)
+
 ### 다음에 이어서 할 일
+0. 10/22 발행 로그: 인터뷰 후보 수·고른 수(LLM 줄 interviews) 확인, 고른 인터뷰가 석학·지도자급인지 점검
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
 2. 그래도 빠지면 Cloudflare Worker cron 으로 workflow_dispatch 부르기 (GitHub 토큰을 Worker 비밀값으로 — 사용자 작업)
 
