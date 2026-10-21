@@ -201,3 +201,16 @@ def test_variant_layout_in_browser(browser, tmp_path, variant, w, h):  # noqa: F
     assert cur["current"] <= first["page"] < cur["current"] + step     # "계속"을 누르면 그 쪽이 보인다
     if variant == "b":
         assert "sec-issue" in m["issueFirst"]
+
+
+def test_a_continuation_is_angle_package(tmp_path):
+    """S26f: A안 이어받는 칸은 각도별 묶음 — 왜 생겼나 / 무엇이 쟁점인가 / … (번호는 있는 칸만 1부터), 사진은 1면에만."""
+    ed = _edition(tmp_path)
+    html = render_html(ed, _cfg(["a"]), load_interests(), load_sources(), variant="a")
+    flow = html[html.index('<div id="flow"'):]
+    c0 = flow.index('class="item sub cont"') if 'class="item sub cont"' in flow else flow.index(' cont"')
+    cont = flow[c0:flow.index("</article>", c0)]
+    assert 'class="pkg"' in cont and "<span>1</span>왜 생겼나" in cont and "<span>2</span>무엇이 쟁점인가" in cont
+    assert 'class="photo"' not in cont and 'class="an-bg"' in cont
+    b = render_html(ed, _cfg(["b"]), load_interests(), load_sources(), variant="b")
+    assert 'class="pkg"' not in b                                        # B안은 그대로
