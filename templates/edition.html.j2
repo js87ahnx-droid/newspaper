@@ -9,7 +9,7 @@
         <figcaption>사진: {{ it.photo_source }}</figcaption>
       </figure>
       {% endif %}
-      <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
+      <h3 class="hl">{% if it.asof %}<span class="asof" title="이 시황 기사가 전하는 시점 (S28e)">{{ it.asof }}</span> {% endif %}<a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if it.sub %}<p class="fz-sub">{{ it.sub }}</p>{% endif %}
       {% if v.lead %}<p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>{% endif %}
       <button type="button" class="detail-btn" data-more>자세히 보기 <small>요약·배경·쟁점·입장 차이·사설</small></button>
@@ -129,7 +129,7 @@
         <figcaption>사진: {{ it.photo_source }}</figcaption>
       </figure>
       {% endif %}
-      <h3 class="hl"><a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
+      <h3 class="hl">{% if it.asof %}<span class="asof" title="이 시황 기사가 전하는 시점 (S28e)">{{ it.asof }}</span> {% endif %}<a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
       {% if v.lead and not brief and not it.detail %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
@@ -159,7 +159,7 @@
         </div>{% endif %}
         {% if it.related_view %}{% set n.i = n.i + 1 %}
         <div class="pkg-part rel-arts"><h4><span>{{ n.i }}</span>함께 볼 보도</h4>
-          {% for r in it.related_view %}<p><span class="badge lean-{{ r.cls }}">{{ r.lean }}</span> <span class="src">{{ r.source }}</span>
+          {% for r in it.related_view %}<p><span class="badge lean-{{ r.cls }}">{{ r.lean }}</span> <span class="src">{{ r.source }}</span>{% if r.asof %} <span class="asof">{{ r.asof }}</span>{% endif %}
             <a href="{{ real_url(r.url) }}" target="_blank" rel="noopener noreferrer"{{ art(r.url, r.source, r.rep.lang) }}>{{ r.view.title }}</a></p>{% endfor %}
         </div>{% endif %}
         {% if it.opinions %}{% set n.i = n.i + 1 %}
@@ -190,7 +190,7 @@
       <div class="rel-arts" aria-label="관련 기사">
         <h4>관련 기사</h4>
         {% for r in it.related_view %}
-        <p><span class="badge lean-{{ r.cls }}">{{ r.lean }}</span> <span class="src">{{ r.source }}</span>
+        <p><span class="badge lean-{{ r.cls }}">{{ r.lean }}</span> <span class="src">{{ r.source }}</span>{% if r.asof %} <span class="asof">{{ r.asof }}</span>{% endif %}
            <a href="{{ real_url(r.url) }}" target="_blank" rel="noopener noreferrer"{{ art(r.url, r.source, r.rep.lang) }}>{{ r.view.title }}</a></p>
         {% endfor %}
       </div>
@@ -316,7 +316,6 @@
 </div>
 
 <script>window.EDITION = {{ edition_json|safe }};</script>
-<script src="{{ base }}static/vendor/page-flip/page-flip.browser.js?v={{ ver }}"></script>
 <script src="{{ base }}static/feedback.js?v={{ ver }}"></script>
 <script src="{{ base }}static/app.js?v={{ ver }}"></script>
 </body>

@@ -382,7 +382,7 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
 
 
 def write_assets(site: Path, masthead_name: str) -> None:
-    """정적 파일 (CSS·JS·page-flip·아이콘)과 manifest·서비스 워커 — 기사 이미지는 복사하지 않는다."""
+    """정적 파일 (CSS·JS·아이콘)과 manifest·서비스 워커 — 기사 이미지는 복사하지 않는다."""
     if (site / "static").exists():
         shutil.rmtree(site / "static")
     shutil.copytree(ROOT / "static", site / "static", ignore=shutil.ignore_patterns(".gitkeep"))

@@ -4,7 +4,7 @@ const VER = "__VER__";
 const CACHE = "news-" + VER;
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(["./"].concat(
-    ["static/app.css", "static/app.js", "static/feedback.js", "static/vendor/page-flip/page-flip.browser.js"].map((u) => u + "?v=" + VER)))));
+    ["static/app.css", "static/app.js", "static/feedback.js"].map((u) => u + "?v=" + VER)))));
   self.skipWaiting();
 });
 self.addEventListener("activate", (e) => {   // 지난 판 캐시(옛 news-v1 포함)는 지운다

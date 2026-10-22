@@ -29,6 +29,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
   display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px;
   padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right));
   background: var(--paper); border-bottom: 1px solid var(--rule); font-size: 14px;
+  position: relative; z-index: 20;   /* 넘기며 들린 쪽(S28a, 3D)이 도구 막대를 덮지 않게 */
 }
 #toolbar .tb-title { font-family: var(--serif); font-weight: 700; }
 #toolbar .tb-page { color: var(--muted); font-size: 12px; margin-left: 8px; }
@@ -41,6 +42,14 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 
 #book { margin: 0 auto; position: relative; }
 #book.reduced .page { display: inline-block; vertical-align: top; }
+/* 넘김 (S28a): 쪽을 겹쳐 두고 transform·opacity 만 바꾼다. 쪽마다 contain — 넘기는 동안 다른 쪽을 다시 재지 않게 */
+#book.anim .page { position: absolute; top: 0; contain: layout paint style; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+#book.anim.single { overflow: hidden; }
+#book.anim { touch-action: pinch-zoom; -webkit-user-select: none; user-select: none; }
+.turn-shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 5; will-change: opacity; }  /* 그림자는 따로 합성 — 쪽 글을 다시 그리지 않게 */
+#book.spread .page:nth-child(odd) .turn-shade { background: linear-gradient(to left, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
+#book.spread .page:nth-child(even) .turn-shade { background: linear-gradient(to right, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
+#book.single .turn-shade { background: rgba(0,0,0,.35); }
 .stage { position: absolute; left: -100000px; top: 0; visibility: hidden; }
 
 .page { background: var(--paper); overflow: hidden; position: relative; }
@@ -196,9 +205,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .an-views .view-orig { font: inherit; font-size: 0.8em; padding: 0 7px; margin-left: 2px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; line-height: 1.4; vertical-align: baseline; }
 .hl a[data-detail] { cursor: pointer; }
 /* 자세히 창 */
-.reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; }  /* cursor: iOS 가 바깥 누르기를 click 으로 보내게 (S28c) */
 .reader[hidden] { display: none; }
-.reader-panel { background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
+.reader-panel { cursor: auto; background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
 .reader-close { float: right; font: inherit; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
 .reader-body .item { border: 0; }
 .reader-body .item .lead { -webkit-line-clamp: unset; display: block; }
@@ -329,3 +338,5 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .item.iv { border-left: 3px solid var(--accent); padding-left: 8px; }
 .iv-who { margin: 0 0 2px; font-size: 0.9em; font-weight: 700; color: var(--ink); }
 .iv-tag { display: inline-block; padding: 0 6px; border-radius: 9px; background: var(--accent); color: var(--paper); font-size: 11px; line-height: 18px; margin-right: 4px; }
+/* 시황 기사 시점 (S28e): 지난 장중 소식이 지금 마감처럼 보이지 않게 */
+.asof { display: inline-block; font-size: 0.62em; font-weight: 600; vertical-align: 0.15em; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--accent); color: var(--accent); white-space: nowrap; }
