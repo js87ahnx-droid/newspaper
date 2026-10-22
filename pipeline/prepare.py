@@ -51,11 +51,21 @@ def target_edition(now: datetime, cfg: Config) -> date:
     return current_edition(now, cfg) + timedelta(days=1)
 
 
+LATE_MARKET = timedelta(hours=3)   # 시간창 끝 뒤 이만큼까지 나온 시황 기사는 이번 호에 넣는다 (S28e)
+
+
 def prepare(
-    store: dict[str, Article], edition: date, cfg: Config, sources: Sources, history_dir: Path | None = None
+    store: dict[str, Article], edition: date, cfg: Config, sources: Sources, history_dir: Path | None = None,
+    late_until: datetime | None = None,
 ) -> tuple[list[Article], dict]:
-    """sources 는 수집 뒤 바뀌었을 수 있으므로(성향 라벨·가중치 수정, 매체 끄기) 여기서 다시 적용한다."""
+    """sources 는 수집 뒤 바뀌었을 수 있으므로(성향 라벨·가중치 수정, 매체 끄기) 여기서 다시 적용한다.
+    late_until(발행 시각): 시간창 끝 뒤 그때까지(최대 LATE_MARKET) 나온 시황 기사도 넣는다 (S28e — 뉴욕 장 마감 기사는
+    시간창 끝 05:30 KST 전후에 나와, 다음 날 호로 넘어가면 이미 지난 소식이 된다)."""
+    from .market import market_of
+
     start, end = edition_window(edition, cfg, history_dir)
+    late_end = min(late_until, end + LATE_MARKET) if late_until else end
+    late = 0
     by_name = {s.name: s for s in sources.sources}
     names = frozenset(by_name)
     no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = empty = 0
@@ -75,7 +85,9 @@ def prepare(
             no_date += 1
             continue
         t = datetime.fromisoformat(a.published)
-        if not (start <= t < end):
+        if end <= t < late_end and market_of(a.title):
+            late += 1
+        elif not (start <= t < end):
             out_of_window += 1
             continue
         if _is_opinion(a) or _side_kind(a):  # 논평·사설, 분석·해설(S22c), 지정 칼럼(S22d)은 뉴스 이슈·점수에 섞지 않는다
@@ -117,6 +129,7 @@ def prepare(
         "dropped_no_date": no_date,
         "opinion_separated": opinion,
         "dropped_out_of_window": out_of_window,
+        "late_market": late,
         "merged_same_title": dup_title,
         "articles": len(articles),
         "by_lang": langs,

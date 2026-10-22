@@ -307,3 +307,25 @@ def test_google_news_items_have_no_fake_lead():
     assert a.title == "高市早苗向靖国神社献祭品" and a.lead == "" and a.lang == "zh"
     b = entry_to_article({**e, "summary": "这是一段真正的导语，介绍了事件的背景和经过。"}, src, rss, now)
     assert b.lead.startswith("这是")
+
+
+def test_late_market_reports_join_this_edition(tmp_path):
+    """S28e: 시간창 끝 뒤 발행 시각까지(최대 3시간) 나온 시황 기사는 이번 호에 — 다른 기사는 다음 호로."""
+    from email.utils import format_datetime
+    _, end = edition_window(date(2026, 10, 16), CFG)
+    at = lambda m: format_datetime(end + timedelta(minutes=m))   # noqa: E731
+    sources = make_sources({"A": [{"section": "top", "url": "https://a.test/rss"}]})
+    routes = {"https://a.test/rss": httpx.Response(200, content=rss([
+        ("뉴욕증시, AI 우려에 나스닥 2% 급락 마감", "https://a.test/1", at(40)),
+        ("정부, 내년 예산안 발표", "https://a.test/2", at(40)),
+        ("뉴욕증시, 혼조 마감(종합)", "https://a.test/3", at(240)),        # 3시간 넘음
+        ("코스피, 하락 출발", "https://a.test/4", at(-60)),                  # 시간창 안
+    ]))}
+    run(sources, tmp_path / "store.jsonl", routes, end + timedelta(hours=5))
+    store = load_store(tmp_path / "store.jsonl")
+    arts, rep = prepare(store, date(2026, 10, 16), CFG, sources, late_until=end + timedelta(hours=5))
+    assert sorted(a.url for a in arts) == ["https://a.test/1", "https://a.test/4"] and rep["late_market"] == 1
+    arts, _ = prepare(store, date(2026, 10, 16), CFG, sources, late_until=end + timedelta(minutes=30))   # 아직 안 나온 시각
+    assert [a.url for a in arts] == ["https://a.test/4"]
+    arts, _ = prepare(store, date(2026, 10, 16), CFG, sources)
+    assert [a.url for a in arts] == ["https://a.test/4"]
