@@ -60,7 +60,8 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     raw = _raw_dir(args)
     edition = date.fromisoformat(args.date) if args.date else current_edition(datetime.now(timezone.utc), cfg)
     hist = Path(args.data) / "history"
-    articles, report = prepare(load_store(raw / "store.jsonl"), edition, cfg, sources, hist)
+    articles, report = prepare(load_store(raw / "store.jsonl"), edition, cfg, sources, hist,
+                              late_until=datetime.now(timezone.utc))   # 시간창 끝 뒤 시황 기사 (S28e)
 
     # 이 호에 기여한 수집 실행들(시간창 앞뒤 여유 포함)의 피드 실패를 함께 보고한다
     start, end = edition_window(edition, cfg, hist)
@@ -116,7 +117,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     Path(args.data, "run-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(
         f"{edition} 호: 기사 {report['articles']}건 "
-        f"(시간창 밖 {report['dropped_out_of_window']}, 시각 없음 {report['dropped_no_date']}, "
+        f"(시간창 밖 {report['dropped_out_of_window']}, 시간창 뒤 시황 넣음 {report['late_market']}, 시각 없음 {report['dropped_no_date']}, "
         f"꺼진 매체 {report['dropped_source_disabled']}, 언어 제외 {report['dropped_wrong_lang']}, "
         f"논평·사설 분리 {report['opinion_separated']} (사설 {report['opinions']['editorial']}·칼럼 {report['opinions']['column']}), "
         f"같은 제목 병합 {report['merged_same_title']}), 분석·해설 {report['analysis']}, 지정 칼럼 {report['picks']}, 수집 실행 {len(runs)}회"
@@ -243,8 +244,34 @@ def cmd_edit(args: argparse.Namespace) -> int:
                 changed = sum(1 for s in cand if override.get(s.issue.id, s.topic) != s.topic)
                 scored = score_issues(issues, articles, cfg, table, previous, headlines, topic_override=override)
                 topic_note = f"AI {len(override)}/{len(cand)} ({topic_note}), 규칙과 다름 {changed}"
+    # 시황 기사 시점 (S28e): 발행 기준 시각(시간창 끝)에 이미 지난 거래일·앞선 시점 시황은 빼고, 남는 것엔 시점 표시
+    from .market import apply as market_apply
+    from .prepare import edition_window
+    scored, mstats = market_apply(scored, articles, edition_window(edition, cfg, history_dir)[1])
+    market_note = f"시황 {mstats['reports']}건 — 지난·앞선 소식 뺌 {len(mstats['dropped'])}, 더 새 기사로 대표 바꿈 {mstats['switched']}"
     placed, cstats = choose(scored, cfg, interests)
     ed = arrange(placed, cfg, interests, articles)
+    fresh_note, fnotes = "AI 꺼짐", []
+    if llm_ask:
+        # 최신성 검증 (S28f): 지면 기사마다 같은 이야기의 더 새 보도를 찾아, AI 가 지난 소식이라 고른 기사는 빼고
+        # 새 보도가 그 자리를 잇도록 점수를 넘겨 다시 편집한다. 같은 후보면 캐시
+        from .fresh import ai_stale, drop_and_promote, find_pairs
+
+        pairs = find_pairs(ed.sections, scored, articles)
+        fr_path = raw / f"{args.date}.fresh.json"
+        fkey = "|".join(f"{p.scored.issue.id}>{q.issue.id}" for p, q in pairs)
+        fcached = json.loads(fr_path.read_text(encoding="utf-8")) if fr_path.exists() else {}
+        if pairs and fcached.get("key") == fkey:
+            stale, fst = set(fcached["stale"]), "캐시"
+        else:
+            stale, fst = ai_stale(pairs, articles, llm_ask, cfg.timezone)
+            if pairs and fst != "응답 없음":
+                fr_path.write_text(json.dumps({"key": fkey, "stale": sorted(stale)}), encoding="utf-8")
+        if stale:
+            scored, fnotes = drop_and_promote(scored, pairs, stale)
+            placed, cstats = choose(scored, cfg, interests)
+            ed = arrange(placed, cfg, interests, articles)
+        fresh_note = f"{fst}, 뺌 {len(fnotes)}"
     related_note = f"규칙 {ed.stats['related_moved']}"
     if llm_ask:
         # 관련 기사 (S22b): 규칙으로 못 잡은 후속·다른 측면 기사를 AI 가 본 기사와 짝짓는다
@@ -280,12 +307,16 @@ def cmd_edit(args: argparse.Namespace) -> int:
         f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "
         f"관심 {st['interest_counted']}/{st['interest_cap']}(제외 {st['interest_skipped']}), 연속 보장 {st['continuity_guaranteed']}, 면 최소 채움 {st.get('section_min_filled', 0)}, "
         f"사진 {st['photos']}, 전날 기록 {st['history_previous']}, 같은 사건 합침 {st.get('merged_duplicates', 0)}, "
-        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건 | 분야 분류 {topic_note} | 관련 기사 {related_note}"
+        f"머리기사 반영 {sum(1 for ps in out['sections'].values() for it in ps if it.get('headline_by'))}건 | 분야 분류 {topic_note} | 관련 기사 {related_note} | {market_note} | 최신성 {fresh_note}"
     )
     from .render import headline_label
 
     for it in out["sections"].get("front", []):  # 1면 구성 (기사 제목만 — 공개 로그)
         print(f"  1면: {it['title'][:60]} | {headline_label(it.get('headline_by', {})) or '머리기사 없음'}")
+    for d in mstats["dropped"]:
+        print(f"  시황 뺌: {d}")
+    for d in fnotes:
+        print(f"  지난 소식 뺌: {d}")
     return 0
 
 
