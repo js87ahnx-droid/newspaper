@@ -445,3 +445,53 @@ def test_ai_related_parses_and_ignores_bad_ids():
     assert ai_related(hosts, briefs, lambda p: next(ans2))[0] == {}      # 검증 실패면 쓰지 않음
     assert ai_related(hosts, briefs, lambda p: None) == ({}, "응답 없음")
     assert ai_related([], briefs, lambda p: 1/0) == ({}, "후보 없음")
+
+
+# ---------- S28d 관련 기사 오배치 (10/23호 실제 시그니처) ----------
+def _sc(iid, title, sig, final=1.0, topic="economy"):
+    from pipeline.score import ScoredIssue
+    iss = Issue(id=iid, article_ids=[], title=title, rep_article="", sources=[], countries=[], leans=[], langs=["ko"], cohesion=1.0)
+    return ScoredIssue(issue=iss, topic=topic, attention=0, importance=0, continuity=0, interest=0, final=final,
+                       frontline=0, final_no_interest=0, days=1, interest_hit=False, signature=list(sig))
+
+
+SPACEX = ("1f74", "뉴욕증시, 스페이스X 실적에 기술주 강세…나스닥 1.1%↑(종합)",
+          ['나스', '스페', '페이', '스닥', '욕증', '이스', '뉴욕', '증시', '술주', '강세', '적에', '상승'])
+KOSDAQ = ("7926", "한국거래소, 코스닥 승강제 최상위에 절대평가제 도입 검토",
+          ['대평', '승강', '강제', '절대', '평가', '스닥', '코스', '최상', '래소', '상위', '도입', '거래'])
+NY_BRIEFS = [
+    ("e957", "뉴욕증시, AI 불안에 하락 출발", ['뉴욕', '증시', '욕증', '불안', '조에', '고조', '나스', '출발', '급락', '스닥', '하락', '투자']),
+    ("e958", "뉴욕증시, 기술주 저가 매수에 혼조 출발", ['뉴욕', '증시', '욕증', '술주', '저가', '매수', '나스', '출발', '혼조', '스닥']),
+    ("e959", "뉴욕증시, 엔비디아 반등에 나스닥 강세", ['뉴욕', '증시', '욕증', '엔비', '비디', '반등', '나스', '스닥', '강세', '디아']),
+    ("e960", "뉴욕증시 기술주 랠리…나스닥 상승", ['뉴욕', '증시', '욕증', '술주', '랠리', '나스', '스닥', '상승']),
+]
+MARKET_WRAP = ("c700", "코스피·코스닥 동반 상승 마감…거래대금 늘어", ['코스', '스피', '스닥', '동반', '상승', '마감', '거래', '대금', '늘어'])
+
+
+def _sections(briefs):
+    from pipeline.edit import Placed
+    host_ny, host_kq = Placed(_sc(*SPACEX, final=3), [], "economy"), Placed(_sc(*KOSDAQ, final=2), [], "economy")
+    return {"economy": [host_ny, host_kq], "briefs": [Placed(_sc(*b, final=1 - k * 0.01), [], "briefs") for k, b in enumerate(briefs)]}, host_ny, host_kq
+
+
+def test_related_overflow_not_moved_to_next_article():
+    """뉴욕증시 기사에 관련 기사 3건이 찬 뒤 넷째 나스닥 기사가 다음 기사(코스닥 승강제)에 붙던 것 (S28d)."""
+    from pipeline.edit import RELATED_MAX, attach_related
+    sections, host_ny, host_kq = _sections(NY_BRIEFS)
+    attach_related(sections)
+    assert len(host_ny.related) == RELATED_MAX
+    assert host_kq.related == []
+    assert not sections["briefs"]          # 넘친 넷째는 단신에 되풀이하지도 않음 (S24c)
+
+
+def test_related_ignores_common_fragments():
+    """본 기사 둘이 같이 가진 "스닥" 을 빼면 "코스"·"거래" 두 조각만 공유하는 시황 단신은 코스닥 승강제 기사의 관련 기사가 아니다."""
+    from pipeline.edit import attach_related, common_signature_tokens, related_score
+    sections, host_ny, host_kq = _sections(NY_BRIEFS[:2] + [MARKET_WRAP])
+    hosts = [host_ny.scored, host_kq.scored]
+    wrap = sections["briefs"][-1].scored
+    assert related_score(wrap, host_kq.scored) > 0                                  # 예전 판정: 스닥·코스·거래 3개 공유
+    assert related_score(wrap, host_kq.scored, common_sig=common_signature_tokens(hosts)) == 0
+    attach_related(sections)
+    assert host_kq.related == []
+    assert {p.scored.issue.id for p in host_ny.related} == {"e957", "e958"}

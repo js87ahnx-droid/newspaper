@@ -345,16 +345,32 @@ def common_title_words(titles: list[str]) -> set[str]:
     return {w for w, c in df.items() if c >= TITLE_COMMON}
 
 
-def related_score(a: ScoredIssue, b: ScoredIssue, common: set[str] | frozenset[str] = frozenset()) -> float:
-    """두 이슈의 관련 정도 (S22b). 같은 사건 이웃(near)이나 같은 제목이면 확실, 아니면 연속성 판정과 같은 드문 토큰 공유 점수."""
+RELATED_HOST_SHARED = 2   # 본 기사 이만큼의 시그니처에 같이 나온 토큰은 어느 기사의 관련 기사인지 가리는 단서가 못 된다 (S28d)
+
+
+def common_signature_tokens(hosts: list[ScoredIssue]) -> set[str]:
+    """본 기사 여럿이 공유하는 시그니처 토큰 (S28d, 10/23호): 두 글자 조각이라 "뉴욕증시 … 나스닥" 기사와 "코스닥 승강제" 기사가
+    "스닥" 을 공유해, 나스닥·코스닥 시황 단신이 승강제 기사의 관련 기사로 갈 수 있었다."""
+    df: dict[str, int] = {}
+    for s in hosts:
+        for t in set(s.signature):
+            df[t] = df.get(t, 0) + 1
+    return {t for t, c in df.items() if c >= RELATED_HOST_SHARED}
+
+
+def related_score(a: ScoredIssue, b: ScoredIssue, common: set[str] | frozenset[str] = frozenset(),
+                  common_sig: set[str] | frozenset[str] = frozenset()) -> float:
+    """두 이슈의 관련 정도 (S22b). 같은 사건 이웃(near)이나 같은 제목이면 확실, 아니면 연속성 판정과 같은 드문 토큰 공유 점수
+    (본 기사 여럿이 공유하는 토큰 common_sig 은 빼고)."""
     if b.issue.id in a.issue.extra.get("near", []) or a.issue.id in b.issue.extra.get("near", []):
         return 99.0
     if same_title(a.issue.title, b.issue.title, common):
         return 98.0
-    shared = set(a.signature) & set(b.signature)
+    sa, sb = [t for t in a.signature if t not in common_sig], [t for t in b.signature if t not in common_sig]
+    shared = set(sa) & set(sb)
     if not shared or (all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN):
         return 0.0
-    sc = match_score(a.signature, b.signature)
+    sc = match_score(sa, sb)
     return sc if sc >= CONTINUITY_MIN_SCORE else 0.0
 
 
@@ -362,10 +378,13 @@ def attach_related(sections: dict[str, list[Placed]], links: dict[str, str] | No
     """단신(예비 포함) 중 앞 면 기사와 이어진 것을 그 기사 아래 '관련 기사'로 옮긴다 (S22b, 2026-10-18 사용자 요청).
     links(단신 이슈 id → 본 기사 이슈 id, AI 판정)가 있으면 그것을, 없으면 규칙(related_score)을 쓴다.
     점수 높은 단신부터, 가장 가까운 기사에, 기사당 RELATED_MAX 건까지. 옮긴 수를 돌려준다.
-    이어진 기사가 이미 RELATED_MAX 건을 달았으면 그 단신은 지면에서 뺀다 — 앞에 나온 기사를 단신에 되풀이하지 않게 (S24c)."""
+    이어진 기사가 이미 RELATED_MAX 건을 달았으면 그 단신은 지면에서 뺀다 — 앞에 나온 기사를 단신에 되풀이하지 않게 (S24c).
+    가장 가까운 기사가 찼다고 덜 가까운 다른 기사에 넘겨 붙이지 않는다 (S28d — 10/23호 뉴욕증시 기사의 관련 기사가 다음 기사
+    "코스닥 승강제" 에 붙었다)."""
     hosts = [p for sid in RELATED_HOSTS for p in sections.get(sid, [])]
     by_id = {h.scored.issue.id: h for h in hosts}
     common = common_title_words([p.scored.issue.title for ps in sections.values() for p in ps])
+    common_sig = common_signature_tokens([h.scored for h in hosts])
     moved = 0
     for b in sorted(sections.get("briefs", []), key=lambda p: (p.reserve, -p.scored.final)):
         best, best_sc = None, 0.0
@@ -373,12 +392,9 @@ def attach_related(sections: dict[str, list[Placed]], links: dict[str, str] | No
             best = by_id.get(links.get(b.scored.issue.id, ""))
         else:
             for h in hosts:
-                sc = related_score(b.scored, h.scored, common)
-                if sc > best_sc or (sc == best_sc and sc > 0 and len(h.related) < len(best.related)):
+                sc = related_score(b.scored, h.scored, common, common_sig)
+                if sc > best_sc:
                     best, best_sc = h, sc
-            if best is not None and len(best.related) >= RELATED_MAX:   # 가장 가까운 기사가 찼으면 다른 이어진 기사에
-                room = [h for h in hosts if len(h.related) < RELATED_MAX and related_score(b.scored, h.scored, common) > 0]
-                best = max(room, key=lambda h: related_score(b.scored, h.scored, common)) if room else best
         if best is None:
             continue
         sections["briefs"].remove(b)
@@ -417,6 +433,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "lean": rep.lean,
             "topic": s.topic,
             "days": s.days,
+            "asof": s.issue.extra.get("asof"),   # 시황 기사 시점 "뉴욕증시 22일(현지) 장중" (S28e)
             "timeline": s.timeline,
             "photo": p.photo,
             "photo_source": p.photo_source,
