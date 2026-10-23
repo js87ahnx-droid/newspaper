@@ -255,20 +255,26 @@ def cmd_edit(args: argparse.Namespace) -> int:
     if llm_ask:
         # 최신성 검증 (S28f): 지면 기사마다 같은 이야기의 더 새 보도를 찾아, AI 가 지난 소식이라 고른 기사는 빼고
         # 새 보도가 그 자리를 잇도록 점수를 넘겨 다시 편집한다. 같은 후보면 캐시
-        from .fresh import ai_stale, drop_and_promote, find_pairs
+        from .fresh import ai_check, drop_and_promote, expire_items, find_pairs
 
-        pairs = find_pairs(ed.sections, scored, articles)
+        pairs, items = find_pairs(ed.sections, scored, articles), expire_items(ed.sections)
+        ref = edition_window(edition, cfg, history_dir)[1]
         fr_path = raw / f"{args.date}.fresh.json"
-        fkey = "|".join(f"{p.scored.issue.id}>{q.issue.id}" for p, q in pairs)
+        fkey = "|".join(f"{p.scored.issue.id}>{q.issue.id}" for p, q in pairs) + "#" + ",".join(p.scored.issue.id for p in items)
         fcached = json.loads(fr_path.read_text(encoding="utf-8")) if fr_path.exists() else {}
-        if pairs and fcached.get("key") == fkey:
-            stale, fst = set(fcached["stale"]), "캐시"
+        if fcached.get("key") == fkey:
+            stale, expired, fst = set(fcached["stale"]), set(fcached.get("expired", [])), "캐시"
         else:
-            stale, fst = ai_stale(pairs, articles, llm_ask, cfg.timezone)
-            if pairs and fst != "응답 없음":
-                fr_path.write_text(json.dumps({"key": fkey, "stale": sorted(stale)}), encoding="utf-8")
-        if stale:
-            scored, fnotes = drop_and_promote(scored, pairs, stale, articles)
+            stale, expired, fst = ai_check(pairs, items, articles, llm_ask, cfg.timezone, ref)
+            if fst not in ("응답 없음", "후보 없음"):
+                fr_path.write_text(json.dumps({"key": fkey, "stale": sorted(stale), "expired": sorted(expired)}), encoding="utf-8")
+        if stale or expired:
+            # 시기성 판단 (S29c): 발행 시각에 이미 의미가 지난 시기성 기사는 뺀다 (이어받을 새 보도가 없으므로 점수 넘김 없음)
+            fnotes = [f"(시기 지남) {s.issue.title[:50]}" for s in scored if s.issue.id in expired]
+            scored = [s for s in scored if s.issue.id not in expired]
+            stale = {i for i in stale if pairs[i][0].scored.issue.id not in expired}
+            scored, more = drop_and_promote(scored, pairs, stale, articles)
+            fnotes += more
             placed, cstats = choose(scored, cfg, interests)
             ed = arrange(placed, cfg, interests, articles)
         fresh_note = f"{fst}, 뺌 {len(fnotes)}"

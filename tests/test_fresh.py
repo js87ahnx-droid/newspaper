@@ -79,3 +79,22 @@ def test_dropped_story_kept_as_update_of_newer():
     kept, _ = drop_and_promote(scored, pairs, {0}, arts)
     new = next(s for s in kept if s.issue.id == "new")
     assert [u["title"] for u in new.issue.extra["updates"]] == ["한미 관세 협상 막판 진통"]
+
+
+def test_expired_check_in_same_call():
+    """S29c: 시기성 판단은 최신성 검증과 같은 호출 한 번 — 발행 시각을 알려 주고, 고른 지면 기사 id 를 돌려준다."""
+    from datetime import datetime, timezone
+    from pipeline.fresh import ai_check
+    sections, scored, arts = _world()
+    pairs = find_pairs(sections, scored, arts)
+    items = sections["economy"]
+    calls = []
+
+    def ask(prompt):
+        calls.append(prompt)
+        return {"stale": [], "expired": ["I0", "I7", "x"]}
+    stale, expired, st = ai_check(pairs, items, arts, ask, ref=datetime(2026, 10, 22, 20, 30, tzinfo=timezone.utc))
+    assert len(calls) == 1 and "10/23 05:30" in calls[0] and "I0\t" in calls[0] and "P0\t" in calls[0]
+    assert stale == set() and expired == {"old"} and "지남 1건" in st
+    assert ai_check(pairs, items, arts, lambda p: {"foo": 1})[2] == "응답 없음"
+    assert ai_check(pairs, items, arts, lambda p: {"expired": "I0"})[2] == "응답 없음"
