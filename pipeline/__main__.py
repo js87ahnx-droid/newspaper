@@ -9,6 +9,7 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+from .fsutil import read_json, write_atomic
 from .settings import ROOT, SettingsError, load_config, load_interests, load_sources
 
 
@@ -69,18 +70,21 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     runs = []
     log_path = raw / "collect-log.jsonl"
     if log_path.exists():
-        for line in log_path.read_text(encoding="utf-8").splitlines():
-            run = json.loads(line)
+        for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                run = json.loads(line)
+            except ValueError:   # 쓰다 끊긴 줄 (S29d)
+                continue
             if lo <= datetime.fromisoformat(run["collected_at"]) <= hi:
                 runs.append(run)
     report["collect_runs"] = [
         {k: r[k] for k in ("collected_at", "feeds_ok", "feeds_total", "added", "feeds_failed")} for r in runs
     ]
-    (raw / f"{edition.isoformat()}.json").write_text(
+    write_atomic(raw / f"{edition.isoformat()}.json", 
         json.dumps(to_jsonable(articles), ensure_ascii=False, indent=1), encoding="utf-8"
     )
     opinions = prepare_opinions(load_store(raw / "store.jsonl"), edition, cfg, sources, hist)
-    (raw / f"{edition.isoformat()}.opinion.json").write_text(
+    write_atomic(raw / f"{edition.isoformat()}.opinion.json", 
         json.dumps(to_jsonable(opinions), ensure_ascii=False, indent=1), encoding="utf-8"
     )
     report["opinions"] = {"editorial": sum(a.opinion == "editorial" for a in opinions),
@@ -90,16 +94,16 @@ def cmd_prepare(args: argparse.Namespace) -> int:
 
     store = load_store(raw / "store.jsonl")
     analysis = prepare_side(store, edition, cfg, sources, "analysis", hist)
-    (raw / f"{edition.isoformat()}.analysis.json").write_text(
+    write_atomic(raw / f"{edition.isoformat()}.analysis.json", 
         json.dumps(to_jsonable(analysis), ensure_ascii=False, indent=1), encoding="utf-8"
     )
     interviews = prepare_side(store, edition, cfg, sources, "interview", hist)   # 인터뷰 후보 (S27)
-    (raw / f"{edition.isoformat()}.interview.json").write_text(
+    write_atomic(raw / f"{edition.isoformat()}.interview.json", 
         json.dumps(to_jsonable(interviews), ensure_ascii=False, indent=1), encoding="utf-8"
     )
     report["interview_candidates"] = len(interviews)
     picks_path = raw / "picks.json"
-    picks = {p["url"]: p for p in (json.loads(picks_path.read_text(encoding="utf-8")) if picks_path.exists() else [])}
+    picks = {p["url"]: p for p in (read_json(picks_path, []))}
     for a in to_jsonable(prepare_side(store, edition, cfg, sources, "pick", hist)):
         picks[a["url"]] = a
     edition_end = edition_window(edition, cfg, hist)[1].isoformat()
@@ -112,9 +116,9 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         if per.get(k, 0) < 3:
             per[k] = per.get(k, 0) + 1
             kept.append(p)
-    picks_path.write_text(json.dumps(kept, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(picks_path, json.dumps(kept, ensure_ascii=False, indent=1), encoding="utf-8")
     report["analysis"], report["picks"] = len(analysis), len(kept)
-    Path(args.data, "run-report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(Path(args.data, "run-report.json"), json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(
         f"{edition} 호: 기사 {report['articles']}건 "
         f"(시간창 밖 {report['dropped_out_of_window']}, 시간창 뒤 시황 넣음 {report['late_market']}, 시각 없음 {report['dropped_no_date']}, "
@@ -176,7 +180,7 @@ def cmd_cluster(args: argparse.Namespace) -> int:
     issues = build_issues(articles, sim, threshold, cfg.clustering.linkage)
     near = mark_near(issues, articles, sim, cfg.clustering.near_mean_min, cfg.clustering.near_max_min)
     t2 = time.perf_counter()
-    (raw / f"{args.date}.issues.json").write_text(
+    write_atomic(raw / f"{args.date}.issues.json", 
         json.dumps(issues_to_json(issues), ensure_ascii=False, indent=1), encoding="utf-8"
     )
     multi = [i for i in issues if len(i.article_ids) > 1]
@@ -207,7 +211,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
     history_dir = Path(args.data) / "history"
     prev_date, previous = load_previous(history_dir, edition)
     hl_path = raw / f"{args.date}.headlines.json"
-    headlines = json.loads(hl_path.read_text(encoding="utf-8")) if hl_path.exists() else []
+    headlines = read_json(hl_path, [])
     table = build_interest_table(interests)
     scored = score_issues(issues, articles, cfg, table, previous, headlines)
     topic_note = "규칙"
@@ -225,7 +229,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
                 by_lang = sorted(arts, key=lambda a: (a.lang != "ko", a.lang != "en"))   # 한국어·영어 제목 먼저
                 rows.append({"id": s.issue.id, "titles": list(dict.fromkeys(a.title for a in by_lang))})
             cache_path = raw / f"{args.date}.topics.json"
-            cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
+            cache = read_json(cache_path, {})
             budget = Budget(raw / "llm-usage.json", edition, cfg.llm.max_calls_per_day)
             why: list[str] = []   # 실패한 호출의 이유 (S21b 평가: "응답 없음"만으로는 원인을 몰랐음)
 
@@ -239,7 +243,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
             llm_ask = lambda p: call(p, cfg.llm, budget, model=cfg.llm.analysis_model, timeout=240)[0]  # noqa: E731
             if why:
                 topic_note += f" — {'; '.join(why)}"
-            cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+            write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
             if override:
                 changed = sum(1 for s in cand if override.get(s.issue.id, s.topic) != s.topic)
                 scored = score_issues(issues, articles, cfg, table, previous, headlines, topic_override=override)
@@ -261,13 +265,13 @@ def cmd_edit(args: argparse.Namespace) -> int:
         ref = edition_window(edition, cfg, history_dir)[1]
         fr_path = raw / f"{args.date}.fresh.json"
         fkey = "|".join(f"{p.scored.issue.id}>{q.issue.id}" for p, q in pairs) + "#" + ",".join(p.scored.issue.id for p in items)
-        fcached = json.loads(fr_path.read_text(encoding="utf-8")) if fr_path.exists() else {}
+        fcached = read_json(fr_path, {})
         if fcached.get("key") == fkey:
             stale, expired, fst = set(fcached["stale"]), set(fcached.get("expired", [])), "캐시"
         else:
             stale, expired, fst = ai_check(pairs, items, articles, llm_ask, cfg.timezone, ref)
             if fst not in ("응답 없음", "후보 없음"):
-                fr_path.write_text(json.dumps({"key": fkey, "stale": sorted(stale), "expired": sorted(expired)}), encoding="utf-8")
+                write_atomic(fr_path, json.dumps({"key": fkey, "stale": sorted(stale), "expired": sorted(expired)}), encoding="utf-8")
         if stale or expired:
             # 시기성 판단 (S29c): 발행 시각에 이미 의미가 지난 시기성 기사는 뺀다 (이어받을 새 보도가 없으므로 점수 넘김 없음)
             fnotes = [f"(시기 지남) {s.issue.title[:50]}" for s in scored if s.issue.id in expired]
@@ -291,20 +295,20 @@ def cmd_edit(args: argparse.Namespace) -> int:
         briefs = [{"id": p.scored.issue.id, "title": title_of(p)} for p in ed.sections.get("briefs", [])]
         rel_path = raw / f"{args.date}.related.json"
         key = ",".join(sorted(h["id"] for h in hosts)) + "|" + ",".join(sorted(b["id"] for b in briefs))
-        cached = json.loads(rel_path.read_text(encoding="utf-8")) if rel_path.exists() else {}
+        cached = read_json(rel_path, {})
         if cached.get("key") == key:
             links, st = cached["links"], "캐시"
         else:
             links, st = ai_related(hosts, briefs, llm_ask)
             if st != "응답 없음":
-                rel_path.write_text(json.dumps({"key": key, "links": links}, ensure_ascii=False), encoding="utf-8")
+                write_atomic(rel_path, json.dumps({"key": key, "links": links}, ensure_ascii=False), encoding="utf-8")
         n = attach_related(ed.sections, links)
         ed.stats["related_moved"] += n
         ed.stats["by_section"]["briefs"] = len(ed.sections["briefs"])
         related_note += f" + AI {n} ({st})"
     out = edition_to_json(ed, args.date, articles, cstats)
     out["stats"]["history_previous"] = prev_date.isoformat() if prev_date else None
-    (raw / f"{args.date}.edition.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(raw / f"{args.date}.edition.json", json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.write_history:
         placed_ids = {q.scored.issue.id for ps in ed.sections.values() for p in ps for q in [p, *p.related]}
         write_history(history_dir, edition, scored, placed_ids)
@@ -364,7 +368,7 @@ def cmd_headlines(args: argparse.Namespace) -> int:
             # 묶기는 판단이 들어가므로 분석과 같은 모델로 (10/17 러너에서 haiku 가 다른 사건을 섞어 11묶음을 만듦)
             ask = lambda prompt: call(prompt, cfg.llm, budget, model=cfg.llm.analysis_model)[0]  # noqa: E731
     how = group(heads, arts, vecs, ask)
-    (raw / f"{args.date}.headlines.json").write_text(json.dumps(to_json(heads), ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(raw / f"{args.date}.headlines.json", json.dumps(to_json(heads), ensure_ascii=False, indent=1), encoding="utf-8")
     got = {h.source for h in heads}
     matched = sum(1 for h in heads if h.article_id)
     groups = len({h.group for h in heads if h.group is not None})
@@ -386,7 +390,7 @@ def _history_summaries(path: Path, edition: dict) -> None:
     for x in data["issues"]:
         if x["id"] in briefs and x.get("timeline"):
             x["timeline"][-1]["summary"] = briefs[x["id"]]
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(path, json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def cmd_enrich(args: argparse.Namespace) -> int:
@@ -461,7 +465,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         if st.get("merged_duplicates"):
             llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
         _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)
-    (raw / f"{args.date}.edition.json").write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(raw / f"{args.date}.edition.json", json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
     noted = sum(1 for it in items if it["stance"]["note"])
     worded = sum(1 for it in items if it["stance"]["lean_words"] or it["stance"]["country_words"])
     op = edition.get("opinion", {}).get("stats")
@@ -493,7 +497,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
     if reader.config() and "read_urls" not in edition:
         # 원문 재배열 보기 (S17): Google 뉴스 경유 주소를 원래 주소로 풀어 둔다 (주소만 저장)
         st = reader.resolve_google(edition)
-        ed_path.write_text(json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+        write_atomic(ed_path, json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"원문 보기: Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
     day_path = _raw_dir(args) / f"{args.date}.json"
     if day_path.exists():
@@ -505,7 +509,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
                 it["photo_alt"], it["photo_alt_source"] = alt
     files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
     # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
-    Path(args.site, ".to-encrypt").write_text("".join(f.as_posix() + "\n" for f in files), encoding="utf-8")
+    write_atomic(Path(args.site, ".to-encrypt"), "".join(f.as_posix() + "\n" for f in files), encoding="utf-8")
     print(f"{args.date} 호 발행 준비: {args.site} (HTML {len(files)}개 — 암호화 전)")
     return 0
 

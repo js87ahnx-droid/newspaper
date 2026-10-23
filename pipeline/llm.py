@@ -25,6 +25,7 @@ import subprocess
 from datetime import date
 from pathlib import Path
 
+from .fsutil import read_json, write_atomic
 from .settings import Llm
 from .textutil import TRANSLATE_BOTH  # 제목 번역 + 한국어 요약 언어 (S20b·S20d)
 
@@ -39,7 +40,7 @@ class Budget:
 
     def __init__(self, path: Path, day: date, limit: int):
         self.path, self.day, self.limit = path, day.isoformat(), limit
-        self.data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        self.data = read_json(path, {})
 
     @property
     def used(self) -> int:
@@ -75,7 +76,7 @@ class Budget:
 
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(self.data, ensure_ascii=False), encoding="utf-8")
+        write_atomic(self.path, json.dumps(self.data, ensure_ascii=False), encoding="utf-8")
 
 
 def available() -> tuple[bool, str]:
@@ -372,7 +373,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
            bodies: dict | None = None) -> dict:
     """edition(dict)에 llm 결과를 붙여 돌려준다. 실패해도 edition 은 그대로 쓸 수 있다.
     bodies(기사 주소 → 본문)는 이슈 분석 프롬프트에만 쓰고 어디에도 저장하지 않는다."""
-    cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
+    cache = read_json(cache_path, {})
     status: dict[str, str] = {}
     items = [it for ps in edition["sections"].values() for it in ps]
     related = [r for it in items for r in it.get("related", [])]   # 관련 기사 (S22b): 제목 번역·요약만 (같은 사건 묶기·분석에는 안 넣음)
@@ -502,7 +503,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         edition["interviews"], status["interviews"] = review_interviews(
             cands, lambda p: guarded(p, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec), cache)
 
-    cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items + related + edition.get("compare", []):
         llm = {}
         if it["issue_id"] in cache.get("ko_summary", {}):
@@ -535,7 +536,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             status["same_event"] = failed
         elif calls:
             cache["same_event"] = {"key": key, "groups": groups}
-            cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+            write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     dups = merge_duplicates(edition, groups)
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "spent_today": budget.spent, "analysis": astats,
                                               "merged_duplicates": dups}

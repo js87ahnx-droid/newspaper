@@ -16,6 +16,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
 
+from .fsutil import write_atomic
 from .cluster import Issue
 from .collect import Article
 from .interest import InterestTable
@@ -48,10 +49,7 @@ SIGNATURE_SIZE = 12
 _HANGUL_1 = re.compile(r"[가-힣]")  # 한 글자 한글 토큰은 뜻이 약하다
 DISTINCT_DF_RATIO = 0.01   # 그날 기사의 1% 이하에만 나온 토큰을 "드문" 토큰으로 본다
 CONTINUITY_MIN_SCORE = 3.0  # 전날 이슈와 공유한 드문 토큰 점수가 이 이상이면 같은 이슈가 이어진 것으로 본다
-# 점수: 한글 2글자 조각 1, 영문 단어 1.5 (한 단어가 여러 조각으로 쪼개지지 않으므로),
-#       성씨로 시작하는 세 글자 이름(앞뒤 조각 둘 다 공유) +1. 10/15→10/16 실측에서 문턱 2 는 "미사일"·"또다시"
-#       같은 낱말 하나로 엉뚱한 이슈가 이어졌고, 3 + 이 가중치로는 틀린 연결이 없었다.
-SURNAMES = set("김이박최정강조윤장임한오서신권황안송류전홍고문양손배백허유남심노하곽성차주우구민진나지엄채원천방공현함변염여추도소석선설마길연위표명기반왕금옥육인맹제모탁국어은편용예봉경")
+# 점수는 match_score: 이어지는 한글 조각을 낱말 하나로 (S29d). 문턱 3 = 낱말 둘 이상이 겹쳐야 이어짐
 _LATIN = re.compile(r"[a-z]")
 
 
@@ -96,17 +94,41 @@ def load_previous(history_dir: Path, edition: date, lookback: int = 3) -> tuple[
         d = edition - timedelta(days=back)
         p = history_dir / f"{d.isoformat()}.json"
         if p.exists():
-            return d, json.loads(p.read_text(encoding="utf-8"))["issues"]
+            try:
+                return d, json.loads(p.read_text(encoding="utf-8"))["issues"]
+            except (ValueError, KeyError, UnicodeDecodeError) as e:   # 깨진 기록은 건너뛰고 그 앞 날짜로 (S29d)
+                print(f"경고: 깨진 연속성 기록 {p.name} 건너뜀 ({str(e)[:60]})")
     return None, []
 
 
+def _word_runs(shared: set[str]) -> list[int]:
+    """공유한 한글 두 글자 조각 중 이어지는 것(앞 조각 끝 글자 = 뒤 조각 첫 글자)을 한 낱말로 묶은 덩어리별 조각 수."""
+    ko = [t for t in shared if len(t) == 2 and not _LATIN.match(t)]
+    parent = {t: t for t in ko}
+
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for t in ko:
+        for u in ko:
+            if t != u and t[1] == u[0]:
+                parent[find(t)] = find(u)
+    size: dict[str, int] = {}
+    for t in ko:
+        size[find(t)] = size.get(find(t), 0) + 1
+    return list(size.values())
+
+
 def match_score(a: list[str], b: list[str]) -> float:
+    """공유 토큰 점수 (S29d, 2026-10-23 점검): 이어지는 한글 조각은 낱말 하나로 — 두 글자 1, 세 글자 1.5, 네 글자 이상 2.
+    영문 낱말 1.5. 예전엔 조각마다 1점 + 성씨로 시작하는 세 글자에 +1 이라 "최상위"·"현대차"·"하이닉스" 낱말 하나로
+    3점이 되어 10/17~23 연속성 932건 중 190건이 낱말 하나로 이어졌다 (코스닥 승강제 ← 현대차 기사 4건 경과)."""
     shared = set(a) & set(b)
-    score = sum(1.5 if _LATIN.match(t) else 1.0 for t in shared)
-    for t in shared:  # 성씨+두 글자 이름: "김지"·"지용" 을 함께 공유
-        if len(t) == 2 and t[0] in SURNAMES and any(u != t and len(u) == 2 and u[0] == t[1] for u in shared):
-            score += 1.0
-            break
+    score = sum(1.5 for t in shared if _LATIN.match(t))
+    score += sum(1.0 for t in shared if not _LATIN.match(t) and len(t) != 2)
+    score += sum({1: 1.0, 2: 1.5}.get(n, 2.0) for n in _word_runs(shared))
     return score
 
 
@@ -114,16 +136,42 @@ LATIN_ONLY_MIN = 3  # 공유 토큰이 모두 영어 낱말이면 3개 이상 (1
                     # 두 낱말로 다른 사건이 이어졌다 — 지난 경과로 지면에 드러나므로 놓치는 쪽을 택한다)
 
 
+def _match_key(sig: list[str], prev: dict) -> tuple[float, float] | None:
+    shared = set(sig) & set(prev["signature"])
+    if shared and all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN:
+        return None
+    sc = match_score(sig, prev["signature"])
+    if sc < CONTINUITY_MIN_SCORE:
+        return None
+    return sc, len(shared) / max(1, len(set(sig) | set(prev["signature"])))   # 동점이면 겹친 비율이 큰 쪽 (예전: 오래 이어진 쪽)
+
+
 def continuity_match(sig: list[str], previous: list[dict]) -> dict | None:
     best = None
     for prev in previous:
-        shared = set(sig) & set(prev["signature"])
-        if shared and all(_LATIN.match(t) for t in shared) and len(shared) < LATIN_ONLY_MIN:
-            continue
-        sc = match_score(sig, prev["signature"])
-        if sc >= CONTINUITY_MIN_SCORE and (best is None or (sc, prev["days"]) > best[0]):
-            best = ((sc, prev["days"]), prev)
+        k = _match_key(sig, prev)
+        if k and (best is None or k > best[0]):
+            best = (k, prev)
     return best[1] if best else None
+
+
+def assign_continuity(sigs: list[list[str]], previous: list[dict]) -> list[dict | None]:
+    """지난 호 이슈 하나는 오늘 이슈 하나에만 잇는다 (S29d — 10/23 김정은 기사 셋이 같은 북한 경과를 나눠 가짐).
+    점수 높은 쌍부터 배정, 각 오늘 이슈는 남은 것 중 가장 가까운 지난 이슈."""
+    cands = []
+    for i, sig in enumerate(sigs):
+        for j, prev in enumerate(previous):
+            k = _match_key(sig, prev)
+            if k:
+                cands.append((k, i, j))
+    cands.sort(key=lambda c: (-c[0][0], -c[0][1], c[1], c[2]))
+    out: list[dict | None] = [None] * len(sigs)
+    used: set[int] = set()
+    for _, i, j in cands:
+        if out[i] is None and j not in used:
+            out[i] = previous[j]
+            used.add(j)
+    return out
 
 
 def continuity_days(sig: list[str], previous: list[dict]) -> int:
@@ -182,13 +230,17 @@ def score_issues(
         hl_by = issue_headlines(headlines or [], iss.article_ids)
         hl_raw = sum(RANK_WEIGHT.get(r, 0) * by_source.get(src, articles[iss.article_ids[0]]).weight
                      for src, (r, _) in hl_by.items())
-        prev = continuity_match(sig, previous)
-        days = 1 + prev["days"] if prev else 1
+        prev = None   # 지난 호 연결은 모든 이슈의 시그니처가 나온 뒤 한꺼번에 (1:1 배정)
+        days = 1
         hit = table.topic_weights.get(topic, 0) >= 1 or any(k.lower() in titles.lower() for k in table.keywords)
         rows.append((iss, topic, att_raw, imp_raw, int_raw, days, hit, sig,
                      {"sources": len(by_source), "countries": countries, "main_sources": mains, "keyword_hits": kw_hits},
                      past_timeline(prev), hl_raw, hl_by))
 
+    for k, prev in enumerate(assign_continuity([r[7] for r in rows], previous)):
+        if prev:
+            r = rows[k]
+            rows[k] = (*r[:5], 1 + prev["days"], *r[6:9], past_timeline(prev), *r[10:])
     max_att = max((r[2] for r in rows), default=1) or 1
     max_imp = max((r[3] for r in rows), default=1) or 1
     max_int = (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1
@@ -231,7 +283,7 @@ def write_history(history_dir: Path, edition: date, scored: list[ScoredIssue], p
             for s in keep
         ],
     }
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_atomic(path, json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
     return path
 
 

@@ -210,7 +210,22 @@ def test_latin_only_continuity_needs_three_words():
     prev = [{"title": "China and North Korea to open bridge", "days": 1, "signature": ["north", "korea", "bridge", "open"]}]
     assert continuity_match(["north", "korea", "missile", "submarine"], prev) is None   # 두 낱말만 — 다른 사건
     assert continuity_match(["north", "korea", "bridge", "officially"], prev) is prev[0]
-    assert continuity_match(["김지", "지용", "임명"], [{"title": "t", "days": 1, "signature": ["김지", "지용"]}])  # 한글은 그대로
+    # 한글: 이름 하나(낱말 하나)만으로는 안 잇고, 다른 낱말이 하나 더 겹쳐야 (S29d)
+    assert continuity_match(["김지", "지용", "임명"], [{"title": "t", "days": 1, "signature": ["김지", "지용"]}]) is None
+    assert continuity_match(["김지", "지용", "중수", "수청", "청장"], [{"title": "t", "days": 1, "signature": ["김지", "지용", "중수", "수청", "청장"]}])
+
+
+def test_continuity_single_word_and_one_to_one():
+    """S29d (10/23 점검): "최상위" 낱말 하나로 승강제 기사가 투싼 경과에, 지난 이슈 하나를 오늘 이슈 여럿이 나눠 갖던 것."""
+    from pipeline.score import assign_continuity, continuity_match
+    tucson = {"title": "“최상위 트림 4000만원대” 완전 변경 ‘투싼’ 반응 온도차", "days": 4,
+              "signature": ["최상", "상위", "트림", "투싼", "온도", "도차"]}
+    kosdaq = ["대평", "승강", "강제", "절대", "평가", "스닥", "코스", "최상", "래소", "상위", "도입", "거래"]
+    assert continuity_match(kosdaq, [tucson]) is None
+    nk = {"title": "김정은, 신형 미사일 시험 참관", "days": 2, "signature": ["김정", "정은", "미사", "사일", "참관", "신형"]}
+    sigs = [["김정", "정은", "미사", "사일", "발사"], ["김정", "정은", "미사", "사일", "참관", "신형"], ["김정", "정은", "배우", "파경"]]
+    got = assign_continuity(sigs, [nk])
+    assert got == [None, nk, None]
 
 
 def test_near_duplicate_issue_merged_not_placed_twice():
@@ -490,7 +505,7 @@ def test_related_ignores_common_fragments():
     sections, host_ny, host_kq = _sections(NY_BRIEFS[:2] + [MARKET_WRAP])
     hosts = [host_ny.scored, host_kq.scored]
     wrap = sections["briefs"][-1].scored
-    assert related_score(wrap, host_kq.scored) > 0                                  # 예전 판정: 스닥·코스·거래 3개 공유
+    assert related_score(wrap, host_kq.scored) == 0      # 낱말 묶음 점수(S29d)로도: "코스닥"(1.5) + "거래"(1) < 3
     assert related_score(wrap, host_kq.scored, common_sig=common_signature_tokens(hosts)) == 0
     attach_related(sections)
     assert host_kq.related == []

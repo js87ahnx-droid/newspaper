@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
+from .fsutil import write_atomic
 from .interest import build_interest_table
 from . import reader as reader_mod
 from .settings import ROOT, TOPICS, Config, Interests, Sources
@@ -394,14 +395,14 @@ def write_assets(site: Path, masthead_name: str) -> None:
         "icons": [{"src": "static/icon-192.png", "sizes": "192x192", "type": "image/png"},
                   {"src": "static/icon-512.png", "sizes": "512x512", "type": "image/png"}],
     }
-    (site / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+    write_atomic(site / "manifest.webmanifest", json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
     sw = (ROOT / "templates" / "sw.js").read_text(encoding="utf-8").replace("__VER__", asset_version())
-    (site / "sw.js").write_text(sw, encoding="utf-8")
+    write_atomic(site / "sw.js", sw, encoding="utf-8")
 
 
 def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "index.html").write_text(render_html(edition, cfg, interests, sources), encoding="utf-8")
+    write_atomic(out_dir / "index.html", render_html(edition, cfg, interests, sources), encoding="utf-8")
     write_assets(out_dir, masthead(date.fromisoformat(edition["edition"])))
     return out_dir / "index.html"
 

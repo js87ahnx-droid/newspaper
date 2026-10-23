@@ -13,6 +13,7 @@ import shutil
 from datetime import date, timedelta
 from pathlib import Path
 
+from .fsutil import write_atomic
 from .render import masthead, render_archive_index, render_html, write_assets
 from .settings import Config, Interests, Sources
 
@@ -21,12 +22,12 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
     d = date.fromisoformat(edition["edition"])
     site.mkdir(parents=True, exist_ok=True)
     write_assets(site, masthead(d))
-    (site / ".nojekyll").write_text("", encoding="utf-8")
+    write_atomic(site / ".nojekyll", "", encoding="utf-8")
     today = site / "index.html"
-    today.write_text(render_html(edition, cfg, interests, sources, base=""), encoding="utf-8")
+    write_atomic(today, render_html(edition, cfg, interests, sources, base=""), encoding="utf-8")
     arch = site / "archive" / d.isoformat()
     arch.mkdir(parents=True, exist_ok=True)
-    (arch / "index.html").write_text(render_html(edition, cfg, interests, sources, base="../../"), encoding="utf-8")
+    write_atomic(arch / "index.html", render_html(edition, cfg, interests, sources, base="../../"), encoding="utf-8")
     # 보관 기간이 지난 호 정리
     cutoff = d - timedelta(days=keep_days)
     dates = []
@@ -42,5 +43,5 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
         else:
             dates.append(pd)
     index = site / "archive" / "index.html"
-    index.write_text(render_archive_index(sorted(dates, reverse=True)), encoding="utf-8")
+    write_atomic(index, render_archive_index(sorted(dates, reverse=True)), encoding="utf-8")
     return [today, arch / "index.html", index]

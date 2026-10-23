@@ -234,11 +234,17 @@ def merge(store: dict[str, Article], new: list[Article]) -> int:
 def load_store(path: Path) -> dict[str, Article]:
     if not path.exists():
         return {}
-    store = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
+    store, bad = {}, 0
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         if line.strip():
-            a = Article.from_dict(json.loads(line))
+            try:
+                a = Article.from_dict(json.loads(line))
+            except (ValueError, TypeError, KeyError):   # 쓰다 끊긴 줄(S29d) — 그 줄만 버린다
+                bad += 1
+                continue
             store[a.id] = a
+    if bad:
+        print(f"경고: 누적 저장소의 깨진 줄 {bad}개 건너뜀")
     return store
 
 
