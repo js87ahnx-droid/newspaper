@@ -329,3 +329,16 @@ def test_late_market_reports_join_this_edition(tmp_path):
     assert [a.url for a in arts] == ["https://a.test/4"]
     arts, _ = prepare(store, date(2026, 10, 16), CFG, sources)
     assert [a.url for a in arts] == ["https://a.test/4"]
+
+
+def test_requested_picks_configured():
+    """2026-10-23 사용자 요청: 중앙일보 "김학균의 이코노믹스"·NYT "The Interview" 를 지정 칼럼으로."""
+    import re
+    from pipeline.settings import load_sources
+    feeds = {f.section: f for s in load_sources(ROOT).sources if s.enabled for f in s.feeds}
+    kh, nyt = feeds["column_pick:김학균의 이코노믹스"], feeds["column_pick:The Interview (NYT)"]
+    assert kh.title_must == "[김학균의 이코노믹스]"
+    ok = "https://www.nytimes.com/2026/10/10/magazine/mirjana-spoljaric-interview.html"
+    no = ["https://www.nytimes.com/2026/10/22/magazine/billionaire-millionaire-interviews.html",
+          "https://www.nytimes.com/2026/10/21/magazine/patient-death-lying-ethics.html"]
+    assert re.search(nyt.url_must, ok) and not any(re.search(nyt.url_must, u) for u in no)
