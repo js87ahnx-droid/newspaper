@@ -181,3 +181,21 @@ def test_drag_starting_on_title_turns_without_opening(browser, tmp_path):  # noq
     ctx.close()
     assert not errors, errors
     assert r == {"open": False, "cur": 2}
+
+
+def test_reader_focus_returns_and_background_inert(browser, tmp_path):  # noqa: F811
+    """S29d 점검: 창을 닫으면 누른 자리로 포커스가 돌아오고, 열린 동안 뒤 지면·도구 막대는 inert."""
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, 1180, 820)
+    _no_survey(page)
+    page.focus('#book .page[data-page="0"] a[data-detail], #book .page[data-page="0"] [data-more]')
+    before = page.evaluate("document.activeElement.outerHTML.slice(0, 80)")
+    page.keyboard.press("Enter")
+    page.wait_for_timeout(300)
+    opened = page.evaluate("({open: !document.getElementById('reader').hidden, inert: document.getElementById('book').inert && document.getElementById('toolbar').inert})")
+    page.keyboard.press("Escape")
+    after = page.evaluate("({back: document.activeElement.outerHTML.slice(0, 80), inert: document.getElementById('book').inert})")
+    ctx.close()
+    assert not errors, errors
+    assert opened == {"open": True, "inert": True}
+    assert after == {"back": before, "inert": False}

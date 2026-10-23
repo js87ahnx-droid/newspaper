@@ -768,11 +768,25 @@
     body.appendChild(node);
     readSeq++;
     reader.setAttribute("aria-label", "기사 자세히");
+    showReader();
+  }
+  // 창 열기·닫기 (S29d 점검): 열면 뒤 지면·도구 막대를 inert 로(탭·스크린리더가 가려진 지면으로 새지 않게), 닫으면 누른 자리로 포커스를 돌린다
+  var lastFocus = null;
+  function showReader() {
+    if (reader.hidden) lastFocus = document.activeElement;
+    [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = true; });
     reader.hidden = false;
     reader.querySelector(".reader-panel").scrollTop = 0;
     reader.querySelector("[data-reader-close]").focus();
   }
-  function closeReader() { if (reader) { reader.hidden = true; readSeq++; } }
+  function closeReader() {
+    if (!reader || reader.hidden) return;
+    reader.hidden = true;
+    readSeq++;
+    [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = false; });
+    if (lastFocus && lastFocus.isConnected && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
+  }
 
   // ---------- 원문 창 (S17·S17b) ----------
   // "원문"(또는 입장 차이·사설의 작은 제목)을 누르면 이 창에서 원문을 본다: 중계 서버가 그 자리에서 받아 사진·글만 돌려준다(저장 안 함).
@@ -855,14 +869,14 @@
     var h = mk("h2", "rv-title", titleText.trim());
     view.appendChild(h);
     var status = mk("p", "rv-status", url && RD ? "원문을 불러오는 중…" : "");
+    status.setAttribute("role", "status");   // 불러오는 중·실패 안내를 스크린리더가 읽게 (S29d 점검)
     view.appendChild(status);
     var main = mk("div", "rv-body");
     view.appendChild(main);
     body.innerHTML = "";
     body.appendChild(view);
     reader.setAttribute("aria-label", "원문 보기");
-    reader.hidden = false;
-    reader.querySelector(".reader-panel").scrollTop = 0;
+    showReader();
     var seq = ++readSeq;
     // 본문을 못 가져올 때: 피드 리드(또는 AI 정리)와 안내, 링크
     var fallback = function (why) {
