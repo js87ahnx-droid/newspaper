@@ -29,6 +29,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
   display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px;
   padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right));
   background: var(--paper); border-bottom: 1px solid var(--rule); font-size: 14px;
+  position: relative; z-index: 20;   /* 넘기며 들린 쪽(S28a, 3D)이 도구 막대를 덮지 않게 */
 }
 #toolbar .tb-title { font-family: var(--serif); font-weight: 700; }
 #toolbar .tb-page { color: var(--muted); font-size: 12px; margin-left: 8px; }
@@ -41,6 +42,14 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 
 #book { margin: 0 auto; position: relative; }
 #book.reduced .page { display: inline-block; vertical-align: top; }
+/* 넘김 (S28a): 쪽을 겹쳐 두고 transform·opacity 만 바꾼다. 쪽마다 contain — 넘기는 동안 다른 쪽을 다시 재지 않게 */
+#book.anim .page { position: absolute; top: 0; contain: layout paint style; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+#book.anim.single { overflow: hidden; }
+#book.anim { touch-action: pinch-zoom; -webkit-user-select: none; user-select: none; }
+.turn-shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 5; will-change: opacity; }  /* 그림자는 따로 합성 — 쪽 글을 다시 그리지 않게 */
+#book.spread .page:nth-child(odd) .turn-shade { background: linear-gradient(to left, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
+#book.spread .page:nth-child(even) .turn-shade { background: linear-gradient(to right, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
+#book.single .turn-shade { background: rgba(0,0,0,.35); }
 .stage { position: absolute; left: -100000px; top: 0; visibility: hidden; }
 
 .page { background: var(--paper); overflow: hidden; position: relative; }
@@ -94,7 +103,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .item.top .photo img { max-height: 280px; }
 .photo figcaption { font-size: 10px; color: var(--muted); text-align: right; }
 
-.meta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: calc(12px * var(--fs)); color: var(--muted); }
 .meta .src { color: var(--ink); font-weight: 600; }
 .badge { display: inline-block; padding: 0 6px; border-radius: 9px; font-size: 11px; color: #fff; background: var(--mid); line-height: 18px; }
 .lean-con { background: var(--con); } .lean-pro { background: var(--pro); } .lean-mid { background: var(--mid); }
@@ -110,7 +119,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .why p { margin: 2px 0; }
 
 .fb { display: flex; gap: 6px; margin-top: 6px; }
-.fb button { font-size: 11px; padding: 3px 9px; min-height: 28px; border: 1px solid var(--rule); background: var(--card); color: var(--muted); border-radius: 12px; }
+.fb button { font-size: calc(11px * var(--fs)); padding: 3px 9px; min-height: 28px; border: 1px solid var(--rule); background: var(--card); color: var(--muted); border-radius: 12px; }
 .fb button.pressed { background: var(--ink); color: var(--paper); }
 .item.brief .meta { display: inline-flex; }
 .item.brief .fb { display: inline-flex; margin: 0 0 0 8px; vertical-align: middle; }
@@ -120,7 +129,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .cmp h4 { font-size: 12px; margin: 8px 0 4px; color: var(--muted); }
 .cmp .frame { background: var(--card); padding: 6px 8px; border-radius: 4px; margin: 0 0 6px; }
 .axis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
-.grp { background: var(--card); border-radius: 4px; padding: 6px; font-size: 12px; }
+.grp { background: var(--card); border-radius: 4px; padding: 6px; font-size: calc(12px * var(--fs)); }
 .grp p { margin: 4px 0 0; }
 .grp a { color: inherit; }
 mark { background: var(--mark); color: inherit; padding: 0 1px; }
@@ -141,7 +150,7 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 #settings { left: auto; right: 16px; }
 #survey .card, #settings .card {
   background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.18); font-size: 14px; max-height: calc(100vh - 80px); overflow: auto;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); font-size: 14px; max-height: calc(100vh - 80px); max-height: calc(100dvh - 80px); overflow: auto;
 }
 #survey h2, #settings h2 { font-size: 17px; margin: 0 0 8px; }
 #survey fieldset { border: 0; padding: 0; margin: 0 0 10px; }
@@ -196,9 +205,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .an-views .view-orig { font: inherit; font-size: 0.8em; padding: 0 7px; margin-left: 2px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; line-height: 1.4; vertical-align: baseline; }
 .hl a[data-detail] { cursor: pointer; }
 /* 자세히 창 */
-.reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; }  /* cursor: iOS 가 바깥 누르기를 click 으로 보내게 (S28c) */
 .reader[hidden] { display: none; }
-.reader-panel { background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
+.reader-panel { cursor: auto; background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
 .reader-close { float: right; font: inherit; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
 .reader-body .item { border: 0; }
 .reader-body .item .lead { -webkit-line-clamp: unset; display: block; }
@@ -329,3 +338,23 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .item.iv { border-left: 3px solid var(--accent); padding-left: 8px; }
 .iv-who { margin: 0 0 2px; font-size: 0.9em; font-weight: 700; color: var(--ink); }
 .iv-tag { display: inline-block; padding: 0 6px; border-radius: 9px; background: var(--accent); color: var(--paper); font-size: 11px; line-height: 18px; margin-right: 4px; }
+/* 시황 기사 시점 (S28e): 지난 장중 소식이 지금 마감처럼 보이지 않게 */
+.asof { display: inline-block; font-size: 0.62em; font-weight: 600; vertical-align: 0.15em; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--accent); color: var(--accent); white-space: nowrap; }
+/* 흐름 (S29b): 지면엔 최근 앞선 보도 2줄 + 지금, 자세히 창엔 전부 */
+.flow { margin: 6px 0 4px; font-size: 0.86em; }
+.flow h4 { margin: 0 0 2px; font-size: 0.92em; }
+.flow h4 small { color: var(--muted); font-weight: 400; }
+.flow ol { list-style: none; margin: 0; padding: 0 0 0 10px; border-left: 2px solid var(--rule); }
+.flow li { margin: 1px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flow li time { color: var(--muted); margin-right: 4px; font-variant-numeric: tabular-nums; }
+.flow li.now { font-weight: 600; }
+.flow a { color: var(--ink); }
+#book .flow li:nth-last-child(n+4), .stage .flow li:nth-last-child(n+4) { display: none; }
+.item.tight .flow { display: none; }
+.reader-body .flow li { white-space: normal; }
+/* 누르는 영역 넓히기 (S29d 점검: 원문 19px·피드백 22px·관점 원문 17px — 44px 권장). 보이는 크기는 그대로, 투명한 ::after 로 위아래를 넓힌다 */
+.meta .orig-btn, .meta .link-btn, .an-views .view-orig, .fb button, .reader-close, .readview .rv-back, #toolbar button { position: relative; }
+.meta .orig-btn::after, .meta .link-btn::after, .fb button::after, .reader-close::after, .readview .rv-back::after { content: ""; position: absolute; inset: -10px -3px; }
+.an-views .view-orig::after { content: ""; position: absolute; inset: -12px -4px; }
+#toolbar button::after { content: ""; position: absolute; inset: -5px 0; }
+#survey .actions, #settings .actions { position: sticky; bottom: -14px; background: var(--card); padding-bottom: 4px; }

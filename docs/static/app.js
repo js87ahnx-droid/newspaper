@@ -1,7 +1,7 @@
 /* ○월 ○일자 뉴스 — 쪽 나누기와 종이 넘김.
  *
  * 1. #flow 의 섹션·기사를 화면 크기에 맞춰 쪽(.page)으로 나눈다 (가로 화면은 좌우 두 쪽 펼침).
- * 2. page-flip(StPageFlip) 으로 손가락을 따라 넘어가게 한다. 동작 줄이기 설정이면 애니메이션 없이 넘긴다.
+ * 2. 손가락을 따라 넘어가게 한다 (S28a: 펼침은 책등 축 3D 넘김, 한 쪽 화면은 옆으로 밀기). 동작 줄이기 설정이면 애니메이션 없이 넘긴다.
  * 3. 화면 회전·크기 변경·글자 크기 변경 때 다시 나눈다 (보던 기사 위치 유지).
  * 4. 한 면 보기(S16): 같은 쪽을 세로로 쌓아 한 쪽이 한 화면, 스크롤로 다음 쪽, 두 손가락·버튼으로 1~3배 줌.
  * 5. 전체화면(S16): 지원하면 Fullscreen API, 아니면 "홈 화면에 추가" 안내.
@@ -19,7 +19,7 @@
   var flow = document.getElementById("flow");
   var pageInfo = document.getElementById("pageInfo");
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var flip = null;      // StPageFlip 인스턴스 (동작 줄이기면 null)
+  var anim = false;     // 애니메이션 넘김 사용 중 (동작 줄이기·한 면 보기면 false)
   var pages = [];
   var current = 0;      // 현재 쪽 번호 (왼쪽 쪽 기준)
   var spread = true;    // 두 쪽 펼침 여부
@@ -349,8 +349,11 @@
   }
 
   function build(keepIssue, keepPage) {
-    if (flip) { try { flip.destroy(); } catch (e) { /* 이미 해제됨 */ } flip = null; }
+    stopTurn();
+    drag = null;
+    anim = false;
     book.innerHTML = "";
+    book.style.perspective = "";
     scroller = sizer = zoomer = null;
     var res = paginate();
     pages = res.pages;
@@ -362,31 +365,174 @@
     document.body.classList.toggle("view-scroll", mode === "scroll");
     syncToolbar();
     if (mode === "scroll") { buildScroll(res.g, start); return; }
-    book.className = (spread ? "spread" : "single") + (reduced.matches ? " reduced" : "");
+    anim = !reduced.matches;
+    book.className = (spread ? "spread" : "single") + (anim ? " anim" : " reduced");
     book.style.width = (spread ? res.g.w * 2 : res.g.w) + "px";
     book.style.height = res.g.h + "px";
-    if (reduced.matches || typeof St === "undefined") {
-      pages.forEach(function (p) { book.appendChild(p); });
-      simpleShow(start);
-      return;
-    }
-    var holder = document.createElement("div");
-    book.appendChild(holder);
-    pages.forEach(function (p) { holder.appendChild(p); });
-    flip = new St.PageFlip(holder, {
-      width: res.g.w, height: res.g.h, size: "fixed",
-      showCover: false, usePortrait: !spread, autoSize: false,
-      maxShadowOpacity: 0.35, flippingTime: 700, drawShadow: true,
-      mobileScrollSupport: false, disableFlipByClick: true, swipeDistance: 20,
-      // 세로(한 쪽) 화면은 라이브러리의 끌기·모서리 넘김이 손가락 밀기를 자주 놓친다 → 아래 손가락 밀기가 넘긴다 (애니메이션은 그대로)
-      useMouseEvents: spread,
-      startPage: start, showPageCorners: true
+    pages.forEach(function (p) { book.appendChild(p); });
+    if (!anim) { simpleShow(start); return; }
+    pw = res.g.w;
+    if (spread) book.style.perspective = Math.round(pw * 4) + "px";
+    current = start - (start % (spread ? 2 : 1));
+    rest();
+  }
+
+  // ---------- 넘김 (S28a) ----------
+  // 넘김 라이브러리(StPageFlip) 대신 직접 (2026-10-23 "넘기는 애니메이션이 부자연스럽고 버벅인다"):
+  // 라이브러리는 프레임마다 쪽 모양을 잘라(clip)·그림자를 다시 그려 글 많은 쪽에서 끊겼고, 세로 화면은 손을 뗀 뒤에야 넘어갔다.
+  // 펼침 = 오른쪽(뒤로는 왼쪽) 쪽이 책등을 축으로 돌아 반을 넘으면 다음 펼침의 쪽이 이어 돈다. 한 쪽 화면 = 옆으로 밀기.
+  // 바꾸는 것은 transform·opacity 뿐(합성 단계만), 끄는 동안 손가락을 따라가고 놓으면 남은 만큼 또는 제자리로.
+  var pw = 0;            // 쪽 폭
+  var turn = null;       // 넘기는 중: {dir, t, els, raf}
+  var DUR_SPREAD = 620, DUR_SINGLE = 340;
+
+  function shadeOf(p) {
+    var s = p.lastChild;
+    if (!s || s.className !== "turn-shade") { s = document.createElement("div"); s.className = "turn-shade"; p.appendChild(s); }
+    return s;
+  }
+  // 넘기지 않을 때: 지금 펼침(또는 쪽)만 보인다. 펼침에서 짝수 쪽은 왼쪽, 홀수 쪽은 오른쪽 자리
+  function rest() {
+    var step = spread ? 2 : 1;
+    pages.forEach(function (p, i) {
+      var on = i >= current && i < current + step;
+      p.style.transform = p.style.transformOrigin = p.style.willChange = "";
+      p.style.left = spread && i % 2 === 1 ? pw + "px" : "0";
+      p.style.zIndex = on ? 1 : 0;
+      p.style.visibility = on ? "visible" : "hidden";
+      var s = p.lastChild;
+      if (s && s.className === "turn-shade") s.style.opacity = 0;
     });
-    flip.loadFromHTML(pages);
-    flip.on("flip", function (e) { current = e.data; showInfo(); });
-    current = flip.getCurrentPageIndex();
     showInfo();
   }
+  function canTurn(dir) {
+    var step = spread ? 2 : 1;
+    return dir > 0 ? current + step < pages.length : current - step >= 0;
+  }
+  // 넘김에 쓰는 쪽: a = 먼저 움직이는 쪽(지금 쪽), b = 이어 들어오는 쪽, under = 밑에 깔린 쪽
+  function beginTurn(dir) {
+    var c = current, P = function (i) { return pages[i] || null; };
+    var els = spread ? (dir > 0 ? { a: P(c + 1), b: P(c + 2), under: [P(c), P(c + 3)] } : { a: P(c), b: P(c - 1), under: [P(c - 2), P(c + 1)] })
+                     : { a: P(c), b: P(c + dir), under: [] };
+    els.under.forEach(function (p) { if (p) { p.style.visibility = "visible"; p.style.zIndex = 1; } });
+    [els.a, els.b].forEach(function (p) {
+      if (!p) return;
+      p.style.willChange = "transform"; p.style.zIndex = 3;
+      shadeOf(p).style.opacity = 0;
+    });
+    if (spread) {   // 책등이 축: 오른쪽 쪽은 왼쪽 가장자리, 왼쪽 쪽은 오른쪽 가장자리
+      els.a.style.transformOrigin = dir > 0 ? "0 50%" : "100% 50%";
+      els.b.style.transformOrigin = dir > 0 ? "100% 50%" : "0 50%";
+    }
+    turn = { dir: dir, t: 0, els: els, raf: 0 };
+    frame(0);
+  }
+  function frame(t) {
+    var e = turn.els, d = turn.dir;
+    turn.t = t;
+    if (spread) {
+      var first = t < 0.5;   // 반 넘기 전엔 지금 쪽이, 넘은 뒤엔 다음 쪽이 보인다
+      e.a.style.visibility = first ? "visible" : "hidden";
+      e.b.style.visibility = first ? "hidden" : "visible";
+      e.a.style.transform = "rotateY(" + (-d * 180 * t) + "deg)";
+      e.b.style.transform = "rotateY(" + (d * 180 * (1 - t)) + "deg)";
+      shadeOf(e.a).style.opacity = Math.min(1, t * 2) * 0.9;
+      shadeOf(e.b).style.opacity = Math.min(1, (1 - t) * 2) * 0.9;
+      e.under.forEach(function (p) { if (p) shadeOf(p).style.opacity = 0.45 * Math.sin(Math.PI * t); });
+    } else {
+      e.a.style.visibility = e.b.style.visibility = "visible";
+      e.a.style.transform = "translate3d(" + (-d * pw * t) + "px,0,0)";
+      e.b.style.transform = "translate3d(" + (d * pw * (1 - t)) + "px,0,0)";
+      shadeOf(e.a).style.opacity = 0.6 * t;
+    }
+  }
+  // 놓은 뒤: done 이면 끝까지 넘기고, 아니면 제자리로
+  function settle(done) {
+    var t0 = turn.t, t1 = done ? 1 : 0, start = 0;
+    turn.to = done;
+    var dur = Math.max(120, (spread ? DUR_SPREAD : DUR_SINGLE) * Math.abs(t1 - t0));
+    var tick = function (now) {
+      if (!turn) return;
+      if (!start) start = now;
+      var k = Math.min(1, (now - start) / dur), ease = 1 - Math.pow(1 - k, 3);
+      frame(t0 + (t1 - t0) * ease);
+      if (k < 1) { turn.raf = requestAnimationFrame(tick); return; }
+      endTurn(done);
+    };
+    turn.raf = requestAnimationFrame(tick);
+  }
+  function endTurn(done) {
+    var d = turn.dir;
+    turn = null;
+    if (done) current += d * (spread ? 2 : 1);
+    rest();
+  }
+  function stopTurn() {   // 넘기던 것을 끝으로 바로 (다시 나누기·다음 넘김 전)
+    if (!turn) return;
+    cancelAnimationFrame(turn.raf);
+    endTurn(turn.raf ? turn.to : turn.t > 0.5);
+  }
+  function animateTurn(dir) {
+    if (drag && drag.dir) return;   // 끄는 중
+    stopTurn();
+    if (!canTurn(dir)) return;
+    beginTurn(dir);
+    settle(true);
+  }
+
+  // 끌기: 마우스·손가락 공통. 8px 넘게 가로로 움직여야 넘기기 시작 — 그 전엔 누르기(제목·원문·단추)로 둔다 (S28b: 모서리 제목 누르면 넘김이 겹치던 것)
+  var drag = null, eatClick = false;
+  function dragStart(x, y) {
+    if (!anim || mode !== "flip" || (turn && !turn.raf)) return false;
+    drag = { x: x, y: y, dir: 0, hist: [[x, Date.now()]] };
+    return true;
+  }
+  function dragMove(x, y) {
+    if (!drag) return false;
+    var dx = x - drag.x, dy = y - drag.y;
+    if (!drag.dir) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { drag = null; return false; }   // 세로 손짓
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 1.2) return false;
+      var dir = dx < 0 ? 1 : -1;
+      if (!canTurn(dir)) { drag = null; return false; }
+      stopTurn();   // 앞 넘김이 아직 움직이는 중이면 끝내고
+      if (!canTurn(dir)) { drag = null; return false; }
+      drag.dir = dir;
+      beginTurn(dir);
+    }
+    drag.hist.push([x, Date.now()]);
+    if (drag.hist.length > 5) drag.hist.shift();
+    frame(Math.max(0, Math.min(1, -dx * drag.dir / (spread ? pw * 1.6 : pw))));
+    return true;
+  }
+  function dragEnd() {
+    var d = drag;
+    drag = null;
+    if (!d || !d.dir || !turn) return;
+    eatClick = true;   // 끌다 놓은 자리의 링크가 눌리지 않게
+    setTimeout(function () { eatClick = false; }, 400);
+    // 넘기는 쪽으로의 속도 (px/ms): 놓기 전 100ms 동안만 — 끌다 멈추고 놓으면 0
+    var now = Date.now(), h = d.hist.filter(function (p) { return now - p[1] <= 100; }), v = 0;
+    if (h.length) v = (d.hist[d.hist.length - 1][0] - h[0][0]) / Math.max(16, now - h[0][1]) * -d.dir;
+    settle(v > -0.3 && (turn.t > 0.5 || (v > 0.3 && turn.t > 0.03)));   // 빠르게 튕기면 짧아도 넘어가고, 거꾸로 튕기면 되돌아감
+  }
+  book.addEventListener("touchstart", function (e) {
+    if (e.touches.length === 1) dragStart(e.touches[0].clientX, e.touches[0].clientY);
+    else if (drag) { drag = null; if (turn && !turn.raf) settle(false); }   // 두 손가락 = 넘기지 않음
+  }, { passive: true });
+  book.addEventListener("touchmove", function (e) {
+    if (e.touches.length !== 1) return;
+    if (dragMove(e.touches[0].clientX, e.touches[0].clientY) && e.cancelable) e.preventDefault();
+  }, { passive: false });
+  book.addEventListener("touchend", function () { dragEnd(); });
+  book.addEventListener("touchcancel", function () { drag = null; if (turn && !turn.raf) settle(false); });
+  book.addEventListener("mousedown", function (e) {
+    if (e.button !== 0 || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (dragStart(e.clientX, e.clientY)) e.preventDefault();   // 글 선택·링크 끌기 대신 넘김 (누르기는 click 으로 그대로)
+  });
+  window.addEventListener("mousemove", function (e) { if (drag) dragMove(e.clientX, e.clientY); });
+  window.addEventListener("mouseup", function () { dragEnd(); });
+  window.addEventListener("click", function (e) { if (eatClick) { eatClick = false; e.preventDefault(); e.stopPropagation(); } }, true);
 
   // ---------- 한 면 보기 (S16) ----------
   function buildScroll(g, start) {
@@ -523,10 +669,7 @@
 
   function go(delta) {
     if (mode === "scroll") { scrollToPage(current + delta); return; }
-    // 세로 한 쪽 화면에서는 라이브러리의 뒤로 넘기기(flipPrev·flip(번호))가 움직이지 않는다 (2026-10-21 실측 —
-    // 왼쪽 가장자리에서 끄는 흉내라 한 쪽 화면엔 안 맞음) → 앞으로는 넘김 애니메이션, 뒤로는 바로 그 쪽으로
-    if (flip && !spread && delta < 0) { if (current > 0) { flip.turnToPage(current - 1); current = flip.getCurrentPageIndex(); showInfo(); } return; }
-    if (flip) { delta > 0 ? flip.flipNext() : flip.flipPrev(); return; }
+    if (anim) { animateTurn(delta > 0 ? 1 : -1); return; }   // 앞·뒤 모두 넘김 애니메이션 (S28a — 예전 라이브러리는 세로에서 뒤로 못 넘김)
     simpleShow(current + delta * (spread ? 2 : 1));
   }
 
@@ -575,12 +718,11 @@
     document.addEventListener(ev, function () { document.body.classList.toggle("is-fullscreen", !!fsElement()); });
   });
 
-  // 동작 줄이기 모드의 손가락 넘기기 (애니메이션 없음)
+  // 애니메이션 없는 손가락 넘기기: 동작 줄이기·한 면 보기(확대 안 했을 때). 넘김 애니메이션은 위 끌기(S28a)가 맡는다
   // 손가락 밀기: 오른쪽→왼쪽 = 다음 쪽, 왼쪽→오른쪽 = 이전 쪽 (2026-10-21 "세로에서 넘기기가 잘 안 먹힌다")
-  // 넘김 라이브러리를 안 쓸 때(동작 줄이기)·세로 한 쪽 화면(라이브러리 끌기 끔)·한 면 보기(확대 안 했을 때) 모두.
   // 가로 이동이 세로 이동보다 뚜렷할 때만 — 세로 스크롤·두 손가락 확대와 겹치지 않게
   var tx = null, ty = 0;
-  function swipeOn() { return mode === "scroll" ? zoom <= 1.01 : (!flip || !spread); }
+  function swipeOn() { return mode === "scroll" ? zoom <= 1.01 : !anim; }
   book.addEventListener("touchstart", function (e) {
     tx = swipeOn() && e.touches.length === 1 ? e.touches[0].clientX : null;
     if (tx !== null) ty = e.touches[0].clientY;
@@ -626,11 +768,25 @@
     body.appendChild(node);
     readSeq++;
     reader.setAttribute("aria-label", "기사 자세히");
+    showReader();
+  }
+  // 창 열기·닫기 (S29d 점검): 열면 뒤 지면·도구 막대를 inert 로(탭·스크린리더가 가려진 지면으로 새지 않게), 닫으면 누른 자리로 포커스를 돌린다
+  var lastFocus = null;
+  function showReader() {
+    if (reader.hidden) lastFocus = document.activeElement;
+    [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = true; });
     reader.hidden = false;
     reader.querySelector(".reader-panel").scrollTop = 0;
     reader.querySelector("[data-reader-close]").focus();
   }
-  function closeReader() { if (reader) { reader.hidden = true; readSeq++; } }
+  function closeReader() {
+    if (!reader || reader.hidden) return;
+    reader.hidden = true;
+    readSeq++;
+    [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = false; });
+    if (lastFocus && lastFocus.isConnected && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
+  }
 
   // ---------- 원문 창 (S17·S17b) ----------
   // "원문"(또는 입장 차이·사설의 작은 제목)을 누르면 이 창에서 원문을 본다: 중계 서버가 그 자리에서 받아 사진·글만 돌려준다(저장 안 함).
@@ -713,14 +869,14 @@
     var h = mk("h2", "rv-title", titleText.trim());
     view.appendChild(h);
     var status = mk("p", "rv-status", url && RD ? "원문을 불러오는 중…" : "");
+    status.setAttribute("role", "status");   // 불러오는 중·실패 안내를 스크린리더가 읽게 (S29d 점검)
     view.appendChild(status);
     var main = mk("div", "rv-body");
     view.appendChild(main);
     body.innerHTML = "";
     body.appendChild(view);
     reader.setAttribute("aria-label", "원문 보기");
-    reader.hidden = false;
-    reader.querySelector(".reader-panel").scrollTop = 0;
+    showReader();
     var seq = ++readSeq;
     // 본문을 못 가져올 때: 피드 리드(또는 AI 정리)와 안내, 링크
     var fallback = function (why) {
@@ -780,8 +936,18 @@
     if (o && !mod) { e.preventDefault(); openArticle(o); return; }
     var m = t.closest("[data-more]");
     if (m) { var art = m.closest("[data-issue]"); if (art) openReader(art.getAttribute("data-issue")); return; }
-    if (t.closest("[data-reader-close]") || t === reader) closeReader();
+    if (t.closest("[data-reader-close]")) closeReader();
   });
+  // 창 바깥(어두운 부분)을 누르면 닫힘 (S28c, 2026-10-23 "지면 부분 누르면 잘 안 먹힌다"): document 로 올라온 click 으로 받던 것은
+  // iOS Safari 가 누를 수 없는 div 의 click 을 document 까지 보내지 않아 놓쳤다 → 창에 직접. 바깥에서 누르고 바깥에서 뗀 것만
+  // (창 안 글을 끌다 바깥에서 놓으면 click 대상이 바깥이 되어 닫히던 것도 막음)
+  if (reader) {
+    var downOut = false;
+    ["pointerdown", "mousedown", "touchstart"].forEach(function (ev) {
+      reader.addEventListener(ev, function (e) { downOut = e.target === reader; }, { passive: true });
+    });
+    reader.addEventListener("click", function (e) { if (e.target === reader && downOut) closeReader(); downOut = false; });
+  }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && reader && !reader.hidden) closeReader(); }, true);
 
   // 피드백 버튼은 feedback.js(S9)가 처리한다. 여기서는 이벤트만 알린다.
@@ -800,11 +966,11 @@
 
   function goTo(i) {
     if (mode === "scroll") { scrollToPage(i); return; }
-    if (flip) { flip.turnToPage(i); current = flip.getCurrentPageIndex(); showInfo(); return; }
+    if (anim) { stopTurn(); i = Math.max(0, Math.min(i, pages.length - 1)); current = i - (i % (spread ? 2 : 1)); rest(); return; }
     simpleShow(i);
   }
 
-  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, openArticle: openArticle, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: !!flip, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
+  window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, openArticle: openArticle, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: anim, turning: !!turn, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };
   // 글꼴(Noto Sans·Noto Sans KR)을 받은 뒤 쪽을 나눈다 — 먼저 나누면 글꼴이 바뀌며 글 길이가 달라져 쪽이 넘친다.
   // 한글 글꼴은 글자 범위별 조각으로 나뉘어 필요할 때 받으므로, 지면에 쓰인 글자를 넘겨 필요한 조각을 미리 받는다.
   // 글꼴 서버에 닿지 못하면(오프라인) 2.5초 뒤 기본 글꼴로 나눈다 (그 뒤 글꼴이 오면 한 번만 다시 나눈다)
