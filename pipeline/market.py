@@ -158,19 +158,48 @@ def apply(scored: list, articles: dict, ref: datetime) -> tuple[list, dict]:
         newest[s.issue.id] = a
         reports.append({"id": s.issue.id, "market": m, "title": a.title, "published": datetime.fromisoformat(a.published)})
     verdict = judge(reports, ref)
-    kept, dropped, switched = [], [], 0
+    by_id = {s.issue.id: s for s in scored}
+    mkt = {r["id"]: r["market"] for r in reports}
+    # 같은 시장·같은 거래일·같은 시점으로 남는 이슈는 점수 높은 하나에 합친다 (S29a — 뉴욕 22일 마감이 이슈 여럿으로 갈라져 따로 실림)
+    hosts: dict[tuple, object] = {}
+    for r in sorted(reports, key=lambda r: -by_id[r["id"]].final):
+        v = verdict[r["id"]]
+        if v["keep"]:
+            hosts.setdefault((r["market"], v["session"], v["phase"]), by_id[r["id"]])
+    latest: dict[str, tuple] = {}   # 시장 → (시점 키, 그 시장 가장 새 시점의 대표 이슈)
+    for (m, ses, ph), h in hosts.items():
+        k = (ses, PHASE_RANK[ph])
+        if m not in latest or k > latest[m][0]:
+            latest[m] = (k, h)
+    kept, dropped, switched, merged, attached = [], [], 0, 0, 0
     for s in scored:
         v = verdict.get(s.issue.id)
         if v is None:
             kept.append(s)
             continue
+        a, m = newest[s.issue.id], mkt[s.issue.id]
         if not v["keep"]:
             dropped.append(f"{s.issue.title[:40]} — {v['why']}")
+            if m in latest:   # 빠진 지난·앞선 시황은 그 시장 최신 이슈의 "앞선 보도"로 (S29a·b)
+                add_update(latest[m][1], a, v["asof"])
+                attached += 1
             continue
-        a = newest[s.issue.id]
+        host = hosts[(m, v["session"], v["phase"])]
+        if host is not s:
+            host.issue.article_ids += [i for i in s.issue.article_ids if i not in host.issue.article_ids]
+            merged += 1
+            continue
         if a.id != s.issue.rep_article:   # 묶음 안의 더 새 시황 기사를 대표로 (제목·리드·링크)
             s.issue.rep_article, s.issue.title = a.id, a.title
             switched += 1
         s.issue.extra["asof"] = v["asof"]
         kept.append(s)
-    return kept, {"reports": len(reports), "dropped": dropped, "switched": switched}
+    return kept, {"reports": len(reports), "dropped": dropped, "switched": switched, "merged": merged, "attached": attached}
+
+
+def add_update(host, a, asof: str | None = None) -> None:
+    """host 이슈에 앞선 보도 한 줄 (S29a): 시각·제목·매체·주소. 같은 주소는 한 번."""
+    ups = host.issue.extra.setdefault("updates", [])
+    if any(u["url"] == a.url for u in ups):
+        return
+    ups.append({"published": a.published, "title": a.title, "source": a.source, "url": a.url, "lang": a.lang, "asof": asof})

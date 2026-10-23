@@ -70,3 +70,12 @@ def test_drop_and_promote_then_reedit_places_newer_report():
     ed2 = arrange(choose(kept, CFG, it)[0], CFG, it, _arts_of(ed))
     ids = {p.scored.issue.id for ps in ed2.sections.values() for p in ps}
     assert newer.issue.id in ids and old.scored.issue.id not in ids
+
+
+def test_dropped_story_kept_as_update_of_newer():
+    """S29a: 지난 소식으로 빠진 기사는 이어받은 새 보도의 앞선 보도로 (흐름 누적 표시)."""
+    sections, scored, arts = _world()
+    pairs = find_pairs(sections, scored, arts)
+    kept, _ = drop_and_promote(scored, pairs, {0}, arts)
+    new = next(s for s in kept if s.issue.id == "new")
+    assert [u["title"] for u in new.issue.extra["updates"]] == ["한미 관세 협상 막판 진통"]

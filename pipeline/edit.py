@@ -434,6 +434,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "topic": s.topic,
             "days": s.days,
             "asof": s.issue.extra.get("asof"),   # 시황 기사 시점 "뉴욕증시 22일(현지) 장중" (S28e)
+            "updates": sorted(s.issue.extra.get("updates", []), key=lambda u: u["published"] or ""),   # 오늘 앞선 보도 (S29a)
             "timeline": s.timeline,
             "photo": p.photo,
             "photo_source": p.photo_source,

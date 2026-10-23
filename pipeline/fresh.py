@@ -98,8 +98,10 @@ def ai_stale(pairs: list[tuple], articles: dict, ask, tz: str = "Asia/Seoul") ->
     return out, f"{len(pairs)}쌍 → 지난 기사 {len({pairs[i][0].scored.issue.id for i in out})}건"
 
 
-def drop_and_promote(scored: list, pairs: list[tuple], stale: set[int]) -> tuple[list, list[str]]:
-    """지난 기사를 빼고, 새 보도에 그 기사 점수를 넘긴다(다시 편집하면 그 자리를 잇게). 돌려주는 값: (이슈 목록, 기록)."""
+def drop_and_promote(scored: list, pairs: list[tuple], stale: set[int], articles: dict | None = None) -> tuple[list, list[str]]:
+    """지난 기사를 빼고, 새 보도에 그 기사 점수를 넘긴다(다시 편집하면 그 자리를 잇게). 뺀 기사는 새 보도의 "앞선 보도"로
+    남긴다 (S29a — 흐름 누적 표시). 돌려주는 값: (이슈 목록, 기록)."""
+    from .market import add_update
     gone, notes = set(), []
     for i in sorted(stale):
         p, s = pairs[i]
@@ -110,5 +112,11 @@ def drop_and_promote(scored: list, pairs: list[tuple], stale: set[int]) -> tuple
         s.final, s.frontline = max(s.final, old.final), max(s.frontline, old.frontline)
         s.final_no_interest = max(s.final_no_interest, old.final_no_interest)
         s.topic = old.topic   # 같은 이야기 — 앞 기사의 면을 잇는다
+        rep = (articles or {}).get(old.issue.rep_article)
+        if rep is not None:
+            add_update(s, rep, old.issue.extra.get("asof"))
+        for u in old.issue.extra.get("updates", []):   # 빠진 기사가 이미 가진 앞선 보도도 이어받음
+            if all(x["url"] != u["url"] for x in s.issue.extra.setdefault("updates", [])):
+                s.issue.extra["updates"].append(u)
         notes.append(f"{old.issue.title[:40]} → {s.issue.title[:40]}")
     return [s for s in scored if s.issue.id not in gone], notes

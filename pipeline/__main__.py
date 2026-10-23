@@ -248,7 +248,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
     from .market import apply as market_apply
     from .prepare import edition_window
     scored, mstats = market_apply(scored, articles, edition_window(edition, cfg, history_dir)[1])
-    market_note = f"시황 {mstats['reports']}건 — 지난·앞선 소식 뺌 {len(mstats['dropped'])}, 더 새 기사로 대표 바꿈 {mstats['switched']}"
+    market_note = f"시황 {mstats['reports']}건 — 지난·앞선 소식 뺌 {len(mstats['dropped'])}, 더 새 기사로 대표 바꿈 {mstats['switched']}, 같은 시점 합침 {mstats['merged']}, 앞선 보도로 붙임 {mstats['attached']}"
     placed, cstats = choose(scored, cfg, interests)
     ed = arrange(placed, cfg, interests, articles)
     fresh_note, fnotes = "AI 꺼짐", []
@@ -268,7 +268,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
             if pairs and fst != "응답 없음":
                 fr_path.write_text(json.dumps({"key": fkey, "stale": sorted(stale)}), encoding="utf-8")
         if stale:
-            scored, fnotes = drop_and_promote(scored, pairs, stale)
+            scored, fnotes = drop_and_promote(scored, pairs, stale, articles)
             placed, cstats = choose(scored, cfg, interests)
             ed = arrange(placed, cfg, interests, articles)
         fresh_note = f"{fst}, 뺌 {len(fnotes)}"

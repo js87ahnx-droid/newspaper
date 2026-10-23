@@ -124,3 +124,28 @@ def test_apply_switches_to_newest_report_and_drops_stale():
     assert s_mixed.issue.rep_article == "a2" and s_mixed.issue.title == "뉴욕증시, AI 불안에 하락 출발"
     assert s_mixed.issue.extra["asof"] == "뉴욕증시 22일(현지) 장중" and "asof" not in s_kq.issue.extra
     assert st["reports"] == 2 and len(st["dropped"]) == 1 and st["switched"] == 1
+
+
+def test_same_session_reports_merged_and_older_ones_become_updates():
+    """S29a: 뉴욕 22일 마감 이슈 셋은 점수 높은 하나로 합치고, 빠진 21일 마감·22일 장중은 그 이슈의 앞선 보도(시각순)로."""
+    from tests.test_edit import _sc
+    rows = [
+        ("old", "뉴욕증시, 스페이스X 실적에 기술주 강세…나스닥 1.1%↑(종합)", "2026-10-21T21:14:00+00:00", 3.0),
+        ("open", "뉴욕증시, AI 불안에 하락 출발", "2026-10-22T13:53:00+00:00", 2.0),
+        ("c1", "뉴욕증시, AI 불안 재고조에 기술주 급락…나스닥 2.6%↓", "2026-10-22T20:15:00+00:00", 1.0),
+        ("c2", "AI 투자비 부담에 흔들린 뉴욕증시… 나스닥 2.6% 급락 마감", "2026-10-22T20:22:00+00:00", 1.5),
+        ("c3", "뉴욕증시, AI투자 불안에 나스닥 2.6%↓…반도체지수 6.7% 급락(종합)", "2026-10-22T21:35:00+00:00", 0.5),
+    ]
+    arts, scored = {}, []
+    for iid, title, pub, final in rows:
+        arts[iid] = _art(iid, title, pub)
+        s = _sc(iid, title, [], final=final)
+        s.issue.article_ids, s.issue.rep_article = [iid], iid
+        scored.append(s)
+    kept, st = apply(scored, arts, REF_1023)
+    assert [s.issue.id for s in kept] == ["c2"]                          # 같은 시점 셋 중 점수 높은 것
+    host = kept[0]
+    assert set(host.issue.article_ids) == {"c1", "c2", "c3"} and st["merged"] == 2
+    ups = sorted(host.issue.extra["updates"], key=lambda u: u["published"])
+    assert [u["title"] for u in ups] == [rows[0][1], rows[1][1]] and st["attached"] == 2
+    assert ups[0]["asof"] == "뉴욕증시 21일(현지) 마감" and ups[1]["asof"] == "뉴욕증시 22일(현지) 장중"
