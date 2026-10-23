@@ -294,6 +294,8 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
             rows.append({
                 **it, "view": view, "photo": larger_photo(it.get("photo")), "headline_label": headline_label(it.get("headline_by", {})),
                 "time": time_label(rep.get("published"), cfg.timezone),
+                # 흐름 (S29b): 오늘 앞선 보도(지난 소식으로 빠졌거나 같은 묶음의 앞선 시점) → 지금 이 기사
+                "updates_view": [{**u, "time": time_label(u.get("published"), cfg.timezone)} for u in it.get("updates", [])],
                 "brief_text": brief_text(it, view),
                 "stance_links": stance_links(it, view.get("analysis")),
                 # 관련 기사 (S22b): 단신에서 옮겨 온 이어진 기사 — 제목(외국어는 번역 제목) → 원문 창

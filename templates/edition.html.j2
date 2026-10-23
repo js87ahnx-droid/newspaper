@@ -186,6 +186,16 @@
         {% endfor %}
       </div>
       {% endif %}
+      {% if it.updates_view and not brief %}
+      <div class="flow" aria-label="이 소식의 흐름">
+        <h4>흐름 <small>앞선 보도 → 지금</small></h4>
+        <ol>
+          {% for u in it.updates_view %}<li><time>{{ u.time }}</time>{% if u.asof %} <span class="asof">{{ u.asof }}</span>{% endif %}
+            <a href="{{ real_url(u.url) }}" target="_blank" rel="noopener noreferrer"{{ art(u.url, u.source, u.lang or 'ko') }}>{{ u.title }}</a> <span class="src">{{ u.source }}</span></li>
+          {% endfor %}<li class="now"><time>{{ it.time }}</time> 지금 이 기사</li>
+        </ol>
+      </div>
+      {% endif %}
       {% if it.related_view and not pkg %}
       <div class="rel-arts" aria-label="관련 기사">
         <h4>관련 기사</h4>

@@ -340,3 +340,15 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .iv-tag { display: inline-block; padding: 0 6px; border-radius: 9px; background: var(--accent); color: var(--paper); font-size: 11px; line-height: 18px; margin-right: 4px; }
 /* 시황 기사 시점 (S28e): 지난 장중 소식이 지금 마감처럼 보이지 않게 */
 .asof { display: inline-block; font-size: 0.62em; font-weight: 600; vertical-align: 0.15em; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--accent); color: var(--accent); white-space: nowrap; }
+/* 흐름 (S29b): 지면엔 최근 앞선 보도 2줄 + 지금, 자세히 창엔 전부 */
+.flow { margin: 6px 0 4px; font-size: 0.86em; }
+.flow h4 { margin: 0 0 2px; font-size: 0.92em; }
+.flow h4 small { color: var(--muted); font-weight: 400; }
+.flow ol { list-style: none; margin: 0; padding: 0 0 0 10px; border-left: 2px solid var(--rule); }
+.flow li { margin: 1px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flow li time { color: var(--muted); margin-right: 4px; font-variant-numeric: tabular-nums; }
+.flow li.now { font-weight: 600; }
+.flow a { color: var(--ink); }
+#book .flow li:nth-last-child(n+4), .stage .flow li:nth-last-child(n+4) { display: none; }
+.item.tight .flow { display: none; }
+.reader-body .flow li { white-space: normal; }
