@@ -194,6 +194,20 @@ def apply(scored: list, articles: dict, ref: datetime) -> tuple[list, dict]:
             switched += 1
         s.issue.extra["asof"] = v["asof"]
         kept.append(s)
+    # 묶음(합친 것 포함) 안의 앞선 시점 시황 기사도 앞선 보도로 — "22:53 하락 출발 → 05:15 급락 마감" 흐름 (S29b)
+    for h in hosts.values():
+        if h not in kept:
+            continue
+        top = verdict[h.issue.id]
+        top_key = (date.fromisoformat(top["session"]), PHASE_RANK[top["phase"]])
+        for i in h.issue.article_ids:
+            a = articles.get(i)
+            m = a and a.published and market_of(a.title)
+            if not m:
+                continue
+            ses, ph = session_of(m, a.title, datetime.fromisoformat(a.published))
+            if (ses, PHASE_RANK[ph]) < top_key:
+                add_update(h, a, label(m, a.title, ses, ph))
     return kept, {"reports": len(reports), "dropped": dropped, "switched": switched, "merged": merged, "attached": attached}
 
 

@@ -149,3 +149,15 @@ def test_same_session_reports_merged_and_older_ones_become_updates():
     ups = sorted(host.issue.extra["updates"], key=lambda u: u["published"])
     assert [u["title"] for u in ups] == [rows[0][1], rows[1][1]] and st["attached"] == 2
     assert ups[0]["asof"] == "뉴욕증시 21일(현지) 마감" and ups[1]["asof"] == "뉴욕증시 22일(현지) 장중"
+
+
+def test_earlier_reports_inside_issue_become_updates():
+    """S29b: 한 묶음 안의 22일 장중 기사는 22일 마감 대표 기사의 앞선 보도로."""
+    from tests.test_edit import _sc
+    arts = {a.id: a for a in [_art("o", "뉴욕증시, AI 불안에 하락 출발", "2026-10-22T13:53:00+00:00"),
+                              _art("c", "뉴욕증시, AI 불안 재고조에 기술주 급락…나스닥 2.6%↓", "2026-10-22T20:15:00+00:00")]}
+    s = _sc("x", arts["o"].title, [])
+    s.issue.article_ids, s.issue.rep_article = ["o", "c"], "o"
+    kept, _ = apply([s], arts, REF_1023)
+    assert kept[0].issue.rep_article == "c"
+    assert [(u["title"], u["asof"]) for u in kept[0].issue.extra["updates"]] == [(arts["o"].title, "뉴욕증시 22일(현지) 장중")]
