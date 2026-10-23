@@ -80,7 +80,8 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Claude Code CLI (구독 토큰이 있을 때만)
         if: env.HAS_TOKEN == 'true'
-        run: npm install -g @anthropic-ai/claude-code
+        # 버전 고정 (S29d 점검: 토큰·비밀번호·쓰기 권한이 있는 작업). 10/22 마지막 성공 발행 때 버전. 올릴 땐 일부러
+        run: npm install -g @anthropic-ai/claude-code@2.1.308
       - name: 누적분 불러오기
         uses: actions/cache/restore@v4
         with:
@@ -108,9 +109,11 @@ jobs:
         with:
           path: data/raw
           key: raw-${{ github.run_id }}
-      - name: 실행 보고 (로그)
+      - name: 실행 보고 (로그·요약)
         if: always()
-        run: cat data/run-report.json 2>/dev/null || echo "보고 없음"
+        run: |
+          cat data/run-report.json 2>/dev/null || echo "보고 없음"
+          echo "### 발행 ${{ job.status }} — $(TZ=Asia/Seoul date '+%F %H:%M KST')" >> "$GITHUB_STEP_SUMMARY"
       - name: 커밋·푸시
         run: |
           git config user.name "newspaper-bot"
@@ -118,4 +121,10 @@ jobs:
           git add docs data/history .staticrypt.json
           if git diff --cached --quiet; then echo "바뀐 것 없음"; exit 0; fi
           git commit -m "발행: $(ls -1 docs/archive | grep -E '^[0-9]{4}-' | sort | tail -1)"
-          git push
+          # 실행 중에 main 에 다른 커밋이 올라오면 push 가 거절되어 그날 호가 버려졌다 (S29d 점검) → rebase 후 3번까지
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            git pull --rebase --autostash origin main || { git rebase --abort; break; }
+            sleep $((i * 5))
+          done
+          echo "::error::발행 결과를 push 하지 못함" ; echo "**push 실패 — 그날 호가 저장소에 없음**" >> "$GITHUB_STEP_SUMMARY"; exit 1

@@ -52,6 +52,30 @@ def cmd_collect(args: argparse.Namespace) -> int:
     return 1 if report["feeds_ok"] == 0 else 0
 
 
+RAW_KEEP_DAYS = 14   # data/raw 의 호별 파일·수집 로그를 남기는 날수 (render_only 다시 그리기·재발행에 충분)
+
+
+def prune_raw(raw: Path, edition: date, keep_days: int = RAW_KEEP_DAYS) -> int:
+    """오래된 호별 파일(<날짜>.*.json)과 수집 로그 줄을 지운다 (S29d 점검: 지우는 곳이 없어 Actions 캐시가 계속 커짐). 지운 파일 수."""
+    import re
+
+    cut = (edition - timedelta(days=keep_days)).isoformat()
+    n = 0
+    for f in raw.glob("20??-??-??.*"):
+        m = re.match(r"(\d{4}-\d{2}-\d{2})\.", f.name)
+        if m and m.group(1) < cut:
+            f.unlink()
+            n += 1
+    log = raw / "collect-log.jsonl"
+    if log.exists():
+        lines = log.read_text(encoding="utf-8", errors="replace").splitlines()
+        head = '{"collected_at": "'
+        keep = [ln for ln in lines if not ln.startswith(head) or ln[len(head):len(head) + 10] >= cut]
+        if len(keep) < len(lines):
+            write_atomic(log, "".join(ln + "\n" for ln in keep))
+    return n
+
+
 def cmd_prepare(args: argparse.Namespace) -> int:
     from .collect import load_store
     from .prepare import current_edition, edition_window, prepare, prepare_opinions, to_jsonable
@@ -61,6 +85,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     raw = _raw_dir(args)
     edition = date.fromisoformat(args.date) if args.date else current_edition(datetime.now(timezone.utc), cfg)
     hist = Path(args.data) / "history"
+    pruned = prune_raw(raw, edition)
     articles, report = prepare(load_store(raw / "store.jsonl"), edition, cfg, sources, hist,
                               late_until=datetime.now(timezone.utc))   # 시간창 끝 뒤 시황 기사 (S28e)
 
@@ -124,7 +149,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         f"(시간창 밖 {report['dropped_out_of_window']}, 시간창 뒤 시황 넣음 {report['late_market']}, 시각 없음 {report['dropped_no_date']}, "
         f"꺼진 매체 {report['dropped_source_disabled']}, 언어 제외 {report['dropped_wrong_lang']}, "
         f"논평·사설 분리 {report['opinion_separated']} (사설 {report['opinions']['editorial']}·칼럼 {report['opinions']['column']}), "
-        f"같은 제목 병합 {report['merged_same_title']}), 분석·해설 {report['analysis']}, 지정 칼럼 {report['picks']}, 수집 실행 {len(runs)}회"
+        f"같은 제목 병합 {report['merged_same_title']}), 분석·해설 {report['analysis']}, 지정 칼럼 {report['picks']}, 수집 실행 {len(runs)}회, 오래된 호별 파일 정리 {pruned}"
     )
     return 0 if articles else 1
 

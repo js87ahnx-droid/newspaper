@@ -28,3 +28,14 @@ def test_corrupt_files_are_skipped(tmp_path, capsys):
     store = tmp_path / "store.jsonl"
     store.write_text("\x00\x00\x00\n{broken\n", encoding="utf-8")
     assert load_store(store) == {}
+
+
+def test_prune_raw_keeps_recent(tmp_path):
+    from pipeline.__main__ import prune_raw
+    for name in ["2026-10-01.json", "2026-10-01.edition.json", "2026-10-20.issues.json", "store.jsonl", "picks.json"]:
+        (tmp_path / name).write_text("{}", encoding="utf-8")
+    (tmp_path / "collect-log.jsonl").write_text(
+        '{"collected_at": "2026-10-01T00:00:00+00:00"}\n{"collected_at": "2026-10-22T00:00:00+00:00"}\n', encoding="utf-8")
+    assert prune_raw(tmp_path, date(2026, 10, 23)) == 2
+    assert sorted(f.name for f in tmp_path.iterdir()) == ["2026-10-20.issues.json", "collect-log.jsonl", "picks.json", "store.jsonl"]
+    assert (tmp_path / "collect-log.jsonl").read_text(encoding="utf-8").count("collected_at") == 1
