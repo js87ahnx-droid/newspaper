@@ -1,7 +1,7 @@
 /* ○월 ○일자 뉴스 — 쪽 나누기와 종이 넘김.
  *
  * 1. #flow 의 섹션·기사를 화면 크기에 맞춰 쪽(.page)으로 나눈다 (가로 화면은 좌우 두 쪽 펼침).
- * 2. 손가락을 따라 넘어가게 한다 (S28a: 펼침은 책등 축 3D 넘김, 한 쪽 화면은 옆으로 밀기). 동작 줄이기 설정이면 애니메이션 없이 넘긴다.
+ * 2. 손가락을 따라 종이가 접히며 넘어가게 한다 (S30d: 모서리 접힘, 펼침·한 쪽 화면 모두). 동작 줄이기 설정이면 애니메이션 없이 넘긴다.
  * 3. 화면 회전·크기 변경·글자 크기 변경 때 다시 나눈다 (보던 기사 위치 유지).
  * 4. 한 면 보기(S16): 같은 쪽을 세로로 쌓아 한 쪽이 한 화면, 스크롤로 다음 쪽, 두 손가락·버튼으로 1~3배 줌.
  * 5. 전체화면(S16): 지원하면 Fullscreen API, 아니면 "홈 화면에 추가" 안내.
@@ -353,7 +353,7 @@
     drag = null;
     anim = false;
     book.innerHTML = "";
-    book.style.perspective = "";
+    leaves = [];
     scroller = sizer = zoomer = null;
     var res = paginate();
     pages = res.pages;
@@ -364,102 +364,147 @@
     if (typeof keepPage === "number") start = Math.max(0, Math.min(keepPage, pages.length - 1));
     document.body.classList.toggle("view-scroll", mode === "scroll");
     syncToolbar();
+    pages.forEach(function (p, i) { p.classList.toggle("pg-left", spread && mode !== "scroll" && i % 2 === 0); });
     if (mode === "scroll") { buildScroll(res.g, start); return; }
     anim = !reduced.matches;
     book.className = (spread ? "spread" : "single") + (anim ? " anim" : " reduced");
     book.style.width = (spread ? res.g.w * 2 : res.g.w) + "px";
     book.style.height = res.g.h + "px";
-    pages.forEach(function (p) { book.appendChild(p); });
-    if (!anim) { simpleShow(start); return; }
-    pw = res.g.w;
-    if (spread) book.style.perspective = Math.round(pw * 4) + "px";
+    if (!anim) { pages.forEach(function (p) { book.appendChild(p); }); simpleShow(start); return; }
+    pw = res.g.w; ph = res.g.h;
+    S = Math.ceil(2 * Math.hypot(pw, ph)) + 4;
+    leaves = pages.map(function (p) { var o = leafOf(p); book.appendChild(o.leaf); return o; });
+    var bp = document.createElement("div");
+    bp.className = "turn-back";
+    bp.style.width = pw + "px"; bp.style.height = ph + "px";
+    backLeaf = leafOf(bp);
+    book.appendChild(backLeaf.leaf);
+    mask = document.createElement("div");
+    mask.className = "turn-mask";
+    mask.style.width = pw + "px"; mask.style.height = ph + "px";
+    cast = document.createElement("div");
+    cast.className = "turn-cast";
+    cast.style.width = cast.style.height = S + "px";
+    mask.appendChild(cast);
+    book.appendChild(mask);
     current = start - (start % (spread ? 2 : 1));
     rest();
   }
 
-  // ---------- 넘김 (S28a) ----------
-  // 넘김 라이브러리(StPageFlip) 대신 직접 (2026-10-23 "넘기는 애니메이션이 부자연스럽고 버벅인다"):
-  // 라이브러리는 프레임마다 쪽 모양을 잘라(clip)·그림자를 다시 그려 글 많은 쪽에서 끊겼고, 세로 화면은 손을 뗀 뒤에야 넘어갔다.
-  // 펼침 = 오른쪽(뒤로는 왼쪽) 쪽이 책등을 축으로 돌아 반을 넘으면 다음 펼침의 쪽이 이어 돈다. 한 쪽 화면 = 옆으로 밀기.
-  // 바꾸는 것은 transform·opacity 뿐(합성 단계만), 끄는 동안 손가락을 따라가고 놓으면 남은 만큼 또는 제자리로.
-  var pw = 0;            // 쪽 폭
-  var turn = null;       // 넘기는 중: {dir, t, els, raf}
-  var DUR_SPREAD = 620, DUR_SINGLE = 340;
+  // ---------- 넘김 (S30d: 종이 넘김) ----------
+  // 10/23 전 라이브러리(StPageFlip)처럼 모서리가 접히며 넘어간다(2026-10-25 "원래대로 하되 부드럽고 버벅이지 않게").
+  // 라이브러리는 프레임마다 쪽 모양을 잘라(clip-path)·그림자를 다시 그려 글 많은 쪽에서 끊겼다 →
+  // 쪽마다 가리는 틀(.leaf, overflow hidden)을 접힌 선에 맞춰 돌려 앞면을 자르고, 뒷면(다음 펼침의 쪽 / 한 쪽 화면은 빈 종이)은
+  // 접힌 선에 거울처럼 비춰 둔다. 매 프레임 transform·opacity 만 바꾸므로 쪽 글자를 다시 그리지 않는다(합성 단계만).
+  // 앞뒤 펼침 쪽은 밑에 깔아 미리 그려 둔다 — 넘김 첫 프레임이 늦지 않게.
+  var pw = 0, ph = 0, S = 0;   // 쪽 폭·높이, 가리는 틀 한 변 (쪽 대각선의 두 배 — 어느 각도로 돌아도 반평면을 덮게)
+  var leaves = [], backLeaf = null, mask = null, cast = null;
+  var turn = null;             // 넘기는 중: {dir, A, B, under, ox, s, e, Hc, rest, done, P, raf, to}
+  var DUR_SPREAD = 820, DUR_SINGLE = 600;
 
-  function shadeOf(p) {
-    var s = p.lastChild;
-    if (!s || s.className !== "turn-shade") { s = document.createElement("div"); s.className = "turn-shade"; p.appendChild(s); }
-    return s;
+  function leafOf(page) {
+    var leaf = document.createElement("div");
+    leaf.className = "leaf";
+    var light = document.createElement("div"); light.className = "flap-light";
+    var shade = document.createElement("div"); shade.className = "flap-shade";
+    leaf.appendChild(page); leaf.appendChild(light); leaf.appendChild(shade);
+    leaf.style.width = leaf.style.height = S + "px";
+    return { leaf: leaf, page: page, light: light, shade: shade };
   }
-  // 넘기지 않을 때: 지금 펼침(또는 쪽)만 보인다. 펼침에서 짝수 쪽은 왼쪽, 홀수 쪽은 오른쪽 자리
+  function originOf(i) { return spread && i % 2 === 1 ? pw : 0; }
+  // 넘기지 않을 때: 지금 펼침(또는 쪽)이 위, 앞뒤 펼침은 밑에 깔아 둔다(가려져 있고 누를 수도 없음).
+  // 값이 같으면 다시 쓰지 않는다 — 쪽이 스무 개 넘어 넘김 끝마다 스타일을 통째로 다시 계산하지 않게
+  function setStyle(el, k, v) { if (el.style[k] !== v) el.style[k] = v; }
   function rest() {
     var step = spread ? 2 : 1;
-    pages.forEach(function (p, i) {
-      var on = i >= current && i < current + step;
-      p.style.transform = p.style.transformOrigin = p.style.willChange = "";
-      p.style.left = spread && i % 2 === 1 ? pw + "px" : "0";
-      p.style.zIndex = on ? 1 : 0;
-      p.style.visibility = on ? "visible" : "hidden";
-      var s = p.lastChild;
-      if (s && s.className === "turn-shade") s.style.opacity = 0;
+    leaves.forEach(function (o, i) {
+      var on = i >= current && i < current + step, near = i >= current - step && i < current + 2 * step;
+      setStyle(o.leaf, "transform", "translate(" + originOf(i) + "px, 0px)");
+      setStyle(o.page, "transform", "");
+      setStyle(o.leaf, "zIndex", on ? "1" : "0");
+      setStyle(o.leaf, "visibility", near ? "visible" : "hidden");
+      setStyle(o.leaf, "willChange", near ? "transform" : "auto");
+      setStyle(o.page, "willChange", near ? "transform" : "auto");
+      if (o.leaf.inert !== !on) o.leaf.inert = !on;
+      setStyle(o.shade, "opacity", "0"); setStyle(o.light, "opacity", "0");
     });
+    if (backLeaf) { backLeaf.leaf.style.visibility = "hidden"; backLeaf.shade.style.opacity = backLeaf.light.style.opacity = 0; }
+    if (mask) { mask.style.visibility = "hidden"; cast.style.opacity = 0; }
     showInfo();
   }
   function canTurn(dir) {
     var step = spread ? 2 : 1;
     return dir > 0 ? current + step < pages.length : current - step >= 0;
   }
-  // 넘김에 쓰는 쪽: a = 먼저 움직이는 쪽(지금 쪽), b = 이어 들어오는 쪽, under = 밑에 깔린 쪽
-  function beginTurn(dir) {
-    var c = current, P = function (i) { return pages[i] || null; };
-    var els = spread ? (dir > 0 ? { a: P(c + 1), b: P(c + 2), under: [P(c), P(c + 3)] } : { a: P(c), b: P(c - 1), under: [P(c - 2), P(c + 1)] })
-                     : { a: P(c), b: P(c + dir), under: [] };
-    els.under.forEach(function (p) { if (p) { p.style.visibility = "visible"; p.style.zIndex = 1; } });
-    [els.a, els.b].forEach(function (p) {
-      if (!p) return;
-      p.style.willChange = "transform"; p.style.zIndex = 3;
-      shadeOf(p).style.opacity = 0;
-    });
-    if (spread) {   // 책등이 축: 오른쪽 쪽은 왼쪽 가장자리, 왼쪽 쪽은 오른쪽 가장자리
-      els.a.style.transformOrigin = dir > 0 ? "0 50%" : "100% 50%";
-      els.b.style.transformOrigin = dir > 0 ? "100% 50%" : "0 50%";
-    }
-    turn = { dir: dir, t: 0, els: els, raf: 0 };
-    frame(0);
-  }
-  function frame(t) {
-    var e = turn.els, d = turn.dir;
-    turn.t = t;
+  // A = 접히는 쪽, B = 그 뒷면, under = 드러나는 쪽. 좌표는 A 쪽 기준: s = 책등 x, e = 바깥 가장자리 x, Hc = 잡은 모서리 y.
+  // rest·done = 모서리(P)의 처음·끝 자리 (한 쪽 화면에서 뒤로는 앞 쪽이 넘어가 있던 자리에서 되돌아온다)
+  function beginTurn(dir, Hc) {
+    var c = current, L = function (i) { return leaves[i] || null; }, T = { dir: dir, Hc: Hc, raf: 0 };
     if (spread) {
-      var first = t < 0.5;   // 반 넘기 전엔 지금 쪽이, 넘은 뒤엔 다음 쪽이 보인다
-      e.a.style.visibility = first ? "visible" : "hidden";
-      e.b.style.visibility = first ? "hidden" : "visible";
-      e.a.style.transform = "rotateY(" + (-d * 180 * t) + "deg)";
-      e.b.style.transform = "rotateY(" + (d * 180 * (1 - t)) + "deg)";
-      shadeOf(e.a).style.opacity = Math.min(1, t * 2) * 0.9;
-      shadeOf(e.b).style.opacity = Math.min(1, (1 - t) * 2) * 0.9;
-      e.under.forEach(function (p) { if (p) shadeOf(p).style.opacity = 0.45 * Math.sin(Math.PI * t); });
+      if (dir > 0) { T.A = L(c + 1); T.B = L(c + 2); T.under = [L(c + 3)]; T.ox = pw; T.s = 0; T.e = pw; }
+      else { T.A = L(c); T.B = L(c - 1); T.under = [L(c - 2)]; T.ox = 0; T.s = pw; T.e = 0; }
+      T.rest = { x: T.e, y: Hc }; T.done = { x: 2 * T.s - T.e, y: Hc };
     } else {
-      e.a.style.visibility = e.b.style.visibility = "visible";
-      e.a.style.transform = "translate3d(" + (-d * pw * t) + "px,0,0)";
-      e.b.style.transform = "translate3d(" + (d * pw * (1 - t)) + "px,0,0)";
-      shadeOf(e.a).style.opacity = 0.6 * t;
+      T.ox = 0; T.s = 0; T.e = pw; T.B = backLeaf;
+      if (dir > 0) { T.A = L(c); T.under = [L(c + 1)]; T.rest = { x: pw, y: Hc }; T.done = { x: -pw, y: Hc }; }
+      else { T.A = L(c - 1); T.under = [L(c)]; T.rest = { x: -pw, y: Hc }; T.done = { x: pw, y: Hc }; }
     }
+    T.under.forEach(function (u) { if (u) { u.leaf.style.visibility = "visible"; u.leaf.style.zIndex = 1; } });
+    [T.A, T.B].forEach(function (o, k) {
+      o.leaf.style.visibility = "visible"; o.leaf.style.zIndex = 3 + k;
+      o.leaf.style.willChange = o.page.style.willChange = "transform";
+    });
+    mask.style.transform = "translate(" + T.ox + "px,0)"; mask.style.visibility = "visible";   // left 를 바꾸면 레이아웃
+    T.P = { x: T.rest.x, y: T.rest.y };
+    turn = T;
+    draw(T.P);
   }
-  // 놓은 뒤: done 이면 끝까지 넘기고, 아니면 제자리로
-  function settle(done) {
-    var t0 = turn.t, t1 = done ? 1 : 0, start = 0;
-    turn.to = done;
-    var dur = Math.max(120, (spread ? DUR_SPREAD : DUR_SINGLE) * Math.abs(t1 - t0));
+  // 모서리가 갈 수 있는 자리: 책등 쪽 두 모서리에서 종이 길이를 넘지 않게 (찢어지지 않게)
+  function clampP(P, s, Hc) {
+    var cx = s, cy = Hc, dx = P.x - cx, dy = P.y - cy, d = Math.hypot(dx, dy);
+    if (d > pw) P = { x: cx + dx * pw / d, y: cy + dy * pw / d };
+    var r2 = Math.hypot(pw, ph);
+    cy = ph - Hc; dx = P.x - cx; dy = P.y - cy; d = Math.hypot(dx, dy);
+    if (d > r2) P = { x: cx + dx * r2 / d, y: cy + dy * r2 / d };
+    return P;
+  }
+  // 모서리를 P 로: 접힌 선 = 모서리 자리와 P 의 수직이등분선. 틀은 그 선을 x 축(=0)으로 돌려 책등 쪽만 남긴다
+  function draw(P) {
+    var T = turn;
+    P = clampP(P, T.s, T.Hc);
+    T.P = P;
+    var dx = P.x - T.e, dy = P.y - T.Hc, d = Math.hypot(dx, dy), ux, uy;
+    if (d < 0.5) { ux = T.s > T.e ? 1 : -1; uy = 0; d = 0.5; } else { ux = dx / d; uy = dy / d; }
+    var mx = T.e + ux * d / 2, my = T.Hc + uy * d / 2, a = Math.atan2(uy, ux) * 180 / Math.PI;
+    var clip = "translate(" + (T.ox + mx) + "px," + my + "px) rotate(" + a + "deg) translate(0," + (-S / 2) + "px)";
+    var back = "translate(0," + (S / 2) + "px) rotate(" + (-a) + "deg) translate(" + (-mx) + "px," + (-my) + "px)";
+    T.A.leaf.style.transform = clip;
+    T.A.page.style.transform = back;   // 틀이 돈 만큼 되돌려 쪽은 제자리
+    T.B.leaf.style.transform = clip;
+    // 뒷면: 쪽 좌우를 뒤집어(뒷면) A 자리에 놓고, 접힌 선에 비춘다 — 두 번 뒤집으므로 글은 바로 읽힌다
+    T.B.page.style.transform = "translate(0," + (S / 2) + "px) scaleX(-1) rotate(" + (-a) + "deg) translate(" + (-mx) + "px," + (-my) + "px) translate(" + pw + "px,0) scaleX(-1)";
+    cast.style.transform = "translate(" + mx + "px," + my + "px) rotate(" + a + "deg) translate(" + (-S) + "px," + (-S / 2) + "px)";
+    var f = Math.min(1, Math.abs(P.x - T.e) / (2 * pw)), k = Math.sin(Math.PI * f);
+    T.B.shade.style.opacity = Math.min(1, k * 1.4);
+    T.B.light.style.opacity = k;
+    cast.style.opacity = Math.min(1, k * 1.6);
+  }
+  function progress() { return turn ? Math.abs(turn.P.x - turn.rest.x) / (2 * pw) : 0; }
+  function ease(k, both) { return both ? (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2) : 1 - Math.pow(1 - k, 3); }
+  // 놓은 뒤: done 이면 끝까지, 아니면 제자리로. lift = 단추로 넘길 때 모서리를 들어 올리는 높이
+  function settle(done, lift) {
+    var T = turn, from = { x: T.P.x, y: T.P.y }, to = done ? T.done : T.rest, start = 0;
+    var dur = Math.max(160, (spread ? DUR_SPREAD : DUR_SINGLE) * Math.abs(to.x - from.x) / (2 * pw));
+    T.to = done;
     var tick = function (now) {
-      if (!turn) return;
+      if (turn !== T) return;
       if (!start) start = now;
-      var k = Math.min(1, (now - start) / dur), ease = 1 - Math.pow(1 - k, 3);
-      frame(t0 + (t1 - t0) * ease);
-      if (k < 1) { turn.raf = requestAnimationFrame(tick); return; }
+      var k = Math.min(1, (now - start) / dur), e = ease(k, !!lift);
+      draw({ x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e + (lift ? lift * Math.sin(Math.PI * e) : 0) });
+      if (k < 1) { T.raf = requestAnimationFrame(tick); return; }
       endTurn(done);
     };
-    turn.raf = requestAnimationFrame(tick);
+    T.raf = requestAnimationFrame(tick);
   }
   function endTurn(done) {
     var d = turn.dir;
@@ -470,21 +515,22 @@
   function stopTurn() {   // 넘기던 것을 끝으로 바로 (다시 나누기·다음 넘김 전)
     if (!turn) return;
     cancelAnimationFrame(turn.raf);
-    endTurn(turn.raf ? turn.to : turn.t > 0.5);
+    endTurn(turn.raf ? turn.to : progress() > 0.5);
   }
   function animateTurn(dir) {
     if (drag && drag.dir) return;   // 끄는 중
     stopTurn();
     if (!canTurn(dir)) return;
-    beginTurn(dir);
-    settle(true);
+    beginTurn(dir, ph);
+    settle(true, -ph * 0.12);
   }
 
   // 끌기: 마우스·손가락 공통. 8px 넘게 가로로 움직여야 넘기기 시작 — 그 전엔 누르기(제목·원문·단추)로 둔다 (S28b: 모서리 제목 누르면 넘김이 겹치던 것)
+  // 잡은 높이가 쪽 위쪽 절반이면 위 모서리, 아래쪽이면 아래 모서리가 접힌다
   var drag = null, eatClick = false;
   function dragStart(x, y) {
     if (!anim || mode !== "flip" || (turn && !turn.raf)) return false;
-    drag = { x: x, y: y, dir: 0, hist: [[x, Date.now()]] };
+    drag = { x: x, y: y, dir: 0, top: book.getBoundingClientRect().top, hist: [[x, Date.now()]] };
     return true;
   }
   function dragMove(x, y) {
@@ -498,11 +544,13 @@
       stopTurn();   // 앞 넘김이 아직 움직이는 중이면 끝내고
       if (!canTurn(dir)) { drag = null; return false; }
       drag.dir = dir;
-      beginTurn(dir);
+      beginTurn(dir, drag.y - drag.top < ph / 2 ? 0 : ph);
+      drag.p0 = { x: turn.rest.x, y: turn.rest.y };
     }
     drag.hist.push([x, Date.now()]);
     if (drag.hist.length > 5) drag.hist.shift();
-    frame(Math.max(0, Math.min(1, -dx * drag.dir / (spread ? pw * 1.6 : pw))));
+    var k = spread ? 1.25 : 2;   // 손가락이 화면을 다 가로지르기 전에 모서리가 끝까지 가게
+    draw({ x: drag.p0.x + dx * k, y: drag.p0.y + dy * 0.5 });
     return true;
   }
   function dragEnd() {
@@ -512,9 +560,9 @@
     eatClick = true;   // 끌다 놓은 자리의 링크가 눌리지 않게
     setTimeout(function () { eatClick = false; }, 400);
     // 넘기는 쪽으로의 속도 (px/ms): 놓기 전 100ms 동안만 — 끌다 멈추고 놓으면 0
-    var now = Date.now(), h = d.hist.filter(function (p) { return now - p[1] <= 100; }), v = 0;
+    var now = Date.now(), h = d.hist.filter(function (p) { return now - p[1] <= 100; }), v = 0, f = progress();
     if (h.length) v = (d.hist[d.hist.length - 1][0] - h[0][0]) / Math.max(16, now - h[0][1]) * -d.dir;
-    settle(v > -0.3 && (turn.t > 0.5 || (v > 0.3 && turn.t > 0.03)));   // 빠르게 튕기면 짧아도 넘어가고, 거꾸로 튕기면 되돌아감
+    settle(v > -0.3 && (f > 0.5 || (v > 0.3 && f > 0.03)));   // 빠르게 튕기면 짧아도 넘어가고, 거꾸로 튕기면 되돌아감
   }
   book.addEventListener("touchstart", function (e) {
     if (e.touches.length === 1) dragStart(e.touches[0].clientX, e.touches[0].clientY);
