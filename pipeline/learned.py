@@ -79,19 +79,20 @@ def learn(root: Path, d: date, rc: dict | None, fetcher=fetch) -> dict:
 
 
 def overlay(interests: Interests, learned: dict) -> Interests:
-    """interests.yaml 값 위에 학습값을 덮은 설정. 원래 분야 가중치(base_weights)와 반영 주(learned_week)를 함께 둔다."""
+    """interests.yaml 값 위에 학습값을 덮은 설정. 원래 분야 가중치·키워드(base_*)와 반영 주(learned_week)를 함께 둔다."""
     from .interest import build_interest_table
 
     prefs = clean({"v": 1, **{k: learned.get(k) for k in ("weights", "keywords", "updated")}})
     base = build_interest_table(interests).topic_weights
     if prefs is None:
-        return interests.model_copy(update={"base_weights": base})
+        return interests.model_copy(update={"base_weights": base, "base_keywords": list(interests.keywords)})
     weights = {**base, **prefs["weights"]}
     return interests.model_copy(update={
         "topics": weights,
         "less": [t for t in TOPICS if weights[t] < interests.default_weight],
         "keywords": prefs["keywords"],
         "base_weights": base,
+        "base_keywords": list(interests.keywords),
         "learned_week": learned.get("week"),
     })
 

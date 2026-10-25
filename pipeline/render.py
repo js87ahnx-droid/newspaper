@@ -147,6 +147,7 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
         "topicWeights": table.topic_weights, "keywords": list(table.keywords), "keywordBoost": table.keyword_boost,
         # 설정 창 (S30c): "기본값으로" = interests.yaml 만의 값, 마지막 서버 반영 주
         "defaultTopicWeights": interests.base_weights or table.topic_weights, "learnedWeek": interests.learned_week,
+        "defaultKeywords": interests.base_keywords if interests.base_keywords is not None else list(table.keywords),
         "maxInterest": (max(table.topic_weights.values(), default=1) + table.keyword_boost) or 1,
         "interestCap": st.get("interest_cap", 0), "interestCounted": st.get("interest_counted", 0),
         # 단신 분야 묶음 순서 (S19c): 분야 중요도 순, 같으면 TOPICS 순

@@ -316,6 +316,7 @@ class Interests(Strict):
     # 학습값을 덮을 때(S30b, learned.overlay)만 채운다 — interests.yaml 에 쓰지 않는다
     base_weights: dict[str, float] | None = None   # interests.yaml 만의 분야 가중치 (설정 창 "기본값으로")
     learned_week: str | None = None                # 마지막으로 반영한 학습값의 주 (예: 2026-W44)
+    base_keywords: list[str] | None = None         # interests.yaml 만의 키워드
 
     @field_validator("topics")
     @classmethod

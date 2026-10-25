@@ -74,6 +74,7 @@ def test_overlay_weights_less_keywords(tmp_path):
     assert "incidents" in i.less and "economy" not in i.less and "science" not in i.less
     assert set(i.less) == {k for k in TOPICS if t[k] < i.default_weight}
     assert i.keywords == ["원전", "HBM"] and i.learned_week == "2026-W44" and i.base_weights == base
+    assert i.base_keywords == load_interests(root, learned=False).keywords
 
 
 def test_broken_learned_file_falls_back(tmp_path):

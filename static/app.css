@@ -164,8 +164,34 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .actions button { min-height: 36px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; }
 .actions button[type="submit"] { background: var(--ink); color: var(--paper); }
 .hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
-#settings table { width: 100%; border-collapse: collapse; font-size: 13px; }
-#settings td, #settings th { border-bottom: 1px solid var(--rule); padding: 3px 4px; text-align: left; }
+/* 관심 학습 창 (S30c): 분야마다 가로 슬라이더 0~3, 키워드 칩. 휴대폰 폭은 아래에서 올라오는 창 */
+#settings { width: min(400px, calc(100vw - 32px)); }
+#settings .shead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+#settings .shead .hint { margin: 0; }
+#settings .wscale, #settings .wrow { display: grid; grid-template-columns: 74px minmax(0, 1fr) 66px; gap: 10px; align-items: center; }
+#settings .wscale { font-size: 11px; color: var(--muted); }
+#settings .wscale span { position: relative; height: 14px; }
+#settings .wscale em { position: absolute; top: 0; font-style: normal; transform: translateX(-50%); white-space: nowrap; }
+#settings .wscale em:first-child { transform: none; }
+#settings .wscale em:last-child { transform: translateX(-100%); }
+#settings .wrow { padding: 4px 0; border-bottom: 1px solid var(--rule); }
+#settings .wrow label { font-size: 14px; }
+#settings .wrow input[type="range"] { width: 100%; height: 30px; margin: 0; accent-color: var(--accent); }
+#settings .wrow output { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+#settings .wrow output b { color: var(--ink); font-weight: 600; }
+#settings .kwh { font-size: 13px; margin: 12px 0 6px; }
+#settings .kwchips { display: flex; flex-wrap: wrap; gap: 6px; }
+#settings .kwchip { display: inline-flex; align-items: center; border: 1px solid var(--rule); border-radius: 14px; padding: 0 2px 0 10px; font-size: 13px; background: var(--paper); }
+#settings .kwchip button { border: 0; background: none; color: var(--muted); font-size: 16px; width: 30px; height: 30px; }
+#settings .kwadd { display: flex; gap: 6px; margin-top: 8px; }
+#settings .kwadd input { flex: 1; min-width: 0; height: 36px; padding: 0 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; }
+#settings .kwadd button { height: 36px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; }
+#settings .sync { margin: 10px 0 2px; font-size: 12px; color: var(--muted); line-height: 1.5; border-left: 3px solid var(--rule); padding-left: 8px; }
+#settings .sync b { color: var(--ink); font-weight: 600; }
+@media (max-width: 560px) {
+  #settings { left: 0; right: 0; top: auto; bottom: 0; width: 100%; max-width: none; }
+  #settings .card { border-radius: 14px 14px 0 0; max-height: 78vh; max-height: 78dvh; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+}
 
 /* ---------- 논평·사설면 ---------- */
 .oplist ul { list-style: none; padding: 0; margin: 4px 0 0; }
