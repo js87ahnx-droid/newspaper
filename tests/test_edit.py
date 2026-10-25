@@ -181,14 +181,55 @@ def test_photo_caps_and_no_duplicates():
 def test_history_has_no_body_or_lead(tmp_path):
     from datetime import date
 
-    _, scored, _, _, ed, _ = run()
+    arts, scored, _, _, ed, _ = run()
     placed_ids = {p.scored.issue.id for ps in ed.sections.values() for p in ps}
-    path = write_history(tmp_path, date(2026, 10, 16), scored, placed_ids)
+    path = write_history(tmp_path, date(2026, 10, 16), scored, placed_ids, arts)
     data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["v"] == 2
     for x in data["issues"]:
-        assert set(x) == {"id", "title", "topic", "days", "signature", "date", "timeline"}
+        assert set(x) == {"id", "title", "topic", "days", "signature", "date", "timeline", "n_sources", "placed", "articles"}
         assert x["timeline"][-1] == {"date": "2026-10-16", "title": x["title"], "summary": None}
         assert all(set(t) == {"date", "title", "summary"} for t in x["timeline"])
+        # 기사 링크는 매체·제목·주소·시각·언어만 — 리드·본문 없음 (2026-10-25 v2)
+        assert all(set(a) == {"source", "title", "url", "published", "lang"} for a in x["articles"])
+        assert len(x["articles"]) <= 3 and len({a["source"] for a in x["articles"]}) == len(x["articles"])
+        assert x["placed"] == (x["id"] in placed_ids) and x["n_sources"] >= 1
+    assert any(x["articles"] for x in data["issues"])
+
+
+def test_history_articles_order_and_tracking():
+    from pipeline.cluster import Issue
+    from pipeline.score import history_articles
+
+    def art(i, src, lang, url, pub="2026-10-16T00:00:00+00:00"):
+        return Article(id=i, url=url, source=src, country="KR", lean="중도", media_type="일간", weight=1.0, paywall=False,
+                       kind="rss", title=f"t{i}", lead="리드는 저장하지 않는다", lang=lang, published=pub, date_source="feed")
+    arts = {a.id: a for a in [
+        art("1", "NHK", "ja", "https://nhk.jp/a?utm_source=rss"),
+        art("2", "BBC", "en", "https://bbc.co.uk/b?utm_medium=x&id=7#top"),
+        art("3", "연합", "ko", "https://www.yna.co.kr/c?rss=1&id=3"),
+        art("4", "연합", "ko", "https://www.yna.co.kr/d"),
+        art("5", "조선", "ko", "https://m.chosun.com/e"),
+    ]}
+    iss = Issue(id="x", article_ids=["1", "2", "3", "4", "5"], title="t", rep_article="4", sources=["NHK", "BBC", "연합", "연합", "조선"],
+                countries=[], leans=[], langs=[], cohesion=1.0)
+    out = history_articles(iss, arts)
+    assert [a["source"] for a in out] == ["연합", "조선", "BBC"]            # 한국어 → 영어, 매체당 1건, 상한 3
+    assert out[0]["url"] == "https://www.yna.co.kr/d"                       # 대표 기사 먼저
+    assert out[1]["url"] == "https://m.chosun.com/e"                        # 호스트는 그대로
+    assert out[2]["url"] == "https://bbc.co.uk/b?id=7"                      # 추적 파라미터·조각만 뗀다
+    assert "lead" not in out[0]
+
+
+def test_v1_history_still_feeds_continuity(tmp_path):
+    """옛 기록(v 없음·기사 없음)도 연속성 읽기가 그대로."""
+    from datetime import date
+
+    (tmp_path / "2026-10-15.json").write_text(json.dumps({"edition": "2026-10-15", "issues": [
+        {"id": "a", "title": "옛", "topic": "economy", "days": 2, "signature": ["옛"], "date": "2026-10-15", "timeline": []}]}),
+        encoding="utf-8")
+    d, prev = load_previous(tmp_path, date(2026, 10, 16))
+    assert d == date(2026, 10, 15) and prev[0]["days"] == 2
 
 
 def test_timeline_carried_from_previous_editions():

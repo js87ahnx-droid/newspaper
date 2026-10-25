@@ -336,7 +336,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
     write_atomic(raw / f"{args.date}.edition.json", json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.write_history:
         placed_ids = {q.scored.issue.id for ps in ed.sections.values() for p in ps for q in [p, *p.related]}
-        write_history(history_dir, edition, scored, placed_ids)
+        write_history(history_dir, edition, scored, placed_ids, articles)
     st = out["stats"]
     print(
         f"{args.date} 호 편집: 실림 {sum(v for k, v in st['by_section'].items() if k != 'compare')}건 {st['by_section']} | 다양성 {st['diversity_slots']}, "

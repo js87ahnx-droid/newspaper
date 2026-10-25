@@ -15,6 +15,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from .fsutil import write_atomic
 from .cluster import Issue
@@ -22,6 +23,7 @@ from .collect import Article
 from .interest import InterestTable
 from .lexical import tokens
 from .settings import Config
+from .textutil import _TRACKING
 from .topics import classify
 
 
@@ -267,19 +269,50 @@ def score_issues(
     return out
 
 
-def write_history(history_dir: Path, edition: date, scored: list[ScoredIssue], placed_ids: set[str]) -> Path:
+#: 기록 판 — 2 = 이슈마다 매체 수·지면 실림·대표 기사 링크(2026-10-25, portfolio-web 분석이 근거로 인용한다).
+HISTORY_V = 2
+HISTORY_ARTICLES = 3   # 이슈당 기사 링크 상한 (공개 저장소 크기)
+
+
+def _plain_url(url: str) -> str:
+    """추적 파라미터·조각만 뗀다 — 호스트·경로는 원래대로(링크가 그대로 열리게)."""
+    parts = urlsplit(url.strip())
+    query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if not _TRACKING.match(k)]
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ""))
+
+
+def history_articles(issue: Issue, articles: dict) -> list[dict]:
+    """이슈의 대표 기사 링크 — 매체·제목·주소·발행 시각·언어만 (리드·본문 없음). 한국어·영어 먼저, 매체당 1건."""
+    arts = [articles[i] for i in issue.article_ids if i in articles]
+    arts.sort(key=lambda a: (a.lang != "ko", a.lang != "en", a.id != issue.rep_article, a.published or ""))
+    out, seen = [], set()
+    for a in arts:
+        if a.source in seen or not a.url:
+            continue
+        seen.add(a.source)
+        out.append({"source": a.source, "title": a.title, "url": _plain_url(a.url), "published": a.published, "lang": a.lang})
+        if len(out) >= HISTORY_ARTICLES:
+            break
+    return out
+
+
+def write_history(history_dir: Path, edition: date, scored: list[ScoredIssue], placed_ids: set[str],
+                  articles: dict | None = None) -> Path:
     """연속성 계산용 기록. 지면에 실린 이슈 + 2개 매체 이상이 다룬 이슈 (지면에 안 실려도 "보도는 이어짐").
-    제목·분야·토큰·일수·지난 경과만 저장 — 본문·리드·임베딩 없음 (공개 저장소).
+    제목·분야·토큰·일수·지난 경과 + 매체 수·지면 실림·대표 기사 링크(매체·제목·주소)만 저장 — 본문·리드·임베딩 없음 (공개 저장소).
     경과의 summary 는 LLM 이 쓴 이슈 정리(enrich 가 채움) — 기사 문장이 아니다."""
     keep = [s for s in scored if s.issue.id in placed_ids or len(s.issue.sources) >= 2]
     history_dir.mkdir(parents=True, exist_ok=True)
     path = history_dir / f"{edition.isoformat()}.json"
     data = {
+        "v": HISTORY_V,
         "edition": edition.isoformat(),
         "issues": [
             {"id": s.issue.id, "title": s.issue.title, "topic": s.topic, "days": s.days, "signature": s.signature,
              "date": edition.isoformat(),
-             "timeline": (s.timeline + [{"date": edition.isoformat(), "title": s.issue.title, "summary": None}])[-TIMELINE_MAX:]}
+             "timeline": (s.timeline + [{"date": edition.isoformat(), "title": s.issue.title, "summary": None}])[-TIMELINE_MAX:],
+             "n_sources": len(set(s.issue.sources)), "placed": s.issue.id in placed_ids,
+             "articles": history_articles(s.issue, articles or {})}
             for s in keep
         ],
     }
