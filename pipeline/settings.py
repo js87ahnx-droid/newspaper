@@ -313,6 +313,9 @@ class Interests(Strict):
     daily_articles: int = Field(gt=0, le=200)
     compare_topics: list[str]
     foreign_display: ForeignDisplay
+    # 학습값을 덮을 때(S30b, learned.overlay)만 채운다 — interests.yaml 에 쓰지 않는다
+    base_weights: dict[str, float] | None = None   # interests.yaml 만의 분야 가중치 (설정 창 "기본값으로")
+    learned_week: str | None = None                # 마지막으로 반영한 학습값의 주 (예: 2026-W44)
 
     @field_validator("topics")
     @classmethod
@@ -380,5 +383,10 @@ def load_sources(root: Path = ROOT) -> Sources:
     return _load(root / "sources.yaml", Sources)
 
 
-def load_interests(root: Path = ROOT) -> Interests:
-    return _load(root / "interests.yaml", Interests)
+def load_interests(root: Path = ROOT, learned: bool = True) -> Interests:
+    """interests.yaml + 주간 학습값(data/interests-learned.json, S30b). learned=False 면 interests.yaml 만."""
+    interests = _load(root / "interests.yaml", Interests)
+    if not learned:
+        return interests
+    from .learned import apply   # learned 가 이 모듈을 불러오므로 여기서
+    return apply(interests, root)

@@ -51,6 +51,7 @@ if [ "${RENDER_ONLY:-0}" = "1" ]; then
   echo "지면만 다시 그리기: $DATE"
   $PY -m pipeline publish --date "$DATE" --site docs
 else
+$PY -m pipeline learn --date "$DATE" || echo "::warning::관심 학습값을 반영하지 못했습니다 (지난 값으로 편집)"
 $PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모두 실패했습니다 (누적분으로 발행)"
 $PY -m pipeline prepare --date "$DATE"
 $PY -m pipeline embed --date "$DATE"

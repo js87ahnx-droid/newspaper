@@ -510,6 +510,16 @@ def cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_learn(args: argparse.Namespace) -> int:
+    """주간 관심 학습값 반영 (S30b): 이번 주에 아직 안 합쳤으면 Worker 의 /prefs 를 받아 data/interests-learned.json 에."""
+    from . import reader
+    from .learned import learn
+
+    r = learn(Path(args.root), date.fromisoformat(args.date), reader.config())
+    print("관심 학습: " + r["status"] + "".join(f", {k} {v}" for k, v in r.items() if k != "status"))
+    return 0
+
+
 def cmd_publish(args: argparse.Namespace) -> int:
     from .publish import publish
 
@@ -579,6 +589,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--out", default=str(ROOT / "build"), help="출력 폴더 (기본: build/)")
     p.set_defaults(func=cmd_render)
+    p = sub.add_parser("learn", help="주간 관심 학습값을 Worker 에서 받아 data/interests-learned.json 에 (주에 한 번)")
+    p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD (이 날짜의 ISO 주)")
+    p.set_defaults(func=cmd_learn)
     p = sub.add_parser("publish", help="Pages 폴더(docs/)에 오늘 호·지난 호·목록 쓰기 (암호화 전)")
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--site", default=str(ROOT / "docs"), help="Pages 폴더 (기본: docs/)")
