@@ -125,10 +125,12 @@ def _open(browser, tmp_path, monkeypatch, handler, configured=True, mutate=None)
     seen = []
 
     def route(r):
-        seen.append({"url": r.request.url, "key": r.request.headers.get("x-reader-key"), "method": r.request.method})
         cors = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "X-Reader-Key, Content-Type"}
         if r.request.method == "OPTIONS":
             return r.fulfill(status=204, headers=cors)
+        if r.request.url.split("?")[0].endswith("/prefs"):   # 관심 학습값 (S30c) — 원문 요청이 아니므로 세지 않음
+            return r.fulfill(status=200, headers={**cors, "Content-Type": "application/json"}, body='{"ok": true, "prefs": null}')
+        seen.append({"url": r.request.url, "key": r.request.headers.get("x-reader-key"), "method": r.request.method})
         status, body = handler(r.request.url, json.loads(r.request.post_data) if r.request.method == "POST" else None)
         if isinstance(body, str):   # 플랫폼 오류 페이지
             return r.fulfill(status=status, headers={**cors, "Content-Type": "text/html"}, body=body)

@@ -1,4 +1,4 @@
-"""넘김 엔진·모서리 제목·자세히 창 닫기 (S28a~c, 2026-10-23 사용자 요청).
+"""넘김 엔진·모서리 제목·자세히 창 닫기 (S28a~c, 2026-10-23 사용자 요청 · S30d 종이 넘김).
 
 1. 넘기는 애니메이션이 부자연스럽고 버벅임 → 직접 만든 넘김: 손가락을 따라가고, transform·opacity 만 바꾼다
 4. 모서리 근처 기사 제목을 누르면 넘김 동작이 겹침 → 누르기는 누르기, 8px 넘게 가로로 끌어야 넘김
@@ -43,14 +43,15 @@ def test_small_drag_returns_and_drag_follows_finger(browser, tmp_path):  # noqa:
         page.mouse.move(x0 - i * 30, y0)
         page.wait_for_timeout(40)
     mid = page.evaluate("""() => { const p = document.querySelector('#book .page[data-page="1"]');
-        return {turning: NEWS.state().turning, tf: p.style.transform}; }""")
+        return {turning: NEWS.state().turning, tf: p.parentNode.style.transform, back: document.querySelector('#book .page[data-page="2"]').style.transform}; }""")
     page.wait_for_timeout(200)                  # 멈췄다 놓기 = 튕김 아님
     page.mouse.up()
     page.wait_for_timeout(800)
     st = _st(page)
     ctx.close()
     assert not errors, errors
-    assert mid["turning"] is True and "rotateY(-" in mid["tf"]    # 끄는 동안 오른쪽 쪽이 책등을 축으로 돈다
+    # 끄는 동안 오른쪽 쪽(1)의 가리는 틀이 접힌 선을 따라 돌고, 다음 펼침의 왼쪽 쪽(2)이 뒷면으로 비친다 (S30d 종이 넘김)
+    assert mid["turning"] is True and "rotate(" in mid["tf"] and "scaleX(-1)" in mid["back"]
     assert st["current"] == 0 and st["turning"] is False          # 반을 안 넘기고 놓으면 제자리
 
 

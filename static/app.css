@@ -42,18 +42,24 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 
 #book { margin: 0 auto; position: relative; }
 #book.reduced .page { display: inline-block; vertical-align: top; }
-/* 넘김 (S28a): 쪽을 겹쳐 두고 transform·opacity 만 바꾼다. 쪽마다 contain — 넘기는 동안 다른 쪽을 다시 재지 않게 */
-#book.anim .page { position: absolute; top: 0; contain: layout paint style; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+/* 종이 넘김 (S30d): 쪽마다 가리는 틀(.leaf) 안에 쪽. 넘기는 동안 틀·쪽의 transform 과 그림자 opacity 만 바꾼다.
+   쪽마다 contain — 넘기는 동안 다른 쪽을 다시 재지 않게 */
+#book.anim .leaf { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; transform-origin: 0 0; }
+#book.anim .leaf > .page, #book.anim .leaf > .turn-back { position: absolute; left: 0; top: 0; transform-origin: 0 0; pointer-events: auto; contain: layout paint style; }
 #book.anim.single { overflow: hidden; }
 #book.anim { touch-action: pinch-zoom; -webkit-user-select: none; user-select: none; }
-.turn-shade { position: absolute; inset: 0; pointer-events: none; opacity: 0; z-index: 5; will-change: opacity; }  /* 그림자는 따로 합성 — 쪽 글을 다시 그리지 않게 */
-#book.spread .page:nth-child(odd) .turn-shade { background: linear-gradient(to left, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
-#book.spread .page:nth-child(even) .turn-shade { background: linear-gradient(to right, rgba(0,0,0,.42), rgba(0,0,0,.1) 40%, rgba(0,0,0,0) 80%); }
-#book.single .turn-shade { background: rgba(0,0,0,.35); }
+.turn-back { background: linear-gradient(to left, var(--paper), var(--paper) 70%, var(--rule)); }   /* 한 쪽 화면에서 접힌 쪽의 뒷면 */
+.flap-shade { position: absolute; left: 0; top: 0; width: 56px; height: 100%; opacity: 0; pointer-events: none;
+  background: linear-gradient(to right, rgba(0,0,0,.30), rgba(0,0,0,.08) 40%, rgba(0,0,0,0)); }
+.flap-light { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none;
+  background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,.16) 30%, rgba(255,255,255,0) 60%); }
+.turn-mask { position: absolute; top: 0; overflow: hidden; pointer-events: none; z-index: 2; visibility: hidden; }
+.turn-cast { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0) calc(100% - 50px), rgba(0,0,0,.34)); }   /* 드러나는 쪽에 진 그림자 */
 .stage { position: absolute; left: -100000px; top: 0; visibility: hidden; }
 
 .page { background: var(--paper); overflow: hidden; position: relative; }
-#book.spread .page[data-page]:nth-child(odd), .stage .page { border-right: 1px solid var(--rule); }
+#book.spread .page.pg-left, .stage .page { border-right: 1px solid var(--rule); }   /* 펼침 왼쪽 쪽 (S30d: 쪽이 틀 안에 있어 nth-child 대신 클래스) */
 .page-inner {
   position: absolute; inset: 0 0 22px 0; padding: 18px 22px 0; overflow: hidden;
   font-size: calc(15px * var(--fs)); line-height: 1.5;
