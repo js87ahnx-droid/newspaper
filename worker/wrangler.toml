@@ -14,6 +14,11 @@ GH_REPO = "js87ahnx-droid/newspaper"
 [triggers]
 crons = ["33 20 * * *", "3 21 * * *", "33 21 * * *"]
 
+# 관심 학습값 (S30a) — 지면 설정 창의 슬라이더·키워드 한 칸. 원문은 저장하지 않는다 (D16)
+[[kv_namespaces]]
+binding = "PREFS"
+id = "0b540f1f4c6d4ee68d8ffb00df37331b"
+
 # 한국어 번역 (S17b) — Workers AI 무료 할당량, 저장 안 함
 [ai]
 binding = "AI"

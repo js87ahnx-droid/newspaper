@@ -91,16 +91,19 @@ def test_turn_does_not_relayout_each_frame(browser, tmp_path, w, h):  # noqa: F8
     cdp.send("Performance.enable")
 
     def layouts():
-        return {m["name"]: m["value"] for m in cdp.send("Performance.getMetrics")["metrics"]}["LayoutCount"]
-    l0 = layouts()
+        m = {m["name"]: m["value"] for m in cdp.send("Performance.getMetrics")["metrics"]}
+        return m["LayoutCount"], m["LayoutDuration"]
+    l0, d0 = layouts()
     page.evaluate("NEWS.go(1)")
     page.wait_for_timeout(900)
-    n = layouts() - l0
+    l1, d1 = layouts()
+    n, ms = l1 - l0, (d1 - d0) * 1000
     st = _st(page)
     ctx.close()
     assert not errors, errors
     assert st["current"] == (1 if w < h else 2)
-    assert n <= 5, f"넘김 한 번에 레이아웃 {n}번"
+    # S30d: 횟수는 늦게 오는 사진에 따라 흔들려(각 0.3ms 이하) 시간으로도 본다 — 예전 라이브러리는 프레임마다 쪽 전체를 다시 쟀다
+    assert n <= 8 and ms < 15, f"넘김 한 번에 레이아웃 {n}번 {ms:.1f}ms"
 
 
 def _corner_title(page):

@@ -611,6 +611,22 @@
   - 테스트: 전체 349건 중 348 통과(실패 1 = 기존 Worker test_worker_has_no_storage)
   - 기록 한계: 점검 원본 목록(안 고친 것과 이유)은 이 세션 맥락이 넘어오며 남지 않아 고친 것만 적음
 
+### S30 13차 요청 (2026-10-25, 종이 넘김·설문 팝업 끄기·관심 학습 슬라이더와 주간 서버 반영)
+- 사용자 결정: 넘김은 10/23 전 종이 넘김 모양, 관심 학습은 서버 편집까지 반영. 시안 https://claude.ai/artifact/KYzKB4vUVYyhhcP9AzfE2S → "시안대로 진행"
+- S30a Worker GET·POST /prefs (worker/src/prefs.js, KV 한 칸 PREFS). D16 을 좁힘(원문은 여전히 저장 안 함). 기존에 실패하던 test_worker_has_no_storage 고침
+- S30b `python -m pipeline learn --date D`(daily.sh, collect 앞): 이번 ISO 주에 아직 안 합쳤으면 /prefs → data/interests-learned.json(커밋) → load_interests 가 interests.yaml 위에 덮음
+  (분야 가중치는 학습값, 덜 보기 = default_weight 미만, 키워드는 학습 목록). 실패·키 없음이면 그대로
+- S30c 설정 창(⚙): 분야마다 가로 슬라이더 0~3·키워드 칩·기본값으로·설문 단추. 기기 값은 절대값(news.prefs2), 예전 delta 옮김.
+  바꾸면 1.5초 모아 /prefs 로, 열 때 서버 값이 더 새것이면 받아 지면 다시 배치. 설문은 저절로 안 뜸. 내보내기 없앰
+- S30d 종이 넘김(app.js): 쪽마다 가리는 틀(.leaf)을 접힌 선에 맞춰 돌리고 뒷면은 거울처럼 비춤 — transform·opacity 만.
+  실측(10/23호, 헤드리스): 프레임 중앙값 16.7ms(펼침·휴대폰, 끌기·단추), 20ms 넘는 프레임은 첫 넘김 1개뿐. 레이아웃 펼침 3회, 휴대폰 4~6회(각 0.3ms 이하)
+- S30e KV PREFS(0b540f1f…) 만들고 wrangler.toml 에 묶어 배포(버전 e7b712b5). 실제 Worker: /prefs 키 없음 401·PUT 405·지면 출처 CORS POST 허용,
+  KV 는 닿고 값 없음(404). 키를 넣은 읽기·쓰기는 못 함 — 이 PC .dev.vars 키는 실제 키와 다름(실제 키는 GitHub Secrets·Worker 에만)
+  → 지면에서 슬라이더를 처음 바꾼 뒤 `npx.cmd wrangler kv key get prefs --binding PREFS --remote` 로 값이 들어왔는지 확인할 것
+- 평가: 전체 356건 중 355 통과 → 실패 1(휴대폰 넘김 레이아웃 횟수 6회 이상, 늦게 오는 사진 탓) 테스트를 횟수 8·시간 15ms 로 바꿔 3번 연속 통과. Worker node 테스트 8/8
+- 반영 시점: 지면 정적 파일(app.js·feedback.js)은 다음 발행 때 docs/static 으로 복사됨 → push 뒤 첫 아침 발행부터. 서버 편집 반영은 그 뒤 첫 월요일 발행(그 주에 값이 있을 때)
+- 계획과 다른 점은 implementation-notes.md(Deviations)
+
 ### 다음에 이어서 할 일
 0. 10/22 발행 로그: 인터뷰 후보 수·고른 수(LLM 줄 interviews) 확인, 고른 인터뷰가 석학·지도자급인지 점검
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
