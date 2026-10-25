@@ -71,6 +71,15 @@ test("지면 출처에만 CORS 허용", async () => {
   assert.equal(r.headers.get("Access-Control-Allow-Origin"), ORIGIN);   // 거부 응답도 지면이 이유를 읽을 수 있게
 });
 
+test("학습값: 키 없음 401, 다른 방식 405 (S30a)", async () => {
+  assert.equal((await w.fetch("/prefs")).status, 401);
+  assert.equal((await w.fetch("/prefs", { method: "POST", body: "{}" })).status, 401);
+  assert.equal((await w.fetch("/prefs", { method: "PUT", headers: { "X-Reader-Key": KEY } })).status, 405);
+  const r = await w.fetch("/prefs", { headers: { "X-Reader-Key": KEY } });
+  assert.ok([200, 501].includes(r.status));   // 시험 런타임에 KV 가 묶였는지에 따라
+  assert.match(r.headers.get("Cache-Control"), /no-store/);
+});
+
 test("번역: 키 없음 401, 잘못된 요청 400, 경로·방식이 다르면 405", async () => {
   const post = (path, body, headers = {}) => w.fetch(path, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body });
   assert.equal((await post("/translate", JSON.stringify({ lang: "en", texts: ["a"] }))).status, 401);

@@ -70,13 +70,19 @@ def test_page_urls_cover_analysis_and_picks():
 
 
 def test_worker_has_no_storage():
-    """D16: 중계 서버는 아무것도 저장하지 않는다 — 저장소 바인딩 없음, 응답 no-store, 요청 기록 끔."""
+    """D16: 중계 서버는 원문을 저장하지 않는다 — 응답 no-store, 요청 기록 끔.
+    S30a(사용자 결정)부터 저장소는 관심 학습값 KV(PREFS) 한 칸뿐, 로그는 아침 발행 상태 코드 한 줄뿐."""
     toml = (WORKER / "wrangler.toml").read_text(encoding="utf-8")
-    for b in ("kv_namespaces", "r2_buckets", "d1_databases", "durable_objects", "queues", "[cache]"):
+    for b in ("r2_buckets", "d1_databases", "durable_objects", "queues", "[cache]"):
         assert b not in toml
+    kv = toml.split("[[kv_namespaces]]")[1:]
+    assert len(kv) <= 1 and all(re.search(r'binding = "PREFS"', k) for k in kv)
     assert re.search(r"\[observability\]\s*\nenabled = false", toml)
     src = (WORKER / "src" / "index.js").read_text(encoding="utf-8")
-    assert "no-store" in src and "caches." not in src and "console.log" not in src
+    assert "no-store" in src and "caches." not in src and ".put(" not in src
+    assert src.count("console.log") == 1 and 'console.log("daily dispatch"' in src
+    prefs = (WORKER / "src" / "prefs.js").read_text(encoding="utf-8")
+    assert prefs.count(".put(") == 1 and "console." not in prefs
 
 
 def test_reader_key_not_in_public_static_files(tmp_path, monkeypatch):
