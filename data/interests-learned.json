@@ -1,0 +1,26 @@
+{
+  "week": "2026-W44",
+  "edition": "2026-10-27",
+  "applied": "2026-10-26T20:34:44+00:00",
+  "weights": {
+    "economy": 1.2,
+    "semis_ai": 1.0,
+    "politics": 1.0,
+    "international": 1.2,
+    "industry": 1.0,
+    "society": 0.7,
+    "entertainment_sports": 0.2,
+    "incidents": 0.2,
+    "lifestyle_culture": 0.2,
+    "science": 0.5
+  },
+  "keywords": [
+    "삼성전자",
+    "SK하이닉스",
+    "엔비디아",
+    "TSMC",
+    "HBM",
+    "반도체 수출"
+  ],
+  "updated": "2026-10-25T23:39:21.406Z"
+}
