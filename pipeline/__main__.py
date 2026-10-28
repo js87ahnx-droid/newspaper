@@ -471,13 +471,25 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
             from .bodies import fetch_bodies
 
-            top = [it for ps in edition["sections"].values() for it in ps][: cfg.llm.analysis_issues]
-            fetched = asyncio.run(fetch_bodies([a["url"] for it in top for a in it["articles"]]))
+            from .llm import econ_targets
+
+            every = [it for ps in edition["sections"].values() for it in ps]
+            top = every[: cfg.llm.analysis_issues]
+            top += [it for it in econ_targets(every, cfg.llm.econ_issues) if it not in top]   # 경제 해설 대상도 (S31b)
+            fetched = asyncio.run(fetch_bodies(list(dict.fromkeys(a["url"] for it in top for a in it["articles"]))))
             bodies = {u: b.text for u, b in fetched.items()}
             ok = sum(1 for b in fetched.values() if b.text)
             edition.setdefault("stats", {})["bodies"] = {"articles": len(fetched), "ok": ok}
             print(f"본문 읽기: {ok}/{len(fetched)}건 (메모리에서만 사용)")
-        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies)
+        known: list[str] = []
+        if cfg.llm.econ_issues > 0:
+            # 아는 경제 개념 (S31a): 독자가 경제 해설 창에서 "필요 없어요"로 표시한 것 — 발행마다 Worker 에서
+            from . import reader
+            from .learned import fetch_known
+
+            known = fetch_known(reader.config())
+            print(f"아는 경제 개념: {len(known)}개")
+        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies, known=known)
         del bodies
         st = edition["stats"]["llm"]
         sp = st.get("spent_today") or {}
@@ -487,6 +499,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
                     f"{' | ' + models if models else ''})")
         if st.get("analysis") and st["analysis"]["rejected"]:
             llm_note += f" | 분석 버림 {st['analysis']['rejected']}"
+        if st.get("econ") and st["econ"]["rejected"]:
+            llm_note += f" | 경제 해설 버림 {st['econ']['rejected']}"
         if st.get("merged_duplicates"):
             llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
         _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)

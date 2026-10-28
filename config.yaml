@@ -91,9 +91,13 @@ photos:
 llm:
   enabled: true
   model: haiku
-  max_calls_per_day: 50   # 호 단위(S21a). 폭주 방지용 — 같은 호를 하루 여러 번 다시 발행하면 나눠 씀. 실제 사용량·API 환산 금액은 발행 로그 LLM 줄(S23c). 분석 14 + 분야 분류 4 + 관련 기사 2 + 비교 1 + 요약·번역 6까지 + 같은 사건 2 + 사설 제목 1 + 분석 요약 1 + 헤드라인 1 ≈ 32, 재시도 여유 (S22)
+  max_calls_per_day: 62   # (S31b: 경제 해설 opus 3건씩 최대 10회 더해 50 → 62) 호 단위(S21a). 폭주 방지용 — 같은 호를 하루 여러 번 다시 발행하면 나눠 씀. 실제 사용량·API 환산 금액은 발행 로그 LLM 줄(S23c). 분석 14 + 분야 분류 4 + 관련 기사 2 + 비교 1 + 요약·번역 6까지 + 같은 사건 2 + 사설 제목 1 + 분석 요약 1 + 헤드라인 1 ≈ 32, 재시도 여유 (S22)
   timeout_sec: 120
   analysis_model: sonnet
   analysis_issues: 70   # 지면 60건 + 예비 10건 (S19d, 14회)
   analysis_batch: 5
   analysis_timeout_sec: 300
+  econ_model: opus        # 경제 심화 해설 (S31b, 14차 요청 — 시안에서 sonnet·opus 비교 후 사용자 "opus로 진행")
+  econ_issues: 30         # 경제·산업·반도체 분야 지면 기사 (예비 제외) 점수 순 30건까지
+  econ_batch: 3
+  econ_timeout_sec: 600
