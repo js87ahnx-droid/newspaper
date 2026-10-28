@@ -17,7 +17,7 @@ from pathlib import Path
 from .fsutil import read_json, write_atomic
 from .settings import TOPICS, Interests
 
-MAX_W, MAX_KW, MAX_KW_LEN = 3.0, 30, 30
+MAX_W, MAX_KW, MAX_KW_LEN, MAX_KNOWN, MAX_KNOWN_LEN = 3.0, 30, 30, 100, 40
 
 
 def learned_path(root: Path) -> Path:
@@ -47,7 +47,35 @@ def clean(prefs) -> dict | None:
             return None
         if k.strip() not in keywords:
             keywords.append(k.strip())
-    return {"weights": weights, "keywords": keywords, "updated": prefs["updated"]}
+    known = clean_known(prefs.get("known", []))
+    if known is None:
+        return None
+    return {"weights": weights, "keywords": keywords, "known": known, "updated": prefs["updated"]}
+
+
+def clean_known(v) -> list[str] | None:
+    """아는 경제 개념 목록 (S31a). 틀리면 None."""
+    if not isinstance(v, list) or len(v) > MAX_KNOWN:
+        return None
+    out: list[str] = []
+    for k in v:
+        if not isinstance(k, str) or not k.strip() or len(k.strip()) > MAX_KNOWN_LEN:
+            return None
+        if k.strip() not in out:
+            out.append(k.strip())
+    return out
+
+
+def fetch_known(rc: dict | None, fetcher=fetch) -> list[str]:
+    """발행마다 Worker 의 /prefs 에서 아는 경제 개념만 (S31a — 관심 가중치와 달리 주간이 아니라 바로 다음 호부터). 실패하면 []."""
+    if not rc:
+        return []
+    try:
+        got = fetcher(rc)
+    except Exception:  # noqa: BLE001 — 못 받으면 아는 개념 없이 해설
+        return []
+    prefs = got.get("prefs") if isinstance(got, dict) and got.get("ok") else None
+    return (clean_known(prefs.get("known", [])) or []) if isinstance(prefs, dict) else []
 
 
 def fetch(rc: dict, timeout: float = 15.0):

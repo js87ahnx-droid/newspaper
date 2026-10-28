@@ -18,7 +18,17 @@ test("저장 뒤 읽으면 같은 값 (키워드 다듬기·겹침 빼기, 가�
   assert.equal(w.status, 200);
   const r = await handlePrefs(req("GET"), env, json);
   assert.equal(r.status, 200);
-  assert.deepEqual(r.body.prefs, { v: 1, weights: { economy: 1.25, semis_ai: 3, incidents: 0 }, keywords: ["HBM", "원전"], updated: "2026-10-25T03:00:00.000Z" });
+  assert.deepEqual(r.body.prefs, { v: 1, weights: { economy: 1.25, semis_ai: 3, incidents: 0 }, keywords: ["HBM", "원전"], known: [], updated: "2026-10-25T03:00:00.000Z" });
+});
+
+test("아는 개념(known): 다듬기·겹침 빼기, 100개·40자 넘으면 400 (S31a)", async () => {
+  const env = { PREFS: kv() };
+  const w = await handlePrefs(req("POST", { ...GOOD, known: [" 기준금리와 환율 ", "기준금리와 환율", "밸류에이션"] }), env, json);
+  assert.equal(w.status, 200);
+  assert.deepEqual(w.body.prefs.known, ["기준금리와 환율", "밸류에이션"]);
+  for (const bad of [Array(101).fill(0).map((_, i) => "개념" + i), ["가".repeat(41)], "문자열", [1]]) {
+    assert.equal((await handlePrefs(req("POST", { ...GOOD, known: bad }), env, json)).status, 400, JSON.stringify(bad).slice(0, 40));
+  }
 });
 
 test("아직 없으면 prefs: null", async () => {
@@ -41,8 +51,8 @@ test("잘못된 값은 400, 저장 안 함", async () => {
   assert.equal(env.PREFS.m.size, 0);
 });
 
-test("본문이 4KB 넘으면 413, KV 가 없으면 501", async () => {
-  assert.equal((await handlePrefs(req("POST", "x".repeat(5000)), { PREFS: kv() }, json)).status, 413);
+test("본문이 8KB 넘으면 413, KV 가 없으면 501", async () => {
+  assert.equal((await handlePrefs(req("POST", "x".repeat(9000)), { PREFS: kv() }, json)).status, 413);
   assert.equal((await handlePrefs(req("GET"), {}, json)).status, 501);
 });
 

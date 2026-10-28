@@ -1,11 +1,11 @@
 // 관심 학습값 저장 (S30a) — 지면 설정 창의 슬라이더·키워드를 KV 한 칸에 둔다. 발행이 주마다 받아 서버 편집에 합친다(S30b)
 //
 // GET  /prefs  → {ok, prefs | null}
-// POST /prefs  본문 {"v":1, "weights":{분야:0~3}, "keywords":[...], "updated":"ISO 시각"} → {ok, prefs}
+// POST /prefs  본문 {"v":1, "weights":{분야:0~3}, "keywords":[...], "known":[아는 경제 개념(선택, S31a)], "updated":"ISO 시각"} → {ok, prefs}
 // 키(X-Reader-Key)·출처 확인은 index.js 가 먼저 한다. KV(PREFS)가 묶여 있지 않으면 501
 export const TOPICS = ["economy", "semis_ai", "politics", "international", "industry", "society",
   "entertainment_sports", "incidents", "lifestyle_culture", "science"];   // pipeline/settings.py TOPICS 와 같게 (tests/test_prefs.py)
-export const MAX_BODY = 4096, MAX_W = 3, MAX_KW = 30, MAX_KW_LEN = 30;
+export const MAX_BODY = 8192, MAX_W = 3, MAX_KW = 30, MAX_KW_LEN = 30, MAX_KNOWN = 100, MAX_KNOWN_LEN = 40;
 const KEY = "prefs";
 
 // 받은 값을 확인해 저장할 모양으로. 틀리면 {error}
@@ -28,9 +28,18 @@ export function validatePrefs(body) {
     if (!t || t.length > MAX_KW_LEN) return { error: "키워드는 1~" + MAX_KW_LEN + "자" };
     if (!keywords.includes(t)) keywords.push(t);
   }
+  // 아는 경제 개념 (S31a, 선택): 경제 해설 창의 "이런 해설은 이제 필요 없어요"
+  const known = [];
+  if (body.known !== undefined) {
+    if (!Array.isArray(body.known) || body.known.length > MAX_KNOWN) return { error: "known 은 " + MAX_KNOWN + "개까지" };
+    for (const k of body.known) {
+      if (typeof k !== "string" || !k.trim() || k.trim().length > MAX_KNOWN_LEN) return { error: "아는 개념은 1~" + MAX_KNOWN_LEN + "자" };
+      if (!known.includes(k.trim())) known.push(k.trim());
+    }
+  }
   const u = Date.parse(body.updated);
   if (typeof body.updated !== "string" || !Number.isFinite(u)) return { error: "updated 는 ISO 시각" };
-  return { prefs: { v: 1, weights, keywords, updated: new Date(u).toISOString() } };
+  return { prefs: { v: 1, weights, keywords, known, updated: new Date(u).toISOString() } };
 }
 
 // json(body, status) 은 index.js 의 응답 함수 (머리글 포함)

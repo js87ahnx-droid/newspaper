@@ -89,3 +89,18 @@ def test_worker_topics_match_pipeline():
     src = (ROOT / "worker" / "src" / "prefs.js").read_text(encoding="utf-8")
     js = re.findall(r'"(\w+)"', re.search(r"TOPICS = \[(.*?)\]", src, re.S).group(1))
     assert js == list(TOPICS)
+
+
+def test_fetch_known_concepts():
+    """S31a: 발행마다 /prefs 에서 아는 경제 개념만. 실패·형식 오류·없음이면 []."""
+    ok = {"ok": True, "prefs": {**PREFS, "known": [" 기준금리와 환율 ", "기준금리와 환율", "밸류에이션"]}}
+    assert learned.fetch_known(RC, lambda rc: ok) == ["기준금리와 환율", "밸류에이션"]
+    assert learned.fetch_known(None, lambda rc: ok) == []
+    for bad in [None, {"ok": False}, {"ok": True, "prefs": None}, {"ok": True, "prefs": {**PREFS, "known": "x"}},
+                {"ok": True, "prefs": {**PREFS, "known": ["가" * 41]}}, {"ok": True, "prefs": PREFS}]:
+        assert learned.fetch_known(RC, lambda rc, b=bad: b) == [], bad
+
+    def boom(rc):
+        raise OSError("down")
+    assert learned.fetch_known(RC, boom) == []
+    assert learned.clean({**PREFS, "known": ["가"] * 101}) is None   # 주간 반영 값도 같은 규칙
