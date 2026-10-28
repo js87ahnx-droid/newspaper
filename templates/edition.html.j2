@@ -1,5 +1,17 @@
 {# 원문 창으로 여는 기사 (S17b): 중계 서버로 읽을 주소(못 읽는 매체면 빈 값)·매체·언어 #}
 {% macro art(url, source, lang) %} data-art data-read="{{ read_url(url, source) }}" data-src="{{ source }}" data-lang="{{ lang }}"{% endmacro %}
+{# 경제 심화 해설 (S31c): 누르면 창으로. 원본은 단추 옆 template — 쪽 나누기에 안 잡히고 단신에도 따라감 #}
+{% macro econ_btn(it, v) %}        {% set ec = it.llm.econ if it.llm else None %}{% if ec %}
+        <button type="button" class="econ-btn" data-econ>경제 해설</button>
+        <template class="econ-src"><article class="econ-view">
+          <span class="ev-kicker">경제 해설</span>
+          <h2 class="ev-title">{{ v.title }}</h2>
+          {% if ec.concepts %}<div class="ev-concepts">핵심 개념 {% for c in ec.concepts %}<span class="concept">{{ c }}</span>{% endfor %}</div>{% endif %}
+          <div class="ev-tp"><section class="t"><h3>이론으로 보면</h3><p>{{ ec.theory }}</p></section><section class="p"><h3>실제로는</h3><p>{{ ec.practice }}</p></section></div>
+          {% if ec.analysis %}<div class="ev-blk"><h3>상세 분석</h3><ol>{% for x in ec.analysis %}<li>{{ x }}</li>{% endfor %}</ol></div>{% endif %}
+          {% if ec.watch %}<div class="ev-blk"><h3>지켜볼 지표</h3><dl class="ev-watch">{% for w in ec.watch %}<dt>{{ w.what }}</dt><dd>{{ w.why }}</dd>{% endfor %}</dl></div>{% endif %}
+          <div class="ev-foot"><span>AI 해설 · 투자 권유 아님</span><span class="ev-skip"></span></div>
+        </article></template>{% endif %}{% endmacro %}
 {# 1면 메인 기사 (S26): 사진·제목·부제·요약 + "자세히 보기"(각도별 묶음은 자세히 창에) #}
 {% macro lead_art(it) %}{% set v = it.view %}
     <article class="fz-art fz-lead" data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-section="front" data-lang="{{ v.lang }}">
@@ -19,6 +31,7 @@
         <span class="badge lean-{{ lean_class.get(it.lean, 'mid') }}">{{ it.lean }}</span>
         {% if it.headline_label %}<span class="hlb" title="그날 이 매체들이 1면·헤드라인으로 올림">{{ it.headline_label }}</span>{% endif %}
         <button type="button" class="orig-btn" data-href="{{ real_url(it.url) }}"{{ art(it.url, it.source, v.lang) }}>원문{% if v.paywall %} (유료){% endif %}</button>
+        {{ econ_btn(it, v) }}
       </div>
     </article>
 {% endmacro %}
@@ -224,6 +237,7 @@
         {% if it.stance and it.stance.note %}<span class="note">{{ it.stance.note }}</span>{% endif %}
         <button type="button" class="orig-btn" data-href="{{ real_url(it.url) }}"{{ art(it.url, it.source, v.lang) }}>원문{% if v.paywall %} (유료){% endif %}</button>
         <a class="link-btn" href="{{ real_url(it.url) }}" target="_blank" rel="noopener noreferrer">링크</a>
+        {{ econ_btn(it, v) }}
         <span class="fb" role="group" aria-label="이 분야 기사">
           <button type="button" data-fb="more">더 보기</button>
           <button type="button" data-fb="less">덜 보기</button>

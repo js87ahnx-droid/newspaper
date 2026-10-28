@@ -974,10 +974,59 @@
     }, function () { clearTimeout(timer); fallback("연결하지 못했습니다. 피드에 실린 내용만 보여 드립니다."); });
   }
 
+  // ---------- 경제 해설 창 (S31c·d, 14차 요청) ----------
+  // 경제 분야 기사 메타 줄의 "경제 해설" → 단추 옆 template(발행 때 AI 가 쓴 이론으로 보면·실제로는·상세 분석·지켜볼 지표)을 창에.
+  // 자세히 창에서 열었으면 "돌아가기". 맨 아래 작은 "이런 해설은 이제 필요 없어요" → 그 개념을 아는 개념으로(feedback.js 가 저장·서버로)
+  function openEcon(btn) {
+    var tpl = btn.parentNode && btn.parentNode.querySelector("template.econ-src");
+    if (!reader || !tpl) return;
+    var body = reader.querySelector(".reader-body");
+    var back = reader.hidden ? null : Array.prototype.slice.call(body.childNodes);
+    var view = tpl.content.firstElementChild.cloneNode(true);
+    if (back) {
+      var bb = mk("button", "rv-back", "← 돌아가기");
+      bb.type = "button";
+      bb.addEventListener("click", function () { body.innerHTML = ""; back.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", "기사 자세히"); });
+      view.insertBefore(bb, view.firstChild);
+    }
+    body.innerHTML = "";
+    body.appendChild(view);
+    readSeq++;
+    reader.setAttribute("aria-label", "경제 해설");
+    econSkip(view);
+    showReader();
+  }
+  function econConcepts(view) {
+    return Array.prototype.map.call(view.querySelectorAll(".ev-concepts .concept"), function (c) { return c.textContent.trim(); });
+  }
+  function econSkip(view) {
+    var z = view.querySelector(".ev-skip"), fb = window.NEWS_FB, cs = econConcepts(view);
+    if (!z) return;
+    z.innerHTML = "";
+    if (!fb || !fb.knows || !cs.length) return;
+    if (!cs.every(fb.knows)) {
+      var b = mk("button", "ev-skip-btn", "이런 해설은 이제 필요 없어요");
+      b.type = "button";
+      z.appendChild(b);
+      return;
+    }
+    var done = mk("span", "ev-done", "다음 호부터 " + cs.map(function (c) { return "‘" + c + "’"; }).join(", ") +
+      " 설명은 빼고, 새로 설명할 게 없는 기사는 해설을 붙이지 않습니다. ");
+    var u = mk("button", "ev-undo", "되돌리기");
+    u.type = "button";
+    done.appendChild(u);
+    z.appendChild(done);
+  }
+
   document.addEventListener("click", function (e) {
     var t = e.target && e.target.closest ? e.target : null;
     if (!t) return;
     var mod = e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0;
+    var ec = t.closest("[data-econ]");                         // "경제 해설" → 해설 창 (S31c)
+    if (ec) { e.preventDefault(); openEcon(ec); return; }
+    var ev = t.closest(".econ-view");
+    if (ev && window.NEWS_FB && t.closest(".ev-skip-btn")) { window.NEWS_FB.addKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-undo").focus(); return; }
+    if (ev && window.NEWS_FB && t.closest(".ev-undo")) { window.NEWS_FB.removeKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-skip-btn").focus(); return; }
     var d = t.closest("a[data-detail]");                      // 기사 제목 → AI 정리(자세히 창)
     if (d && !mod) { e.preventDefault(); var ai = d.closest("[data-issue]"); if (ai) openReader(ai.getAttribute("data-issue")); return; }
     var o = t.closest("[data-art]");                           // "원문"·작은 제목 → 원문 창
