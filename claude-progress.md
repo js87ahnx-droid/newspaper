@@ -627,6 +627,19 @@
 - 반영 시점: 지면 정적 파일(app.js·feedback.js)은 다음 발행 때 docs/static 으로 복사됨 → push 뒤 첫 아침 발행부터. 서버 편집 반영은 그 뒤 첫 월요일 발행(그 주에 값이 있을 때)
 - 계획과 다른 점은 implementation-notes.md(Deviations)
 
+### S31 14차 요청 (2026-10-29, 경제 기사 심화 해설 — 이론과 실전의 차이·상세 분석, 별도 창)
+- 사용자 결정: 경제 분야 전부(경제·증시·산업·반도체·AI), 처음엔 AI 가 거르지 말고, 읽는 사람이 "필요 없다" 누를 작은 단추.
+  시안(https://claude.ai/artifact/Fhow15VA83v2y5JS1f6NZ7, 10/23호 3건 sonnet·opus 비교) → "opus로 진행"
+- S31a 아는 경제 개념(known)을 관심 학습값(/prefs)에 함께 저장. 발행마다 learned.fetch_known 으로 받음(주간 아님)
+- S31b llm.econ_dive(enrich 0-1단계, 분석 바로 뒤): 지면(예비 제외) 경제 분야 점수 순 30건, opus 3건씩. 입력 = 제목·AI 요약·본문(메모리)·아는 개념.
+  결과 it.llm.econ = {concepts, theory, practice, analysis, watch}. 이론·실제 빈 것·본문 복사는 버림, skip 은 캐시. config llm.econ_*, max_calls_per_day 62
+- S31c 메타 줄 "경제 해설" 단추(1면 메인 포함, 단신은 숨김 → 자세히 창에서) → 기존 창을 해설 모양으로: 핵심 개념·이론으로 보면|실제로는·상세 분석·지켜볼 지표·"AI 해설 · 투자 권유 아님"
+- S31d 창 아래 "이런 해설은 이제 필요 없어요" → 개념을 known 에 저장·서버로, 되돌리기. 설정 창 "아는 경제 개념"에서 빼기
+- 평가(실제 opus, 10/23호 6건, 본문 29/37): 6/6 ok, 2회 128초, API 환산 $0.43 → 하루 30건이면 약 11분·$2. 아는 개념 "밸류에이션 디레이팅" 을 주자 그 개념은 빠짐.
+  렌더한 지면 1180·390 넘친 쪽 0. 테스트: test_econ(5)·test_econ_browser(8), Worker prefs 6
+- 다음 정기 발행부터(push 뒤). 첫 발행 로그에서 "econ" 상태·발행 시간 늘어난 정도 확인할 것
+- **Worker 재배포 필요**(아직 안 함 — 운영 배포라 사용자 승인 대기): 지금 Worker 는 known 을 저장하지 않고 버림. 배포 전까지 "필요 없어요"는 이 기기에만
+
 ### 다음에 이어서 할 일
 0. 10/22 발행 로그: 인터뷰 후보 수·고른 수(LLM 줄 interviews) 확인, 고른 인터뷰가 석학·지도자급인지 점검
 1. GH_TOKEN 등록 뒤 10/21 아침: daily 가 05:33 전후 workflow_dispatch 로 시작했는지, 뒤 실행은 check 에서 건너뛰었는지 확인
