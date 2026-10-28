@@ -66,12 +66,12 @@ def clean_known(v) -> list[str] | None:
     return out
 
 
-def fetch_known(rc: dict | None, fetcher=fetch) -> list[str]:
+def fetch_known(rc: dict | None, fetcher=None) -> list[str]:
     """발행마다 Worker 의 /prefs 에서 아는 경제 개념만 (S31a — 관심 가중치와 달리 주간이 아니라 바로 다음 호부터). 실패하면 []."""
     if not rc:
         return []
     try:
-        got = fetcher(rc)
+        got = (fetcher or fetch)(rc)
     except Exception:  # noqa: BLE001 — 못 받으면 아는 개념 없이 해설
         return []
     prefs = got.get("prefs") if isinstance(got, dict) and got.get("ok") else None
