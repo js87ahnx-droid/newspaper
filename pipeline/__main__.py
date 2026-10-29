@@ -418,6 +418,17 @@ def _history_summaries(path: Path, edition: dict) -> None:
     write_atomic(path, json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def _store_econ(args: argparse.Namespace, raw: Path, edition: dict | None = None) -> None:
+    """경제 해설 보관 (S33a): 이 호를 data/econ 에 (다시) 쓰고, data/raw 에 남은 지난 호 중 보관본이 없는 것을 채운다."""
+    from . import econ_store
+
+    data = Path(args.data)
+    wrote = econ_store.write(data, args.date, edition) if edition is not None else None
+    filled = econ_store.backfill(raw, data)
+    if wrote or filled:
+        print(f"경제 해설 보관: 이 호 {'씀' if wrote else '해설 없음'}" + (f", 지난 호 채움 {', '.join(filled)}" if filled else ""))
+
+
 def cmd_enrich(args: argparse.Namespace) -> int:
     """입장 차이(무토큰)를 붙이고, LLM 훅이 켜져 있으면 요약·번역을 붙인다."""
     from .collect import Article
@@ -489,7 +500,17 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
             known = fetch_known(reader.config())
             print(f"아는 경제 개념: {len(known)}개")
-        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies, known=known)
+        past_econ: dict = {}
+        if cfg.llm.econ_issues > 0:
+            # 지난 경제 해설 (S33b): 대상 기사마다 연속성과 같은 기준으로 가까운 지난 해설을 참고로
+            from .econ_store import past_for
+            from .llm import econ_targets
+
+            every = [it for ps in edition["sections"].values() for it in ps]
+            past_econ = past_for(econ_targets(every, cfg.llm.econ_issues), Path(args.data), date.fromisoformat(args.date))
+            print(f"지난 경제 해설 참고: {len(past_econ)}건")
+        edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies, known=known,
+                         past_econ=past_econ)
         del bodies
         st = edition["stats"]["llm"]
         sp = st.get("spent_today") or {}
@@ -505,6 +526,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
             llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
         _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)
     write_atomic(raw / f"{args.date}.edition.json", json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+    _store_econ(args, raw, edition)
     noted = sum(1 for it in items if it["stance"]["note"])
     worded = sum(1 for it in items if it["stance"]["lean_words"] or it["stance"]["country_words"])
     op = edition.get("opinion", {}).get("stats")
@@ -557,6 +579,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
             if alt and not it.get("photo"):
                 it["photo_alt"], it["photo_alt_source"] = alt
     files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
+    _store_econ(args, _raw_dir(args))   # 지면만 다시 그릴 때도 보관본이 빠진 호를 채운다 (S33a)
     # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
     write_atomic(Path(args.site, ".to-encrypt"), "".join(f.as_posix() + "\n" for f in files), encoding="utf-8")
     print(f"{args.date} 호 발행 준비: {args.site} (HTML {len(files)}개 — 암호화 전)")

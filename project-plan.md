@@ -728,3 +728,25 @@ S11(공식 API 본문 열람)은 D14로 대체한다. S12(7일 시범 운영)는
 
 ### S32b. 한 면 보기 넘김 애니메이션
 - **기준**: [ ] 브라우저(390×844 한 면 보기): 왼쪽으로 밀면 current+1·덮개가 생겼다가 0.6초 안에 사라짐, 오른쪽으로 밀면 current−1 같은 식, 확대 중엔 덮개 없음, 연속 밀기에 덮개가 쌓이지 않음, 오류 없음 [ ] 실제 화면 캡처로 넘어가는 중간 모습 확인
+
+## 16차 요청 (2026-10-30): 경제 해설 별도 보관·재사용
+
+사용자: 지난 호를 14일만 두면 경제 해설도 함께 사라져 비슷한 분석을 다시 돌리기 아깝다 → 지면과 따로 보관하고, 나중에 비슷한 내용을
+불러와 검토·손봐서 쓰게. 보관 위치는 "저장소에 그대로"(공개 저장소 평문 JSON — 해설은 AI 가 쓴 글이고 기사 본문 없음, data/history 와 같은 수준).
+
+결정(뒤집기 비싼 것부터):
+- 보관 모양 `data/econ/<호>.json` = `{"v": 1, "edition": 날짜, "items": [{issue_id, title, topic, signature, concepts, theory, practice,
+  analysis, watch, articles: [{source, title, url, published, lang} ≤3]}]}`. 기사 본문·리드 없음. 발행 커밋에 함께 올리고 지우지 않는다
+- 원천은 enrich 가 끝난 `data/raw/<호>.edition.json` 의 it.llm.econ, 특징 낱말(signature)은 같은 호 `data/history/<호>.json`(edit 가 enrich 전에 씀)
+- 메꾸기: data/raw 에 edition 은 있는데 data/econ 이 없는 호는 enrich·publish 때 채운다(data/raw 는 14일 — 첫 해설 호 10/30 부터 빠짐없이)
+- 재사용: 해설을 쓸 때 대상 기사마다 지난 180일 보관본에서 연속성과 같은 기준(score._match_key)으로 가장 가까운 1~2건을 찾아
+  프롬프트에 "지난 해설"로 붙인다 — 참고만, 이번 사안에 맞게 검토해 고쳐 쓰고 그때와 달라진 점을 밝히게. opus 를 건너뛰는 절약형은 나중 결정
+
+### S33a. 경제 해설 보관
+- pipeline/econ_store.py: record(edition, history) · write(data, 날짜, …) · backfill(raw, data). cmd_enrich 끝에 오늘 호 쓰기 + 메꾸기, cmd_publish 에 메꾸기. daily.yml 커밋에 data/econ
+- **기준**: [ ] 단위 테스트: 필드·기사 3건 상한·본문/리드 없음·skip·해설 없는 기사 빠짐·signature 는 history 에서, 해설 없는 호는 파일 안 만듦, 메꾸기는 없는 호만(있으면 그대로)
+
+### S33b. 지난 해설 참고
+- econ_store.load_past(data, 오늘, 180) · match(signature, past, 2). cmd_enrich 가 대상 기사별 짝을 enrich(past_econ=…) 로 넘기고 econ_dive 가 행에 "지난 해설" 블록
+- 프롬프트 규칙: 지난 해설은 참고만 — 검토해 고쳐 쓰고, 그때와 달라진 점을 밝히고, 문장을 옮기지 말 것
+- **기준**: [ ] 단위 테스트: 비슷한 것 짝지음·무관한 것·영어 낱말 둘뿐인 것 안 짝지음·오늘 호 제외·180일 넘은 것 제외, 프롬프트에 지난 해설(날짜·제목·이론) 블록과 규칙, 짝 없으면 블록 없음 [ ] 전체 pytest 통과

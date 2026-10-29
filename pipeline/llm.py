@@ -286,6 +286,8 @@ ECON_PROMPT = """각 경제 기사(id)마다 독자가 참고할 '경제 심화 
 독자가 이미 안다고 한 개념: {known}
 — 이 개념들의 기본 설명은 빼고 이번 사안에서 새로운 점만 쓴다. 이 개념들 말고 새로 설명할 것이 없으면 skip.
 경제 해설이 의미 없는 기사(인물 동정·홍보·문화·사건)도 {{"skip": true}} 만.
+"지난 해설"이 붙은 기사: 예전 비슷한 사안에 이 신문이 쓴 해설이다. 참고만 할 것 — 이번 사안에 맞는지 검토해 고쳐 쓰고,
+그때와 달라진 점(이론의 예측이 맞았는지, 상황이 어떻게 바뀌었는지)을 practice·analysis 에 날짜와 함께 밝힐 것. 문장을 그대로 옮기지 말 것.
 출력 형식: {{"issues": {{"<id>": {{"concepts": [], "theory": "", "practice": "", "analysis": [], "watch": [{{"what": "", "why": ""}}], "skip": false}}}}}}
 {data}"""
 ECON_ARTICLES = 4        # 묶음당 프롬프트에 넣는 기사 수 (매체가 다른 것부터, 본문 있는 것 먼저)
@@ -310,16 +312,23 @@ def _econ_clean(out: dict) -> dict | None:
     return {"concepts": concepts, "theory": theory, "practice": practice, "analysis": analysis, "watch": watch}
 
 
+def _past_block(past: list[dict]) -> list[dict]:
+    """지난 해설 (S33b) — 프롬프트에 넣는 만큼만: 날짜·제목·개념·이론·실제·분석 앞 2개."""
+    return [{"날짜": p.get("date"), "제목": p.get("title"), "개념": p.get("concepts") or [], "이론으로 보면": p.get("theory", ""),
+             "실제로는": p.get("practice", ""), "분석": (p.get("analysis") or [])[:2]} for p in past]
+
+
 def econ_dive(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded, known: list[str],
-              analysis: dict | None = None) -> tuple[dict, dict]:
+              analysis: dict | None = None, past: dict | None = None) -> tuple[dict, dict]:
     """경제 기사 심화 해설 (S31b). bodies 는 프롬프트에만 쓴다. 돌려주는 것: ({issue_id: 해설}, 통계)
-    캐시 cache["econ"][issue_id] = 해설 또는 {"skip": True} (같은 호를 다시 만들 때 재호출 안 함)."""
+    캐시 cache["econ"][issue_id] = 해설 또는 {"skip": True} (같은 호를 다시 만들 때 재호출 안 함).
+    past = {issue_id: [지난 해설]} (econ_store.past_for) — 있으면 그 기사 행에 "지난 해설"로 붙인다 (S33b)."""
     from .bodies import copied_span
 
     done = cache.setdefault("econ", {})
     targets = econ_targets(items, cfg.econ_issues)
     todo = [it for it in targets if it["issue_id"] not in done]
-    stats = {"targets": len(targets), "asked": 0, "ok": 0, "skip": 0, "rejected": {}, "calls": [], "known": len(known)}
+    stats = {"targets": len(targets), "asked": 0, "ok": 0, "skip": 0, "rejected": {}, "calls": [], "known": len(known), "past": 0}
     for i in range(0, len(todo), cfg.econ_batch):
         batch = todo[i : i + cfg.econ_batch]
         rows = []
@@ -333,7 +342,11 @@ def econ_dive(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded, k
                 arts.append({"매체": a["source"], "제목": a["title"],
                              "본문": body[:ECON_BODY_CHARS] if body else f"(본문 없음) {a.get('lead', '')[:300]}"})
             an = (analysis or {}).get(it["issue_id"]) or {}
-            rows.append({"id": it["issue_id"], "제목": it["title"], "AI 요약": an.get("summary", ""), "기사": arts})
+            row = {"id": it["issue_id"], "제목": it["title"], "AI 요약": an.get("summary", ""), "기사": arts}
+            if (past or {}).get(it["issue_id"]):
+                row["지난 해설"] = _past_block(past[it["issue_id"]])
+                stats["past"] += 1
+            rows.append(row)
         stats["asked"] += len(batch)
         res, st = guarded(ECON_PROMPT.format(known=", ".join(known) if known else "(없음)", data=_data_block(rows)),
                           model=cfg.econ_model, timeout=cfg.econ_timeout_sec, system=ECON_SYSTEM)
@@ -463,7 +476,7 @@ def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> lis
 
 
 def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, runner=None,
-           bodies: dict | None = None, known: list[str] | None = None) -> dict:
+           bodies: dict | None = None, known: list[str] | None = None, past_econ: dict | None = None) -> dict:
     """edition(dict)에 llm 결과를 붙여 돌려준다. 실패해도 edition 은 그대로 쓸 수 있다.
     bodies(기사 주소 → 본문)는 이슈 분석 프롬프트에만 쓰고 어디에도 저장하지 않는다."""
     cache = read_json(cache_path, {})
@@ -501,7 +514,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     # 0-1. 경제 기사 심화 해설 (S31b): 이론으로 보면·실제로는·상세 분석·지켜볼 지표. known = 독자가 "필요 없어요"로 표시한 개념
     econ, estats = {}, None
     if cfg.econ_issues > 0:
-        econ, estats = econ_dive(items, bodies or {}, cfg, cache, guarded, known or [], analysis)
+        econ, estats = econ_dive(items, bodies or {}, cfg, cache, guarded, known or [], analysis, past_econ)
         failed = next((c for c in estats["calls"] if c != "ok"), None)
         if estats["asked"] and not (estats["ok"] or estats["skip"]) and failed:
             status["econ"] = failed   # 하나도 못 받았으면 이유를 (인증·시간 초과 등)
