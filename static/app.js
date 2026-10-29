@@ -368,6 +368,10 @@
     var bp = document.createElement("div");
     bp.className = "turn-back";
     bp.style.width = pw + "px"; bp.style.height = ph + "px";
+    ghost = document.createElement("div");
+    ghost.className = "turn-ghost";
+    bp.appendChild(ghost);
+    ghostOf = -1;
     backLeaf = leafOf(bp);
     book.appendChild(backLeaf.leaf);
     mask = document.createElement("div");
@@ -390,6 +394,7 @@
   // 앞뒤 펼침 쪽은 밑에 깔아 미리 그려 둔다 — 넘김 첫 프레임이 늦지 않게.
   var pw = 0, ph = 0, S = 0;   // 쪽 폭·높이, 가리는 틀 한 변 (쪽 대각선의 두 배 — 어느 각도로 돌아도 반평면을 덮게)
   var leaves = [], backLeaf = null, mask = null, cast = null;
+  var ghost = null, ghostOf = -1;   // 한 쪽 화면 뒷면에 비치는 앞면 글자 (S34): 지금 담긴 쪽 번호
   var turn = null;             // 넘기는 중: {dir, A, B, under, ox, s, e, Hc, rest, done, P, raf, to}
   var DUR_SPREAD = 820, DUR_SINGLE = 600;
 
@@ -421,8 +426,22 @@
     });
     if (backLeaf) { backLeaf.leaf.style.visibility = "hidden"; backLeaf.shade.style.opacity = backLeaf.light.style.opacity = 0; }
     if (mask) { mask.style.visibility = "hidden"; cast.style.opacity = 0; }
+    if (!spread && ghost) { clearTimeout(ghostTimer); ghostTimer = setTimeout(function () { if (!turn) fillGhost(current); }, 150); }
     showInfo();
   }
+  // 한 쪽 화면 뒷면 (S34, 2026-10-30 "넘기는 뒷부분이 빈 화면이라 어색 — 아이패드처럼 살짝 보이게"): 펼침은 뒷면에 다음 쪽이
+  // 오지만 한 쪽 화면은 뒤에 올 쪽이 없다 → 신문지처럼 그 쪽 앞면 글자가 뒤집혀 옅게 비친다. 다음 넘김(지금 쪽)은 쉬는 동안 미리 복제해 둔다
+  function fillGhost(i) {
+    if (!ghost || ghostOf === i || !pages[i]) return;
+    var c = pages[i].cloneNode(true);
+    c.removeAttribute("data-page");
+    Array.prototype.forEach.call(c.querySelectorAll("[id],[data-issue]"), function (n) { n.removeAttribute("id"); n.removeAttribute("data-issue"); });
+    c.style.transform = "";
+    ghost.textContent = "";
+    ghost.appendChild(c);
+    ghostOf = i;
+  }
+  var ghostTimer = 0;
   function canTurn(dir) {
     var step = spread ? 2 : 1;
     return dir > 0 ? current + step < pages.length : current - step >= 0;
@@ -439,6 +458,7 @@
       T.ox = 0; T.s = 0; T.e = pw; T.B = backLeaf;
       if (dir > 0) { T.A = L(c); T.under = [L(c + 1)]; T.rest = { x: pw, y: Hc }; T.done = { x: -pw, y: Hc }; }
       else { T.A = L(c - 1); T.under = [L(c)]; T.rest = { x: -pw, y: Hc }; T.done = { x: pw, y: Hc }; }
+      fillGhost(dir > 0 ? c : c - 1);
     }
     T.under.forEach(function (u) { if (u) { u.leaf.style.visibility = "visible"; u.leaf.style.zIndex = 1; } });
     [T.A, T.B].forEach(function (o, k) {

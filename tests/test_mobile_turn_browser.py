@@ -80,3 +80,31 @@ def test_scroll_view_turn_screenshot(browser, tmp_path):  # noqa: F811
     page.screenshot(path=str(out))
     ctx.close()
     assert out.stat().st_size > 0
+
+
+@pytest.mark.parametrize("direction", [1, -1])
+def test_single_page_back_shows_faint_print(browser, tmp_path, direction):  # noqa: F811
+    """S34: 한 쪽 화면 넘김의 뒷면에 넘기는 쪽 앞면이 옅게 비친다 (복제에는 쪽 번호·기사 표시 없음). 캡처: build/s34-back{±1}.png"""
+    from pathlib import Path
+    index = make_site(tmp_path)
+    ctx, page, errors = open_page(browser, index, 390, 844)
+    if direction < 0:
+        page.evaluate("NEWS.goTo(2)")
+    page.wait_for_timeout(400)
+    issues0 = page.evaluate("document.querySelectorAll('#book [data-issue]').length")
+    cur = page.evaluate("NEWS.state().current")
+    page.evaluate(f"NEWS.go({direction})")
+    page.wait_for_timeout(260)
+    g = page.evaluate("""() => { const g = document.querySelector('#book .turn-ghost'), p = g && g.firstElementChild;
+        return {has: !!p, page: p && p.hasAttribute('data-page'), text: p ? p.textContent.length : 0,
+                op: g && getComputedStyle(g).opacity, issues: document.querySelectorAll('#book [data-issue]').length}; }""")
+    want = page.evaluate(f"document.querySelector('#book .page[data-page=\"{cur if direction > 0 else cur - 1}\"]').textContent.length")
+    out = Path(__file__).resolve().parent.parent / "build" / f"s34-back{direction:+d}.png"
+    page.screenshot(path=str(out))
+    page.wait_for_timeout(900)
+    st = page.evaluate("NEWS.state()")
+    ctx.close()
+    assert g["has"] and not g["page"] and g["text"] == want and 0 < float(g["op"]) < 0.3
+    assert g["issues"] == issues0                    # 복제가 기사 표시를 늘리지 않음
+    assert st["current"] == cur + direction and not st["turning"]
+    assert not errors, errors
