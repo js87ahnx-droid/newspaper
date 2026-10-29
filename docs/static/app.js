@@ -18,8 +18,7 @@
   var book = document.getElementById("book");
   var flow = document.getElementById("flow");
   var pageInfo = document.getElementById("pageInfo");
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var anim = false;     // 애니메이션 넘김 사용 중 (동작 줄이기·한 면 보기면 false)
+  var anim = false;     // 종이 넘김 사용 중 (펼침 보기면 늘 — 동작 줄이기 설정이어도, S32a. 한 면 보기·쪽 나누는 중엔 false)
   var pages = [];
   var current = 0;      // 현재 쪽 번호 (왼쪽 쪽 기준)
   var spread = true;    // 두 쪽 펼침 여부
@@ -340,20 +339,13 @@
     if (fr) fr.disabled = current === 0;   // 이미 1면이면 누를 일이 없다
   }
 
-  function simpleShow(idx) {   // 동작 줄이기: 애니메이션 없이 펼침면 교체
-    var step = spread ? 2 : 1;
-    idx = Math.max(0, Math.min(idx - (idx % step), pages.length - 1));
-    current = idx;
-    pages.forEach(function (p, i) { p.style.display = (i >= idx && i < idx + step) ? "" : "none"; });
-    showInfo();
-  }
-
   function build(keepIssue, keepPage) {
     stopTurn();
     drag = null;
     anim = false;
     book.innerHTML = "";
     leaves = [];
+    endSheet();
     scroller = sizer = zoomer = null;
     var res = paginate();
     pages = res.pages;
@@ -366,11 +358,10 @@
     syncToolbar();
     pages.forEach(function (p, i) { p.classList.toggle("pg-left", spread && mode !== "scroll" && i % 2 === 0); });
     if (mode === "scroll") { buildScroll(res.g, start); return; }
-    anim = !reduced.matches;
-    book.className = (spread ? "spread" : "single") + (anim ? " anim" : " reduced");
+    anim = true;
+    book.className = (spread ? "spread" : "single") + " anim";
     book.style.width = (spread ? res.g.w * 2 : res.g.w) + "px";
     book.style.height = res.g.h + "px";
-    if (!anim) { pages.forEach(function (p) { book.appendChild(p); }); simpleShow(start); return; }
     pw = res.g.w; ph = res.g.h;
     S = Math.ceil(2 * Math.hypot(pw, ph)) + 4;
     leaves = pages.map(function (p) { var o = leafOf(p); book.appendChild(o.leaf); return o; });
@@ -638,6 +629,55 @@
     showInfo();
   }
 
+  // 한 면 보기 넘김 (S32b): 스크롤은 바로 목표 쪽으로 옮기고, 그 위에 옮기기 전 화면을 복제한 덮개를 두어 왼쪽 가장자리를 축으로 돌린다.
+  // 다음 = 옛 화면이 넘어가며 새 쪽이 드러남, 이전 = 옛 화면 위로 앞 쪽이 되넘어와 덮음. transform·opacity 만 움직인다(Web Animations)
+  var sheet = null;   // 넘기는 중인 덮개 {el, anim}
+  function snapshot() {   // 지금 스크롤 화면에 걸친 쪽들을 같은 자리에 복제
+    var box = document.createElement("div"), sr = scroller.getBoundingClientRect();
+    box.className = "sheet-face";
+    pages.forEach(function (p) {
+      var r = p.getBoundingClientRect();
+      if (r.bottom <= sr.top || r.top >= sr.bottom) return;
+      var c = p.cloneNode(true);
+      c.removeAttribute("id");
+      c.style.position = "absolute";
+      c.style.left = (r.left - sr.left) + "px"; c.style.top = (r.top - sr.top) + "px";
+      c.style.transformOrigin = "0 0"; c.style.transform = "scale(" + zoom + ")";
+      box.appendChild(c);
+    });
+    return box;
+  }
+  function endSheet() {
+    if (!sheet) return;
+    var s = sheet;
+    sheet = null;
+    if (s.anim) s.anim.cancel();
+    s.el.remove();
+  }
+  function turnScroll(delta) {
+    endSheet();
+    var to = Math.max(0, Math.min(current + delta, pages.length - 1));
+    if (to === current || zoom > 1.01 || !scroller.animate) { scrollToPage(to); return; }
+    var wrap = document.createElement("div"), old = snapshot();
+    wrap.className = "sheet";
+    wrap.setAttribute("aria-hidden", "true");
+    var face = old;
+    if (delta < 0) { scrollToPage(to); face = snapshot(); wrap.appendChild(old); }   // 이전: 옛 화면은 깔고 앞 쪽이 덮으며 들어온다
+    var shade = document.createElement("div");
+    shade.className = "sheet-shade";
+    face.appendChild(shade);
+    wrap.appendChild(face);
+    book.appendChild(wrap);
+    if (delta > 0) scrollToPage(to);
+    var turned = "perspective(1800px) rotateY(-100deg)", flat = "perspective(1800px) rotateY(0deg)";
+    var frames = delta > 0 ? [{ transform: flat }, { transform: turned }] : [{ transform: turned }, { transform: flat }];
+    var opt = { duration: 520, easing: "cubic-bezier(.4, .1, .3, 1)", fill: "both" };
+    sheet = { el: wrap, anim: face.animate(frames, opt) };
+    shade.animate(delta > 0 ? [{ opacity: 0 }, { opacity: 0.45 }] : [{ opacity: 0.45 }, { opacity: 0 }], opt);
+    var mine = sheet;
+    mine.anim.onfinish = function () { if (sheet === mine) endSheet(); };
+  }
+
   function bindPinch(el) {
     var d0 = 0, z0 = 1;
     function dist(t) { var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx * dx + dy * dy); }
@@ -716,9 +756,8 @@
   }
 
   function go(delta) {
-    if (mode === "scroll") { scrollToPage(current + delta); return; }
-    if (anim) { animateTurn(delta > 0 ? 1 : -1); return; }   // 앞·뒤 모두 넘김 애니메이션 (S28a — 예전 라이브러리는 세로에서 뒤로 못 넘김)
-    simpleShow(current + delta * (spread ? 2 : 1));
+    if (mode === "scroll") { turnScroll(delta); return; }
+    animateTurn(delta > 0 ? 1 : -1);   // 앞·뒤 모두 넘김 애니메이션 (S28a — 예전 라이브러리는 세로에서 뒤로 못 넘김)
   }
 
   // 지금 보이는 쪽의 첫 기사 (다시 나눌 때 위치 유지용)
@@ -766,7 +805,7 @@
     document.addEventListener(ev, function () { document.body.classList.toggle("is-fullscreen", !!fsElement()); });
   });
 
-  // 애니메이션 없는 손가락 넘기기: 동작 줄이기·한 면 보기(확대 안 했을 때). 넘김 애니메이션은 위 끌기(S28a)가 맡는다
+  // 한 면 보기(확대 안 했을 때)의 손가락 넘기기 → go() 가 넘김 덮개(S32b)로. 펼침 보기의 넘김은 위 끌기(S28a)가 맡는다
   // 손가락 밀기: 오른쪽→왼쪽 = 다음 쪽, 왼쪽→오른쪽 = 이전 쪽 (2026-10-21 "세로에서 넘기기가 잘 안 먹힌다")
   // 가로 이동이 세로 이동보다 뚜렷할 때만 — 세로 스크롤·두 손가락 확대와 겹치지 않게
   var tx = null, ty = 0;
@@ -798,7 +837,6 @@
     var keep = visibleIssue();
     resizeTimer = setTimeout(function () { build(keep); }, 250);
   });
-  reduced.addEventListener && reduced.addEventListener("change", function () { build(visibleIssue()); });
 
   // ---------- 기사 자세히 (S15) ----------
   // 지면에서는 머리기사만 분석을 다 펼치고, 나머지는 줄여 보인다. "자세히"는 쪽 나누기 전 원본(#flow)을 그대로 보여 준다
@@ -974,10 +1012,59 @@
     }, function () { clearTimeout(timer); fallback("연결하지 못했습니다. 피드에 실린 내용만 보여 드립니다."); });
   }
 
+  // ---------- 경제 해설 창 (S31c·d, 14차 요청) ----------
+  // 경제 분야 기사 메타 줄의 "경제 해설" → 단추 옆 template(발행 때 AI 가 쓴 이론으로 보면·실제로는·상세 분석·지켜볼 지표)을 창에.
+  // 자세히 창에서 열었으면 "돌아가기". 맨 아래 작은 "이런 해설은 이제 필요 없어요" → 그 개념을 아는 개념으로(feedback.js 가 저장·서버로)
+  function openEcon(btn) {
+    var tpl = btn.parentNode && btn.parentNode.querySelector("template.econ-src");
+    if (!reader || !tpl) return;
+    var body = reader.querySelector(".reader-body");
+    var back = reader.hidden ? null : Array.prototype.slice.call(body.childNodes);
+    var view = tpl.content.firstElementChild.cloneNode(true);
+    if (back) {
+      var bb = mk("button", "rv-back", "← 돌아가기");
+      bb.type = "button";
+      bb.addEventListener("click", function () { body.innerHTML = ""; back.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", "기사 자세히"); });
+      view.insertBefore(bb, view.firstChild);
+    }
+    body.innerHTML = "";
+    body.appendChild(view);
+    readSeq++;
+    reader.setAttribute("aria-label", "경제 해설");
+    econSkip(view);
+    showReader();
+  }
+  function econConcepts(view) {
+    return Array.prototype.map.call(view.querySelectorAll(".ev-concepts .concept"), function (c) { return c.textContent.trim(); });
+  }
+  function econSkip(view) {
+    var z = view.querySelector(".ev-skip"), fb = window.NEWS_FB, cs = econConcepts(view);
+    if (!z) return;
+    z.innerHTML = "";
+    if (!fb || !fb.knows || !cs.length) return;
+    if (!cs.every(fb.knows)) {
+      var b = mk("button", "ev-skip-btn", "이런 해설은 이제 필요 없어요");
+      b.type = "button";
+      z.appendChild(b);
+      return;
+    }
+    var done = mk("span", "ev-done", "다음 호부터 " + cs.map(function (c) { return "‘" + c + "’"; }).join(", ") +
+      " 설명은 빼고, 새로 설명할 게 없는 기사는 해설을 붙이지 않습니다. ");
+    var u = mk("button", "ev-undo", "되돌리기");
+    u.type = "button";
+    done.appendChild(u);
+    z.appendChild(done);
+  }
+
   document.addEventListener("click", function (e) {
     var t = e.target && e.target.closest ? e.target : null;
     if (!t) return;
     var mod = e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0;
+    var ec = t.closest("[data-econ]");                         // "경제 해설" → 해설 창 (S31c)
+    if (ec) { e.preventDefault(); openEcon(ec); return; }
+    var ev = t.closest(".econ-view");
+    if (ev && window.NEWS_FB && t.closest(".ev-skip-btn")) { window.NEWS_FB.addKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-undo").focus(); return; }
+    if (ev && window.NEWS_FB && t.closest(".ev-undo")) { window.NEWS_FB.removeKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-skip-btn").focus(); return; }
     var d = t.closest("a[data-detail]");                      // 기사 제목 → AI 정리(자세히 창)
     if (d && !mod) { e.preventDefault(); var ai = d.closest("[data-issue]"); if (ai) openReader(ai.getAttribute("data-issue")); return; }
     var o = t.closest("[data-art]");                           // "원문"·작은 제목 → 원문 창
@@ -1014,8 +1101,10 @@
 
   function goTo(i) {
     if (mode === "scroll") { scrollToPage(i); return; }
-    if (anim) { stopTurn(); i = Math.max(0, Math.min(i, pages.length - 1)); current = i - (i % (spread ? 2 : 1)); rest(); return; }
-    simpleShow(i);
+    stopTurn();
+    i = Math.max(0, Math.min(i, pages.length - 1));
+    current = i - (i % (spread ? 2 : 1));
+    rest();
   }
 
   window.NEWS = { rebuild: function () { build(visibleIssue()); }, go: go, goTo: goTo, openReader: openReader, openArticle: openArticle, setView: setView, setZoom: function (z) { applyZoom(z, null); }, fullscreen: toggleFullscreen, state: function () { return { mode: mode, zoom: zoom, current: current, pages: pages.length, spread: spread, flip: anim, turning: !!turn, overflow: overflowPages.slice(), clipped: clipped, demoted: demotedCount, briefs: briefCount, dropped: dropped, emptySummary: emptySummary }; } };

@@ -13,6 +13,8 @@
  *   · 1면 톱·다양성·연속 보장 기사는 내리지 않는다 (다양성 규칙이 항상 우선, 6-3)
  *   처음 지면(#flow)을 복사해 두고, 값이 바뀌면 거기서 새로 배치한다
  * - 주간 설문은 저절로 뜨지 않는다 (S30c, 사용자 요청) — 설정 창의 "설문" 단추로만
+ * - 아는 경제 개념(known, S31d): 경제 해설 창의 "이런 해설은 이제 필요 없어요" → 같은 값에 함께 저장·서버로.
+ *   발행이 매일 받아 그 개념의 기초 설명을 빼고, 새로 설명할 게 없는 기사는 해설을 붙이지 않는다. 설정 창에서 뺄 수 있다
  */
 (function () {
   "use strict";
@@ -42,6 +44,7 @@
       }
     }
     p.weights = p.weights || {};
+    p.known = Array.isArray(p.known) ? p.known : [];
     return p;
   }
   function weightOf(p, topic) { return clampW(topic in p.weights ? p.weights[topic] : serverW(topic)); }
@@ -171,7 +174,7 @@
   function push() {
     var p = prefs();
     if (!RD || !p.updated) return;
-    var body = JSON.stringify({ v: 1, weights: fullWeights(p), keywords: keywordList(p).slice(0, 30), updated: p.updated });
+    var body = JSON.stringify({ v: 1, weights: fullWeights(p), keywords: keywordList(p).slice(0, 30), known: p.known.slice(-100), updated: p.updated });
     fetch(RD.url + "/prefs", { method: "POST", headers: { "X-Reader-Key": RD.key, "Content-Type": "application/json" }, body: body,
       cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
       .then(function (r) { if (!r.ok) throw new Error("http " + r.status); store.set("news.prefsPending", false); syncState = "sent"; showSync(); })
@@ -185,7 +188,7 @@
       .then(function (j) {
         var s = j && j.ok && j.prefs, p = prefs();
         if (s && s.v === 1 && s.updated && (!p.updated || s.updated > p.updated)) {
-          store.set("news.prefs2", { v: 1, weights: s.weights || {}, keywords: s.keywords || null, updated: s.updated });
+          store.set("news.prefs2", { v: 1, weights: s.weights || {}, keywords: s.keywords || null, known: s.known || [], updated: s.updated });
           store.set("news.prefsPending", false);
           syncState = "sent";
           reapply();
@@ -195,6 +198,20 @@
         }
       })
       .catch(function () { /* 서버를 못 보면 이 기기 값으로 */ });
+  }
+
+  // ---------- 아는 경제 개념 (S31d) ----------
+  function knows(c) { return prefs().known.indexOf(c) >= 0; }
+  function addKnown(list) {
+    var p = prefs();
+    list.forEach(function (c) { c = String(c).trim().slice(0, 40); if (c && p.known.indexOf(c) < 0) p.known.push(c); });
+    p.known = p.known.slice(-100);
+    save(p); refreshSettings();
+  }
+  function removeKnown(list) {
+    var p = prefs();
+    p.known = p.known.filter(function (c) { return list.indexOf(c) < 0; });
+    save(p); refreshSettings();
   }
 
   // ---------- 누른 표시 ----------
@@ -333,12 +350,18 @@
       return '<span class="kwchip">' + esc(k) + '<button type="button" data-kw="' + i + '" aria-label="' + esc(k) + ' 빼기">×</button></span>';
     }).join("") || '<span class="hint">없음</span>';
   }
+  function knownHTML(p) {
+    return p.known.map(function (k, i) {
+      return '<span class="kwchip">' + esc(k) + '<button type="button" data-known="' + i + '" aria-label="' + esc(k) + ' 다시 해설 받기">×</button></span>';
+    }).join("") || '<span class="hint">없음 — 경제 해설 창의 "이런 해설은 이제 필요 없어요"로 더합니다</span>';
+  }
   function refreshSettings() {
     var box = document.getElementById("settings");
     if (!box) return;
     var p = prefs();
     box.querySelector(".wrows").innerHTML = rowsHTML(p);
     box.querySelector(".kwchips").innerHTML = chipsHTML(p);
+    box.querySelector(".knownchips").innerHTML = knownHTML(p);
     showSync();
   }
 
@@ -359,6 +382,7 @@
       '<div class="wrows">' + rowsHTML(p) + "</div>" +
       '<h3 class="kwh">챙겨 볼 키워드</h3><div class="kwchips">' + chipsHTML(p) + "</div>" +
       '<form class="kwadd"><input type="text" name="kw" placeholder="예: 원전, 배터리" aria-label="키워드 추가"><button type="submit">추가</button></form>' +
+      '<h3 class="kwh">아는 경제 개념 <small class="hint">해설에서 기초 설명을 뺍니다</small></h3><div class="kwchips knownchips">' + knownHTML(p) + "</div>" +
       '<p class="sync">' + syncText() + "</p>" +
       '<div class="actions"><button type="button" data-x="reset">기본값으로</button><button type="button" data-x="survey">설문</button>' +
       '<button type="button" data-x="close">닫기</button></div></div>';
@@ -391,6 +415,8 @@
     });
     box.addEventListener("click", function (ev) {
       var t = ev.target, x = t.getAttribute && t.getAttribute("data-x"), kw = t.getAttribute && t.getAttribute("data-kw");
+      var kn = t.getAttribute && t.getAttribute("data-known");
+      if (kn !== null && kn !== undefined) { var kp = prefs(); removeKnown([kp.known[+kn]]); return; }
       if (kw !== null && kw !== undefined) {
         var q = prefs(), kws = keywordList(q).slice();
         kws.splice(+kw, 1);
@@ -419,6 +445,7 @@
   if (p0.updated && !store.get("news.prefs2", null)) save(p0);   // 예전 delta 를 옮긴 것: 저장하고 서버로도
   apply();
   markPressed();
-  window.NEWS_FB = { apply: apply, reapply: reapply, prefs: prefs, weightOf: weightOf, isoWeek: isoWeek, showSurvey: showSurvey, showSettings: showSettings };
+  window.NEWS_FB = { apply: apply, reapply: reapply, prefs: prefs, weightOf: weightOf, isoWeek: isoWeek, showSurvey: showSurvey, showSettings: showSettings,
+                     knows: knows, addKnown: addKnown, removeKnown: removeKnown };
   pull();
 })();
