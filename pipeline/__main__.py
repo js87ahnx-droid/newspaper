@@ -609,7 +609,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("publish", help="Pages 폴더(docs/)에 오늘 호·지난 호·목록 쓰기 (암호화 전)")
     p.add_argument("--date", required=True, help="호 날짜 YYYY-MM-DD")
     p.add_argument("--site", default=str(ROOT / "docs"), help="Pages 폴더 (기본: docs/)")
-    p.add_argument("--keep-days", type=int, default=180, help="지난 호 보관 일수")
+    from .publish import ARCHIVE_KEEP_DAYS
+    p.add_argument("--keep-days", type=int, default=ARCHIVE_KEEP_DAYS, help=f"지난 호 보관 일수 (기본 {ARCHIVE_KEEP_DAYS})")
     p.set_defaults(func=cmd_publish)
     args = parser.parse_args(argv)
     return args.func(args)

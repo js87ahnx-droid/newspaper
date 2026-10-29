@@ -18,7 +18,12 @@ from .render import masthead, render_archive_index, render_html, write_assets
 from .settings import Config, Interests, Sources
 
 
-def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, site: Path, keep_days: int = 180) -> list[Path]:
+#: 지난 호 보관 일수 (2026-10-30 사용자 "2주까지만") — 지면만. 연속성 기록(data/history)은 따로 두고 지우지 않는다
+ARCHIVE_KEEP_DAYS = 14
+
+
+def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, site: Path,
+            keep_days: int = ARCHIVE_KEEP_DAYS) -> list[Path]:
     d = date.fromisoformat(edition["edition"])
     site.mkdir(parents=True, exist_ok=True)
     write_assets(site, masthead(d))

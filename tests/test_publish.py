@@ -54,6 +54,17 @@ def test_old_archives_pruned(tmp_path):
     assert not (site / "archive" / "2025-01-01").exists()
 
 
+def test_archives_kept_two_weeks_by_default(tmp_path):
+    """기본 보관 14일 (2026-10-30): 호 날짜 2026-10-16 기준 10-02 까지 남고 10-01 은 지운다. 목록에서도 빠진다."""
+    site = tmp_path / "docs"
+    for d in ("2026-10-01", "2026-10-02"):
+        (site / "archive" / d).mkdir(parents=True)
+    publish(edition(), load_config(), load_interests(), load_sources(), site)
+    listing = (site / "archive" / "index.html").read_text(encoding="utf-8")
+    assert not (site / "archive" / "2026-10-01").exists() and (site / "archive" / "2026-10-02").exists()
+    assert "2026-10-01" not in listing
+
+
 def run_verify(site, ed_path):
     return subprocess.run([sys.executable, str(ROOT / "tools" / "verify_site.py"), str(site), str(ed_path)],
                           capture_output=True, text=True, encoding="utf-8")
