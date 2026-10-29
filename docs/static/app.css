@@ -51,6 +51,10 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 #book.anim.single { overflow: hidden; }
 #book.anim { touch-action: pinch-zoom; -webkit-user-select: none; user-select: none; }
 .turn-back { background: linear-gradient(to left, var(--paper), var(--paper) 70%, var(--rule)); }   /* 한 쪽 화면에서 접힌 쪽의 뒷면 */
+/* 뒷면에 비치는 앞면 (S34): 쪽 복제를 좌우로 뒤집어 옅게 — 뒷면 틀이 이미 한 번 뒤집으므로 합치면 앞면 글자의 거울상 */
+.turn-ghost { position: absolute; inset: 0; transform: scaleX(-1); opacity: .16; pointer-events: none; }
+.turn-ghost > .page { position: absolute; left: 0; top: 0; background: transparent; }
+:root[data-theme="dark"] .turn-ghost { opacity: .2; }
 .flap-shade { position: absolute; left: 0; top: 0; width: 56px; height: 100%; opacity: 0; pointer-events: none;
   background: linear-gradient(to right, rgba(0,0,0,.30), rgba(0,0,0,.08) 40%, rgba(0,0,0,0)); }
 .flap-light { position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none;
