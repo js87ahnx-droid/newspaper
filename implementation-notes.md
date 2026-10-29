@@ -29,3 +29,10 @@
 - S31c: 단신(한 줄)에는 "경제 해설" 단추를 숨김 — 단신 메타 줄은 시각·매체만 보이는 규칙(한 줄 유지). 단신 제목 → 자세히 창에서 단추를 씀. 1면 메인 기사 메타 줄에도 단추
 - S31c: 창은 새로 만들지 않고 기존 자세히·원문 창(포커스·inert·바깥 닫기 갖춤)을 해설 모양으로
 - S31 평가: 전체 테스트가 저장소의 실제 주간 학습값(data/interests-learned.json, 10/27 발행이 커밋)을 읽어 interests.yaml 을 전제한 테스트 5건 실패 → conftest 에서 저장소 루트의 학습 파일을 가림. 다시 돌려 372 통과
+
+## 15차 요청 (S32)
+
+### Deviations
+- 스프린트 2개(하네스 기준 5~12개보다 적음) — 요청이 넘김 애니메이션 두 가지뿐이라 더 나누면 기계적 분할만 됨. S32a·S32b 가 같은 파일(app.js·app.css)에 얽혀 커밋 하나로
+- test_render_browser::test_reduced_motion_simple_flip 삭제 — 동작 줄이기에서 애니메이션 없이 넘기는 동작 자체를 없앴으므로. 대신 test_reduced_motion_still_turns
+- 다른 UI 의 동작 줄이기 CSS(transition·animation 끔)는 그대로 둠 — 사용자가 요청한 것은 넘김뿐. 한 면 보기 덮개는 Web Animations 라 그 규칙에 안 걸림

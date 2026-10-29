@@ -104,15 +104,7 @@ def test_drag_flips_page(browser, tmp_path):
     assert cur == 2
 
 
-def test_reduced_motion_simple_flip(browser, tmp_path):
-    index = make_site(tmp_path)
-    ctx, page, _ = open_page(browser, index, 1180, 820, reduced=True)
-    assert page.evaluate("NEWS.state().flip") is False
-    page.click('[data-act="next"]')
-    cur = page.evaluate("NEWS.state().current")
-    visible = page.evaluate("[...document.querySelectorAll('#book .page')].filter(p => p.style.display !== 'none').length")
-    ctx.close()
-    assert cur == 2 and visible == 2
+# 동작 줄이기에서도 종이 넘김 (S32a) — tests/test_mobile_turn_browser.py::test_reduced_motion_still_turns
 
 
 @pytest.mark.parametrize("reduced", [False, True])
