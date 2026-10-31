@@ -407,8 +407,11 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
   color: var(--ev-theory); font-weight: 600; cursor: pointer; line-height: 1.5; position: relative; }
 .meta .econ-btn::after { content: ""; position: absolute; inset: -10px -3px; }
 .meta template { display: none; }
-.econ-view { display: grid; gap: 14px; line-height: 1.6; }
-.econ-view .rv-back { justify-self: start; }
+/* 블록 흐름 (2026-10-31): grid 면 오른쪽에 뜬 "닫기" 옆에 통째로 비켜 서서 휴대폰에서 오른쪽이 단추 폭만큼 비었다 — 단추 아래부터는 쪽 폭을 다 쓰게 */
+.econ-view { display: block; line-height: 1.6; }
+.econ-view > * + * { margin-top: 14px; }
+.econ-view > .rv-back, .econ-view > .ev-kicker { display: block; }
+.econ-view > .ev-title { margin-top: 4px; }
 .ev-kicker { font-size: 12px; letter-spacing: .06em; color: var(--ev-theory); font-weight: 700; }
 .ev-title { font-size: 1.25em; line-height: 1.4; margin: -10px 0 0; text-wrap: balance; }
 .ev-concepts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
