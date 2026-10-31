@@ -33,23 +33,36 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
-          cache: pip
+          # pip 캐시는 쓰지 않는다 (S35b: 하루 8번 × 170MB 가 Actions 캐시 내려받기 한도를 먹는다 — PyPI 에서 받는다)
       - run: pip install -r requirements.txt
       - name: 누적분 불러오기
+        id: raw
         uses: actions/cache/restore@v4
         with:
           path: data/raw
           key: raw-${{ github.run_id }}
           restore-keys: raw-
-      - name: 임베딩 모델 캐시
-        uses: actions/cache@v4
+      - name: 불러오기 확인 (S35a — 못 불러왔으면 빈 누적분을 저장하지 않고 실패로)
+        id: rawguard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/raw_cache_guard.sh "${{ steps.raw.outputs.cache-matched-key }}" 1
+      - name: 임베딩 모델 내려받기 (Hugging Face)
+        # S35b: 1.26GB 모델을 하루 8번 Actions 캐시에서 받아 내려받기 한도(egress)를 넘겼다(10/31) — 수집은 HF 에서 직접.
+        # 아침 발행(daily.yml)은 하루 한 번 캐시를 써서 캐시가 7일 미사용으로 지워지지 않는다. HF 가 안 되면 캐시로
+        id: hf
+        continue-on-error: true
+        run: python -c "from pipeline.cluster import embed_texts; embed_texts(['ok'], 'multilingual-e5-large')"
+      - name: 임베딩 모델 캐시 (HF 실패 때만)
+        if: steps.hf.outcome == 'failure'
+        uses: actions/cache/restore@v4
         with:
           path: models
           key: models-multilingual-e5-large-v1
       - name: 수집·임베딩
         run: bash scripts/collect.sh
       - name: 누적분 저장
-        if: always()
+        if: always() && steps.rawguard.outputs.save == 'true'
         uses: actions/cache/save@v4
         with:
           path: data/raw

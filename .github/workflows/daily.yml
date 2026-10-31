@@ -37,6 +37,7 @@ concurrency:
 
 permissions:
   contents: write   # 지면(docs/)·연속성 기록(data/history) 커밋
+  actions: read     # 누적분 캐시가 있는지 확인 (S35a raw_cache_guard)
 
 jobs:
   check:
@@ -83,11 +84,17 @@ jobs:
         # 버전 고정 (S29d 점검: 토큰·비밀번호·쓰기 권한이 있는 작업). 10/22 마지막 성공 발행 때 버전. 올릴 땐 일부러
         run: npm install -g @anthropic-ai/claude-code@2.1.308
       - name: 누적분 불러오기
+        id: raw
         uses: actions/cache/restore@v4
         with:
           path: data/raw
           key: raw-${{ github.run_id }}
           restore-keys: raw-
+      - name: 불러오기 확인 (S35a — 못 불러왔으면 발행은 하되 빈 누적분을 저장하지 않는다)
+        id: rawguard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/raw_cache_guard.sh "${{ steps.raw.outputs.cache-matched-key }}"
       - name: 임베딩 모델 캐시
         uses: actions/cache@v4
         with:
@@ -104,7 +111,7 @@ jobs:
           RENDER_ONLY: ${{ inputs.render_only && '1' || '0' }}
         run: bash scripts/daily.sh
       - name: 누적분 저장
-        if: always()
+        if: always() && steps.rawguard.outputs.save == 'true'
         uses: actions/cache/save@v4
         with:
           path: data/raw
