@@ -61,14 +61,17 @@ def test_window_opens_closes_and_layout_fits(browser, tmp_path, w, h):  # noqa: 
         concepts: [...document.querySelectorAll('#reader .ev-concepts .concept')].map(c => c.textContent),
         skip: !!document.querySelector('#reader .ev-skip-btn'),
         wide: document.querySelector('#reader .reader-panel').scrollWidth <= document.querySelector('#reader .reader-panel').clientWidth + 1,
-        hscroll: document.documentElement.scrollWidth <= innerWidth})""")
+        hscroll: document.documentElement.scrollWidth <= innerWidth,
+        // 2026-10-31: 해설 본문이 "닫기" 옆으로 비켜 서지 않고 창 폭을 다 쓴다 (휴대폰에서 오른쪽이 단추 폭만큼 비었음)
+        full: (() => { const b = document.querySelector('#reader .reader-body').getBoundingClientRect(),
+                             t = document.querySelector('#reader .ev-tp').getBoundingClientRect(); return b.right - t.right <= 1; })()})""")
     page.keyboard.press("Escape")
     after = page.evaluate("({open: !document.getElementById('reader').hidden, focus: document.activeElement.className})")
     ctx.close()
     assert not errors, errors
     assert st["overflow"] == [], st["overflow"]
     assert opened == {"open": True, "label": "경제 해설", "theory": DIVE["theory"], "concepts": DIVE["concepts"],
-                      "skip": True, "wide": True, "hscroll": True}
+                      "skip": True, "wide": True, "hscroll": True, "full": True}
     assert after == {"open": False, "focus": "econ-btn"}
 
 
