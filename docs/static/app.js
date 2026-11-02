@@ -1105,16 +1105,6 @@
   }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && reader && !reader.hidden) closeReader(); }, true);
 
-  // 피드백 버튼은 feedback.js(S9)가 처리한다. 여기서는 이벤트만 알린다.
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest && e.target.closest("[data-fb]");
-    if (!b) return;
-    var art = b.closest("[data-issue]");
-    document.dispatchEvent(new CustomEvent("news:feedback", {
-      detail: { kind: b.getAttribute("data-fb"), issue: art.getAttribute("data-issue"), topic: art.getAttribute("data-topic") }
-    }));   // 누른 표시(다시 누르면 취소, S24b)도 feedback.js 가 정한다
-  });
-
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register((window.EDITION && window.EDITION.base || "") + "sw.js").catch(function () { /* 오프라인 캐시는 선택 기능 */ });
   }
