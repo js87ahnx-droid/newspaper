@@ -55,12 +55,13 @@
 <link rel="stylesheet" href="{{ base }}static/app.css?v={{ ver }}">
 </head>
 <body>
-<div id="toolbar"{% if base %} class="has-today"{% endif %} role="toolbar" aria-label="보기 설정">
+<div id="toolbar" role="toolbar" aria-label="보기 설정">
   <span class="tb-title">{{ masthead }}</span>
   <span class="tb-page" id="pageInfo" aria-live="polite"></span>
   <span class="tb-spacer"></span>
-  <a class="tb-link" href="{{ base }}archive/">지난 호</a>
-  {% if base %}<a class="tb-link" href="{{ base }}">오늘 호</a>{% endif %}{# 지난 호 지면에서 맨 앞(오늘 호)으로 — 2026-11-03 사용자 요청 #}
+  {# 호 이동 (2026-11-03 사용자 요청, 시안 A): 다른 단추와 같은 상자. "목록" = 지난 호 목록, "오늘" = 맨 앞 오늘 호 — 오늘 호에서는 눌린 모양 #}
+  <a class="tb-link tb-btn" href="{{ base }}archive/" aria-label="지난 호 목록">목록</a>
+  <a class="tb-link tb-btn{% if not base %} on{% endif %}" href="{{ base or './' }}" aria-label="오늘 호"{% if not base %} aria-current="page"{% endif %}>오늘</a>
   <button type="button" data-act="front" aria-label="1면으로 돌아가기">1면</button>
   <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
   <button type="button" data-act="next" aria-label="다음 쪽">›</button>

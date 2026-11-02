@@ -694,3 +694,7 @@
 - 원인: 조직이 Claude Code 구독 사용을 막아 모든 호출이 "disabled Claude subscription access" 로 거절 → 사용자가 다시 켬
 - 거절된 호출까지 하루 상한(62)에 세어져 다시 만들 수 없었음 → 거절·오류 호출은 되돌림(Budget.refund), daily 에 reset_budget 입력(그 호 호출 수 0으로). test_analysis 2건
 - 11/3 호 전체 다시 발행 (force + reset_budget)
+
+### 목록·오늘 단추 (2026-11-03, 시안 A)
+- 도구 줄 "지난 호/오늘 호" 글자 링크 → 다른 단추와 같은 상자 [목록][오늘], 오늘 호에서는 "오늘"이 눌린 모양. 휴대폰은 단추 최소 폭 29px 로 한 줄. test_toolbar_links 5건
+- 거절된 AI 호출 되돌림에 맞춰 test_stance_llm 기대값(calls_today 0) 고침

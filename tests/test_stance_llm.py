@@ -145,7 +145,7 @@ def test_llm_failure_falls_back(tmp_path):
     assert st["compare"].startswith("호출 실패")
     # 인증 실패 뒤에는 더 부르지 않는다 (하루 상한을 헛되이 쓰지 않음)
     assert all(v.startswith("앞 호출 실패로 건너뜀") for k, v in st.items() if k != "compare")
-    assert ed["stats"]["llm"]["calls_today"] == 1
+    assert ed["stats"]["llm"]["calls_today"] == 0   # 거절된 호출은 하루 상한에서 되돌린다 (2026-11-03)
 
 
 def test_cli_error_envelope_reason(tmp_path):
