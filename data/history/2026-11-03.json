@@ -5,7 +5,7 @@
   {
    "id": "9dc308616c64b48c",
    "title": "28년간 5만㎞ 걷고 헤엄쳐 세계일주 영국인…\"21세기 오디세이\"",
-   "topic": "international",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "bushby",
@@ -13,8 +13,8 @@
     "walk",
     "year",
     "adventurer",
-    "around",
     "world",
+    "around",
     "return",
     "british",
     "mile",
@@ -26,7 +26,7 @@
     {
      "date": "2026-11-03",
      "title": "28년간 5만㎞ 걷고 헤엄쳐 세계일주 영국인…\"21세기 오디세이\"",
-     "summary": null
+     "summary": "영국인 부시비, 28년 도보 세계일주 끝 귀향"
     }
    ],
    "n_sources": 10,
@@ -58,7 +58,7 @@
   {
    "id": "47d1e2db61f6d761",
    "title": "한진칼 지분 경쟁… 호반 추가매입에 조원태도 반격",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "진칼",
@@ -79,7 +79,7 @@
     {
      "date": "2026-11-03",
      "title": "한진칼 지분 경쟁… 호반 추가매입에 조원태도 반격",
-     "summary": null
+     "summary": "호반·조원태, 한진칼 최대주주 지분 경쟁 본격화"
     }
    ],
    "n_sources": 8,
@@ -132,7 +132,7 @@
     {
      "date": "2026-11-03",
      "title": "Ukraine and Russia Report Cyberattacks on Emergency Alert Apps",
-     "summary": null
+     "summary": "우크라·러 경보 앱 모두 해킹, 배후는 불명"
     }
    ],
    "n_sources": 8,
@@ -168,8 +168,8 @@
    "days": 1,
    "signature": [
     "supreme",
-    "california",
     "ballot",
+    "california",
     "court",
     "administration",
     "ask",
@@ -185,7 +185,7 @@
     {
      "date": "2026-11-03",
      "title": "Trump administration asks Supreme Court to set aside 20,000 disputed California ballots",
-     "summary": null
+     "summary": "대법원, 캘리포니아 2만 표 분리 요청 기각"
     }
    ],
    "n_sources": 8,
@@ -228,8 +228,8 @@
     "亡確",
     "ペイ",
     "本人",
-    "イン",
     "確認",
+    "イン",
     "確",
     "人の"
    ],
@@ -238,7 +238,7 @@
     {
      "date": "2026-11-03",
      "title": "스페인 열차사고 사망자 69명 대부분 신원 파악…3명은 확인 중",
-     "summary": null
+     "summary": "스페인 열차사고 사망자 대부분 신원 확인, 3명 남아"
     }
    ],
    "n_sources": 8,
@@ -291,11 +291,11 @@
     {
      "date": "2026-11-03",
      "title": "또 냉장고 노린 사이버 공격…프랑스 이어 벨기에·스웨덴도(종합)",
-     "summary": null
+     "summary": "프랑스 이어 유럽 각국 슈퍼 냉장고 해킹"
     }
    ],
    "n_sources": 7,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -376,7 +376,7 @@
   {
    "id": "01c49f1700b188b3",
    "title": "Martha Stewart apologizes for ‘homeless’ Halloween costume",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "martha",
@@ -397,7 +397,7 @@
     {
      "date": "2026-11-03",
      "title": "Martha Stewart apologizes for ‘homeless’ Halloween costume",
-     "summary": null
+     "summary": "스튜어트, 노숙인 분장 비판에 \"큰 실수\" 사과"
     }
    ],
    "n_sources": 7,
@@ -450,7 +450,7 @@
     {
      "date": "2026-11-03",
      "title": "재정난 벨기에, 정부 붕괴하나…총리, 예산안 결렬에 사퇴 표명",
-     "summary": null
+     "summary": "벨기에 총리 예산 결렬로 사의, 국왕 결정 보류"
     }
    ],
    "n_sources": 7,
@@ -492,8 +492,8 @@
     "bombing",
     "centre",
     "humanitarian",
-    "people",
     "strike",
+    "people",
     "berichtet",
     "luftangriff",
     "saporischschja"
@@ -508,7 +508,7 @@
     {
      "date": "2026-11-03",
      "title": "Ukraine Says Russian Strike on Humanitarian Aid Center Kills 24",
-     "summary": null
+     "summary": "러, 자포리자 구호센터 폭격해 26명 숨져"
     }
    ],
    "n_sources": 7,
@@ -561,7 +561,7 @@
     {
      "date": "2026-11-03",
      "title": "Lindsay Clancy returns to court in a bid to dismiss charges she killed her three young children",
-     "summary": null
+     "summary": "클랜시 기각 신청 심리, 16일 판단·재심 3월 거론"
     }
    ],
    "n_sources": 7,
@@ -593,7 +593,7 @@
   {
    "id": "6047fc4cca949c15",
    "title": "육군 “강원 철원 전방부대 하사 1명 외상 입고 사망”",
-   "topic": "politics",
+   "topic": "incidents",
    "days": 1,
    "signature": [
     "하사",
@@ -614,7 +614,7 @@
     {
      "date": "2026-11-03",
      "title": "육군 “강원 철원 전방부대 하사 1명 외상 입고 사망”",
-     "summary": null
+     "summary": "철원 전방부대 하사 사망, 군·민간 합동 조사"
     }
    ],
    "n_sources": 7,
@@ -646,7 +646,7 @@
   {
    "id": "5e880ed6aeca1bd4",
    "title": "李대통령 부부 여권번호까지…‘1호기 탑승자’ 168명 정보 유출",
-   "topic": "politics",
+   "topic": "incidents",
    "days": 1,
    "signature": [
     "호기",
@@ -671,7 +671,7 @@
     }
    ],
    "n_sources": 6,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "중앙일보",
@@ -702,18 +702,18 @@
    "topic": "entertainment_sports",
    "days": 1,
    "signature": [
+    "youngest",
     "antonelli",
     "champion",
-    "youngest",
-    "kimi",
     "become",
-    "history",
+    "kimi",
     "world",
+    "history",
     "age",
-    "formula",
     "mexico",
-    "make",
-    "blew"
+    "born",
+    "charismatic",
+    "garage"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -764,8 +764,8 @@
     "착공",
     "영남",
     "남권",
-    "si",
     "미에",
+    "si",
     "터로"
    ],
    "date": "2026-11-03",
@@ -826,7 +826,7 @@
     {
      "date": "2026-11-03",
      "title": "F1 안토넬리, 20세에 역대 최연소 드라이버 챔피언 등극",
-     "summary": null
+     "summary": "안토넬리, 4경기 남기고 F1 최연소 챔피언 확정"
     }
    ],
    "n_sources": 6,
@@ -858,7 +858,7 @@
   {
    "id": "e030b8f0b9798148",
    "title": "조선호텔, 내년 종로·여수에 새 호텔…2030년 14개 체제 구축",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "선호",
@@ -883,7 +883,7 @@
     }
    ],
    "n_sources": 6,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -932,7 +932,7 @@
     {
      "date": "2026-11-03",
      "title": "Nine killed after Learjet crashes in Florida",
-     "summary": null
+     "summary": "리어젯 플로리다 추락, 9명 전원 사망"
     }
    ],
    "n_sources": 6,
@@ -962,6 +962,112 @@
    ]
   },
   {
+   "id": "601af3fe85fa4df3",
+   "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
+   "topic": "entertainment_sports",
+   "days": 1,
+   "signature": [
+    "박항",
+    "태국",
+    "항서",
+    "치맨",
+    "김치",
+    "관중",
+    "독에",
+    "인종",
+    "종차",
+    "감독",
+    "축구",
+    "차별"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
+     "summary": null
+    }
+   ],
+   "n_sources": 6,
+   "placed": false,
+   "articles": [
+    {
+     "source": "조선일보",
+     "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
+     "url": "https://www.chosun.com/international/international_general/2026/11/02/GI3DGMJXMJRDQMBSHFRGIMJWMM/",
+     "published": "2026-11-02T02:34:56+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "중앙일보",
+     "title": "“XX 김치맨” 박항서, 태국 관중 인종차별에 극대노...충돌직전까지",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5kOHJIQW5MRDJMTHlaVmJTdVZVXzdTV1poUFotX2tvMmtpeTZXYzBFVlJ1SXh2N29fYnRJa3JYQzhJMlRoOEZZbllKNTctN1o0N0xYRUlB?oc=5",
+     "published": "2026-11-01T23:32:49+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "연합뉴스",
+     "title": "박항서 감독에 \"김치맨\"…태국 프로축구서 인종차별 논란",
+     "url": "https://www.yna.co.kr/view/AKR20261102053600007",
+     "published": "2026-11-02T01:11:15+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "2ab917c81e51f030",
+   "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "총격",
+    "러윈",
+    "핼러",
+    "부상",
+    "사망",
+    "shooting",
+    "여명",
+    "dozen",
+    "weekend",
+    "halloween",
+    "decry",
+    "mas"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
+     "summary": "핼러윈 주말 미국 곳곳 총격, 최소 24명 사망"
+    }
+   ],
+   "n_sources": 6,
+   "placed": true,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
+     "url": "https://www.yna.co.kr/view/AKR20261102061800009",
+     "published": "2026-11-02T01:50:51+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "경향신문",
+     "title": "핼러윈 밤 미국 곳곳서 총격…24명 사망·90여명 부상",
+     "url": "https://www.khan.co.kr/article/202611021146001/",
+     "published": "2026-11-02T02:46:00+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "동아일보",
+     "title": "“축제 대신 총성”…美 핼러윈 총격 잇따라 24명 사망·94명 부상",
+     "url": "https://www.donga.com/news/Inter/article/all/20261102/134950532/1",
+     "published": "2026-11-02T05:47:04+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
    "id": "c13a27be8e9ee2ff",
    "title": "Judge dismisses charges against FBI agents involved in Hunter Biden case",
    "topic": "international",
@@ -978,14 +1084,14 @@
     "official",
     "tosse",
     "agent",
-    "fbi"
+    "dismisse"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
      "title": "Judge dismisses charges against FBI agents involved in Hunter Biden case",
-     "summary": null
+     "summary": "판사, 前FBI 간부 위증 기소 기각하며 '무기화' 질타"
     }
    ],
    "n_sources": 6,
@@ -1017,7 +1123,7 @@
   {
    "id": "239c2ed509ae5ab0",
    "title": "Ryanair to freeze pay and cut hiring as €2bn jet fuel hit looms",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "ryanair",
@@ -1038,7 +1144,7 @@
     {
      "date": "2026-11-03",
      "title": "Ryanair to freeze pay and cut hiring as €2bn jet fuel hit looms",
-     "summary": null
+     "summary": "라이언에어, 연료비 20억유로 증가에 임금동결 검토"
     }
    ],
    "n_sources": 6,
@@ -1095,7 +1201,7 @@
     }
    ],
    "n_sources": 6,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "BBC",
@@ -1176,7 +1282,7 @@
   {
    "id": "058c6a41c100cb03",
    "title": "포스코홀딩스, 3분기 영업이익 작년 대비 48% 증가",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "코홀",
@@ -1201,7 +1307,7 @@
     }
    ],
    "n_sources": 5,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -1250,7 +1356,7 @@
     {
      "date": "2026-11-03",
      "title": "[속보] 李대통령 \"불평등 양극화 그늘 여전 …'모두의 성장' 대전환\"",
-     "summary": null
+     "summary": "내년 예산 820.9조, 시정연설서 양극화 해소 강조"
     }
    ],
    "n_sources": 5,
@@ -1303,7 +1409,7 @@
     {
      "date": "2026-11-03",
      "title": "주식 판 돈, 이틀 말고 하루 만에 받는다…54년 결제주기 단축 2028년 목표",
-     "summary": null
+     "summary": "주식 매도대금 입금 T+1 전환, 2028년 하반기 목표"
     }
    ],
    "n_sources": 5,
@@ -1409,7 +1515,7 @@
     {
      "date": "2026-11-03",
      "title": "軍 ‘국방드론본부’ 출범… 尹정부 ‘드론작전사’ 해체해 개편",
-     "summary": null
+     "summary": "드론작전사 해체, 정책 총괄 국방드론본부 100명 규모로 출범"
     }
    ],
    "n_sources": 5,
@@ -1434,6 +1540,59 @@
      "title": "현대전 대비 드론 전력화 속도… 국방부, 100여명 규모 ‘드론본부’ 첫발",
      "url": "https://www.khan.co.kr/article/202611021647001/",
      "published": "2026-11-02T07:47:00+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "6fc71699d13a2d3c",
+   "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "래소",
+    "융위",
+    "거래",
+    "낸스",
+    "이낸",
+    "국내",
+    "금융",
+    "킹에",
+    "바이",
+    "해킹",
+    "긴급",
+    "비금"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
+     "summary": "금융위, 바이낸스 해킹 계기로 국내 거래소 보안 강화 주문"
+    }
+   ],
+   "n_sources": 5,
+   "placed": true,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
+     "url": "https://www.yna.co.kr/view/AKR20261102134600002",
+     "published": "2026-11-02T06:55:37+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "한겨레",
+     "title": "바이낸스 8조원 해킹에…금융위, 국내 가상자산 거래소 긴급점검",
+     "url": "https://www.hani.co.kr/arti/economy/finance/1285347.html",
+     "published": "2026-11-02T07:17:00+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "동아일보",
+     "title": "바이낸스 해킹에 국내 거래소도 긴장…금융당국, 보안 강화 주문",
+     "url": "https://www.donga.com/news/Economy/article/all/20261102/134950484/1",
+     "published": "2026-11-02T07:18:00+00:00",
      "lang": "ko"
     }
    ]
@@ -1547,7 +1706,7 @@
   {
    "id": "2783b3d9817c8bdc",
    "title": "Watch: King Charles III caught in torrential downpour at Antigua and Barbuda parade",
-   "topic": "international",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "charle",
@@ -1572,7 +1731,7 @@
     }
    ],
    "n_sources": 5,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "BBC",
@@ -1598,29 +1757,29 @@
    ]
   },
   {
-   "id": "601af3fe85fa4df3",
-   "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
-   "topic": "entertainment_sports",
+   "id": "8a2d4af2ce1ab7b9",
+   "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
+   "topic": "international",
    "days": 1,
    "signature": [
-    "박항",
-    "태국",
-    "항서",
-    "치맨",
-    "김치",
-    "인종",
-    "종차",
-    "관중",
-    "축구",
-    "차별",
-    "독에",
-    "로축"
+    "el-sayed",
+    "fundraising",
+    "single-day",
+    "haley",
+    "michigan",
+    "steven",
+    "abdul",
+    "record",
+    "endorsement",
+    "democrat",
+    "affect",
+    "backfire"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
+     "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
      "summary": null
     }
    ],
@@ -1628,25 +1787,25 @@
    "placed": false,
    "articles": [
     {
-     "source": "조선일보",
-     "title": "“김치맨” 조롱에 박항서 “내려와”… 태국 프로축구서 관중과 충돌",
-     "url": "https://www.chosun.com/international/international_general/2026/11/02/GI3DGMJXMJRDQMBSHFRGIMJWMM/",
-     "published": "2026-11-02T02:34:56+00:00",
-     "lang": "ko"
+     "source": "Fox News",
+     "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
+     "url": "https://www.foxnews.com/politics/haley-stevens-endorsement-stunt-backfires-el-sayed-setting-single-day-fundraising-record",
+     "published": "2026-11-02T14:07:42+00:00",
+     "lang": "en"
     },
     {
-     "source": "중앙일보",
-     "title": "“XX 김치맨” 박항서, 태국 관중 인종차별에 극대노...충돌직전까지",
-     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5kOHJIQW5MRDJMTHlaVmJTdVZVXzdTV1poUFotX2tvMmtpeTZXYzBFVlJ1SXh2N29fYnRJa3JYQzhJMlRoOEZZbllKNTctN1o0N0xYRUlB?oc=5",
-     "published": "2026-11-01T23:32:49+00:00",
-     "lang": "ko"
+     "source": "Al Jazeera",
+     "title": "US midterms: 1 day to go – Democrats rally around El-Sayed amid attacks",
+     "url": "https://www.aljazeera.com/news/2026/11/2/us-midterms-1-day-to-go-democrats-rally-around-el-sayed-amid-attacks?traffic_source=rss",
+     "published": "2026-11-02T09:06:20+00:00",
+     "lang": "en"
     },
     {
-     "source": "연합뉴스",
-     "title": "박항서 감독에 \"김치맨\"…태국 프로축구서 인종차별 논란",
-     "url": "https://www.yna.co.kr/view/AKR20261102053600007",
-     "published": "2026-11-02T01:11:15+00:00",
-     "lang": "ko"
+     "source": "CNN",
+     "title": "Democrats' Drama: Could Rep. Haley Stevens' last-minute endorsement switch affect Abdul El-Sayed's chances in Michigan?",
+     "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNLW5ZVXdaMkNqUG0yS05yWGhFX0pXNVBDSUhFU01NandLQUNObTFtWTYwZ0M4bGdqaVBZRVhJU1M5Qk1VSWRVekVvZjNJRnhEQURiZEx4dFo1eC12c1N6SlRvNGlJUzJ2c3JYN3VHSlVOVkVZWW5Ua2toMzBCbm0waEdBakE3My1aZ3VyUzNDaWUtNDhFdU5uNTctbVJ1S1laSWJtY2N1UlpfWUJYYlNBUGpEbDhtTE1sQUV3a3VLWS1iMDhqUnctc2N0cUstNmR1ek9yQnR2ZUZXTTVmMGdzSEdLZEVOR2tHd2tQbm10dUg?oc=5",
+     "published": "2026-11-02T14:24:18+00:00",
+     "lang": "en"
     }
    ]
   },
@@ -1706,7 +1865,7 @@
   {
    "id": "f0a0de156176a3c0",
    "title": "하이브, 사내 시스템 해킹 피해…임직원 주민번호·계좌번호 유출",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "이브",
@@ -1731,7 +1890,7 @@
     }
    ],
    "n_sources": 5,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "중앙일보",
@@ -1780,7 +1939,7 @@
     {
      "date": "2026-11-03",
      "title": "프랑스 고등학생 시위, 중간방학 끝나자마자 소규모로 재개",
-     "summary": null
+     "summary": "프랑스 고교 봉쇄 재개, 소규모지만 총파업 예고"
     }
    ],
    "n_sources": 5,
@@ -1833,7 +1992,7 @@
     {
      "date": "2026-11-03",
      "title": "이스라엘 선관위 “총선 적법하게 진행” 네타냐후 측 부정 의혹 일축",
-     "summary": null
+     "summary": "이스라엘 선관위, 네타냐후 부정선거 주장 일축"
     }
    ],
    "n_sources": 5,
@@ -1868,11 +2027,11 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "가리",
     "친러",
+    "가리",
     "불가",
-    "여성",
     "리아",
+    "여성",
     "요토",
     "대선",
     "선제",
@@ -1939,7 +2098,7 @@
     {
      "date": "2026-11-03",
      "title": "이란 \"美 해상봉쇄 해제 등 요구 수용시 이틀내 호르무즈 개방\"",
-     "summary": null
+     "summary": "이란, 요구 수용 조건으로 호르무즈 이틀 내 개방 제시"
     }
    ],
    "n_sources": 5,
@@ -1969,62 +2128,9 @@
    ]
   },
   {
-   "id": "2ab917c81e51f030",
-   "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "총격",
-    "러윈",
-    "핼러",
-    "부상",
-    "사망",
-    "여명",
-    "injured",
-    "击事",
-    "周末",
-    "国周",
-    "多起",
-    "末"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
-     "summary": null
-    }
-   ],
-   "n_sources": 5,
-   "placed": true,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "진짜 피로 얼룩진 美 핼러윈…잇단 총격에 24명 사망·90여명 부상",
-     "url": "https://www.yna.co.kr/view/AKR20261102061800009",
-     "published": "2026-11-02T01:50:51+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "경향신문",
-     "title": "핼러윈 밤 미국 곳곳서 총격…24명 사망·90여명 부상",
-     "url": "https://www.khan.co.kr/article/202611021146001/",
-     "published": "2026-11-02T02:46:00+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "동아일보",
-     "title": "“축제 대신 총성”…美 핼러윈 총격 잇따라 24명 사망·94명 부상",
-     "url": "https://www.donga.com/news/Inter/article/all/20261102/134950532/1",
-     "published": "2026-11-02T05:47:04+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
    "id": "2c21c75d7adbed40",
    "title": "G마켓, 개인정보 유출 고객에 1만원 보상…e쿠폰 피해 전액 배상",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "객에",
@@ -2049,7 +2155,7 @@
     }
    ],
    "n_sources": 5,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -2075,23 +2181,23 @@
    ]
   },
   {
-   "id": "31c2c6d61f768cef",
-   "title": "Trump reacts to Haley Stevens’ endorsement of Mike Rogers",
+   "id": "295d5dce5f082877",
+   "title": "Mike Rogers dishes on how shock Haley Stevens endorsement unfolded hours before Election Day",
    "topic": "international",
    "days": 3,
    "signature": [
     "roger",
-    "haley",
     "steven",
+    "haley",
     "endorsement",
     "mike",
     "democrat",
     "republican",
     "betrayal",
     "speak",
+    "michigan",
     "anderson",
-    "cooper",
-    "rep"
+    "cooper"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -2107,18 +2213,18 @@
     },
     {
      "date": "2026-11-03",
-     "title": "Trump reacts to Haley Stevens’ endorsement of Mike Rogers",
-     "summary": null
+     "title": "Mike Rogers dishes on how shock Haley Stevens endorsement unfolded hours before Election Day",
+     "summary": "민주 스티븐스, 미시간서 공화 후보 지지"
     }
    ],
    "n_sources": 4,
    "placed": true,
    "articles": [
     {
-     "source": "CNN",
-     "title": "Trump reacts to Haley Stevens’ endorsement of Mike Rogers",
-     "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNYUR2d3NrSzRLUGhsTi1UNVA4MjVlMmVGdzRyb0kxUG5oVFpoUHVVQ05ZX2lRcUtiUndtN3lCSlYwbkY0eFVfcTVHSExDQmQxdDNsNnZKQ0luY3lxcWJJNTlVc0ZEUTRJWTNSbjR6bThhbTNNV1hUU0RNOE52dHdlMjJZQkFoYlQ5dExtdUFCNkdwbVl4RHBKQjVZR2NWdE11U1NR?oc=5",
-     "published": "2026-11-01T22:23:00+00:00",
+     "source": "Fox News",
+     "title": "Mike Rogers dishes on how shock Haley Stevens endorsement unfolded hours before Election Day",
+     "url": "https://www.foxnews.com/politics/mike-rogers-dishes-shock-haley-stevens-endorsement-unfolded-hours-election-day",
+     "published": "2026-11-02T18:29:06+00:00",
      "lang": "en"
     },
     {
@@ -2129,10 +2235,10 @@
      "lang": "en"
     },
     {
-     "source": "Guardian",
-     "title": "‘A despicable betrayal’: Democrats incensed by Haley Stevens’ endorsement of Mike Rogers",
-     "url": "https://www.theguardian.com/us-news/2026/nov/02/democrats-reaction-haley-steven-mike-rogers",
-     "published": "2026-11-02T11:00:41+00:00",
+     "source": "CNN",
+     "title": "Trump reacts to Haley Stevens’ endorsement of Mike Rogers",
+     "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNYUR2d3NrSzRLUGhsTi1UNVA4MjVlMmVGdzRyb0kxUG5oVFpoUHVVQ05ZX2lRcUtiUndtN3lCSlYwbkY0eFVfcTVHSExDQmQxdDNsNnZKQ0luY3lxcWJJNTlVc0ZEUTRJWTNSbjR6bThhbTNNV1hUU0RNOE52dHdlMjJZQkFoYlQ5dExtdUFCNkdwbVl4RHBKQjVZR2NWdE11U1NR?oc=5",
+     "published": "2026-11-01T22:23:00+00:00",
      "lang": "en"
     }
    ]
@@ -2201,10 +2307,10 @@
     "나자",
     "마자",
     "자마",
-    "국지",
     "레시",
     "시키",
     "올레",
+    "국지",
     "공격",
     "우크",
     "크라"
@@ -2302,59 +2408,6 @@
    ]
   },
   {
-   "id": "6fc71699d13a2d3c",
-   "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "융위",
-    "래소",
-    "거래",
-    "금융",
-    "킹에",
-    "낸스",
-    "이낸",
-    "국내",
-    "바이",
-    "해킹",
-    "비금",
-    "긴급"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
-     "summary": null
-    }
-   ],
-   "n_sources": 4,
-   "placed": true,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "바이낸스 해킹에…금융위, 국내 거래소에 준비금 추가 등 당부",
-     "url": "https://www.yna.co.kr/view/AKR20261102134600002",
-     "published": "2026-11-02T06:55:37+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "한겨레",
-     "title": "바이낸스 8조원 해킹에…금융위, 국내 가상자산 거래소 긴급점검",
-     "url": "https://www.hani.co.kr/arti/economy/finance/1285347.html",
-     "published": "2026-11-02T07:17:00+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "동아일보",
-     "title": "바이낸스 해킹에 국내 거래소도 긴장…금융당국, 보안 강화 주문",
-     "url": "https://www.donga.com/news/Economy/article/all/20261102/134950484/1",
-     "published": "2026-11-02T07:18:00+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
    "id": "1b24f9760113e97e",
    "title": "European supermarkets hit by new fridge cyber attack",
    "topic": "international",
@@ -2410,7 +2463,7 @@
   {
    "id": "227ecb5d80fe6fb0",
    "title": "정의선 만난 이형일…생산세액공제 등 전기차 경쟁력 강화 논의(종합)",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "기차",
@@ -2435,7 +2488,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -2463,7 +2516,7 @@
   {
    "id": "c2038854ae6bea99",
    "title": "삼양홀딩스 대표 김지섭, 삼양사 대표 정지석",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "지섭",
@@ -2488,7 +2541,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -2516,7 +2569,7 @@
   {
    "id": "f233f4b13fbf2120",
    "title": "롯데몰 웨스트레이크 하노이, 개점 3년 만에 누적 매출 1조 원 돌파",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "데몰",
@@ -2541,7 +2594,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -2631,8 +2684,8 @@
     "국방",
     "환수",
     "예산",
-    "필요",
     "확보",
+    "필요",
     "명하",
     "보할",
     "요전",
@@ -2683,8 +2736,8 @@
     "이언",
     "메이",
     "언메",
-    "전쟁",
     "한미",
+    "전쟁",
     "이스",
     "아이",
     "北",
@@ -2696,11 +2749,11 @@
     {
      "date": "2026-11-03",
      "title": "北, 한미 핵·재래식 통합훈련 ‘아이언 메이스’에 “극악한 핵전쟁 시연”",
-     "summary": null
+     "summary": "北 김정식, 아이언메이스 비난하며 핵억제력 가속 강화 천명"
     }
    ],
    "n_sources": 4,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "동아일보",
@@ -2749,7 +2802,7 @@
     {
      "date": "2026-11-03",
      "title": "자산-소득 하위 20%, 생계용 신용대출 비중 최대",
-     "summary": null
+     "summary": "자산·소득 하위층 생계형 신용대출 비중 역대 최대"
     }
    ],
    "n_sources": 4,
@@ -2781,7 +2834,7 @@
   {
    "id": "6c28a8fd965e7eab",
    "title": "Anthropic plans to sell $3.5 billion of shares to Japan investors in IPO, filing shows",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "anthropic",
@@ -2802,7 +2855,7 @@
     {
      "date": "2026-11-03",
      "title": "Anthropic plans to sell $3.5 billion of shares to Japan investors in IPO, filing shows",
-     "summary": null
+     "summary": "앤스로픽 3분기 매출 170억 달러, 상장 임박"
     }
    ],
    "n_sources": 4,
@@ -2940,7 +2993,7 @@
   {
    "id": "7833843898628fb9",
    "title": "[게시판] 우리금융, 에너지 취약계층 525가구에 연탄 10만5천장",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "연탄",
@@ -2961,7 +3014,7 @@
     {
      "date": "2026-11-03",
      "title": "[게시판] 우리금융, 에너지 취약계층 525가구에 연탄 10만5천장",
-     "summary": null
+     "summary": "우리금융, 수도권 525가구에 연탄 지원"
     }
    ],
    "n_sources": 4,
@@ -3019,7 +3072,7 @@
     {
      "date": "2026-11-03",
      "title": "Bulgaria has its first elected female president",
-     "summary": null
+     "summary": "요토바, 불가리아 첫 선출직 여성 대통령 당선"
     }
    ],
    "n_sources": 4,
@@ -3049,6 +3102,59 @@
    ]
   },
   {
+   "id": "87a164c88fed3e3f",
+   "title": "런던발 여객기 폭탄 위협…헝가리 전투기 호위 속 긴급 착륙",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "던발",
+    "런던",
+    "헝가",
+    "객기",
+    "여객",
+    "폭탄",
+    "위협",
+    "가리",
+    "bombendrohung",
+    "budapest",
+    "escort",
+    "fighter"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "런던발 여객기 폭탄 위협…헝가리 전투기 호위 속 긴급 착륙",
+     "summary": null
+    }
+   ],
+   "n_sources": 4,
+   "placed": true,
+   "articles": [
+    {
+     "source": "중앙일보",
+     "title": "런던발 여객기 폭탄 위협…헝가리 전투기 호위 속 긴급 착륙",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE95OXJqNzRYcVBlZkVBcmxEb2lVcm5DMlNPcWNmYXV3VVpJa3RVaW9hOXZRRTZuakVXZzA5clIwdU01OUZlZUJQRGI1VERuMllGMGpoNmRn?oc=5",
+     "published": "2026-11-02T15:38:34+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "연합뉴스",
+     "title": "런던발 소피아행 여객기 폭탄 위협…헝가리로 회항",
+     "url": "https://www.yna.co.kr/view/AKR20261103000500109",
+     "published": "2026-11-02T15:11:45+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "BBC",
+     "title": "Wizz Air flight from Luton makes emergency landing with fighter jet escort after bomb threat",
+     "url": "https://www.bbc.co.uk/news/articles/c6rryvwre0p5o?at_medium=RSS&at_campaign=rss",
+     "published": "2026-11-02T14:35:38+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
    "id": "7bc33250f7774e85",
    "title": "South Africa, Rwanda Lose Access to Preferential US Trade Pact",
    "topic": "economy",
@@ -3072,7 +3178,7 @@
     {
      "date": "2026-11-03",
      "title": "South Africa, Rwanda Lose Access to Preferential US Trade Pact",
-     "summary": null
+     "summary": "미국, 남아공·르완다 무관세 혜택 내년 1월 박탈"
     }
    ],
    "n_sources": 4,
@@ -3104,7 +3210,7 @@
   {
    "id": "5088496d3c7d633b",
    "title": "22개 재외 공공기관 한자리에… 中 베이징서 ‘K-마루’ 문 열어",
-   "topic": "economy",
+   "topic": "politics",
    "days": 1,
    "signature": [
     "마루",
@@ -3129,7 +3235,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -3231,7 +3337,7 @@
     {
      "date": "2026-11-03",
      "title": "\"미, 우크라 경유 러시아-유럽 가스관 가동재개 추진\"",
-     "summary": null
+     "summary": "미국, 우크라 경유 러 가스 유럽 판매 재개 추진"
     }
    ],
    "n_sources": 4,
@@ -3263,7 +3369,7 @@
   {
    "id": "546fdb045374375a",
    "title": "삼성전자 ‘다카르 청소년올림픽’ 공식 파트너 참여",
-   "topic": "economy",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "림픽",
@@ -3288,7 +3394,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -3314,29 +3420,29 @@
    ]
   },
   {
-   "id": "dd7d326e95ec2893",
-   "title": "Midterms: Gefährdet ein »niederträchtiger Verrat« in Michigan den Sieg der Demokraten?",
-   "topic": "international",
+   "id": "b240b130ef5e183f",
+   "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
+   "topic": "politics",
    "days": 1,
    "signature": [
-    "michigan",
-    "abdul",
-    "endorsement",
-    "el-sayed",
-    "steven",
-    "affect",
-    "chtiger",
-    "gef",
-    "hrdet",
-    "incroyable",
-    "last-minute",
-    "mocrate"
+    "한길",
+    "전한",
+    "유포",
+    "북한",
+    "송치",
+    "개입",
+    "입설",
+    "혐의",
+    "소청",
+    "공소",
+    "외자",
+    "자설"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "Midterms: Gefährdet ein »niederträchtiger Verrat« in Michigan den Sieg der Demokraten?",
+     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
      "summary": null
     }
    ],
@@ -3344,25 +3450,25 @@
    "placed": false,
    "articles": [
     {
-     "source": "Fox News",
-     "title": "Michigan Dem claims Stevens shot down Rogers endorsement rumor hours before turning on El-Sayed",
-     "url": "https://www.foxnews.com/politics/michigan-dem-claims-stevens-shot-down-rogers-endorsement-rumor-hours-before-turning-el-sayed",
-     "published": "2026-11-02T11:23:23+00:00",
-     "lang": "en"
+     "source": "연합뉴스",
+     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
+     "url": "https://www.yna.co.kr/view/AKR20261102173600004",
+     "published": "2026-11-02T12:41:19+00:00",
+     "lang": "ko"
     },
     {
-     "source": "CNN",
-     "title": "Democrats' Drama: Could Rep. Haley Stevens' last-minute endorsement switch affect Abdul El-Sayed's chances in Michigan?",
-     "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNLW5ZVXdaMkNqUG0yS05yWGhFX0pXNVBDSUhFU01NandLQUNObTFtWTYwZ0M4bGdqaVBZRVhJU1M5Qk1VSWRVekVvZjNJRnhEQURiZEx4dFo1eC12c1N6SlRvNGlJUzJ2c3JYN3VHSlVOVkVZWW5Ua2toMzBCbm0waEdBakE3My1aZ3VyUzNDaWUtNDhFdU5uNTctbVJ1S1laSWJtY2N1UlpfWUJYYlNBUGpEbDhtTE1sQUV3a3VLWS1iMDhqUnctc2N0cUstNmR1ek9yQnR2ZUZXTTVmMGdzSEdLZEVOR2tHd2tQbm10dUg?oc=5",
-     "published": "2026-11-02T14:24:18+00:00",
-     "lang": "en"
+     "source": "경향신문",
+     "title": "경찰, ‘이재명 혼외자설’ ‘5·18 북한 개입설’ 전한길 송치···명예훼손·5·18 특별법 위반 등 혐의",
+     "url": "https://www.khan.co.kr/article/202611022144001/",
+     "published": "2026-11-02T12:44:00+00:00",
+     "lang": "ko"
     },
     {
-     "source": "Der Spiegel",
-     "title": "Midterms: Gefährdet ein »niederträchtiger Verrat« in Michigan den Sieg der Demokraten?",
-     "url": "https://www.spiegel.de/ausland/gefaehrdet-ein-niedertraechtiger-verrat-in-michigan-den-sieg-der-demokraten-a-571ca960-6484-4d80-80c2-5cff658ccba8",
-     "published": "2026-11-02T04:06:00+00:00",
-     "lang": "de"
+     "source": "한국경제",
+     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
+     "url": "https://www.hankyung.com/article/2026110213477",
+     "published": "2026-11-02T13:02:10+00:00",
+     "lang": "ko"
     }
    ]
   },
@@ -3485,9 +3591,9 @@
     "당했",
     "관계",
     "합의",
-    "했다",
     "무고",
     "집유",
+    "했다",
     "허위",
     "그녀"
    ],
@@ -3528,7 +3634,7 @@
   {
    "id": "35a89264ed89cf28",
    "title": "Binance: Kunden der Kryptoplattform ziehen nach Milliarden-Diebstahl 3,6 Milliarden Dollar ab",
-   "topic": "international",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "binance",
@@ -3553,7 +3659,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "BBC",
@@ -3602,7 +3708,7 @@
     {
      "date": "2026-11-03",
      "title": "보금자리론 10년 만기 금리도 5%대…역대 처음",
-     "summary": null
+     "summary": "보금자리론 금리 0.1%p 인상, 10년물 첫 5%대"
     }
    ],
    "n_sources": 4,
@@ -3634,7 +3740,7 @@
   {
    "id": "160d5b421fa04609",
    "title": "HD현대, 임원인사…부사장 7명·전무 23명 승진",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "hd",
@@ -3659,7 +3765,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -3687,7 +3793,7 @@
   {
    "id": "96d1267daea3450a",
    "title": "삼성바이오, 폴리펩타이드 공개매수 마감…\"응모 지분 90% 넘어\"",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "펩타",
@@ -3712,7 +3818,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -3740,7 +3846,7 @@
   {
    "id": "c279cdd30756a1cd",
    "title": "GS건설, 스틸 모듈러 표준 평면 개발… 예상 공사비 산정 지원",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "듈러",
@@ -3765,7 +3871,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -3899,7 +4005,7 @@
   {
    "id": "b169e9e1062ff855",
    "title": "한은, 유네스코한국위원회와 세계유산 기념주화 화폐기획전",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "계유",
@@ -3912,8 +4018,8 @@
     "네스",
     "획전",
     "기획",
-    "폐기",
-    "스코"
+    "스코",
+    "폐기"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -3924,7 +4030,7 @@
     }
    ],
    "n_sources": 4,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -3955,12 +4061,12 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "senator",
     "stroke",
     "뇌졸",
     "머피",
     "졸중",
     "중으",
+    "senator",
     "입원",
     "원의",
     "크리",
@@ -4026,7 +4132,7 @@
     {
      "date": "2026-11-03",
      "title": "11월 전국 아파트 4만4358가구 분양 예정",
-     "summary": null
+     "summary": "11월 전국 4만4천가구 분양 예정, 지방 비중 55%"
     }
    ],
    "n_sources": 4,
@@ -4169,7 +4275,7 @@
   {
    "id": "1952f2a4b10df9dc",
    "title": "트럼프 \"캐나다와 무역합의 매우 근접\"…카니도 \"건설적 협의\"",
-   "topic": "international",
+   "topic": "economy",
    "days": 1,
    "signature": [
     "concept",
@@ -4190,7 +4296,7 @@
     {
      "date": "2026-11-03",
      "title": "트럼프 \"캐나다와 무역합의 매우 근접\"…카니도 \"건설적 협의\"",
-     "summary": null
+     "summary": "트럼프 \"캐나다와 합의 근접\", 카니는 협상 계속 강조"
     }
    ],
    "n_sources": 4,
@@ -4222,7 +4328,7 @@
   {
    "id": "9c126ca616a7e3f9",
    "title": "[속보] 李대통령 “‘소수의 성장’이 아니라 ‘모두의 성장’으로 대전환해야”",
-   "topic": "politics",
+   "topic": "economy",
    "days": 2,
    "signature": [
     "성장",
@@ -4333,7 +4439,7 @@
   {
    "id": "44f922df81e7594c",
    "title": "[경제계 인사]DL케미칼사장 김길수, DL에너지대표 정삼두",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "dl",
@@ -4358,7 +4464,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -4407,7 +4513,7 @@
     {
      "date": "2026-11-03",
      "title": "‘5극 3특’ 지역 中企에 저리 보증부 대출…3년간 4조5000억 규모",
-     "summary": null
+     "summary": "금융위, 지방 중기에 3년간 4.5조 보증대출·외담대 개선"
     }
    ],
    "n_sources": 3,
@@ -4490,9 +4596,62 @@
    ]
   },
   {
+   "id": "eb277a48500844ed",
+   "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "marvell",
+    "lumentum",
+    "bet",
+    "buy",
+    "deal",
+    "billion",
+    "ai'",
+    "component",
+    "data-center",
+    "megadeal",
+    "optical",
+    "reache"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
+     "summary": null
+    }
+   ],
+   "n_sources": 3,
+   "placed": false,
+   "articles": [
+    {
+     "source": "Reuters",
+     "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
+     "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOelFpUlRuWUdrd3oyYkZTNkxFMW9mQlBTY01YTl9ERVRsYTc1VGNWQjR1VF90aEcwY01sTDNXN3NiWVBZNTY4aGVFSlR3WlBlb0laSkptRS1EMF9fMGlna1BXSVExN2dFVGlTNWMyQzYyM1RsYm5pMGxXOWxhbmp1UGRYVjk3RVA0b25WWVZPcFZMS05IOE1CTUgzY1BsQWY3MW5DbDF1bGs1M185UlM4cjlB?oc=5",
+     "published": "2026-11-02T12:25:33+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "Bloomberg",
+     "title": "Marvell Reaches $115 Billion Deal for Lumentum Holdings",
+     "url": "https://www.bloomberg.com/news/articles/2026-11-02/marvell-reaches-115-billion-deal-for-lumentum-holdings",
+     "published": "2026-11-02T12:15:11+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "Financial Times",
+     "title": "Marvell to buy data centre component maker Lumentum in $115bn AI bet",
+     "url": "https://www.ft.com/content/92322fad-f293-48b8-a14b-00506d78eb3b",
+     "published": "2026-11-02T14:07:40+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
    "id": "8ee42c1c33f4536d",
    "title": "HL만도 새 CEO에 ‘중국통’ 박영문… HL그룹 ‘전략총괄’ 신설",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "박영",
@@ -4517,7 +4676,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -4598,7 +4757,7 @@
   {
    "id": "c3d18db817c23ea5",
    "title": "GC녹십자웰빙 3분기 영업이익 73억원…39% 증가",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "녹십",
@@ -4623,7 +4782,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -4712,8 +4871,8 @@
     "인텔",
     "반등",
     "상승",
-    "마감",
     "쇼크",
+    "마감",
     "속보",
     "라지",
     "악재",
@@ -4725,7 +4884,7 @@
     {
      "date": "2026-11-03",
      "title": "인텔 실적 평가 달라지자…코스피 2% 반등",
-     "summary": null
+     "summary": "기관 매수로 코스피 2.24% 반등, 5859 마감"
     }
    ],
    "n_sources": 3,
@@ -4751,6 +4910,59 @@
      "url": "https://www.donga.com/news/Economy/article/all/20261102/134948540/1",
      "published": "2026-11-02T01:12:13+00:00",
      "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "0fbc79fc79ef2e72",
+   "title": "Trump details Reflecting Pool renovations in speech the day before midterm votes are counted",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "pool",
+    "reflecting",
+    "renovation",
+    "botched",
+    "counted",
+    "refilled",
+    "renaming",
+    "speech",
+    "dc",
+    "argument",
+    "choose",
+    "detail"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Trump details Reflecting Pool renovations in speech the day before midterm votes are counted",
+     "summary": null
+    }
+   ],
+   "n_sources": 3,
+   "placed": false,
+   "articles": [
+    {
+     "source": "CNN",
+     "title": "Trump details Reflecting Pool renovations in speech the day before midterm votes are counted",
+     "url": "https://news.google.com/rss/articles/CBMifEFVX3lxTE45VHhOXzlHU0l4ZmtKSmdWTEtnVmhaVXczWkgxbGtvVEd4LWREbzBQQjlXQTYwd2p2bE0wSnUxWjlhMV80Tk81XzRkckxPU21EU3BrM3IydUw2NlZUeUxWMkNvYkxuRGxFcXphNGpnTWZsNjBrX2h0Rl9KWmw?oc=5",
+     "published": "2026-11-02T20:25:53+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "New York Times",
+     "title": "Trump Returns to Reflecting Pool, Now Refilled After Botched Renovation",
+     "url": "https://www.nytimes.com/2026/11/02/us/politics/trump-reflecting-pool-refilled-botched-repairs.html",
+     "published": "2026-11-02T16:31:11+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "Bloomberg",
+     "title": "Trump Chooses DC Reflecting Pool For Midterm Elections Closing Argument",
+     "url": "https://www.bloomberg.com/news/articles/2026-11-02/trump-chooses-dc-reflecting-pool-for-midterm-closing-argument",
+     "published": "2026-11-02T20:11:37+00:00",
+     "lang": "en"
     }
    ]
   },
@@ -4916,7 +5128,7 @@
   {
    "id": "08c662272a5617c6",
    "title": "[인사] 재정경제부",
-   "topic": "economy",
+   "topic": "politics",
    "days": 1,
    "signature": [
     "정경",
@@ -4941,7 +5153,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -4969,7 +5181,7 @@
   {
    "id": "02e7a48b7e775a3c",
    "title": "‘유령 호실’로 전세대출 받고 보증금까지…27억 가로챈 일당 검거",
-   "topic": "economy",
+   "topic": "incidents",
    "days": 1,
    "signature": [
     "유령",
@@ -4994,7 +5206,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -5022,7 +5234,7 @@
   {
    "id": "65fffe8439b4edcf",
    "title": "“연금 나올때까지 버텨야”…60대 재취업 61%가 임시·일용직",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "용직",
@@ -5047,7 +5259,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -5075,7 +5287,7 @@
   {
    "id": "df8b8b0389d406ac",
    "title": "Chinese state TV continues Real Madrid blackout after Mbappe-Mao meme row",
-   "topic": "international",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "madrid",
@@ -5100,7 +5312,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Al Jazeera",
@@ -5181,7 +5393,7 @@
   {
    "id": "e99cf9f207ea4a61",
    "title": "비만치료제 개발도 ‘중국 굴기’…아시아 후보 30개 중 21개 중국산",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "비만",
@@ -5206,7 +5418,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "중앙일보",
@@ -5228,59 +5440,6 @@
      "url": "https://www.yna.co.kr/view/AKR20261102147400017",
      "published": "2026-11-02T07:40:07+00:00",
      "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "eb277a48500844ed",
-   "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
-   "topic": "semis_ai",
-   "days": 1,
-   "signature": [
-    "marvell",
-    "lumentum",
-    "bet",
-    "buy",
-    "deal",
-    "billion",
-    "component",
-    "data-center",
-    "megadeal",
-    "reache",
-    "holding",
-    "milestone"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
-     "summary": null
-    }
-   ],
-   "n_sources": 3,
-   "placed": false,
-   "articles": [
-    {
-     "source": "Reuters",
-     "title": "Marvell to buy Lumentum in $115 billion deal in AI data-center bet",
-     "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOelFpUlRuWUdrd3oyYkZTNkxFMW9mQlBTY01YTl9ERVRsYTc1VGNWQjR1VF90aEcwY01sTDNXN3NiWVBZNTY4aGVFSlR3WlBlb0laSkptRS1EMF9fMGlna1BXSVExN2dFVGlTNWMyQzYyM1RsYm5pMGxXOWxhbmp1UGRYVjk3RVA0b25WWVZPcFZMS05IOE1CTUgzY1BsQWY3MW5DbDF1bGs1M185UlM4cjlB?oc=5",
-     "published": "2026-11-02T12:25:33+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Bloomberg",
-     "title": "Marvell Reaches $115 Billion Deal for Lumentum Holdings",
-     "url": "https://www.bloomberg.com/news/articles/2026-11-02/marvell-reaches-115-billion-deal-for-lumentum-holdings",
-     "published": "2026-11-02T12:15:11+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Financial Times",
-     "title": "Marvell to buy data centre component maker Lumentum in $115bn AI bet",
-     "url": "https://www.ft.com/content/92322fad-f293-48b8-a14b-00506d78eb3b",
-     "published": "2026-11-02T14:07:40+00:00",
-     "lang": "en"
     }
    ]
   },
@@ -5404,8 +5563,8 @@
     "냐후",
     "네타",
     "타냐",
-    "이란",
     "직후",
+    "이란",
     "간선",
     "중간",
     "프는",
@@ -5451,7 +5610,7 @@
   {
    "id": "7ad4f9719dd672dc",
    "title": "김정관 산업부 장관 “메가 프로젝트 반도체 공장 가동 시점 2년 이상 앞당길 것”",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "앞당",
@@ -5476,7 +5635,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -5578,11 +5737,11 @@
     {
      "date": "2026-11-03",
      "title": "央行将开展证券、基金、保险公司互换便利第三次操作",
-     "summary": null
+     "summary": "인민은행, 3일 세 번째 증권사 스와프 실시"
     }
    ],
    "n_sources": 3,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "신화통신",
@@ -5931,59 +6090,6 @@
    ]
   },
   {
-   "id": "ba0b4a9e329721c9",
-   "title": "런던발 소피아행 여객기 폭탄 위협…헝가리로 회항",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "bombendrohung",
-    "budapest",
-    "escort",
-    "fighter",
-    "flugzeug",
-    "landing",
-    "luton",
-    "notlanden",
-    "ungarn",
-    "wegen",
-    "wizz",
-    "던발"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "런던발 소피아행 여객기 폭탄 위협…헝가리로 회항",
-     "summary": null
-    }
-   ],
-   "n_sources": 3,
-   "placed": true,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "런던발 소피아행 여객기 폭탄 위협…헝가리로 회항",
-     "url": "https://www.yna.co.kr/view/AKR20261103000500109",
-     "published": "2026-11-02T15:11:45+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "BBC",
-     "title": "Wizz Air flight from Luton makes emergency landing with fighter jet escort after bomb threat",
-     "url": "https://www.bbc.co.uk/news/articles/c6rryvwre0p5o?at_medium=RSS&at_campaign=rss",
-     "published": "2026-11-02T14:35:38+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Der Spiegel",
-     "title": "Ungarn: Flugzeug muss wegen Bombendrohung in Budapest notlanden",
-     "url": "https://www.spiegel.de/ausland/ungarn-flugzeug-muss-wegen-bombendrohung-in-budapest-notlanden-a-c17974e2-af3e-419e-a630-e8f4cde67c21",
-     "published": "2026-11-02T20:13:00+00:00",
-     "lang": "de"
-    }
-   ]
-  },
-  {
    "id": "c9a9f128980262bb",
    "title": "트럼프 남은 2년 달렸다, 오늘 美 중간선거",
    "topic": "international",
@@ -6007,7 +6113,7 @@
     {
      "date": "2026-11-03",
      "title": "트럼프 남은 2년 달렸다, 오늘 美 중간선거",
-     "summary": null
+     "summary": "하원 민주 우세, 상원 접전 속 중간선거 투표"
     }
    ],
    "n_sources": 3,
@@ -6039,7 +6145,7 @@
   {
    "id": "eaaa979ae16a5909",
    "title": "'年 40달러' HIV 예방주사 개도국에 나온다…FDA, 복제약 승인",
-   "topic": "international",
+   "topic": "science",
    "days": 1,
    "signature": [
     "version",
@@ -6060,7 +6166,7 @@
     {
      "date": "2026-11-03",
      "title": "'年 40달러' HIV 예방주사 개도국에 나온다…FDA, 복제약 승인",
-     "summary": null
+     "summary": "FDA, HIV 예방주사 복제약 잠정 승인…연 40달러"
     }
    ],
    "n_sources": 3,
@@ -6301,64 +6407,6 @@
    ]
   },
   {
-   "id": "68caa0ac0fd34320",
-   "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
-   "topic": "international",
-   "days": 2,
-   "signature": [
-    "비토",
-    "미스",
-    "스터",
-    "ll",
-    "mr",
-    "권으",
-    "당이",
-    "웨이",
-    "이웨",
-    "veto",
-    "나는",
-    "부권"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-02",
-     "title": "트럼프 \"난 미스터 비토\"…야당 승리시 행정권한 총동원 채비",
-     "summary": null
-    },
-    {
-     "date": "2026-11-03",
-     "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
-     "summary": null
-    }
-   ],
-   "n_sources": 3,
-   "placed": false,
-   "articles": [
-    {
-     "source": "조선일보",
-     "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
-     "url": "https://www.chosun.com/international/international_general/2026/11/03/MTA6T56QLJB3BCKUSACWZEL2J4/",
-     "published": "2026-11-02T15:44:00+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "중앙일보",
-     "title": "거부권으로 마이웨이 고수?…트럼프 “나는 ‘미스터 비토’ 될 것”",
-     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE0xbWpJYUVvZnFZSFQ4N1ZDZ2M3aGhYTmIxa3pKeUlPU2NZSHdBbGpRX3FXV2tERzBFcVRoYWIxcGtiQnQ3TEdJaXRMVGRVS1F2Sk51Zmhn?oc=5",
-     "published": "2026-11-02T02:13:09+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "CNN",
-     "title": "Trump says he’ll become ‘Mr. Veto’ if Democrats win back Congress",
-     "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOWnJjdXprQVdUd0k4VE8xbXJUTDdHcEtuNnZBVzJpeU5uVEo0bU9KZE90azdtbW9zdTJKcWtSRU1BX2tiT3YtN2NGNXV5bWpENzZCLTh0YXJSQUxPYW0wUWpzQUY4WTF5aU5jcFl2dFBxbzREUmdYS2VtcDhqZDBmZy11NU5kZmFKVm9V?oc=5",
-     "published": "2026-11-02T18:14:00+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
    "id": "e6197ba0503135f1",
    "title": "유엔, 서사하라 평화유지 35년 만에 종료…'미-러 대립 불똥'",
    "topic": "international",
@@ -6375,7 +6423,7 @@
     "불똥",
     "사하",
     "유엔",
-    "종료"
+    "화유"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -6414,7 +6462,7 @@
   {
    "id": "6f5901b2484148b7",
    "title": "Fox News ratings drop is due to ‘viewer fatigue,’ Murdoch says on eve of midterms",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "fox",
@@ -6439,7 +6487,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "CNN",
@@ -6545,7 +6593,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Reuters",
@@ -6573,7 +6621,7 @@
   {
    "id": "4fe14e781322653c",
    "title": "美 제조업 경기 10개월 연속 확장…생산지수 5년 만에 최고",
-   "topic": "international",
+   "topic": "economy",
    "days": 1,
    "signature": [
     "manufacturing",
@@ -6586,15 +6634,15 @@
     "확장",
     "stay",
     "제조",
-    "october",
-    "activity"
+    "activity",
+    "high"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
      "title": "美 제조업 경기 10개월 연속 확장…생산지수 5년 만에 최고",
-     "summary": null
+     "summary": "美 제조업 10개월 연속 확장, 생산지수 5년 만에 최고"
     }
    ],
    "n_sources": 3,
@@ -6690,10 +6738,10 @@
     "meeting",
     "shipping",
     "unite",
-    "host",
     "mideast",
     "rare",
-    "hormuz"
+    "hormuz",
+    "host"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -6785,7 +6833,7 @@
   {
    "id": "1bffa9dbae2fc263",
    "title": "Oracle Kicks Off $20 Billion Capital Raise for AI Spending Plan",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "oracle",
@@ -6810,7 +6858,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Bloomberg",
@@ -6885,6 +6933,59 @@
      "url": "https://www.lemonde.fr/international/article/2026/11/02/a-l-aube-d-une-possible-reprise-des-frappes-en-iran-les-pays-du-golfe-en-plein-desarroi_6805119_3210.html",
      "published": "2026-11-02T07:30:04+00:00",
      "lang": "fr"
+    }
+   ]
+  },
+  {
+   "id": "c5f0d4003fb0ee7f",
+   "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
+   "topic": "semis_ai",
+   "days": 1,
+   "signature": [
+    "앤트",
+    "로픽",
+    "트로",
+    "외기",
+    "조달",
+    "ipo",
+    "역대",
+    "해외",
+    "럽네",
+    "부럽",
+    "서만",
+    "판다"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
+     "summary": null
+    }
+   ],
+   "n_sources": 3,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
+     "url": "https://www.yna.co.kr/view/AKR20261102171900073",
+     "published": "2026-11-02T11:59:14+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "한국경제",
+     "title": "앤트로픽, 美 IPO로 日서 4.7조 조달…해외기업 역대 최대",
+     "url": "https://www.hankyung.com/article/2026110213307",
+     "published": "2026-11-02T12:31:06+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "매일경제",
+     "title": "“일본 투자자들 부럽네”…앤트로픽, 4.7조원 규모 공모주 판다",
+     "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE9RVlJ1bXd2cUlyTk8xaW82VlVSeHRIekNHYWlwNUFhM0wyV250LW4zZE03OFRBU0pDYndGcGNxb2pSVDFVWUE?oc=5",
+     "published": "2026-11-02T13:29:05+00:00",
+     "lang": "ko"
     }
    ]
   },
@@ -6965,7 +7066,7 @@
     {
      "date": "2026-11-03",
      "title": "三部门将优化支持资本市场两项工具",
-     "summary": null
+     "summary": "중국, 증시 지원 재대출 금리 1%로 낮추고 상설화"
     }
    ],
    "n_sources": 3,
@@ -7048,62 +7149,9 @@
    ]
   },
   {
-   "id": "b240b130ef5e183f",
-   "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "한길",
-    "개입",
-    "입설",
-    "전한",
-    "북한",
-    "송치",
-    "혐의",
-    "유포",
-    "소청",
-    "공소",
-    "외자",
-    "자설"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
-     "summary": null
-    }
-   ],
-   "n_sources": 3,
-   "placed": false,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
-     "url": "https://www.yna.co.kr/view/AKR20261102173600004",
-     "published": "2026-11-02T12:41:19+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "경향신문",
-     "title": "경찰, ‘이재명 혼외자설’ ‘5·18 북한 개입설’ 전한길 송치···명예훼손·5·18 특별법 위반 등 혐의",
-     "url": "https://www.khan.co.kr/article/202611022144001/",
-     "published": "2026-11-02T12:44:00+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "한국경제",
-     "title": "'5·18 북한 개입설' 유포 혐의 전한길 공소청 송치",
-     "url": "https://www.hankyung.com/article/2026110213477",
-     "published": "2026-11-02T13:02:10+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
    "id": "1d4a43d0d65e4e5a",
    "title": "교회 헌금·퇴직금 등 4억6천만원 횡령한 직원 2명 징역 8개월",
-   "topic": "economy",
+   "topic": "incidents",
    "days": 1,
    "signature": [
     "교회",
@@ -7128,7 +7176,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -7149,6 +7197,59 @@
      "title": "헌금함 털고 퇴직금 빼돌렸다…교회 돈 4억6000만원 횡령한 직원들",
      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE01U21SU0pjNG1CbVdMSGM4R3J2YVVCVU4yRGwzV3U0VlRiR3BvX09vSmM5WXRDVThrUkotejFYOGM5clFIMkxnWHVvajJmT05hQmxTNjFn?oc=5",
      "published": "2026-11-02T12:00:50+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "50637c279df465c1",
+   "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "심서",
+    "검증",
+    "단장",
+    "란종",
+    "국회",
+    "현장",
+    "장검",
+    "종사",
+    "내란",
+    "징역",
+    "前",
+    "증하"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
+     "summary": null
+    }
+   ],
+   "n_sources": 3,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
+     "url": "https://www.yna.co.kr/view/AKR20261102152300004",
+     "published": "2026-11-02T08:12:28+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "매일경제",
+     "title": "‘국회 진입’ 김현태 전 707단장, 항소심서 “국회 현장검증 필요”",
+     "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE5rX0dSX2ZVZkVMN0QtWktreUlZdFFKa0RCUkdIdEUxcGJBakRydFdYVXk4OG9sZ2M5QWF0cFZnblR0ZTBIRlE?oc=5",
+     "published": "2026-11-02T11:33:27+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "한국경제",
+     "title": "'내란종사 징역12년' 前707단장, 2심서 국회 현장 검증 요구",
+     "url": "https://www.hankyung.com/article/2026110213037",
+     "published": "2026-11-02T11:53:54+00:00",
      "lang": "ko"
     }
    ]
@@ -7186,7 +7287,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "BBC",
@@ -7279,8 +7380,8 @@
     "직권",
     "철거",
     "동구",
-    "현장",
     "장에",
+    "현장",
     "남마"
    ],
    "date": "2026-11-03",
@@ -7327,14 +7428,14 @@
     "england",
     "cummin",
     "serie",
-    "captain",
     "hazlewood",
     "odi",
     "omit",
     "pace",
     "renshaw",
     "rested",
-    "select"
+    "select",
+    "starc"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -7373,7 +7474,7 @@
   {
    "id": "ef6a63e024340f65",
    "title": "우리은행 해외 지점서 원화 계좌로 국내 투자",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "리은",
@@ -7398,7 +7499,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -7424,9 +7525,9 @@
    ]
   },
   {
-   "id": "7939b670d392885c",
-   "title": "サントリーＨＤ、従業員や新卒採用応募者ら１０万人の情報漏えい…利用するクラウドサービスに不正アクセス",
-   "topic": "economy",
+   "id": "9ab0bc9c5f3616d9",
+   "title": "サントリーHD 不正アクセスで個人情報約10万人分が漏えい",
+   "topic": "international",
    "days": 1,
    "signature": [
     "トリ",
@@ -7437,8 +7538,8 @@
     "アク",
     "クセ",
     "セス",
-    "ント",
     "正ア",
+    "ント",
     "不正",
     "情報"
    ],
@@ -7446,20 +7547,13 @@
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "サントリーＨＤ、従業員や新卒採用応募者ら１０万人の情報漏えい…利用するクラウドサービスに不正アクセス",
+     "title": "サントリーHD 不正アクセスで個人情報約10万人分が漏えい",
      "summary": null
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
-    {
-     "source": "요미우리신문",
-     "title": "サントリーＨＤ、従業員や新卒採用応募者ら１０万人の情報漏えい…利用するクラウドサービスに不正アクセス",
-     "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5uT0VnZzVZazhoQ1dVWEVhUERYTDdERG1OX0tPVjM5SXR0YjVzT0N3WGRLUHIzNk84ZWROX2hGNFVtRjNZTXJaWElFNkcxWm4zeXVUNW9LbnJXWXFXZXZVRDExSDI?oc=5",
-     "published": "2026-11-02T10:21:00+00:00",
-     "lang": "ja"
-    },
     {
      "source": "NHK",
      "title": "サントリーHD 不正アクセスで個人情報約10万人分が漏えい",
@@ -7472,6 +7566,13 @@
      "title": "サントリーグループ、10万人分の情報漏洩 不正アクセスで",
      "url": "https://www.asahi.com/articles/ASVC22PPMVC2ULFA012M.html",
      "published": "2026-11-02T08:20:12+00:00",
+     "lang": "ja"
+    },
+    {
+     "source": "요미우리신문",
+     "title": "サントリーＨＤ、従業員や新卒採用応募者ら１０万人の情報漏えい…利用するクラウドサービスに不正アクセス",
+     "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5uT0VnZzVZazhoQ1dVWEVhUERYTDdERG1OX0tPVjM5SXR0YjVzT0N3WGRLUHIzNk84ZWROX2hGNFVtRjNZTXJaWElFNkcxWm4zeXVUNW9LbnJXWXFXZXZVRDExSDI?oc=5",
+     "published": "2026-11-02T10:21:00+00:00",
      "lang": "ja"
     }
    ]
@@ -7562,7 +7663,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -7802,7 +7903,7 @@
   {
    "id": "d9c368e8c63ea1b9",
    "title": "3분기 스마트폰 출하량 20% 감소…삼성, 프리미엄-보급형 쌍끌이로 1위 수성",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "하량",
@@ -7827,7 +7928,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -8093,7 +8194,7 @@
     {
      "date": "2026-11-03",
      "title": "5대은행 10월 가계대출 2.7조↑…중기 2년7개월만에 최대폭 증가",
-     "summary": null
+     "summary": "5대 은행 가계대출 2.7조 늘며 증가 전환"
     }
    ],
    "n_sources": 3,
@@ -8131,8 +8232,8 @@
     "광군",
     "군제",
     "별단",
-    "단속",
     "직구",
+    "단속",
     "특별",
     "블프",
     "해외",
@@ -8151,7 +8252,7 @@
     {
      "date": "2026-11-03",
      "title": "관세청, 광군제·블랙프라이데이 앞두고 ‘불법 해외 직구’ 특별단속",
-     "summary": null
+     "summary": "관세청, 8주간 해외직구 악용 특별단속"
     }
    ],
    "n_sources": 3,
@@ -8204,7 +8305,7 @@
     {
      "date": "2026-11-03",
      "title": "모건스탠리 \"미주식 일시적 하락조정 가능…진입할 좋은 기회\"",
-     "summary": null
+     "summary": "윌슨 \"S&P500 7100 조정 뒤 8000 간다\""
     }
    ],
    "n_sources": 3,
@@ -8289,7 +8390,7 @@
   {
    "id": "363bb1e8d9a83667",
    "title": "メール配信サービス「アララ」700万通超の不審メール確認",
-   "topic": "economy",
+   "topic": "international",
    "days": 1,
    "signature": [
     "アラ",
@@ -8314,7 +8415,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "NHK",
@@ -8342,7 +8443,7 @@
   {
    "id": "9c251ccc26569b08",
    "title": "부모 차 3년 무사고로 몰았더니… 첫 차 보험료 133만→72만원",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "험료",
@@ -8367,7 +8468,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -8448,7 +8549,7 @@
   {
    "id": "8ab48c7cfbe35bb4",
    "title": "SK스퀘어, 4.3조 이상 주주환원…하이닉스 배당수입 70% 푼다",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "스퀘",
@@ -8473,7 +8574,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -8501,7 +8602,7 @@
   {
    "id": "58b5a28ab5d40ddc",
    "title": "‘토스뱅크 체크카드’ 보유 미성년 100만명 육박…주요 사용처는 ‘편의점’",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "스뱅",
@@ -8526,7 +8627,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "동아일보",
@@ -8554,7 +8655,7 @@
   {
    "id": "bcd5a37762c168dc",
    "title": "hy, 마이크로바이옴 화장품 브랜드 '아이오셀' 출시",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "hy",
@@ -8579,7 +8680,7 @@
     }
    ],
    "n_sources": 3,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -8802,7 +8903,7 @@
     {
      "date": "2026-11-03",
      "title": "习近平同阿曼苏丹海赛姆会谈",
-     "summary": null
+     "summary": "리창, 오만 술탄 만나 협력 확대 논의"
     }
    ],
    "n_sources": 2,
@@ -8827,7 +8928,7 @@
   {
    "id": "92b0197b623a0062",
    "title": "한국GM, 10월 5만189대 판매…작년보다 27% 증가",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "판매",
@@ -9021,7 +9122,7 @@
     {
      "date": "2026-11-03",
      "title": "中共中央关于持之以恒推进全面从严治党若干重大问题的决定",
-     "summary": null
+     "summary": "관영매체, 종엄치당 결정 탄생 과정 홍보"
     }
    ],
    "n_sources": 2,
@@ -9145,8 +9246,8 @@
     "트럼",
     "단정",
     "설시",
-    "욕설",
     "고령",
+    "욕설",
     "해져",
     "늘고",
     "정적",
@@ -9178,6 +9279,52 @@
      "url": "https://www.khan.co.kr/article/202611020755001/",
      "published": "2026-11-01T22:55:00+00:00",
      "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "71e8237abc1471a0",
+   "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "southwest",
+    "evacuation",
+    "flooding",
+    "day",
+    "shift",
+    "storm",
+    "east",
+    "force",
+    "historic",
+    "altering",
+    "colorado",
+    "dire"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "CNN",
+     "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
+     "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPbXFKUS1XenhaeldNTGVaXzFKYlpfRFRXSkZoU1B1dFo3SFlLY2Q2a2hpQzJKeklJcTB0OTR4cWlwZ1BHX29icmlHTUFBUEJDN3N3UmZIaVN6ZjdBYnFEU3IyWmFOLU5HdUJhQ1JlVkRQcGdCdXNhM0xLb2xFS2Z1YzNxMXJRdmNOQThuX01Fd2pReEdGaXJBWFoyNA?oc=5",
+     "published": "2026-11-02T13:52:47+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "AP",
+     "title": "Flash flooding triggers evacuations in Southwest and dire warning for Colorado spa town",
+     "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNNDh4NktGVGxZOF80aEhPdnUtRmdDb0VFOWxTSEh4NTNkRFlyTTdzUWkwd3lfenZ4cVp3bFptRE5qVGloSU00OGs4SldjZHlvZjBLNVp0allfNE1KZmU3dGpoQ3pxNElSa1JpLXgzZzA1NkFJMExnVktzVzdDLUFSNUhrVFJORVMzS1VtMjZqZ0NpRnNnakFIem9wbG9rMmpoNEJaMHNwcFZwVk8wWVI4dUZ1dVg0bVdT?oc=5",
+     "published": "2026-11-02T01:11:00+00:00",
+     "lang": "en"
     }
    ]
   },
@@ -9339,9 +9486,9 @@
     "诉讼",
     "改刑",
     "诉",
-    "改",
     "国拟",
-    "拟"
+    "拟",
+    "改"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -9514,52 +9661,6 @@
    ]
   },
   {
-   "id": "71e8237abc1471a0",
-   "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "evacuation",
-    "southwest",
-    "flooding",
-    "storm",
-    "day",
-    "shift",
-    "east",
-    "force",
-    "altering",
-    "colorado",
-    "dire",
-    "flash"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "CNN",
-     "title": "Historic flooding forces evacuations in Southwest as storm shifts east for Election Day",
-     "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPbXFKUS1XenhaeldNTGVaXzFKYlpfRFRXSkZoU1B1dFo3SFlLY2Q2a2hpQzJKeklJcTB0OTR4cWlwZ1BHX29icmlHTUFBUEJDN3N3UmZIaVN6ZjdBYnFEU3IyWmFOLU5HdUJhQ1JlVkRQcGdCdXNhM0xLb2xFS2Z1YzNxMXJRdmNOQThuX01Fd2pReEdGaXJBWFoyNA?oc=5",
-     "published": "2026-11-02T13:52:47+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "AP",
-     "title": "Flash flooding triggers evacuations in Southwest and dire warning for Colorado spa town",
-     "url": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNNDh4NktGVGxZOF80aEhPdnUtRmdDb0VFOWxTSEh4NTNkRFlyTTdzUWkwd3lfenZ4cVp3bFptRE5qVGloSU00OGs4SldjZHlvZjBLNVp0allfNE1KZmU3dGpoQ3pxNElSa1JpLXgzZzA1NkFJMExnVktzVzdDLUFSNUhrVFJORVMzS1VtMjZqZ0NpRnNnakFIem9wbG9rMmpoNEJaMHNwcFZwVk8wWVI4dUZ1dVg0bVdT?oc=5",
-     "published": "2026-11-02T01:11:00+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
    "id": "38cd80a51fe3a330",
    "title": "学习贯彻党的二十届五中全会精神中央宣讲团动员会在京召开 蔡奇出席会议并讲话",
    "topic": "international",
@@ -9684,7 +9785,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -9795,8 +9896,8 @@
    ]
   },
   {
-   "id": "3148157d49851a15",
-   "title": "오세훈-한동훈, 김성원 부친상서 조우…'공식 만남 갖자' 교감",
+   "id": "8d83e5be1dc3c014",
+   "title": "오세훈·한동훈, 장례식장서 한자리... “공식 만남 갖자”",
    "topic": "politics",
    "days": 1,
    "signature": [
@@ -9817,7 +9918,7 @@
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "오세훈-한동훈, 김성원 부친상서 조우…'공식 만남 갖자' 교감",
+     "title": "오세훈·한동훈, 장례식장서 한자리... “공식 만남 갖자”",
      "summary": null
     }
    ],
@@ -9825,18 +9926,64 @@
    "placed": false,
    "articles": [
     {
-     "source": "연합뉴스",
-     "title": "오세훈-한동훈, 김성원 부친상서 조우…'공식 만남 갖자' 교감",
-     "url": "https://www.yna.co.kr/view/AKR20261102175600001",
-     "published": "2026-11-02T14:30:02+00:00",
-     "lang": "ko"
-    },
-    {
      "source": "조선일보",
      "title": "오세훈·한동훈, 장례식장서 한자리... “공식 만남 갖자”",
      "url": "https://www.chosun.com/economy/economy_general/2026/11/03/MEYDOY3FGEZDINJSMYYDMYRVME/",
      "published": "2026-11-02T16:39:04+00:00",
      "lang": "ko"
+    },
+    {
+     "source": "연합뉴스",
+     "title": "오세훈-한동훈, 김성원 부친상서 조우…'공식 만남 갖자' 교감",
+     "url": "https://www.yna.co.kr/view/AKR20261102175600001",
+     "published": "2026-11-02T14:30:02+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "bf10ac5a814c9d1e",
+   "title": "Washington reports first US bird flu death of 2026; health officials say risk to the public is low",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "bird",
+    "flu",
+    "washington",
+    "low",
+    "public",
+    "death",
+    "health",
+    "official",
+    "risk",
+    "first",
+    "cattle",
+    "exposure"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Washington reports first US bird flu death of 2026; health officials say risk to the public is low",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "CNN",
+     "title": "Washington reports first US bird flu death of 2026; health officials say risk to the public is low",
+     "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9VaENkNHpqVUYzUnRGcDU3UWw0SS1vR3NzTmJ3VWxOenhrOFN6UWx0N3hPSEtKUEg5WFNDVGw5Z0R0X1ZMb3ZUaTF4OUxvUEJhaGlfTVpTbDMtdGRSaEx5UkJ0SWR0Wnli?oc=5",
+     "published": "2026-11-02T14:09:58+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "AP",
+     "title": "Washington state resident dies from bird flu following exposure to infected cattle",
+     "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQb0d4NUNUbjhBbTN0TGtuakFKQV80M0JUcEFKbjVfel9LVkFuZmtfWHBNdjFVcm1LTTA4UkRlV01KSXBzbE91U1JTOEdjdXQzbERuNksyOTBqTHJtMDMzTW5yaXluVXNFZGRCTWxySDNjV0JJTkJFYk5VbWQ4eEtWUlNJWVBFZTFET0o0ZmZoaGRyWkRHcllv?oc=5",
+     "published": "2026-11-02T19:55:00+00:00",
+     "lang": "en"
     }
    ]
   },
@@ -9989,8 +10136,8 @@
     "주군",
     "공군",
     "우주",
-    "게임",
     "참가",
+    "게임",
     "트너",
     "파트",
     "국제"
@@ -10038,8 +10185,8 @@
     "강경",
     "걸면",
     "경파",
-    "구현",
-    "내걸"
+    "내걸",
+    "도덕"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -10184,7 +10331,7 @@
     {
      "date": "2026-11-03",
      "title": "Carburants : le gouvernement affirme que le prix du gazole a baissé de « 12 à 18 centimes » dans plus de la moitié des stations-service grâce à la libération de stocks stratégiques",
-     "summary": null
+     "summary": "이란 협상 기대에 유가·휘발유값 하락"
     }
    ],
    "n_sources": 2,
@@ -10253,6 +10400,52 @@
    ]
   },
   {
+   "id": "85e184d2960a5160",
+   "title": "영암서 퇴근길 통근버스 논두렁 추락…21명 중경상(종합)",
+   "topic": "incidents",
+   "days": 1,
+   "signature": [
+    "논두",
+    "두렁",
+    "버스",
+    "추락",
+    "근버",
+    "통근",
+    "퇴근",
+    "근길",
+    "암서",
+    "중경",
+    "영암",
+    "경상"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "영암서 퇴근길 통근버스 논두렁 추락…21명 중경상(종합)",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "영암서 퇴근길 통근버스 논두렁 추락…21명 중경상(종합)",
+     "url": "https://www.yna.co.kr/view/AKR20261102175351054",
+     "published": "2026-11-02T15:22:35+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "중앙일보",
+     "title": "퇴근길 달리다 논두렁 ‘쾅’…근로자 21명 탄 버스 추락, 무슨일",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE80bXg3WGtZQWxFYTA0SGh6SHpKWDI5SWVVVFpNTDlOX0JKZGd5a2xIOWZZeGpadU5YbGFWZGREbTJXbUllLV9VaFJOemc4NzN2ZV9Gd19R?oc=5",
+     "published": "2026-11-02T16:41:13+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
    "id": "2b1ff9d29b777ea9",
    "title": "学习贯彻党的二十届五中全会精神丨勇担历史使命 把持之以恒推进全面从严治党落在实处",
    "topic": "international",
@@ -10295,6 +10488,52 @@
      "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOdnFmWXotM3VyUmNtSU1uc0hRTGJvTWpDR0Q2RVdya1c4Q3B0YUlWRXZsaWMtWG5VSGt0dnlkY2EwNVpYdUw0Q19JbTExbHhvOU5UNW9fRTdIUnFyRndlSEpJU0QzNzNOTEZnZHgwMmN2X2JkOHBQcW9KZ3hpQXh4QzJvaw?oc=5",
      "published": "2026-11-02T15:54:48+00:00",
      "lang": "zh"
+    }
+   ]
+  },
+  {
+   "id": "68caa0ac0fd34320",
+   "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "비토",
+    "미스",
+    "스터",
+    "되겠",
+    "겠다",
+    "권으",
+    "당이",
+    "묻자",
+    "어쩌",
+    "웨이",
+    "이웨",
+    "쩌나"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "조선일보",
+     "title": "트럼프 “민주당이 의회 장악하면, ‘미스터 비토’ 되겠다”",
+     "url": "https://www.chosun.com/international/international_general/2026/11/03/MTA6T56QLJB3BCKUSACWZEL2J4/",
+     "published": "2026-11-02T15:44:00+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "중앙일보",
+     "title": "거부권으로 마이웨이 고수?…트럼프 “나는 ‘미스터 비토’ 될 것”",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE0xbWpJYUVvZnFZSFQ4N1ZDZ2M3aGhYTmIxa3pKeUlPU2NZSHdBbGpRX3FXV2tERzBFcVRoYWIxcGtiQnQ3TEdJaXRMVGRVS1F2Sk51Zmhn?oc=5",
+     "published": "2026-11-02T02:13:09+00:00",
+     "lang": "ko"
     }
    ]
   },
@@ -10360,8 +10599,8 @@
     "율은",
     "익비",
     "출렁",
-    "대급",
-    "스도"
+    "스도",
+    "대급"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -10393,7 +10632,7 @@
   {
    "id": "2de46d527817a58d",
    "title": "에쓰오일, 3분기 영업이익 1조4067억 원… 윤활유 부문 실적 급증 견인",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "쓰오",
@@ -10439,7 +10678,7 @@
   {
    "id": "75b039401be0c560",
    "title": "삼성전자, 아프리카 진출 31년 만에 스마트폰 시장 첫 1위",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "트폰",
@@ -10621,52 +10860,6 @@
    ]
   },
   {
-   "id": "8a2d4af2ce1ab7b9",
-   "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "el-sayed",
-    "fundraising",
-    "single-day",
-    "record",
-    "haley",
-    "steven",
-    "backfire",
-    "setting",
-    "stunt",
-    "score",
-    "around",
-    "endorse"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "Fox News",
-     "title": "Haley Stevens' endorsement stunt backfires with El-Sayed setting single-day fundraising record",
-     "url": "https://www.foxnews.com/politics/haley-stevens-endorsement-stunt-backfires-el-sayed-setting-single-day-fundraising-record",
-     "published": "2026-11-02T14:07:42+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Al Jazeera",
-     "title": "US midterms: 1 day to go – Democrats rally around El-Sayed amid attacks",
-     "url": "https://www.aljazeera.com/news/2026/11/2/us-midterms-1-day-to-go-democrats-rally-around-el-sayed-amid-attacks?traffic_source=rss",
-     "published": "2026-11-02T09:06:20+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
    "id": "3fcbe77d9ff67572",
    "title": "Launch of global legal body’s office in Hong Kong seals city’s law hub status: John Lee",
    "topic": "international",
@@ -10759,8 +10952,8 @@
    ]
   },
   {
-   "id": "8abbc9b6ae01c3b5",
-   "title": "신차 투입 갈등에 제네시스 생산 차질…가동 중단 계속될 듯(종합2보)",
+   "id": "9610cad4f940cc02",
+   "title": "신차 투입 갈등에 제네시스 생산 차질…노조, 재개 여부 논의(종합)",
    "topic": "industry",
    "days": 1,
    "signature": [
@@ -10781,7 +10974,7 @@
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "신차 투입 갈등에 제네시스 생산 차질…가동 중단 계속될 듯(종합2보)",
+     "title": "신차 투입 갈등에 제네시스 생산 차질…노조, 재개 여부 논의(종합)",
      "summary": null
     }
    ],
@@ -10790,9 +10983,9 @@
    "articles": [
     {
      "source": "연합뉴스",
-     "title": "신차 투입 갈등에 제네시스 생산 차질…가동 중단 계속될 듯(종합2보)",
-     "url": "https://www.yna.co.kr/view/AKR20261102116052057",
-     "published": "2026-11-02T12:43:11+00:00",
+     "title": "신차 투입 갈등에 제네시스 생산 차질…노조, 재개 여부 논의(종합)",
+     "url": "https://www.yna.co.kr/view/AKR20261102116051057",
+     "published": "2026-11-02T08:36:30+00:00",
      "lang": "ko"
     },
     {
@@ -11041,8 +11234,8 @@
    "days": 1,
    "signature": [
     "소규",
-    "규모",
     "정비",
+    "규모",
     "무책",
     "수료",
     "동시",
@@ -11062,7 +11255,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -11175,7 +11368,7 @@
   {
    "id": "cbf0f8b2b6514bef",
    "title": "LX홀딩스, 정기 임원 인사… CFO에 염민석 상무",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "lx",
@@ -11199,7 +11392,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -11266,7 +11459,7 @@
   {
    "id": "4045e3dcb8ac19d7",
    "title": "한진칼, 애프터마켓서 10%대 급등",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "애프",
@@ -11310,8 +11503,8 @@
    ]
   },
   {
-   "id": "afcc1fc8f0c38f84",
-   "title": "島田麻央が示した、ジュニアで過ごした4年間の価値 GP初出場V",
+   "id": "eb84fb13a1064901",
+   "title": "島田麻央、日本女子4人目のGP初出場優勝 「笑顔で滑りきれた」",
    "topic": "international",
    "days": 2,
    "signature": [
@@ -11321,10 +11514,10 @@
     "田麻",
     "麻",
     "麻央",
-    "田",
     "初",
     "島",
     "場",
+    "田",
     "滑り",
     "央"
    ],
@@ -11337,7 +11530,7 @@
     },
     {
      "date": "2026-11-03",
-     "title": "島田麻央が示した、ジュニアで過ごした4年間の価値 GP初出場V",
+     "title": "島田麻央、日本女子4人目のGP初出場優勝 「笑顔で滑りきれた」",
      "summary": null
     }
    ],
@@ -11346,9 +11539,9 @@
    "articles": [
     {
      "source": "아사히신문",
-     "title": "島田麻央が示した、ジュニアで過ごした4年間の価値 GP初出場V",
-     "url": "http://www.asahi.com/articles/ASVC22FZVVC2PTQP001M.html",
-     "published": "2026-11-02T09:02:35+00:00",
+     "title": "島田麻央、日本女子4人目のGP初出場優勝 「笑顔で滑りきれた」",
+     "url": "http://www.asahi.com/articles/ASVC17KSRVC1PTQP004M.html",
+     "published": "2026-11-01T23:19:36+00:00",
      "lang": "ja"
     },
     {
@@ -11363,7 +11556,7 @@
   {
    "id": "a15d51ea45e70540",
    "title": "기업은행, 한국투자금융 지분 전략 매각… 비핵심 자산 정리 재개",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "매각",
@@ -11388,7 +11581,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "조선일보",
@@ -11434,7 +11627,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -11485,7 +11678,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "한국경제",
@@ -11531,7 +11724,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "동아일보",
@@ -11621,7 +11814,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -11651,9 +11844,9 @@
     "진만",
     "감독",
     "국시",
+    "kt",
     "리즈",
     "시리",
-    "kt",
     "mk",
     "대하",
     "독으"
@@ -11713,7 +11906,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -11734,7 +11927,7 @@
   {
    "id": "1e1bdfe06036d284",
    "title": "롯데칠성음료, 2년 연속 희망퇴직…최대 24개월치 급여 지급",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "데칠",
@@ -11759,7 +11952,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -11805,7 +11998,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -11836,8 +12029,8 @@
     "長選",
     "岡",
     "候補",
-    "福",
     "候",
+    "福",
     "補",
     "立",
     "えは"
@@ -11875,56 +12068,48 @@
    ]
   },
   {
-   "id": "37e3437a562cbda8",
-   "title": "Nikkei Falls 0.9%, Dragged by Bank, Tech Stocks",
+   "id": "f553147911ae029c",
+   "title": "뉴욕증시, 미·이란 협상 기대에도 반도체주 하락에 혼조 마감",
    "topic": "economy",
-   "days": 4,
+   "days": 1,
    "signature": [
-    "fall",
-    "stock",
-    "tech",
-    "nikkei",
-    "wrap",
-    "dragged",
-    "kioxia",
-    "rout",
-    "selloff",
-    "japanese",
-    "profit",
-    "asian"
+    "욕증",
+    "뉴욕",
+    "증시",
+    "기대",
+    "이란",
+    "체주",
+    "혼조",
+    "대감",
+    "감에",
+    "대에",
+    "락에",
+    "마감"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
-     "date": "2026-10-31",
-     "title": "Wall Street sell-off continues as investors question returns on massive AI spending",
-     "summary": null
-    },
-    {
-     "date": "2026-11-01",
-     "title": "Wall Street drops to its worst day since June after tech sell-off deepens",
-     "summary": "인텔 폭락 속 美 증시 AI 우려로 급락"
-    },
-    {
-     "date": "2026-11-02",
-     "title": "Wall Street Braces for More Wild Days in Stocks After Tech Rout",
-     "summary": null
-    },
-    {
      "date": "2026-11-03",
-     "title": "Nikkei Falls 0.9%, Dragged by Bank, Tech Stocks",
-     "summary": null
+     "title": "뉴욕증시, 미·이란 협상 기대에도 반도체주 하락에 혼조 마감",
+     "summary": "유가 급락에도 기술주 약세로 뉴욕증시 혼조"
     }
    ],
    "n_sources": 2,
    "placed": true,
    "articles": [
     {
-     "source": "Wall Street Journal",
-     "title": "Nikkei Falls 0.9%, Dragged by Bank, Tech Stocks",
-     "url": "https://www.wsj.com/finance/stocks/nikkei-falls-0-9-dragged-by-bank-tech-stocks-a63f180d?mod=rss_markets_main",
-     "published": "2026-11-02T00:30:00+00:00",
-     "lang": "en"
+     "source": "조선일보",
+     "title": "뉴욕증시, 미·이란 협상 기대에도 반도체주 하락에 혼조 마감",
+     "url": "https://www.chosun.com/international/international_general/2026/11/03/GQYGKZJRGVSTAMJUMYYGIMZTHE/",
+     "published": "2026-11-02T22:25:57+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "연합뉴스",
+     "title": "뉴욕증시, 미-이란 합의 기대감에 상승 출발",
+     "url": "https://www.yna.co.kr/view/AKR20261102176400009",
+     "published": "2026-11-02T14:44:29+00:00",
+     "lang": "ko"
     },
     {
      "source": "Bloomberg",
@@ -11982,6 +12167,52 @@
    ]
   },
   {
+   "id": "7847eb280a1c19f7",
+   "title": "秋の叙勲３８６１人",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "の叙",
+    "叙",
+    "叙勲",
+    "勲",
+    "秋の",
+    "秋",
+    "が受",
+    "た計",
+    "で功",
+    "功労",
+    "労の",
+    "各界"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "秋の叙勲３８６１人",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "요미우리신문",
+     "title": "秋の叙勲３８６１人",
+     "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFBBb1VRSGlLcUF1Smd3ZUpYNm1lVFZkY2ZCT3IxN1ZaUEVLRUYwdXNQU2dpdGpzRC1ZbDRtTU5KVjVpYTVYMWJCS2x5NW12ajllRVd2VTVqczJPSTVLVVpXS3pENA?oc=5",
+     "published": "2026-11-02T20:00:00+00:00",
+     "lang": "ja"
+    },
+    {
+     "source": "NHK",
+     "title": "「秋の叙勲」受章者発表 各界で功労のあった計3861人が受章",
+     "url": "https://news.web.nhk/newsweb/na/nd-20261103de69860",
+     "published": "2026-11-02T20:21:50+00:00",
+     "lang": "ja"
+    }
+   ]
+  },
+  {
    "id": "abf87bd1bafc0cc0",
    "title": "Federal judge dismisses Trump administration’s Harvard admissions probe case",
    "topic": "international",
@@ -12014,11 +12245,11 @@
     {
      "date": "2026-11-03",
      "title": "Federal judge dismisses Trump administration’s Harvard admissions probe case",
-     "summary": null
+     "summary": "하버드 입학자료 요구한 트럼프 정부 소송 기각"
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "CNN",
@@ -12032,51 +12263,6 @@
      "title": "Judge Dismisses Trump Lawsuit Demanding Harvard Admissions Data",
      "url": "https://www.nytimes.com/2026/11/02/us/harvard-admissions-trump-lawsuit-dismissed.html",
      "published": "2026-11-02T20:13:41+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
-   "id": "edf2cdc8b06a4d51",
-   "title": "Trump Returns to Reflecting Pool, Now Refilled After Botched Renovation",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "pool",
-    "reflecting",
-    "botched",
-    "refilled",
-    "dc",
-    "argument",
-    "choose",
-    "renovation",
-    "closing",
-    "now",
-    "return"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Trump Returns to Reflecting Pool, Now Refilled After Botched Renovation",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "New York Times",
-     "title": "Trump Returns to Reflecting Pool, Now Refilled After Botched Renovation",
-     "url": "https://www.nytimes.com/2026/11/02/us/politics/trump-reflecting-pool-refilled-botched-repairs.html",
-     "published": "2026-11-02T16:31:11+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Bloomberg",
-     "title": "Trump Chooses DC Reflecting Pool For Midterm Elections Closing Argument",
-     "url": "https://www.bloomberg.com/news/articles/2026-11-02/trump-chooses-dc-reflecting-pool-for-midterm-closing-argument",
-     "published": "2026-11-02T20:11:37+00:00",
      "lang": "en"
     }
    ]
@@ -12128,6 +12314,52 @@
    ]
   },
   {
+   "id": "7a6582cfd6777c8a",
+   "title": "Evidence of red blood cells seen in dinosaur fossil from Brazil",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "blood",
+    "dinosaur",
+    "cell",
+    "red",
+    "bone",
+    "fossil",
+    "fossilised",
+    "m-year-old",
+    "brazil",
+    "seen",
+    "evidence",
+    "found"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Evidence of red blood cells seen in dinosaur fossil from Brazil",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "Reuters",
+     "title": "Evidence of red blood cells seen in dinosaur fossil from Brazil",
+     "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOYng2emNYbzh4ckJ5Sy02X0x6V3YycjloVHRaQ0VRRE5iWE4yaVRaYklrUklKYkEyMXFfWWFSSTVTN2o2Rl90Y1lrS1Fsb29LQ2FoWjlZTHZYOHUtQjFLbzdLamlwd1VIYkh2RjF4Y2x3R1p5Y2pYendVVlJlUk41cDRvdVVYcnhvOTNKOHRfUzdHUEhXMnhzb3M1U3U?oc=5",
+     "published": "2026-11-02T20:03:44+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "Guardian",
+     "title": "Fossilised red blood cells found in 115m-year-old dinosaur’s bone, say scientists",
+     "url": "https://www.theguardian.com/science/2026/nov/02/fossilised-red-blood-cells-aratasaurus-dinosaurs-bone",
+     "published": "2026-11-02T20:00:27+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
    "id": "eac65ef475958fb0",
    "title": "8조 해킹 털리고 5조 빠졌는데…바이낸스 파산 피한 비밀",
    "topic": "economy",
@@ -12169,6 +12401,52 @@
      "title": "8.4조원 털리고도 전액 보상…바이낸스 '재무 체력'의 비밀",
      "url": "https://www.hankyung.com/article/2026110210521",
      "published": "2026-11-02T08:41:23+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "f1d1d989331a5b11",
+   "title": "전두환까지 소환한 李대통령…‘PC주의’와 때아닌 전쟁, 왜",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "소환",
+    "pc",
+    "환한",
+    "두환",
+    "전두",
+    "주의",
+    "李",
+    "때아",
+    "구현",
+    "환까",
+    "비판",
+    "의사"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "전두환까지 소환한 李대통령…‘PC주의’와 때아닌 전쟁, 왜",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "중앙일보",
+     "title": "전두환까지 소환한 李대통령…‘PC주의’와 때아닌 전쟁, 왜",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5uNWU2VTZSbkczcFdmek9iNGtiS0tWVUJXa2c1dl9uel9wRTVpOW1ES2FEMXF4bWV3cnBDYjlPc3dKdlRPMGtVSjNaSGxDNTZ0WTlOcUJn?oc=5",
+     "published": "2026-11-02T20:00:01+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "매일경제",
+     "title": "전두환 '정의사회 구현'까지 소환한 李 … PC주의 비판",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9lSmFmSGtjdFRFX1VmWm95Y3hSLWtycENlTjdTcmFpQjdpS2YzU2FOczJKUUhSTDUydmpsZk1kcnNKWlZzdWQ5YUZ2Z2RESk9TVHRfazVR?oc=5",
+     "published": "2026-11-02T08:38:10+00:00",
      "lang": "ko"
     }
    ]
@@ -12228,15 +12506,15 @@
     "espn",
     "wilbon",
     "due",
-    "health",
     "issue",
+    "health",
     "michael",
     "announce",
     "longtime",
     "pti",
     "indefinite",
-    "host",
-    "multiple"
+    "away",
+    "host"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -12358,29 +12636,29 @@
    ]
   },
   {
-   "id": "1151ec0a3e9cb60e",
-   "title": "베네수엘라, 콜롬비아 반군 공격…\"19명 사망\"",
+   "id": "b1910317491e2fd0",
+   "title": "Attack on Colombian military base kills 4 civilians, including a 2-month-old",
    "topic": "international",
    "days": 1,
    "signature": [
+    "base",
+    "civilian",
+    "colombian",
     "kolumbien",
+    "month-old",
     "sprengstoffanschl",
     "tet",
-    "네수",
-    "롬비",
-    "반군",
-    "베네",
-    "수엘",
-    "엘라",
-    "콜롬",
     "menschen",
-    "nf"
+    "nf",
+    "including",
+    "gen",
+    "military"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "베네수엘라, 콜롬비아 반군 공격…\"19명 사망\"",
+     "title": "Attack on Colombian military base kills 4 civilians, including a 2-month-old",
      "summary": null
     }
    ],
@@ -12388,11 +12666,11 @@
    "placed": false,
    "articles": [
     {
-     "source": "연합뉴스",
-     "title": "베네수엘라, 콜롬비아 반군 공격…\"19명 사망\"",
-     "url": "https://www.yna.co.kr/view/AKR20261102050300009",
-     "published": "2026-11-02T01:04:34+00:00",
-     "lang": "ko"
+     "source": "AP",
+     "title": "Attack on Colombian military base kills 4 civilians, including a 2-month-old",
+     "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPNGltcUZYZVlFVVlVUE95SHJOWmVodnVOOERSOUMtQi0yUVIxSS1CcFRrMVA2cE5xQXJkOS13WFVPRzhDRFFhMGgyaXdSZFhZV25pUGQtaXk2eUtnMjBjSDBxcUJ0QUFtT2dOZEluM0IzYTlWUWV6WHVteWVWamVMZGtYbUlIeGJMTVdQM2h4TmZlZmtrQjJpZUMzYmVBUkI0ZmhiR0M0TkpWcXU1NDk3RV9adkFwd3FRSTRvZW54UnQxdmMt?oc=5",
+     "published": "2026-11-02T16:36:00+00:00",
+     "lang": "en"
     },
     {
      "source": "Der Spiegel",
@@ -12431,7 +12709,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -12477,7 +12755,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -12509,8 +12787,8 @@
     "supercharge",
     "behind",
     "largest",
-    "fbi",
     "crypto",
+    "fbi",
     "hacker",
     "world"
    ],
@@ -12557,9 +12835,55 @@
    ]
   },
   {
+   "id": "4970bd0d390db676",
+   "title": "Legal challenge to Australia's social media ban to start in High Court",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "ban",
+    "challenge",
+    "media",
+    "social",
+    "high",
+    "court",
+    "australia'",
+    "libertarian",
+    "reddit",
+    "group",
+    "australia",
+    "legal"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Legal challenge to Australia's social media ban to start in High Court",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "BBC",
+     "title": "Legal challenge to Australia's social media ban to start in High Court",
+     "url": "https://www.bbc.co.uk/news/articles/ck79py02p1jlo?at_medium=RSS&at_campaign=rss",
+     "published": "2026-11-02T19:12:59+00:00",
+     "lang": "en"
+    },
+    {
+     "source": "Guardian",
+     "title": "Reddit and libertarian group challenge Australia’s under-16s social media ban in high court",
+     "url": "https://www.theguardian.com/australia-news/2026/nov/03/australia-social-media-ban-high-court-challenge-reddit-digital-freedom-project",
+     "published": "2026-11-02T14:00:44+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
    "id": "531221d3911dee00",
    "title": "Comment l’IA permet aux bidouilleurs de « décompiler », de fusionner ou de copier plus rapidement des jeux vidéo",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "bidouilleur",
@@ -12570,10 +12894,10 @@
     "permet",
     "rapidement",
     "学计",
-    "拍",
     "拍高",
     "机给",
-    "清电"
+    "清电",
+    "电影"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -12584,7 +12908,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Le Monde",
@@ -12760,9 +13084,9 @@
     "das",
     "frau",
     "eine",
-    "germany",
     "soll",
-    "friedrich"
+    "friedrich",
+    "germany"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -12773,7 +13097,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Bloomberg",
@@ -12907,7 +13231,7 @@
     {
      "date": "2026-11-03",
      "title": "El Niño Could Raise US Inflation, Boost Jobs in 2027: Fed Study",
-     "summary": null
+     "summary": "역대급 엘니뇨, 각국 재난과 미 물가 변수로"
     }
    ],
    "n_sources": 2,
@@ -12932,7 +13256,7 @@
   {
    "id": "5d8db104cdbdcb6c",
    "title": "天津银行官宣换帅 前三季度净利润同比下滑16%",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "manager-boni",
@@ -12957,7 +13281,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "차이신",
@@ -13030,12 +13354,12 @@
     "oil",
     "tumble",
     "treasury",
-    "higher",
     "yield",
+    "higher",
     "lower",
-    "slide",
     "extend",
     "month",
+    "slide",
     "future",
     "past",
     "investor"
@@ -13049,7 +13373,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Wall Street Journal",
@@ -13198,7 +13522,7 @@
     {
      "date": "2026-11-03",
      "title": "Fighting returns to Kherson region after longest Ukraine war ceasefire",
-     "summary": null
+     "summary": "헤르손 6일 휴전 종료, 공격 재개와 재정비 공방"
     }
    ],
    "n_sources": 2,
@@ -13216,6 +13540,52 @@
      "title": "Kherson braces for return of war as localised Russia-Ukraine truce ends",
      "url": "https://www.aljazeera.com/news/2026/11/1/ukraine-evacuates-civilians-in-kherson-region-as-localised-ceasefire-ends?traffic_source=rss",
      "published": "2026-11-01T22:15:14+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "7439cff99d36777c",
+   "title": "치안 불안한데…멕시코서 교내 스마트폰 사용 금지 찬반 논란",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "cellphone",
+    "resistance",
+    "교내",
+    "치안",
+    "코서",
+    "한데",
+    "parent",
+    "멕시",
+    "시코",
+    "안한",
+    "찬반",
+    "ban"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "치안 불안한데…멕시코서 교내 스마트폰 사용 금지 찬반 논란",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "치안 불안한데…멕시코서 교내 스마트폰 사용 금지 찬반 논란",
+     "url": "https://www.yna.co.kr/view/AKR20261103002400087",
+     "published": "2026-11-02T17:22:54+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "AP",
+     "title": "Mexico’s school cellphone ban faces resistance from parents amid violence",
+     "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQeUZUVXJob1Vic2tPZlg3YnZqcXJhUG16Qlh0M00wMmFiZGVsMTJ6eHBrM3NnMEhIY25xelZTb0JqUTFBSVJFTlN2VDZsMFF5VEdkUGFuTlE1VmlSd2ZEMFRDcThLZFJMTXVfcWJoYlpLVUpZTGRXR1ZkVmxJRFdrRy05cmRzMnBLMkxyNDdRMTdQUFQ1dzhuNERpYk5wNjhVVzYwWUwtMjcyZnNQbU0zRVR3aW56dGFhTHpTdnBwSWpLNDNKSmdaSGh3?oc=5",
+     "published": "2026-11-02T13:03:00+00:00",
      "lang": "en"
     }
    ]
@@ -13336,7 +13706,7 @@
     {
      "date": "2026-11-03",
      "title": "Alphabet Kicks Off Sale of Its Second Euro Bond This Year",
-     "summary": null
+     "summary": "알파벳 60억 유로 채권, 기술채 수요 시험"
     }
    ],
    "n_sources": 2,
@@ -13361,7 +13731,7 @@
   {
    "id": "31dde218e1285c85",
    "title": "트럼프 두 아들 투자한 광산업체, 20억달러 규모 美상장 추진",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "family-linked",
@@ -13374,8 +13744,8 @@
     "업체",
     "public",
     "go",
-    "아들",
-    "상장"
+    "상장",
+    "아들"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -13386,7 +13756,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -13625,6 +13995,52 @@
    ]
   },
   {
+   "id": "2e217c40fb6a6660",
+   "title": "[영상] 맨손으로 설탕물 '뒤적뒤적'…中 황도 젤리 제조 모습 '충격'",
+   "topic": "industry",
+   "days": 1,
+   "signature": [
+    "젤리",
+    "탕물",
+    "황도",
+    "설탕",
+    "갑도",
+    "물에",
+    "적뒤",
+    "뒤적",
+    "맨손",
+    "없이",
+    "위생",
+    "장갑"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "[영상] 맨손으로 설탕물 '뒤적뒤적'…中 황도 젤리 제조 모습 '충격'",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "[영상] 맨손으로 설탕물 '뒤적뒤적'…中 황도 젤리 제조 모습 '충격'",
+     "url": "https://www.yna.co.kr/view/AKR20261102152000704",
+     "published": "2026-11-02T08:06:55+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "중앙일보",
+     "title": "장갑도 없이 설탕물에 손 ‘푹’…中 황도 젤리 공장 위생 논란",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9MWmwzMWpMRlRmRzE4eUw5OHEzYzVrSXBJZUhSLUJONjNPOG9JOVZhcGNmbjc5Rlp6cmsxSGtIV2hLaGJlSHFicjFWUVl4Yk9BeTE4ajdR?oc=5",
+     "published": "2026-11-02T16:32:45+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
    "id": "85ee1083603a2c1e",
    "title": "맘다니, ICE에 \"뉴욕시 주차장 사용 안 돼\"…법적 대응 경고",
    "topic": "international",
@@ -13641,7 +14057,7 @@
     "맘다",
     "다니",
     "법적",
-    "뉴욕"
+    "사용"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -13717,7 +14133,7 @@
   {
    "id": "f91539fbc210d5a9",
    "title": "Blackstone Leads $3.1 Billion Investment in Mitsubishi’s Stake in LNG Canada",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "blackstone",
@@ -13742,7 +14158,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Wall Street Journal",
@@ -13824,16 +14240,16 @@
    "signature": [
     "migrant",
     "bateau",
-    "boat",
     "bord",
     "bound",
     "canarie",
     "canary",
     "faisant",
-    "least",
     "pneumatique",
     "sept",
-    "sont"
+    "sont",
+    "traver",
+    "ver"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -14150,8 +14566,8 @@
     "신경",
     "경전",
     "계세",
-    "대에",
-    "야유"
+    "야유",
+    "항의"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -14231,9 +14647,9 @@
    "signature": [
     "환까",
     "진보",
+    "진영",
     "두환",
     "전두",
-    "진영",
     "격한",
     "급하",
     "꺼내",
@@ -14415,8 +14831,8 @@
    "signature": [
     "코그",
     "철강",
-    "에너",
     "그룹",
+    "에너",
     "너지",
     "포스",
     "스코",
@@ -14605,9 +15021,9 @@
    "signature": [
     "은미",
     "이은",
-    "모습",
     "습에",
     "뒤집",
+    "모습",
     "시경",
     "약물",
     "집히",
@@ -14717,7 +15133,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Wall Street Journal",
@@ -15158,7 +15574,7 @@
     "领先",
     "奖",
     "成果",
-    "获"
+    "果"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -15526,7 +15942,7 @@
     "approval",
     "release",
     "sex",
-    "범죄"
+    "우파"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -15597,51 +16013,6 @@
      "title": "유영 5위·김예림 8위…‘발리예바 실격’ 베이징올림픽 피겨 여자 싱글 순위 조정",
      "url": "https://www.chosun.com/sports/2026/11/02/NMG23DK4TJADRKWBVYHNZ6LOCQ/",
      "published": "2026-11-02T12:32:48+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "c5f0d4003fb0ee7f",
-   "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "외기",
-    "조달",
-    "앤트",
-    "로픽",
-    "트로",
-    "ipo",
-    "역대",
-    "해외",
-    "서만",
-    "천억",
-    "억원"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "앤트로픽, 美IPO로 日서만 4조7천억원 조달…해외기업 역대 최대",
-     "url": "https://www.yna.co.kr/view/AKR20261102171900073",
-     "published": "2026-11-02T11:59:14+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "한국경제",
-     "title": "앤트로픽, 美 IPO로 日서 4.7조 조달…해외기업 역대 최대",
-     "url": "https://www.hankyung.com/article/2026110213307",
-     "published": "2026-11-02T12:31:06+00:00",
      "lang": "ko"
     }
    ]
@@ -15877,52 +16248,6 @@
    ]
   },
   {
-   "id": "50637c279df465c1",
-   "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
-   "topic": "politics",
-   "days": 1,
-   "signature": [
-    "란종",
-    "심서",
-    "종사",
-    "검증",
-    "내란",
-    "단장",
-    "징역",
-    "국회",
-    "현장",
-    "前",
-    "증하",
-    "장검"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "연합뉴스",
-     "title": "'내란종사 징역12년' 前707단장, 2심서 \"국회 현장검증하자\"",
-     "url": "https://www.yna.co.kr/view/AKR20261102152300004",
-     "published": "2026-11-02T08:12:28+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "한국경제",
-     "title": "'내란종사 징역12년' 前707단장, 2심서 국회 현장 검증 요구",
-     "url": "https://www.hankyung.com/article/2026110213037",
-     "published": "2026-11-02T11:53:54+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
    "id": "23946fe94af06c0a",
    "title": "Netanyahu presses Trump for renewed strikes against Iran",
    "topic": "international",
@@ -16017,7 +16342,7 @@
   {
    "id": "a766f046106c26ee",
    "title": "ロードサービス事業で最大550万件の情報漏洩 車両番号や口座番号",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "ドサ",
@@ -16204,7 +16529,6 @@
    "topic": "international",
    "days": 1,
    "signature": [
-    "brazil",
     "lula",
     "playbook",
     "reinvented",
@@ -16215,7 +16539,8 @@
     "ラジ",
     "ラ氏",
     "ラ軍",
-    "ルラ"
+    "ルラ",
+    "ル大"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -16293,17 +16618,17 @@
    "days": 1,
    "signature": [
     "계통",
-    "객기",
-    "여객",
     "연료",
     "회항",
+    "객기",
     "어부",
+    "여객",
     "에어",
     "부산",
     "결함",
     "쿄행",
     "해공",
-    "향하"
+    "김해"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -16481,9 +16806,9 @@
     "사형",
     "이름",
     "尹",
-    "항소",
     "형이",
     "누구",
+    "항소",
     "소심",
     "니고",
     "름도",
@@ -16804,8 +17129,8 @@
     "survey",
     "raising",
     "expected",
-    "join",
     "since",
+    "join",
     "key",
     "raise",
     "time",
@@ -16820,7 +17145,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Wall Street Journal",
@@ -16854,8 +17179,8 @@
     "무대",
     "갑작",
     "떠나",
-    "슨일",
-    "연중"
+    "연중",
+    "작스"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -16958,7 +17283,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "아사히신문",
@@ -17071,7 +17396,7 @@
   {
    "id": "637d7c39a9647095",
    "title": "ノジマ 不正アクセスで約700万件の個人情報漏えい",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "ジマ",
@@ -17184,7 +17509,7 @@
     {
      "date": "2026-11-03",
      "title": "Turkish Market Clearinghouse CEO Resigns as Fund Probe Widens",
-     "summary": null
+     "summary": "튀르키예 펀드 사기 수사가 여권과 금융기관으로 확대"
     }
    ],
    "n_sources": 2,
@@ -17517,8 +17842,8 @@
    "days": 1,
    "signature": [
     "과세",
-    "상자",
     "가상",
+    "상자",
     "與",
     "자산",
     "민병",
@@ -17676,7 +18001,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -17690,52 +18015,6 @@
      "title": "삼성바이오 교섭 난항…다음주 ‘초정밀 공정별 파업’ 할까",
      "url": "https://www.hani.co.kr/arti/economy/marketing/1285415.html",
      "published": "2026-11-02T09:40:00+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "ecc890668cffb4f3",
-   "title": "[사진]심은경, '환한 미소로'",
-   "topic": "entertainment_sports",
-   "days": 1,
-   "signature": [
-    "심은",
-    "은경",
-    "소로",
-    "차분",
-    "함에",
-    "낮과",
-    "밤은",
-    "분함",
-    "환한",
-    "가져",
-    "서로",
-    "미소"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "[사진]심은경, '환한 미소로'",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "조선일보",
-     "title": "[사진]심은경, '환한 미소로'",
-     "url": "https://www.chosun.com/entertainments/entertain_photo/2026/11/02/MY2TINBYMYYDANDFG4ZGINLBME/",
-     "published": "2026-11-02T07:34:00+00:00",
-     "lang": "ko"
-    },
-    {
-     "source": "연합뉴스",
-     "title": "'낮과 밤은 서로에게' 심은경 \"김종관 감독 차분함에 용기 가져\"",
-     "url": "https://www.yna.co.kr/view/AKR20261102164000005",
-     "published": "2026-11-02T09:39:29+00:00",
      "lang": "ko"
     }
    ]
@@ -17768,7 +18047,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -17973,7 +18252,7 @@
   {
    "id": "7ae8e6f501457994",
    "title": "HK이노엔, 의료기기 시장 진출…한국로슈진단과 진단검사 플랫폼 국내 판매 계약",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "노엔",
@@ -17985,8 +18264,8 @@
     "이노",
     "진단",
     "랫폼",
-    "검사",
     "플랫",
+    "검사",
     "의료"
    ],
    "date": "2026-11-03",
@@ -18157,7 +18436,7 @@
   {
    "id": "f41eeeb6ca402959",
    "title": "한국마즈, 결식아동 지원 지속중…“아이들의 삶 긍정적인 변화 이끌겠다”",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "국마",
@@ -18385,6 +18664,98 @@
    ]
   },
   {
+   "id": "509d0ed1c690512d",
+   "title": "일주일째 안 보이는 상어 '부캉이'…먼바다로 나갔나",
+   "topic": "society",
+   "days": 1,
+   "signature": [
+    "다로",
+    "부캉",
+    "캉이",
+    "갔나",
+    "먼바",
+    "일째",
+    "주일",
+    "일주",
+    "바다",
+    "감춘",
+    "따뜻",
+    "뜻한"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "일주일째 안 보이는 상어 '부캉이'…먼바다로 나갔나",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "연합뉴스",
+     "title": "일주일째 안 보이는 상어 '부캉이'…먼바다로 나갔나",
+     "url": "https://www.yna.co.kr/view/AKR20261102151500051",
+     "published": "2026-11-02T08:06:58+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "매일경제",
+     "title": "“부산은 추워서 따뜻한 먼바다로 갔나”…일주일째 모습 감춘 ‘부캉이’",
+     "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE5oWHl1bzF4d0RCakdGSXZ0bUFyV05Ybl96c3FPVEN3X1BvdTlSWG13dDVVeHBEM2JZUEx0dGNuWlJGMlpBZGMxb3NSa0xralNvR2J2ZA?oc=5",
+     "published": "2026-11-02T08:45:47+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "250d7a80108084b9",
+   "title": "세종, 법무부 정책기획단장 출신 윤원기 변호사 영입",
+   "topic": "politics",
+   "days": 1,
+   "signature": [
+    "윤원",
+    "원기",
+    "영입",
+    "법무",
+    "세종",
+    "무법",
+    "책기",
+    "획단",
+    "장검",
+    "호사",
+    "무부",
+    "법인"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "세종, 법무부 정책기획단장 출신 윤원기 변호사 영입",
+     "summary": null
+    }
+   ],
+   "n_sources": 2,
+   "placed": false,
+   "articles": [
+    {
+     "source": "중앙일보",
+     "title": "세종, 법무부 정책기획단장 출신 윤원기 변호사 영입",
+     "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5nODNubWRMb1BIaS1rOE42RExXQVRwLW5uMHFlMkRMMW1hbWVhWERxYmFpUHZWNHNtM0xZY3RkVzM5VHd3Q0VFWWZneXVqRm9HcE5EYkd3?oc=5",
+     "published": "2026-11-02T08:15:00+00:00",
+     "lang": "ko"
+    },
+    {
+     "source": "매일경제",
+     "title": "법무법인 세종, 윤원기 전 부장검사 영입",
+     "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBOb3RGT09IejhvVzIxZnR6cFBqNHhQSXdJSHNNbXY4Rm9sbVN1UVpJZTBRLWxTTmVjMC04NGhYZXJnNV9ycmhFcWNwallIYXVQLUVJeQ?oc=5",
+     "published": "2026-11-02T08:42:29+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
    "id": "6ce97644901192b0",
    "title": "서울중수청, '3억원대 하도급 대금 미지급' 법인·계열사 송치",
    "topic": "politics",
@@ -18400,8 +18771,8 @@
     "법인",
     "지급",
     "송치",
-    "소청",
-    "계열"
+    "계열",
+    "소청"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -18525,7 +18896,7 @@
   {
    "id": "4d9a1898defb3158",
    "title": "신한카드·F&F 과제를 AI로 풀어라…해시드 해커톤 열린다",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "커톤",
@@ -18617,7 +18988,7 @@
   {
    "id": "af04033673bc3a16",
    "title": "파리바게뜨, 주문 즉시 매장 오븐서 굽는 '파바 그릴' 출시",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "게뜨",
@@ -18642,7 +19013,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -19171,7 +19542,7 @@
   {
    "id": "fdf488d2b3f11961",
    "title": "초광역특구 '주 52시간 예외' 노사정 논의 본격화…첫 차관급 회의",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "사정",
@@ -19355,7 +19726,7 @@
   {
    "id": "2f07bd3e80493e12",
    "title": "삼성전기, 창립 53주년 기념식 개최…장덕현 사장 “AI 산업은 이제 1월 1일”",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "덕현",
@@ -19401,7 +19772,7 @@
   {
    "id": "66b1fd6e72417d48",
    "title": "이수페타시스, 대구국가산단에 5000억원 투자해 공장 신설",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "가산",
@@ -19544,8 +19915,8 @@
    "signature": [
     "강버",
     "공표",
-    "위사",
     "발인",
+    "위사",
     "사실",
     "고발",
     "한강",
@@ -19728,7 +20099,7 @@
   {
    "id": "2adc6301dfc67932",
    "title": "한투증권, MTS 업데이트…\"연금자산 통합조회·관심종목 개편\"",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "mts",
@@ -19753,7 +20124,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -19866,7 +20237,7 @@
   {
    "id": "e7de0c2a7f7d0100",
    "title": "화성시, 동탄트램 실시설계·준비공사 착수…17년 만에 본궤도",
-   "topic": "economy",
+   "topic": "politics",
    "days": 1,
    "signature": [
     "동탄",
@@ -19912,7 +20283,7 @@
   {
    "id": "acaa4b8bd5b42d1f",
    "title": "Troubled train giant Alstom issues new profit warning",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "alstom",
@@ -19937,7 +20308,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Financial Times",
@@ -19963,11 +20334,11 @@
    "signature": [
     "갇혀",
     "marathon",
-    "photo",
     "라톤",
     "마라",
     "km",
     "아가",
+    "photo",
     "video",
     "로감",
     "york",
@@ -20142,7 +20513,7 @@
   {
    "id": "b016d37022c81e6d",
    "title": "해외여행 70%, 가까운 아시아로…日-中 늘고 유럽-북미 줄어",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "북미",
@@ -20188,7 +20559,7 @@
   {
    "id": "d537a1a5100ee996",
    "title": "화장품에도 점자·QR코드…식약처, 시각장애인 접근성 높인다",
-   "topic": "economy",
+   "topic": "society",
    "days": 1,
    "signature": [
     "식약",
@@ -20259,7 +20630,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -20351,7 +20722,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -20423,9 +20794,9 @@
    "signature": [
     "차전",
     "국시",
+    "kt",
     "리즈",
     "시리",
-    "kt",
     "리팀",
     "니엘",
     "대니",
@@ -20489,7 +20860,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -20516,15 +20887,15 @@
     "keira",
     "knightley",
     "stasi",
-    "other",
     "live",
+    "other",
     "dillane",
     "icke",
     "visier",
     "london",
     "luke",
-    "robert",
-    "thompson"
+    "bring",
+    "robert"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -20561,16 +20932,16 @@
    "signature": [
     "미약",
     "약품",
-    "국산",
     "한미",
+    "국산",
     "약에",
     "중관",
     "찍으",
     "체중",
     "음식",
     "칼로",
-    "환한",
-    "결합"
+    "결합",
+    "먹은"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -20662,7 +21033,7 @@
     "agree",
     "funeral",
     "grant",
-    "shooting"
+    "visa"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -20678,7 +21049,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -20709,11 +21080,11 @@
     "下",
     "が下",
     "き不",
-    "の一",
     "の先",
     "は続",
     "や半",
-    "ら売"
+    "ら売",
+    "り注"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -20724,7 +21095,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "NHK",
@@ -20858,7 +21229,7 @@
     {
      "date": "2026-11-03",
      "title": "한투증권 \"내년 코스피 목표치 8,300…올해 4분기 저점 통과\"",
-     "summary": null
+     "summary": "한투, 내년 코스피 목표 8300 제시"
     }
    ],
    "n_sources": 2,
@@ -20897,7 +21268,7 @@
     "망라",
     "사극",
     "향년",
-    "황후"
+    "성황"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -20959,7 +21330,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "동아일보",
@@ -21143,7 +21514,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -21222,9 +21593,9 @@
     "sick",
     "flag",
     "nhs",
-    "acros",
     "child",
-    "largest"
+    "largest",
+    "acros"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -21281,7 +21652,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "Financial Times",
@@ -21348,7 +21719,7 @@
   {
    "id": "1cc06a3b99ac5776",
    "title": "현대건설, 미국 차세대 소형모듈원자로 개발사와 맞손",
-   "topic": "economy",
+   "topic": "industry",
    "days": 2,
    "signature": [
     "대건",
@@ -21378,7 +21749,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "연합뉴스",
@@ -21424,7 +21795,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -21537,13 +21908,13 @@
   {
    "id": "7fb2bfe4d4c2d9f0",
    "title": "라쿠텐 이치바, 이달부터 한국 개인사업자 입점 신청 받는다",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "라쿠",
-    "입점",
     "치바",
     "쿠텐",
+    "입점",
     "이치",
     "업자",
     "개인",
@@ -21654,7 +22025,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -21683,8 +22054,8 @@
     "장우",
     "거법",
     "위반",
-    "송치",
     "의혹",
+    "송치",
     "공직",
     "박스",
     "이박",
@@ -21721,7 +22092,7 @@
   {
    "id": "05effedbce9e61b3",
    "title": "Hypersonic missile start-up secures funds to boost Europe’s deep-strike capability",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "capability",
@@ -21746,7 +22117,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Financial Times",
@@ -21767,7 +22138,7 @@
   {
    "id": "ac882ed2522a717a",
    "title": "호요버스 '쁘띠플래닛' 출시일 12월 4일 확정",
-   "topic": "economy",
+   "topic": "entertainment_sports",
    "days": 1,
    "signature": [
     "띠플",
@@ -21879,7 +22250,7 @@
     {
      "date": "2026-11-03",
      "title": "Bank of England poised to raise rates but may push back on bets for more",
-     "summary": null
+     "summary": "영란은행 인상 가능성, 추가 인상엔 신중할 듯"
     }
    ],
    "n_sources": 2,
@@ -21964,7 +22335,7 @@
     "데헌",
     "앞세",
     "케데",
-    "현지"
+    "농심"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -21975,7 +22346,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -22007,8 +22378,8 @@
     "정청",
     "청래",
     "어야",
-    "무슨",
     "들어",
+    "무슨",
     "표가",
     "대표"
    ],
@@ -22194,7 +22565,7 @@
     "결사",
     "부시",
     "현안",
-    "되겠"
+    "임명"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -22698,11 +23069,11 @@
     "持表",
     "接戦",
     "表明",
-    "ガン",
     "シガ",
     "ミシ",
     "員が",
     "議員",
+    "ガン",
     "支持",
     "民主",
     "共和"
@@ -22900,7 +23271,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -22919,7 +23290,7 @@
    ]
   },
   {
-   "id": "8ceeb10b4615300d",
+   "id": "2c53cbefb12aa869",
    "title": "新华社权威快报丨可再生能源法修订草案提请审议",
    "topic": "international",
    "days": 1,
@@ -22951,8 +23322,8 @@
     {
      "source": "신화통신",
      "title": "新华社权威快报丨可再生能源法修订草案提请审议",
-     "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5FYjFjMnhicHh6Uk15OUJHUEoyY1p2cUVMM01CZG1LRTJvMm1GcmtVdlFCNFRFemd6V29iOE5KS1Z1ZUVBWWJUWXFWalVqaWt5X2xhV256em1QRW5kZXNubEM1SVNlc0piUEtETVFBXzhMczNpMU9j?oc=5",
-     "published": "2026-11-02T01:44:23+00:00",
+     "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE1yejU0UDh4MTlZa2wzTEE5S3JEUXpOVjFTQUtGZVpxTnNLb3dscU16UUFFUXYwRmZlRk1xTDRKZFYzWGlBODZkcUhOVzVNSG42YjN5TWR6dkNQYTRDREpMeF8ydlRlNUprTDhhVkxfU0dvblNWVnVBM2FTbUtSa2s?oc=5",
+     "published": "2026-11-02T01:44:21+00:00",
      "lang": "zh"
     },
     {
@@ -22992,7 +23363,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -23202,7 +23573,7 @@
   {
    "id": "05873605e0f6843b",
    "title": "대한민국창작만화공모전 대상에 '캥거루화 프로젝트'",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "거루",
@@ -23248,7 +23619,7 @@
   {
    "id": "fc07c6c2b87de149",
    "title": "하나은행 을지로 본점에 초대형 미디어파사드",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "본점",
@@ -23593,7 +23964,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -23757,17 +24128,17 @@
   {
    "id": "d81782c2696d7e88",
    "title": "한국 모바일게임 다운로드는 줄었지만 수익성은 역대 최고",
-   "topic": "economy",
+   "topic": "industry",
    "days": 1,
    "signature": [
     "운로",
     "모바",
     "바일",
-    "성은",
     "다운",
-    "게임",
+    "성은",
     "로드",
     "익성",
+    "게임",
     "최고",
     "수익",
     "역대",
@@ -23828,7 +24199,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -23895,7 +24266,7 @@
   {
    "id": "69133e22f5a3b17e",
    "title": "CJ제일제당 '퀴진케이' 셰프, 용산에 한식 다이닝 '오닐' 개점",
-   "topic": "economy",
+   "topic": "lifestyle_culture",
    "days": 1,
    "signature": [
     "한식",
@@ -24109,7 +24480,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -24130,7 +24501,7 @@
   {
    "id": "f5f3bc587e7cff72",
    "title": "China's robot makers have mastered the moves. Now comes the race for brains",
-   "topic": "economy",
+   "topic": "semis_ai",
    "days": 1,
    "signature": [
     "mastered",
@@ -24155,7 +24526,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": true,
+   "placed": false,
    "articles": [
     {
      "source": "Reuters",
@@ -24183,8 +24554,8 @@
     "우드",
     "클라",
     "강세",
-    "기대",
     "lg",
+    "기대",
     "씨엔",
     "엔에",
     "장과",
@@ -24201,7 +24572,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -24247,7 +24618,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "조선일보",
@@ -24415,10 +24786,10 @@
     "이터",
     "데이",
     "앤티",
-    "루션",
-    "솔루",
     "영역",
     "이앤",
+    "루션",
+    "솔루",
     "확장"
    ],
    "date": "2026-11-03",
@@ -24522,7 +24893,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -24614,7 +24985,7 @@
     }
    ],
    "n_sources": 2,
-   "placed": false,
+   "placed": true,
    "articles": [
     {
      "source": "연합뉴스",
@@ -24690,12 +25061,12 @@
     "결정",
     "보상",
     "단은",
-    "통보",
     "알린",
     "위법",
+    "통보",
     "유족",
-    "軍",
-    "지나"
+    "지나",
+    "軍"
    ],
    "date": "2026-11-03",
    "timeline": [
@@ -24771,52 +25142,6 @@
    ]
   },
   {
-   "id": "e7df6c9aeab6bb05",
-   "title": "Lamar Jackson needs surgery for thumb injury and could miss rest of season, Ravens coach says",
-   "topic": "entertainment_sports",
-   "days": 1,
-   "signature": [
-    "lamar",
-    "jackson",
-    "season",
-    "rest",
-    "thumb",
-    "surgery",
-    "mis",
-    "raven",
-    "roundup",
-    "coach",
-    "late",
-    "nfl"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Lamar Jackson needs surgery for thumb injury and could miss rest of season, Ravens coach says",
-     "summary": null
-    }
-   ],
-   "n_sources": 2,
-   "placed": false,
-   "articles": [
-    {
-     "source": "AP",
-     "title": "Lamar Jackson needs surgery for thumb injury and could miss rest of season, Ravens coach says",
-     "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNNXJEUW5lNEFjbGNueXJWbE52UnNRLW9ydEttRFVidDlfZ2NtV3BEMnN0SUhHN0ZTWDJxbzFZXy16M192LWg0aHBzMk1wNm9URGhwRXdieEJTTkVWRm9TSnpQZ00wUmNGLWVhR3ZpVmtBNnlaLXdoOHBVbXdIQnJLWWRpZTBjaWV3Ri1SQkxvWHhLaEhJMEdmeQ?oc=5",
-     "published": "2026-11-01T20:48:00+00:00",
-     "lang": "en"
-    },
-    {
-     "source": "Guardian",
-     "title": "NFL roundup: Cowboys and Chiefs suffer late collapses; Lamar Jackson’s season could be over",
-     "url": "https://www.theguardian.com/sport/2026/nov/01/nfl-roundup-sunday-football-scores",
-     "published": "2026-11-01T21:56:26+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
    "id": "0ea61cc13d3e68c8",
    "title": "I'll tell my players to dive in future - Iraola",
    "topic": "international",
@@ -24829,9 +25154,9 @@
     "denial",
     "penalty",
     "dive",
-    "player",
     "liverpool",
     "respond",
+    "player",
     "future",
     "down"
    ],
@@ -24876,9 +25201,9 @@
     "널도",
     "다국",
     "채널",
-    "국어",
     "안내",
     "요하",
+    "국어",
     "내세"
    ],
    "date": "2026-11-03",
@@ -24909,45 +25234,6 @@
    ]
   },
   {
-   "id": "34c836ff4598549a",
-   "title": "アメリカ中間選挙 日本時間の今夜 投票開始 激しい選挙戦続く",
-   "topic": "international",
-   "days": 1,
-   "signature": [
-    "間選",
-    "中間",
-    "カ中",
-    "挙",
-    "選挙",
-    "間",
-    "アメ",
-    "メリ",
-    "リカ",
-    "選",
-    "票開",
-    "投票"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "アメリカ中間選挙 日本時間の今夜 投票開始 激しい選挙戦続く",
-     "summary": null
-    }
-   ],
-   "n_sources": 1,
-   "placed": true,
-   "articles": [
-    {
-     "source": "NHK",
-     "title": "アメリカ中間選挙 日本時間の今夜 投票開始 激しい選挙戦続く",
-     "url": "https://news.web.nhk/newsweb/na/nd-20261103de69868",
-     "published": "2026-11-02T20:07:25+00:00",
-     "lang": "ja"
-    }
-   ]
-  },
-  {
    "id": "aa403b33a1e9b4a3",
    "title": "국고채 금리 일제히 상승…3년물 연 3.740%",
    "topic": "economy",
@@ -24967,7 +25253,7 @@
     {
      "date": "2026-11-03",
      "title": "국고채 금리 일제히 상승…3년물 연 3.740%",
-     "summary": null
+     "summary": "국고채 금리 하락 뒤 되돌림, 3년물 3.740%"
     }
    ],
    "n_sources": 1,
@@ -24979,45 +25265,6 @@
      "url": "https://www.yna.co.kr/view/AKR20261102148800008",
      "published": "2026-11-02T07:40:35+00:00",
      "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "677f15a863e5f4de",
-   "title": "【ライブ中】GMO 熊谷社長ら記者会見",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "gmo",
-    "が課",
-    "めセ",
-    "ら記",
-    "キュ",
-    "ク対",
-    "セキ",
-    "プ含",
-    "ュリ",
-    "リテ",
-    "体制",
-    "制構"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "【ライブ中】GMO 熊谷社長ら記者会見",
-     "summary": null
-    }
-   ],
-   "n_sources": 1,
-   "placed": true,
-   "articles": [
-    {
-     "source": "NHK",
-     "title": "【ライブ中】GMO 熊谷社長ら記者会見",
-     "url": "https://news.web.nhk/newsweb/na/nd-20261102de69492",
-     "published": "2026-11-02T08:02:31+00:00",
-     "lang": "ja"
     }
    ]
   },
@@ -25125,7 +25372,7 @@
     {
      "date": "2026-11-03",
      "title": "한국, GDP 대비 총부채 상승률 ‘1위’",
-     "summary": null
+     "summary": "한국 GDP 대비 총부채 상승폭 28개국 중 최대"
     }
    ],
    "n_sources": 1,
@@ -25164,7 +25411,7 @@
     {
      "date": "2026-11-03",
      "title": "[단독] 2030 '생존 매수'…경매시장 큰손 됐다",
-     "summary": null
+     "summary": "서울 경매 매수 2030 비중 41%, 4050 첫 추월"
     }
    ],
    "n_sources": 1,
@@ -25180,131 +25427,113 @@
    ]
   },
   {
-   "id": "6098cef4876d0e49",
-   "title": "将棋の青野照市九段に旭日双光章 タイトル戦の惜敗「忘れられない」",
-   "topic": "international",
+   "id": "99f6d10c4441efe4",
+   "title": "トヨタ会長の豊田章男さんら７人に旭日大綬章、松坂慶子さんに旭日小綬章…秋の叙勲３８６１人",
+   "topic": "industry",
    "days": 1,
    "signature": [
-    "に旭",
-    "の惜",
-    "れな",
-    "れら",
-    "イト",
-    "ル戦",
-    "光章",
-    "双光",
-    "市九",
-    "忘",
-    "忘れ",
-    "惜"
+    "の豊",
+    "んに",
+    "タ会",
+    "トヨ",
+    "ヨタ",
+    "人に",
+    "坂慶",
+    "大綬",
+    "慶",
+    "慶子",
+    "松坂",
+    "田章"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "将棋の青野照市九段に旭日双光章 タイトル戦の惜敗「忘れられない」",
-     "summary": null
+     "title": "トヨタ会長の豊田章男さんら７人に旭日大綬章、松坂慶子さんに旭日小綬章…秋の叙勲３８６１人",
+     "summary": "일본 가을 서훈 3861명, 도요다 아키오 욱일대수장"
     }
    ],
    "n_sources": 1,
    "placed": true,
    "articles": [
     {
-     "source": "아사히신문",
-     "title": "将棋の青野照市九段に旭日双光章 タイトル戦の惜敗「忘れられない」",
-     "url": "http://www.asahi.com/articles/ASVC23DM8VC2UCVL02SM.html",
+     "source": "요미우리신문",
+     "title": "トヨタ会長の豊田章男さんら７人に旭日大綬章、松坂慶子さんに旭日小綬章…秋の叙勲３８６１人",
+     "url": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE1ZMVpTYkpCTTJZSkR1VUlXUXBUb0J4V1ZxeWM5cXJBSlRKVjNjMFg5eWlCZXA4MmE0YVZLbmkzSjFVQVRabUpkTUxaX2tsWWhURzVRNm9HdmMxWkVuVW9QUGVCSC1zQQ?oc=5",
      "published": "2026-11-02T20:00:00+00:00",
      "lang": "ja"
     }
    ]
   },
   {
-   "id": "00d9f917a8476b4e",
-   "title": "Big majority of US voters disapprove of Trump’s handling of inflation: FT poll",
-   "topic": "economy",
-   "days": 1,
+   "id": "94d424505a3aaf91",
+   "title": "King's role is not policy making, says Palace in slavery apology row",
+   "topic": "international",
+   "days": 3,
    "signature": [
-    "disapprove",
-    "handling",
-    "ft",
-    "majority",
-    "inflation",
-    "big",
-    "voter",
-    "poll"
+    "palace",
+    "slavery",
+    "apology",
+    "king'",
+    "making",
+    "role",
+    "row",
+    "policy"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
-     "date": "2026-11-03",
-     "title": "Big majority of US voters disapprove of Trump’s handling of inflation: FT poll",
+     "date": "2026-11-01",
+     "title": "UK PM Burnham ‘open’ to slavery apology, but not reparations",
+     "summary": "버넘, 노예무역 사과 가능성 열고 배상은 거부"
+    },
+    {
+     "date": "2026-11-02",
+     "title": "Briten offen für offizielle Entschuldigung für Sklavenhandel, aber keine Reparationszahlungen",
      "summary": null
+    },
+    {
+     "date": "2026-11-03",
+     "title": "King's role is not policy making, says Palace in slavery apology row",
+     "summary": "왕실, 노예제 사과 논란서 국왕 정치적 역할 선 그어"
     }
    ],
    "n_sources": 1,
    "placed": true,
    "articles": [
     {
-     "source": "Financial Times",
-     "title": "Big majority of US voters disapprove of Trump’s handling of inflation: FT poll",
-     "url": "https://www.ft.com/content/5ed63d08-66f3-4ad3-9ec7-2ec8b590fc85",
-     "published": "2026-11-02T18:36:12+00:00",
+     "source": "BBC",
+     "title": "King's role is not policy making, says Palace in slavery apology row",
+     "url": "https://www.bbc.co.uk/news/articles/cm5ynve7q1zdo?at_medium=RSS&at_campaign=rss",
+     "published": "2026-11-02T18:24:36+00:00",
      "lang": "en"
     }
    ]
   },
   {
-   "id": "a36c2d9a23c2db6a",
-   "title": "Vista, Elliott’s Cloud Software to Refinance $2 Billion of Debt",
-   "topic": "economy",
-   "days": 1,
-   "signature": [
-    "elliott",
-    "refinance",
-    "software",
-    "vista",
-    "cloud",
-    "debt",
-    "billion"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-03",
-     "title": "Vista, Elliott’s Cloud Software to Refinance $2 Billion of Debt",
-     "summary": null
-    }
-   ],
-   "n_sources": 1,
-   "placed": true,
-   "articles": [
-    {
-     "source": "Bloomberg",
-     "title": "Vista, Elliott’s Cloud Software to Refinance $2 Billion of Debt",
-     "url": "https://www.bloomberg.com/news/articles/2026-11-02/vista-elliott-s-cloud-software-to-refinance-2-billion-of-debt",
-     "published": "2026-11-02T18:23:35+00:00",
-     "lang": "en"
-    }
-   ]
-  },
-  {
-   "id": "7d39f83b8f861628",
-   "title": "Trump’s Immigration Crackdown Backlash Poses Challenge for Republicans in the Midterms",
+   "id": "b0e8dfe1cab4706a",
+   "title": "Au sein du service d’ordre du Rassemblement national, les méthodes du groupe de choc de « Kaiser »",
    "topic": "international",
    "days": 1,
    "signature": [
-    "pose",
-    "backlash",
-    "crackdown",
-    "challenge",
-    "immigration",
-    "republican"
+    "choc",
+    "groupe",
+    "kaiser",
+    "rassemblement",
+    "thode",
+    "ordre",
+    "sein",
+    "service",
+    "national",
+    "au",
+    "du",
+    "les"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "Trump’s Immigration Crackdown Backlash Poses Challenge for Republicans in the Midterms",
+     "title": "Au sein du service d’ordre du Rassemblement national, les méthodes du groupe de choc de « Kaiser »",
      "summary": null
     }
    ],
@@ -25312,73 +25541,76 @@
    "placed": true,
    "articles": [
     {
-     "source": "New York Times",
-     "title": "Trump’s Immigration Crackdown Backlash Poses Challenge for Republicans in the Midterms",
-     "url": "https://www.nytimes.com/2026/11/02/us/politics/trump-immigration-crackdown-backlash-republicans.html",
-     "published": "2026-11-02T15:19:18+00:00",
-     "lang": "en"
+     "source": "Le Monde",
+     "title": "Au sein du service d’ordre du Rassemblement national, les méthodes du groupe de choc de « Kaiser »",
+     "url": "https://www.lemonde.fr/politique/article/2026/11/02/au-sein-du-service-d-ordre-du-rassemblement-national-les-methodes-du-groupe-de-choc-de-kaiser_6805308_823448.html",
+     "published": "2026-11-02T18:24:25+00:00",
+     "lang": "fr"
     }
    ]
   },
   {
-   "id": "2cb9a329ceef8d89",
-   "title": "Credit Boss at Top Canada Pension Warns of ‘Bubble-Like’ AI Rush",
+   "id": "b81fae89c9c58fdd",
+   "title": "“제로금리·1100원 환율 시대 안 올 듯… 달러 쪼개사고 단기채 담아라”",
    "topic": "economy",
    "days": 1,
    "signature": [
-    "bubble-like",
-    "credit",
-    "pension",
-    "rush",
-    "bos",
-    "warn",
-    "canada",
-    "top"
+    "기채",
+    "로금",
+    "담아",
+    "제로",
+    "쪼개",
+    "단기",
+    "아라",
+    "개사",
+    "환율",
+    "금리",
+    "사고",
+    "시대"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "Credit Boss at Top Canada Pension Warns of ‘Bubble-Like’ AI Rush",
-     "summary": null
+     "title": "“제로금리·1100원 환율 시대 안 올 듯… 달러 쪼개사고 단기채 담아라”",
+     "summary": "고금리·강달러 지속, 달러 분할매수·단기채 권고"
     }
    ],
    "n_sources": 1,
    "placed": true,
    "articles": [
     {
-     "source": "Bloomberg",
-     "title": "Credit Boss at Top Canada Pension Warns of ‘Bubble-Like’ AI Rush",
-     "url": "https://www.bloomberg.com/news/articles/2026-11-02/credit-boss-at-top-canada-pension-warns-of-bubble-like-ai-rush",
-     "published": "2026-11-02T15:01:32+00:00",
-     "lang": "en"
+     "source": "조선일보",
+     "title": "“제로금리·1100원 환율 시대 안 올 듯… 달러 쪼개사고 단기채 담아라”",
+     "url": "https://www.chosun.com/economy/money/2026/11/03/EYYBMPLNO5HDXF3SLB3I6FN5WA/",
+     "published": "2026-11-02T15:37:00+00:00",
+     "lang": "ko"
     }
    ]
   },
   {
-   "id": "a264e99bb7a7b1b7",
-   "title": "フジHDとSBIHDが資本業務提携 メディア分野で合弁会社設立へ",
+   "id": "23bbab90761af650",
+   "title": "인터넷은행 ‘마통’ 금리 두달 연속 7%대… 5대 은행보다 높아",
    "topic": "economy",
    "days": 1,
    "signature": [
-    "sbihd",
-    "が資",
-    "で合",
-    "ア分",
-    "ィア",
-    "フジ",
-    "メデ",
-    "務提",
-    "合弁",
-    "弁",
-    "弁会",
-    "提携"
+    "두달",
+    "마통",
+    "넷은",
+    "높아",
+    "행보",
+    "터넷",
+    "연속",
+    "금리",
+    "인터",
+    "보다",
+    "은행"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "フジHDとSBIHDが資本業務提携 メディア分野で合弁会社設立へ",
+     "title": "인터넷은행 ‘마통’ 금리 두달 연속 7%대… 5대 은행보다 높아",
      "summary": null
     }
    ],
@@ -25386,18 +25618,56 @@
    "placed": true,
    "articles": [
     {
-     "source": "아사히신문",
-     "title": "フジHDとSBIHDが資本業務提携 メディア分野で合弁会社設立へ",
-     "url": "https://www.asahi.com/articles/ASVC245CTVC2UCVL04LM.html",
-     "published": "2026-11-02T13:55:00+00:00",
-     "lang": "ja"
+     "source": "조선일보",
+     "title": "인터넷은행 ‘마통’ 금리 두달 연속 7%대… 5대 은행보다 높아",
+     "url": "https://www.chosun.com/economy/stock-finance/2026/11/03/P7XVM6CQBVCVDO6PSOONVYYWAI/",
+     "published": "2026-11-02T15:36:00+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "795643c6239da581",
+   "title": "EXCLUSIVE: India moves to resolve Scotch tariff dispute under UK trade pact, sources say",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "dispute",
+    "scotch",
+    "pact",
+    "resolve",
+    "tariff",
+    "exclusive",
+    "move",
+    "source",
+    "india",
+    "trade",
+    "uk"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "EXCLUSIVE: India moves to resolve Scotch tariff dispute under UK trade pact, sources say",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Reuters",
+     "title": "EXCLUSIVE: India moves to resolve Scotch tariff dispute under UK trade pact, sources say",
+     "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPejNZeU16MndWU3VSckp3bDJ4YXgzQ0Rnb1Ftb2daeWRlVHZsQkxjY2U4ODVvRUJrM1VtMXl6UnQ5STlfcFVtYzF1YnpCaUZfWExkLUhkaEU4SFE4T2tQRHZoN3J0QVBUbUtCSThZcF8yYVJCbndSeFFVTjZCa0Y3RE5iUS1hUUM4d1dIQjRvVlZMNFViTWd4cllEVmdHWTJfQ0x5Tjk5SzlDeUtmMXRfM0hsSm9TX294dTJv?oc=5",
+     "published": "2026-11-02T14:25:44+00:00",
+     "lang": "en"
     }
    ]
   },
   {
    "id": "101c151e72efda39",
    "title": "The Morning Risk Report: Binance Resumes Withdrawals After Suffering Biggest-Ever Crypto Hack",
-   "topic": "economy",
+   "topic": "international",
    "days": 4,
    "signature": [
     "suffering",
@@ -25447,6 +25717,44 @@
    ]
   },
   {
+   "id": "90fdc01c79bfa1cf",
+   "title": "Hong Kong’s first national security law convict among 4 released early, sources say",
+   "topic": "international",
+   "days": 1,
+   "signature": [
+    "convict",
+    "law",
+    "security",
+    "among",
+    "released",
+    "national",
+    "source",
+    "early",
+    "hong",
+    "kong",
+    "first"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Hong Kong’s first national security law convict among 4 released early, sources say",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "SCMP",
+     "title": "Hong Kong’s first national security law convict among 4 released early, sources say",
+     "url": "https://www.scmp.com/news/hong-kong/politics/article/3373012/hong-kongs-first-national-security-law-convict-among-4-released-early-sources-say",
+     "published": "2026-11-02T11:52:51+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
    "id": "d27947b7597156f4",
    "title": "Saudi Business Model Built on Corporate Commuters Challenged by War",
    "topic": "economy",
@@ -25466,7 +25774,7 @@
     {
      "date": "2026-11-03",
      "title": "Saudi Business Model Built on Corporate Commuters Challenged by War",
-     "summary": null
+     "summary": "후티 공격에 리야드 공항 폐쇄, 출장형 사업 모델 흔들"
     }
    ],
    "n_sources": 1,
@@ -25477,6 +25785,81 @@
      "title": "Saudi Business Model Built on Corporate Commuters Challenged by War",
      "url": "https://www.bloomberg.com/news/articles/2026-11-02/saudi-business-model-built-on-corporate-commuters-challenged-by-war",
      "published": "2026-11-02T11:27:14+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "f45d0375819c6dea",
+   "title": "美 민주, 중간선거 후 트럼프 관세 폐지 추진…한·일 대미투자금도 조사",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "금도",
+    "미투",
+    "폐지",
+    "대미",
+    "관세",
+    "자금",
+    "조사",
+    "간선",
+    "중간",
+    "추진",
+    "민주"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "美 민주, 중간선거 후 트럼프 관세 폐지 추진…한·일 대미투자금도 조사",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한국경제",
+     "title": "美 민주, 중간선거 후 트럼프 관세 폐지 추진…한·일 대미투자금도 조사",
+     "url": "https://www.hankyung.com/article/202611021256i",
+     "published": "2026-11-02T10:28:51+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "f9fc9fd7de4aadcb",
+   "title": "Argentina's austerity-hit economy reels towards recession, testing Milei ahead of 2027 vote",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "argentina'",
+    "austerity-hit",
+    "reel",
+    "milei",
+    "recession",
+    "testing",
+    "toward",
+    "economy",
+    "vote",
+    "ahead"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Argentina's austerity-hit economy reels towards recession, testing Milei ahead of 2027 vote",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Reuters",
+     "title": "Argentina's austerity-hit economy reels towards recession, testing Milei ahead of 2027 vote",
+     "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNNFVsdDIwMFVTSnVyR2Y4ZHh3bkRBdHJqSVowbHRnX2JxaFdIcGVVS0RPTTAxYy1VNWlQVGgwYmNqV2JFYTNvSm1KdmV4U0RsUi1wMnBGenV6c2xDNlc0THJLMzVTdno1ZVlkVDZmOXhIVUphSjNSOEI1QnRqOTBLc2ViUDNFOVdVVFRhUEpwOEhHZVZzUjV5TDExU2Vmc0g3Z0lTVU1JTUszRWZtZFJvdDhOQ3Z2blQ0TjRvMFczWUdpSjBsblE?oc=5",
+     "published": "2026-11-02T10:09:43+00:00",
      "lang": "en"
     }
    ]
@@ -25502,7 +25885,7 @@
     {
      "date": "2026-11-03",
      "title": "Gulf Economies, Torn by War in Iran, Desperately Need a Return to Normal",
-     "summary": null
+     "summary": "걸프 산유국, 전쟁 속 성장 급락…정상화 시급"
     }
    ],
    "n_sources": 1,
@@ -25518,77 +25901,25 @@
    ]
   },
   {
-   "id": "2ba1be0050db13c0",
-   "title": "李 \"역대 최대 821조 미래선점 예산\"",
-   "topic": "society",
+   "id": "beb19cdf12afbc44",
+   "title": "“美 트럼프 관세 돌려줘”…농심, 40억원대 환급 소송",
+   "topic": "economy",
    "days": 1,
    "signature": [
-    "래선",
-    "선점",
-    "역대",
-    "李",
-    "미래",
-    "예산"
+    "려줘",
+    "농심",
+    "돌려",
+    "환급",
+    "소송",
+    "관세",
+    "원대",
+    "억원"
    ],
    "date": "2026-11-03",
    "timeline": [
     {
      "date": "2026-11-03",
-     "title": "李 \"역대 최대 821조 미래선점 예산\"",
-     "summary": null
-    }
-   ],
-   "n_sources": 1,
-   "placed": true,
-   "articles": [
-    {
-     "source": "매일경제",
-     "title": "李 \"역대 최대 821조 미래선점 예산\"",
-     "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1TYlBfdDM3cE15bF9MOE5zZXNuaXpmcHlMR2xDNnJsYWJxQlpuVFMxajU4YURxbjVxUzlTRVFJN3JfaGdHa1BkMkNzY1RLMXRKaXc?oc=5",
-     "published": "2026-11-02T08:38:53+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "c8a4e521bcbabbc6",
-   "title": "배민 ‘코리아 그랜드 페스티벌’ 참가…4일까지 한우 최대 46% 할인",
-   "topic": "economy",
-   "days": 4,
-   "signature": [
-    "그랜",
-    "배민",
-    "한우",
-    "티벌",
-    "스티",
-    "페스",
-    "랜드",
-    "참가",
-    "일까",
-    "코리",
-    "할인",
-    "리아"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-10-31",
-     "title": "삼성전자, 정부 소비축제 ‘코리아 그랜드 페스티벌’ 참여… 가전·스마트폰 할인",
-     "summary": null
-    },
-    {
-     "date": "2026-11-01",
-     "title": "'코리아 그랜드 페스티벌' 안동서 공식 개막…소비 촉진",
-     "summary": "한 총리, 안동 코리아 그랜드 페스티벌 개막 참석"
-    },
-    {
-     "date": "2026-11-02",
-     "title": "전국 4만개 기업 참가 ‘코리아 그랜드 페스티벌’…할인·상생복권 쏟아진다",
-     "summary": null
-    },
-    {
-     "date": "2026-11-03",
-     "title": "배민 ‘코리아 그랜드 페스티벌’ 참가…4일까지 한우 최대 46% 할인",
+     "title": "“美 트럼프 관세 돌려줘”…농심, 40억원대 환급 소송",
      "summary": null
     }
    ],
@@ -25597,10 +25928,423 @@
    "articles": [
     {
      "source": "조선일보",
-     "title": "배민 ‘코리아 그랜드 페스티벌’ 참가…4일까지 한우 최대 46% 할인",
-     "url": "https://www.chosun.com/economy/market_trend/2026/11/02/ME2GGZRTGU2GKMJVMIYTKOLBGQ/",
-     "published": "2026-11-02T05:24:22+00:00",
+     "title": "“美 트럼프 관세 돌려줘”…농심, 40억원대 환급 소송",
+     "url": "https://www.chosun.com/economy/market_trend/2026/11/02/MRQTOZJWGI2DKYJVGFSDQOBRMI/",
+     "published": "2026-11-02T09:20:41+00:00",
      "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "ad02c3c3f6dd5ff3",
+   "title": "정유사 3분기 실적도 ‘고공’ 행진…전쟁 여파로 호황 장기화 전망도",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "고공",
+    "기화",
+    "적도",
+    "행진",
+    "망도",
+    "여파",
+    "정유",
+    "파로",
+    "호황",
+    "유사",
+    "장기",
+    "전망"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "정유사 3분기 실적도 ‘고공’ 행진…전쟁 여파로 호황 장기화 전망도",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한겨레",
+     "title": "정유사 3분기 실적도 ‘고공’ 행진…전쟁 여파로 호황 장기화 전망도",
+     "url": "https://www.hani.co.kr/arti/economy/marketing/1285394.html",
+     "published": "2026-11-02T08:48:00+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "dbe67f24e3946590",
+   "title": "\"3대 메가프로젝트, 생태계 조성이 핵심\"",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "성이",
+    "생태",
+    "태계",
+    "가프",
+    "조성",
+    "핵심",
+    "로젝",
+    "젝트",
+    "메가",
+    "프로"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "\"3대 메가프로젝트, 생태계 조성이 핵심\"",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한국경제",
+     "title": "\"3대 메가프로젝트, 생태계 조성이 핵심\"",
+     "url": "https://www.hankyung.com/article/2026110210511",
+     "published": "2026-11-02T08:43:29+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "1fa45ce290c72642",
+   "title": "금리 7% 눈앞인데…한 달 새 대출 2조8000억원 늘었다",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "앞인",
+    "눈앞",
+    "늘었",
+    "인데",
+    "금리",
+    "었다",
+    "대출",
+    "억원"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "금리 7% 눈앞인데…한 달 새 대출 2조8000억원 늘었다",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한국경제",
+     "title": "금리 7% 눈앞인데…한 달 새 대출 2조8000억원 늘었다",
+     "url": "https://www.hankyung.com/article/202611020910i",
+     "published": "2026-11-02T08:40:22+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "babe4d6c33c3cc96",
+   "title": "한국형 녹색대전환 시대…'핵심광물' 공급망 리스크 관리 시급",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "국형",
+    "녹색",
+    "색대",
+    "시급",
+    "광물",
+    "심광",
+    "급망",
+    "스크",
+    "핵심",
+    "공급",
+    "리스",
+    "시대"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "한국형 녹색대전환 시대…'핵심광물' 공급망 리스크 관리 시급",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한국경제",
+     "title": "한국형 녹색대전환 시대…'핵심광물' 공급망 리스크 관리 시급",
+     "url": "https://www.hankyung.com/article/2026110293881",
+     "published": "2026-11-02T07:03:43+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "ac1e68e3921f166d",
+   "title": "부실 보험사 정리할 때 고금리·고보장 계약도 바꾼다…예보, 법 개정 검토",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "고금",
+    "예보",
+    "꾼다",
+    "리할",
+    "바꾼",
+    "부실",
+    "약도",
+    "험사",
+    "고보",
+    "보장",
+    "정리",
+    "개정"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "부실 보험사 정리할 때 고금리·고보장 계약도 바꾼다…예보, 법 개정 검토",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "조선일보",
+     "title": "부실 보험사 정리할 때 고금리·고보장 계약도 바꾼다…예보, 법 개정 검토",
+     "url": "https://www.chosun.com/economy/stock-finance/2026/11/02/MMYDQZTGGQZGEMZQGRQWCMZXHA/",
+     "published": "2026-11-02T07:00:14+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "07c18586b822bf6f",
+   "title": "China’s soaring chemical exports threaten new trade war front",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "front",
+    "soaring",
+    "chemical",
+    "export",
+    "threaten",
+    "trade",
+    "war",
+    "china"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "China’s soaring chemical exports threaten new trade war front",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Financial Times",
+     "title": "China’s soaring chemical exports threaten new trade war front",
+     "url": "https://www.ft.com/content/2962ad57-cee1-4a63-82ba-17acfc09d812",
+     "published": "2026-11-02T06:42:16+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "c65ce8dc172dfde4",
+   "title": "Minns warns expected RBA rate rise will see ‘shops close that don’t reopen’ as pressure mounts on PM",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "minn",
+    "rba",
+    "mount",
+    "expected",
+    "pm",
+    "reopen",
+    "shop",
+    "close",
+    "don",
+    "see",
+    "pressure",
+    "warn"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Minns warns expected RBA rate rise will see ‘shops close that don’t reopen’ as pressure mounts on PM",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Guardian",
+     "title": "Minns warns expected RBA rate rise will see ‘shops close that don’t reopen’ as pressure mounts on PM",
+     "url": "https://www.theguardian.com/australia-news/2026/nov/02/minns-warns-rba-rate-rise-job-losses-economy",
+     "published": "2026-11-02T06:08:33+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "96c487cc9e4b9fc8",
+   "title": "금리는 AI에도 작동한다…워시 의장이 던진 투자 단서",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "단서",
+    "동한",
+    "워시",
+    "작동",
+    "장이",
+    "던진",
+    "의장",
+    "리는",
+    "금리",
+    "한다",
+    "에도"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "금리는 AI에도 작동한다…워시 의장이 던진 투자 단서",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "한국경제",
+     "title": "금리는 AI에도 작동한다…워시 의장이 던진 투자 단서",
+     "url": "https://www.hankyung.com/article/202611029489i",
+     "published": "2026-11-02T06:06:28+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "3a75bc9ae1b8be3a",
+   "title": "UK talks up EU defence ties to counter tilt towards ‘Made in Europe’ weapons",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "counter",
+    "made",
+    "tie",
+    "tilt",
+    "weapon",
+    "defence",
+    "toward",
+    "eu",
+    "europe",
+    "uk",
+    "talk"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "UK talks up EU defence ties to counter tilt towards ‘Made in Europe’ weapons",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Financial Times",
+     "title": "UK talks up EU defence ties to counter tilt towards ‘Made in Europe’ weapons",
+     "url": "https://www.ft.com/content/1dec293b-284f-4939-b6f0-6982092be0b1",
+     "published": "2026-11-02T06:00:08+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "752f9347b15e8174",
+   "title": "美 중간선거 D-2…트럼프 의약품 관세 향방에 국내 업계도 촉각",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "계도",
+    "의약",
+    "향방",
+    "방에",
+    "업계",
+    "촉각",
+    "관세",
+    "약품",
+    "간선",
+    "중간",
+    "국내"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "美 중간선거 D-2…트럼프 의약품 관세 향방에 국내 업계도 촉각",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "동아일보",
+     "title": "美 중간선거 D-2…트럼프 의약품 관세 향방에 국내 업계도 촉각",
+     "url": "https://www.donga.com/news/Inter/article/all/20261102/134949884/1",
+     "published": "2026-11-02T04:24:09+00:00",
+     "lang": "ko"
+    }
+   ]
+  },
+  {
+   "id": "f93c85b7b0daf9b3",
+   "title": "Indian shares rise on Iran war talks, Reliance earnings beat",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "reliance",
+    "earning",
+    "indian",
+    "beat",
+    "rise",
+    "share",
+    "talk",
+    "war",
+    "iran"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "Indian shares rise on Iran war talks, Reliance earnings beat",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Reuters",
+     "title": "Indian shares rise on Iran war talks, Reliance earnings beat",
+     "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPRV9nWF8tcV9tRkNYTENXRnRyTDhkcnRoZEJmMFJ1Wm1USDJwbDNxcEFuU0xNbE9JSnRJb2xScTBmWWVpZWJ5SmlhXzdBajNuSDhnOWdULWQ4UUZ2T3RRdjhpNWxZb08tcEQxR01tdks4dkhLTUN1WjJiZVFSa1JCbHBRdGVsZVZqNzFoQ2ZDdF9zbE9MeUlvRHhzZGRRM05SeGxlaFB1MFZjWVB3TVZjbTBfUlprRTZ2eTA3bFBFQVpLdw?oc=5",
+     "published": "2026-11-02T02:42:00+00:00",
+     "lang": "en"
     }
    ]
   },
@@ -25639,50 +26383,6 @@
      "title": "인상 사이클인데 국채금리 너무 내렸나…\"주가조정 과잉반영\"",
      "url": "https://www.yna.co.kr/view/AKR20261102053800008",
      "published": "2026-11-02T01:31:41+00:00",
-     "lang": "ko"
-    }
-   ]
-  },
-  {
-   "id": "58cd495bf33ac67b",
-   "title": "[특징주] 한화오션, 잠수함 핵심장비 국산화 소식에 7%대 강세",
-   "topic": "economy",
-   "days": 2,
-   "signature": [
-    "수함",
-    "오션",
-    "잠수",
-    "화오",
-    "장비",
-    "산화",
-    "식에",
-    "심장",
-    "핵심",
-    "강세",
-    "징주",
-    "특징"
-   ],
-   "date": "2026-11-03",
-   "timeline": [
-    {
-     "date": "2026-11-02",
-     "title": "한화오션, 어뢰 밀어내 쏘는 잠수함 ‘수평발사장치’ 국산화 성공",
-     "summary": null
-    },
-    {
-     "date": "2026-11-03",
-     "title": "[특징주] 한화오션, 잠수함 핵심장비 국산화 소식에 7%대 강세",
-     "summary": null
-    }
-   ],
-   "n_sources": 1,
-   "placed": true,
-   "articles": [
-    {
-     "source": "조선일보",
-     "title": "[특징주] 한화오션, 잠수함 핵심장비 국산화 소식에 7%대 강세",
-     "url": "https://www.chosun.com/economy/stock-finance/2026/11/02/GM2GCNTEHA4GEZRTGY2GEZRZMU/",
-     "published": "2026-11-02T00:36:25+00:00",
      "lang": "ko"
     }
    ]
@@ -25774,7 +26474,7 @@
     {
      "date": "2026-11-03",
      "title": "Two Dan Sullivans, No Confusion: Alaska Voters Say Don’t Underestimate Them",
-     "summary": null
+     "summary": "동명 후보 논란에도 유권자는 혼동 없다는 반응"
     }
    ],
    "n_sources": 1,
@@ -25810,7 +26510,7 @@
     {
      "date": "2026-11-03",
      "title": "Philippine Bonds Can Beat Asia If War Risks Ebb, Says Brandywine",
-     "summary": null
+     "summary": "전쟁 위험 완화 시 필리핀 채권 아시아 선두 가능성"
     }
    ],
    "n_sources": 1,
@@ -25821,6 +26521,40 @@
      "title": "Philippine Bonds Can Beat Asia If War Risks Ebb, Says Brandywine",
      "url": "https://www.bloomberg.com/news/articles/2026-11-01/philippine-bonds-can-beat-asia-if-war-risks-ebb-says-brandywine",
      "published": "2026-11-01T23:55:15+00:00",
+     "lang": "en"
+    }
+   ]
+  },
+  {
+   "id": "8160226ecf71667f",
+   "title": "FirstFT: Gulf braced for renewed war between US and Iran",
+   "topic": "economy",
+   "days": 1,
+   "signature": [
+    "braced",
+    "firstft",
+    "renewed",
+    "between",
+    "gulf",
+    "war",
+    "iran"
+   ],
+   "date": "2026-11-03",
+   "timeline": [
+    {
+     "date": "2026-11-03",
+     "title": "FirstFT: Gulf braced for renewed war between US and Iran",
+     "summary": null
+    }
+   ],
+   "n_sources": 1,
+   "placed": true,
+   "articles": [
+    {
+     "source": "Financial Times",
+     "title": "FirstFT: Gulf braced for renewed war between US and Iran",
+     "url": "https://www.ft.com/content/703dd322-e880-4bbf-80f8-8b0efda1831c",
+     "published": "2026-11-01T22:22:33+00:00",
      "lang": "en"
     }
    ]
@@ -25878,7 +26612,7 @@
     {
      "date": "2026-11-03",
      "title": "美로 떠난 보우소나루에 등 돌리는 브라질 우파",
-     "summary": null
+     "summary": "보수 정당들 선거 결과 인정, 보우소나루 고립"
     }
    ],
    "n_sources": 1,
