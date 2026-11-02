@@ -42,6 +42,7 @@ sections:
   - {id: politics, title: "정치·안보", max_articles: 9, pages: 3}
   - {id: economy, title: "경제·산업", max_articles: 9, pages: 3}
   - {id: international, title: "국제", max_articles: 12, pages: 4}
+  - {id: china, title: "중국은 지금", max_articles: 0, pages: 2}  # 인민일보로 읽는 중국의 시선 (S37) — AI 가 실을 만하다고 본 날만 쪽이 생김
   - {id: society, title: "사회·과학", max_articles: 7, pages: 2}
   - {id: interest, title: "관심", max_articles: 14, pages: 3}
   - {id: analysis, title: "분석·해설", max_articles: 0, pages: 2}  # 매체가 쓴 분석·해설 기사 (S22c — AI 글 아님). 뉴스 기사 수에는 안 셈

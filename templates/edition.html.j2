@@ -124,6 +124,31 @@
     </article>
     {% endfor %}
   {% endif %}
+  {% if sec.china %}{% set cn = sec.china %}{# 중국은 지금 (S37): 인민일보로 읽는 중국의 시선 — 두 덩어리라 휴대폰에서는 두 쪽에 나뉘어도 잘리지 않는다 #}
+    <article class="item cn-view" data-issue="cn-{{ cn.issue_id }}" data-section="china">
+      <p class="cn-kicker">관영매체 읽기 · 인민일보는 중국공산당 기관지</p>
+      <h2 class="cn-title">{{ cn.title }}</h2>
+      <p class="cn-lead">{{ cn.lead }}</p>
+      <section class="cn-box cn-own">
+        <h3>중국이 강조하는 것</h3>
+        <ul>{% for e in cn.emphasis %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% if cn.omitted %}<h4>말하지 않은 것</h4>
+        <ul class="cn-omit">{% for e in cn.omitted %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        {% if cn.keywords %}<p class="cn-words">{% for k in cn.keywords %}<span lang="zh">{{ k }}</span>{% endfor %}</p>{% endif %}
+      </section>
+    </article>
+    <article class="item cn-view cn-more" data-issue="cn-{{ cn.issue_id }}-2" data-section="china">
+      <section class="cn-box">
+        <h3>다른 나라 매체는</h3>
+        <dl class="cn-cmp">{% for c in cn.compare %}
+          <dt><span class="badge lean-{{ c.cls }}">{{ c.flag }}</span> {{ c.short }}</dt><dd>{{ c.focus }}</dd>{% endfor %}
+        </dl>
+      </section>
+      {% if cn.agenda %}<p class="cn-agenda"><b>오늘 인민일보가 앞세운 의제</b> {% for a in cn.agenda %}<span>{{ a }}</span>{% endfor %}</p>{% endif %}
+      {% if cn.evidence %}<div class="cn-ev">근거 기사 {% for e in cn.evidence %}<button type="button" class="orig-btn" data-href="{{ real_url(e.url) }}"{{ art(e.url, e.source, e.lang) }}>{{ e.source }} · {{ e.title }}</button>{% endfor %}</div>{% endif %}
+      <p class="cn-note" data-note="AI 해석">AI 가 인민일보와 다른 나라 매체 보도를 견주어 쓴 해석입니다. 인민일보 보도는 사실 전달보다 "중국 지도부가 무엇을 말하고 싶어 하는가"로 읽어 주세요.</p>
+    </article>
+  {% endif %}
   {% if sec.lead %}{# 1면 첫 쪽 (S26): 메인 기사 하나로 끝낸다 #}
     <div class="item fz" data-issue="front-zone" data-page-end="1">{{ lead_art(sec.lead) }}</div>
   {% endif %}

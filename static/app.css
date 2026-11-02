@@ -429,3 +429,32 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .ev-undo { color: var(--accent); }
 .ev-done { font-size: 12px; color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px; }
 @media (max-width: 600px) { .ev-tp { grid-template-columns: 1fr; } .ev-watch { grid-template-columns: 1fr; } .ev-watch dt { border-bottom: 0; padding-bottom: 0; } }
+
+/* 중국은 지금 (S37, 2026-11-03): 인민일보로 읽는 중국의 시선 — 한 쪽 */
+:root { --cn: #9a2b2b; --cn-bg: #f7e9e6; }
+:root[data-theme="dark"] { --cn: #e58a7c; --cn-bg: #34221f; }
+@media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --cn: #e58a7c; --cn-bg: #34221f; } }
+.cn-view { border: 0; line-height: 1.6; }
+.cn-view > * + * { margin-top: 12px; }
+.cn-kicker { margin: 0; color: var(--cn); font-weight: 700; font-size: calc(12px * var(--fs)); letter-spacing: .04em; }
+.cn-title { font-size: calc(1.35em * var(--fs)); line-height: 1.35; margin: 4px 0 0; text-wrap: balance; }
+.cn-lead { margin: 0; }
+.cn-box { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.cn-box h3 { font-size: calc(13px * var(--fs)); margin: 0 0 6px; }
+.cn-own h3, .cn-own h4 { color: var(--cn); }
+.cn-box h4 { font-size: calc(12px * var(--fs)); margin: 10px 0 4px; }
+.cn-box ul { margin: 0; padding-left: 18px; font-size: .95em; }
+.cn-omit li { color: var(--muted); }
+.cn-words { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.cn-words span { font-size: calc(12px * var(--fs)); background: var(--cn-bg); color: var(--cn); border-radius: 12px; padding: 1px 9px; }
+.cn-cmp { margin: 0; font-size: .93em; }
+.cn-cmp dt { font-weight: 600; margin-top: 6px; }
+.cn-cmp dt:first-child { margin-top: 0; }
+.cn-cmp dd { margin: 2px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+.cn-agenda { font-size: .93em; margin-bottom: 0; }
+.cn-agenda span { display: inline-block; margin: 2px 4px 0 0; border: 1px solid var(--rule); border-radius: 12px; padding: 0 9px; background: var(--card); }
+.cn-ev { font-size: calc(12px * var(--fs)); color: var(--muted); margin-bottom: 0; }
+.cn-ev .orig-btn { display: block; text-align: left; margin-top: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cn-note { font-size: calc(11px * var(--fs)); color: var(--muted); margin-bottom: 0; }
+.cn-ev .orig-btn { font: inherit; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+.item.tight.cn-view .cn-words, .item.tight.cn-more .cn-agenda { display: none; }

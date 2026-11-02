@@ -33,6 +33,7 @@ def page_urls(edition: dict) -> list[str]:
     urls += [e["url"] for e in op.get("editorials", []) + op.get("columns", [])]
     # 분석·해설 면(S22c)·지정 칼럼(S22d)도 — 빠져 있어 Google 뉴스로 받는 조선비즈 지정 칼럼이 원문 창에서 못 열렸다 (S18)
     urls += [a["url"] for a in (edition.get("analysis") or []) + (edition.get("picks") or [])]
+    urls += [e["url"] for e in (edition.get("china") or {}).get("evidence", [])]   # 중국은 지금 근거 기사 (S37 — 인민일보는 Google 뉴스 경유)
     return list(dict.fromkeys(urls))
 
 

@@ -22,7 +22,9 @@ from .fsutil import write_atomic
 from .interest import build_interest_table
 from . import reader as reader_mod
 from .settings import ROOT, TOPICS, Config, Interests, Sources
-from .stance import LEAN_ORDER
+from .stance import COUNTRY_LABEL, LEAN_ORDER
+
+COUNTRY_KO = {**COUNTRY_LABEL, "FR": "프랑스", "DE": "독일", "BE": "벨기에"}   # 중국은 지금 비교표 (S37)
 from .textutil import LEAD_MAX, TRANSLATE_BOTH, cap_lead, title_key
 
 LEAN_CLASS = {"보수": "con", "중도": "mid", "진보": "pro", "경제지": "biz", "통신·공영": "pub", "관영": "state"}
@@ -287,6 +289,13 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
             an = [a for a in an if a["url"] not in {i["url"] for i in iv}]
             if an or iv:
                 sections.append({"id": "analysis", "title": titles[s.id], "items": [], "analysis": an, "interviews": iv})
+            continue
+        if s.id == "china":   # 중국은 지금 (S37): AI 가 실기로 한 날만
+            cn = edition.get("china")
+            if cn:
+                sections.append({"id": "china", "title": titles[s.id], "items": [], "china": {
+                    **cn, "compare": [{**c, "cls": LEAN_CLASS.get(c.get("lean"), "mid"), "short": SHORT_NAME.get(c["source"], c["source"]),
+                                       "flag": COUNTRY_KO.get(c.get("country"), c.get("country"))} for c in cn.get("compare", [])]}})
             continue
         items = edition["sections"].get(s.id, [])
         if not items:
