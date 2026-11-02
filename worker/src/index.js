@@ -2,6 +2,7 @@
 //
 // GET /?url=<기사 주소>  (머리글 X-Reader-Key: <접근 키>)
 // GET·POST /prefs  관심 학습값 (S30a, prefs.js)
+// GET·POST /reviews, POST /reviews/reset  편집 리뷰 (S38a, reviews.js)
 //   → 그 자리에서 원문을 받아 제목·사진(원 주소)·본문 문단만 JSON 으로 돌려준다.
 //   → 아무것도 저장·캐시하지 않는다 (응답에 no-store, Cloudflare 캐시도 끔, 로그에 본문 안 남김).
 //
@@ -16,6 +17,7 @@ import { extract } from "./extract.js";
 import { translate, validate } from "./translate.js";
 import { dispatchDaily } from "./morning.js";
 import { handlePrefs } from "./prefs.js";
+import { handleReviews } from "./reviews.js";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36";
 const MAX_REDIRECTS = 5;
@@ -108,13 +110,16 @@ export default {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
     const path = new URL(req.url).pathname;
     const isPrefs = path === "/prefs" && (req.method === "GET" || req.method === "POST");
-    if (!(req.method === "GET" && path === "/") && !(req.method === "POST" && path === "/translate") && !isPrefs) {
-      return json({ ok: false, reason: "GET / · POST /translate · GET·POST /prefs 만" }, 405, h);
+    const isReviews = (path === "/reviews" && (req.method === "GET" || req.method === "POST")) || (path === "/reviews/reset" && req.method === "POST");
+    if (!(req.method === "GET" && path === "/") && !(req.method === "POST" && path === "/translate") && !isPrefs && !isReviews) {
+      return json({ ok: false, reason: "GET / · POST /translate · GET·POST /prefs · GET·POST /reviews 만" }, 405, h);
     }
     if (!sameKey(req.headers.get("X-Reader-Key") || "", env.READER_KEY || "")) return json({ ok: false, reason: "키 없음" }, 401, h);
 
     // 관심 학습값 (S30a) — KV 한 칸
     if (isPrefs) return handlePrefs(req, env, (body, status) => json(body, status, h));
+    // 편집 리뷰 (S38a) — 호별 KV 칸, 60일
+    if (isReviews) return handleReviews(req, env, (body, status) => json(body, status, h), path, new URL(req.url));
 
     if (path === "/translate") {
       // 한국어 번역 (S17b) — Workers AI, 저장 안 함
