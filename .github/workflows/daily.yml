@@ -30,6 +30,10 @@ on:
         description: "지면만 다시 그리기 (수집·편집·AI 호출 없이, force 와 함께)"
         type: boolean
         default: false
+      reset_budget:
+        description: "이 호의 AI 호출 수를 0으로 (거절된 호출로 상한이 찼을 때 다시 만들기, force 와 함께)"
+        type: boolean
+        default: false
 
 concurrency:
   group: newspaper-data
@@ -109,6 +113,7 @@ jobs:
           EDITION_DATE: ${{ inputs.date }}
           SKIP_IF_PUBLISHED: ${{ (github.event_name == 'schedule' || !inputs.force) && '1' || '0' }}
           RENDER_ONLY: ${{ inputs.render_only && '1' || '0' }}
+          RESET_BUDGET: ${{ inputs.reset_budget && '1' || '0' }}
         run: bash scripts/daily.sh
       - name: 누적분 저장
         if: always() && steps.rawguard.outputs.save == 'true'

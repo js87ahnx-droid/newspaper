@@ -53,6 +53,13 @@ class Budget:
         self._save()
         return True
 
+    def refund(self) -> None:
+        """일을 하지 않고 거절된 호출(인증·권한 오류 등)은 되돌린다 — 11/3 호: 조직이 구독 사용을 막아 모든 호출이 거절됐는데
+        그것만으로 하루 상한(62)을 채워, 다시 켠 뒤에도 그 호를 다시 만들 수 없었다."""
+        if self.used > 0:
+            self.data[self.day] = self.used - 1
+            self._save()
+
     def record(self, model: str, envelope: dict) -> None:
         """CLI 응답 봉투의 사용량을 호 단위로 쌓는다 (S23c "50회·100회가 얼마인지"). total_cost_usd 는 API 요금으로 환산한 값 —
         구독 토큰(CLAUDE_CODE_OAUTH_TOKEN)이면 실제 청구가 아니라 구독 사용 한도에서 빠진다."""
@@ -114,6 +121,7 @@ def call(prompt: str, cfg: Llm, budget: Budget, runner=None, model: str | None =
     except subprocess.TimeoutExpired:
         return None, f"시간 초과 {timeout}초"
     except Exception as e:  # 인증 실패·CLI 오류 등 — 무토큰으로 계속
+        budget.refund()
         return None, f"호출 실패: {str(e)[:200]}"
     try:
         envelope = json.loads(out)
@@ -121,6 +129,7 @@ def call(prompt: str, cfg: Llm, budget: Budget, runner=None, model: str | None =
             budget.record(model or cfg.model, envelope)
         text = envelope.get("result", "") if isinstance(envelope, dict) else out
         if isinstance(envelope, dict) and envelope.get("is_error"):
+            budget.refund()
             return None, f"CLI 오류: {text[:200]}"
         # 첫 번째 완전한 JSON 객체만 (뒤에 설명·두 번째 객체가 붙어도 — S19 평가: "Extra data" 로 같은 사건 묶기 실패)
         start = text.find("{")

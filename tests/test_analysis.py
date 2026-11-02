@@ -172,3 +172,38 @@ def test_call_records_usage_per_edition(tmp_path):
     assert b.used == 2 and Budget(tmp_path / "u.json", date(2026, 10, 20), 10).spent["usd"] == 0
     call("p", cfg(), b, runner=lambda _: json.dumps({**env, "modelUsage": {"claude-haiku-5-5": {}}}))
     assert b.spent["by_model"]["claude-haiku-5-5"]["calls"] == 1   # 봉투가 실제 모델을 알려 주면 그 이름으로
+
+
+def test_refused_calls_do_not_use_budget(tmp_path):
+    """2026-11-03: 조직이 구독 사용을 막아 모든 호출이 거절됐는데 그것만으로 하루 상한을 채웠다 → 거절은 세지 않는다."""
+    import json as _json
+
+    from pipeline.llm import call
+    from pipeline.settings import Llm
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=3, timeout_sec=10)
+    b = Budget(tmp_path / "u.json", date(2026, 11, 3), 3)
+    refused = lambda p: _json.dumps({"is_error": True, "result": "Your organization has disabled Claude subscription access"})  # noqa: E731
+
+    def broken(p):
+        raise RuntimeError("401")
+    for run in (refused, broken) * 3:
+        assert call("x", cfg, b, runner=run)[0] is None
+    assert b.used == 0
+    ok = lambda p: _json.dumps({"result": '{"a": 1}'})  # noqa: E731
+    assert [call("x", cfg, b, runner=ok)[1] for _ in range(4)] == ["ok", "ok", "ok", "하루 호출 상한 3회 도달"]
+
+
+def test_reset_budget_in_daily_script(tmp_path):
+    """RESET_BUDGET=1 이면 그 호의 호출 수만 지운다 (다른 날·요금 기록은 그대로)."""
+    import re
+    import subprocess
+    import sys
+    from pathlib import Path
+    sh = (Path(__file__).resolve().parent.parent / "scripts" / "daily.sh").read_text(encoding="utf-8")
+    snippet = re.search(r'\$PY -c "(import json, sys;.*?)" "\$DATE"', sh).group(1)
+    raw = tmp_path / "data" / "raw"
+    raw.mkdir(parents=True)
+    (raw / "llm-usage.json").write_text('{"2026-11-03": 62, "2026-11-02": 40, "cost": {"2026-11-03": {"usd": 1}}}', encoding="utf-8")
+    subprocess.run([sys.executable, "-c", snippet, "2026-11-03"], cwd=tmp_path, check=True, capture_output=True)
+    import json as _json
+    assert _json.loads((raw / "llm-usage.json").read_text(encoding="utf-8")) == {"2026-11-02": 40, "cost": {"2026-11-03": {"usd": 1}}}

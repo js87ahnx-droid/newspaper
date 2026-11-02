@@ -4,6 +4,7 @@
 #   EDITION_DATE=YYYY-MM-DD   호 날짜 (기본: 가장 최근에 끝난 시간창)
 #   SKIP_IF_PUBLISHED=1       이미 발행된 호면 아무것도 안 하고 끝냄 (예비 실행용)
 #   RENDER_ONLY=1             지면 HTML 만 다시 (수집·편집·LLM 없이 data/raw/<호>.edition.json 으로)
+#   RESET_BUDGET=1            이 호의 AI 호출 수를 0으로 되돌리고 시작 (거절된 호출로 상한이 찼을 때, 2026-11-03)
 #   CLAUDE_CODE_OAUTH_TOKEN   있으면 LLM 훅 사용 (구독), 없으면 무토큰
 # 암호화(NEWS_PASSWORD)가 없거나 실패하면 중간에 멈춘다 — 평문 지면이 커밋·공개되지 않게.
 set -euo pipefail
@@ -42,6 +43,9 @@ if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || ! command -v claude >/dev/null 2>&1;
 fi
 
 $PY -m pipeline validate
+if [ "${RESET_BUDGET:-0}" = "1" ]; then
+  $PY -c "import json, sys; from pathlib import Path; p = Path('data/raw/llm-usage.json'); d = json.loads(p.read_text(encoding='utf-8')) if p.exists() else {}; print('AI 호출 수 되돌림:', sys.argv[1], d.pop(sys.argv[1], 0)); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(json.dumps(d, ensure_ascii=False), encoding='utf-8')" "$DATE"
+fi
 if [ "${RENDER_ONLY:-0}" = "1" ]; then
   # 지면만 다시 그리기 (S26e): 수집·편집·AI 호출 없이, 이 호를 만들 때 남긴 data/raw/<호>.edition.json 으로 HTML 만 새로
   if [ ! -f "data/raw/$DATE.edition.json" ]; then

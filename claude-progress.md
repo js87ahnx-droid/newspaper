@@ -689,3 +689,8 @@
 - 지면: 두 덩어리(강조점·말하지 않은 것·핵심 표현 / 다른 나라 매체·오늘 의제·근거 기사), 최대 2쪽. 실을 게 없으면 쪽 없음
 - 실데이터(10/22) 평가로 후보 규칙 고침, 실제 AI 1회 결과 양호. 테스트 test_china 15건·test_china_browser 5건
 - 남은 확인: push 뒤 첫 발행에서 LLM 상태 줄의 china (실음 / 안 실음: 이유 / 후보 없음)
+
+### 11/3 호 AI 빈칸 (2026-11-03, 사용자 "번역·요약·분석·해설이 제대로 안 됨")
+- 원인: 조직이 Claude Code 구독 사용을 막아 모든 호출이 "disabled Claude subscription access" 로 거절 → 사용자가 다시 켬
+- 거절된 호출까지 하루 상한(62)에 세어져 다시 만들 수 없었음 → 거절·오류 호출은 되돌림(Budget.refund), daily 에 reset_budget 입력(그 호 호출 수 0으로). test_analysis 2건
+- 11/3 호 전체 다시 발행 (force + reset_budget)
