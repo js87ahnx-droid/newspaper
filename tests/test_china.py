@@ -1,5 +1,7 @@
 """S37 중국은 지금 — 후보 고르기(watch)와 AI 분석 검사(analyze)."""
-from pipeline.china import AGENDA_MAX, analyze, watch
+import pytest
+
+from pipeline.china import AGENDA_MAX, CHINA_RE, analyze, watch
 from pipeline.collect import Article
 
 
@@ -24,24 +26,28 @@ PD_TOP = art("p1", "인민일보", "CN", "坚定不移推进科技自立自强",
 PD_POL = art("p2", "인민일보", "CN", "外交部回应美方出口管制", ("politics",), lean="관영")
 PD_OP = art("p3", "인민일보", "CN", "霸凌行径注定失败（人民论坛）", ("opinion",), opinion="column", lean="관영")
 WSJ = art("w", "Wall Street Journal", "US", "China chip stockpile", lean="보수")
-FT = art("f", "Financial Times", "GB", "ASML sales hit")
-NK = art("n", "Nikkei Asia", "JP", "Japan suppliers")
-YH = art("y", "연합뉴스", "KR", "반도체 예외")
+FT = art("f", "Financial Times", "GB", "ASML China sales hit")
+NK = art("n", "Nikkei Asia", "JP", "Japan suppliers brace for China curbs")
+YH = art("y", "연합뉴스", "KR", "중국 공장 반도체 예외")
+FT2 = art("f2", "Financial Times", "GB", "Oil prices rise")      # 중국과 무관한 기사
+NK2 = art("n2", "Nikkei Asia", "JP", "Yen slips")
+YH2 = art("y2", "연합뉴스", "KR", "코스피 상승")
 XH = art("x", "신화통신", "CN", "商务部", lean="관영")
 
 
 def setup():
-    arts = [PD_TOP, PD_POL, PD_OP, WSJ, FT, NK, YH, XH,
+    arts = [PD_TOP, PD_POL, PD_OP, WSJ, FT, NK, YH, XH, FT2, NK2, YH2,
             art("pic", "인민일보", "CN", "图片报道", lean="관영"), art("ed", "인민일보", "CN", "责编：张三 邮箱：a@b.c", lean="관영")]
     articles = {a.id: a for a in arts}
     edition = {"sections": {
         "international": [item("chip", [PD_TOP, WSJ, FT, NK], 0.9),            # 후보: top + 3개국
                           item("one", [PD_TOP, WSJ], 0.95),                     # 중국 밖 1개국뿐
                           item("res", [PD_OP, WSJ, FT], 0.99, reserve=True)],   # 예비 기사
-        "politics": [item("pol", [PD_POL, WSJ, YH], 0.8),                       # 인민일보가 politics 피드뿐 → 아님
-                     item("polh", [PD_POL, WSJ, YH], 0.7, headline_by={"인민일보": [1, "homepage"]}),   # 헤드라인이면 후보
+        "politics": [item("pol", [PD_POL, WSJ, YH], 0.8),                       # 중국 매체 + 2개국
+                     item("polh", [PD_POL, WSJ, YH], 0.7),                      # 점수 4등 → 3개 상한에 걸림
                      item("op", [PD_OP, FT, YH, XH], 0.85),                     # 논평 + 2개국 (신화는 중국이라 안 셈)
-                     item("none", [WSJ, FT, NK], 0.99)],                       # 인민일보 없음
+                     item("none", [FT2, NK2, YH2], 0.99),                     # 중국과 무관
+                     item("cnone", [XH, FT2, NK2, YH2], 0.98)],               # 중국 매체가 끼었을 뿐 제목은 무관 → 아님
     }}
     return edition, articles
 
@@ -49,11 +55,32 @@ def setup():
 def test_watch_candidates_and_agenda():
     edition, articles = setup()
     w = watch(edition, articles)
-    assert [c["issue_id"] for c in w["candidates"]] == ["chip", "op", "polh"]
+    assert [c["issue_id"] for c in w["candidates"]] == ["chip", "op", "pol"]
     assert w["candidates"][1]["foreign_countries"] == ["GB", "KR"]
     titles = [a["title"] for a in w["agenda"]]
     assert set(titles) == {PD_TOP.title, PD_POL.title, PD_OP.title}       # 사진 설명·편집자 표시 빼고 인민일보만
     assert all(set(a) == {"id", "title", "sections", "opinion", "url"} for a in w["agenda"])   # 리드·본문 없음
+
+
+def test_watch_needs_paper_or_opinion_today():
+    edition, articles = setup()
+    for k in ("p1", "p3"):          # 그날 종이 인민일보·논평을 못 받음
+        articles.pop(k)
+    assert watch(edition, articles)["candidates"] == []
+
+
+def test_china_related_by_title_only():
+    edition, articles = setup()
+    tw = item("tw", [art("t", "Reuters", "US", "Stocks fall"), FT2, NK2], 0.97)
+    tw["title"] = "대만 증시 급락"                  # 이슈 제목만 중국 관련이어도
+    edition["sections"]["international"].append(tw)
+    assert watch(edition, articles)["candidates"][0]["issue_id"] == "tw"
+
+
+@pytest.mark.parametrize("title,want", [("\"中 티베트서 규모 7.0 강진\"", True), ("美中 갈등", True), ("한중 정상회담", True),
+                                        ("시진핑 연설", True), ("中東情勢が緊迫", False), ("大会を中止", False), ("오늘 중에 발표", False)])
+def test_china_regex(title, want):
+    assert bool(CHINA_RE.search(title)) == want
 
 
 def test_watch_caps():
@@ -103,6 +130,7 @@ def test_analyze_rejects():
     assert run({**GOOD, "issue_id": "none"})[1] == "후보 밖 이슈"
     assert run({**GOOD, "compare": GOOD["compare"][2:]})[1] == "다른 나라 매체 비교가 2곳 미만"
     assert run({**GOOD, "lead": " "})[1] == "제목·요약 비어 있음"
+    assert run({**GOOD, "evidence": ["https://x.test/w"]})[1] == "인민일보 근거 없음"
     assert run(None)[:2] == (None, "시간 초과")
 
 
