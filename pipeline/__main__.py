@@ -333,6 +333,8 @@ def cmd_edit(args: argparse.Namespace) -> int:
         related_note += f" + AI {n} ({st})"
     out = edition_to_json(ed, args.date, articles, cstats)
     out["stats"]["history_previous"] = prev_date.isoformat() if prev_date else None
+    from .china import watch as china_watch   # 중국은 지금 (S37): 그날 인민일보 제목과 후보 이슈 — 분석은 enrich 가
+    out["china_watch"] = china_watch(out, articles)
     write_atomic(raw / f"{args.date}.edition.json", json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.write_history:
         placed_ids = {q.scored.issue.id for ps in ed.sections.values() for p in ps for q in [p, *p.related]}

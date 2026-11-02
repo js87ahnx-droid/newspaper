@@ -15,7 +15,8 @@ def row(a: Article) -> dict:
 
 
 def item(iid, arts, final, reserve=False, headline_by=None):
-    return {"issue_id": iid, "title": f"제목 {iid}", "articles": [row(a) for a in arts], "scores": {"final": final},
+    return {"issue_id": iid, "title": f"제목 {iid}", "lead": "리드", "topic": "international", "url": arts[0].url, "source": arts[0].source,
+            "lean": arts[0].lean, "articles": [row(a) for a in arts], "scores": {"final": final},
             "reserve": reserve, "headline_by": headline_by or {}}
 
 
@@ -114,3 +115,32 @@ def test_no_candidates_no_call_and_cache():
     run(GOOD, cache=cache)
     out, st, calls = run({"show": False}, cache=cache)       # 같은 후보면 다시 묻지 않는다
     assert st == "실음" and calls == []
+
+
+def test_enrich_runs_china_and_llm_off_has_none(tmp_path):
+    """S37d: enrich 가 china_watch 로 분석해 edition["china"] 에 둔다. 응답이 안 실음이면 없음, 본문은 캐시에 안 남는다."""
+    import json
+    from datetime import date
+
+    from pipeline.llm import Budget, enrich
+    from pipeline.settings import Llm, load_interests
+
+    def build(answer):
+        edition, articles = setup()
+        edition.update({"compare": [], "stats": {}, "china_watch": watch(edition, articles)})
+        calls = []
+
+        def run(prompt):
+            calls.append(prompt)
+            return json.dumps({"result": json.dumps(answer if "중국은 지금" in prompt else {}, ensure_ascii=False)})
+        cfg = Llm(enabled=True, model="haiku", max_calls_per_day=50, timeout_sec=10, analysis_issues=0, econ_issues=0)
+        body = "본문 " * 100 + "비밀 문장"
+        out = enrich(edition, cfg, load_interests().foreign_display, tmp_path / f"llm-{len(answer)}.json",
+                     Budget(tmp_path / "u.json", date(2026, 11, 3), 50), runner=run, bodies={"https://x.test/w": body})
+        return out, calls
+    out, calls = build(GOOD)
+    assert out["china"]["issue_id"] == "chip" and out["stats"]["llm"]["status"]["china"] == "실음"
+    assert sum("중국은 지금" in c for c in calls) == 1 and any("비밀 문장" in c for c in calls)
+    assert "비밀 문장" not in (tmp_path / f"llm-{len(GOOD)}.json").read_text(encoding="utf-8")
+    out, _ = build({"show": False, "reason": "평범"})
+    assert "china" not in out and out["stats"]["llm"]["status"]["china"] == "안 실음: 평범"

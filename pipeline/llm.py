@@ -524,6 +524,17 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             status["econ"] = "캐시"
         write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")   # opus 결과는 비싸다 — 뒤에서 실패해도 남게
 
+    # 0-2. 중국은 지금 (S37): 인민일보로 읽는 중국의 시선 — 후보가 있을 때만 분석 모델 1회, AI 가 실을 만하다고 볼 때만
+    edition.pop("china", None)
+    if edition.get("china_watch"):
+        from .china import analyze as china_analyze
+
+        cn, status["china"] = china_analyze(
+            edition["china_watch"], items, bodies or {}, cache,
+            lambda p, system=None: guarded(p, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec, system=system or ""))
+        if cn:
+            edition["china"] = cn
+
     # 1. 입장 비교 프레임 요약
     if "compare" not in cache and edition.get("compare"):
         rows = [
