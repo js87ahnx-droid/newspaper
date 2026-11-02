@@ -1,7 +1,7 @@
 /* 피드백·관심 학습 — 기기에서 바로 지면에 반영하고, 서버 편집에는 주마다 합친다 (지시서 6-2, 6-3 / S30).
  *
  * - 관심 학습값 = 분야마다 절대 가중치(0~3)와 챙겨 볼 키워드. localStorage "news.prefs2" 에 {v, weights, keywords, updated}
- *   · "더 보기 / 덜 보기" 는 그 분야 값을 ±0.25 (같은 단추를 다시 누르면 취소, S24b)
+ *   · 기사마다 있던 "더 보기 / 덜 보기" 단추는 뺐다 (2026-11-03 사용자 요청) — 설정 창 슬라이더·설문으로만
  *   · 설정 창(⚙)에서 분야마다 가로 슬라이더, 키워드 넣기·빼기, "기본값으로"(interests.yaml 원래 값)
  *   · 예전 기기 값(news.prefs 의 delta)은 처음 열 때 절대값으로 옮긴다
  * - 서버 반영(S30a·b): 바꾸면 1.5초 모아 중계 서버(Worker)의 /prefs 로 보낸다. 열 때 서버 값이 더 새것이면(다른 기기) 그것을 쓴다.
@@ -153,7 +153,6 @@
     while (flow.firstChild) flow.removeChild(flow.firstChild);
     while (fresh.firstChild) flow.appendChild(fresh.firstChild);
     apply();
-    markPressed();
     if (window.NEWS) window.NEWS.rebuild();
   }
 
@@ -214,18 +213,6 @@
     save(p); refreshSettings();
   }
 
-  // ---------- 누른 표시 ----------
-  function pressedMap() {
-    var m = store.get("news.pressed", {}) || {};
-    return m[E.edition] || {};
-  }
-  function markPressed() {
-    var m = pressedMap();
-    Object.keys(m).forEach(function (issue) {
-      flow.querySelectorAll('[data-issue="' + issue + '"] [data-fb="' + m[issue] + '"]').forEach(function (b) { b.classList.add("pressed"); });
-    });
-  }
-
   function toast(msg) {
     var t = document.getElementById("toast");
     if (!t) { t = document.createElement("div"); t.id = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
@@ -234,33 +221,6 @@
     clearTimeout(toast.timer);
     toast.timer = setTimeout(function () { t.className = ""; }, 2200);
   }
-
-  document.addEventListener("news:feedback", function (e) {
-    var d = e.detail, p = prefs();
-    var label = (E.topics || {})[d.topic] || d.topic;
-    var all = store.get("news.pressed", {}) || {};
-    var keep = {};
-    Object.keys(all).sort().slice(-2).forEach(function (k) { keep[k] = all[k]; });  // 최근 두 호만 보관
-    keep[E.edition] = keep[E.edition] || {};
-    var before = keep[E.edition][d.issue];
-    var undo = before === d.kind;   // 같은 단추를 다시 누르면 취소 (S24b)
-    // 앞서 누른 것은 되돌리고(반대 단추로 바꿀 때도), 취소가 아니면 새로 누른 것을 더한다
-    var change = (before === "more" ? -STEP : before === "less" ? STEP : 0) + (undo ? 0 : (d.kind === "more" ? STEP : -STEP));
-    p.weights[d.topic] = clampW(weightOf(p, d.topic) + change);
-    save(p);
-    var log = store.get("news.fbLog", []) || [];
-    log.push({ t: new Date().toISOString(), edition: E.edition, issue: d.issue, topic: d.topic, kind: undo ? "undo" : d.kind });
-    store.set("news.fbLog", log.slice(-500));
-    if (undo) delete keep[E.edition][d.issue]; else keep[E.edition][d.issue] = d.kind;
-    store.set("news.pressed", keep);
-    // 같은 기사의 단추 표시: 누른 것만 (취소면 모두 지움)
-    document.querySelectorAll('[data-issue="' + d.issue + '"] [data-fb]').forEach(function (b) {
-      b.classList.toggle("pressed", !undo && b.getAttribute("data-fb") === d.kind);
-    });
-    refreshSettings();
-    toast(undo ? label + " 분야 " + (d.kind === "more" ? "더" : "덜") + " 보기를 취소했습니다"
-      : label + " 분야를 " + (d.kind === "more" ? "더" : "덜") + " 보도록 기억했습니다 · 다음에 열 때 반영");
-  });
 
   // ---------- 주간 설문 (설정 창에서만) ----------
   function isoWeek(d) {
@@ -444,7 +404,6 @@
   var p0 = prefs();
   if (p0.updated && !store.get("news.prefs2", null)) save(p0);   // 예전 delta 를 옮긴 것: 저장하고 서버로도
   apply();
-  markPressed();
   window.NEWS_FB = { apply: apply, reapply: reapply, prefs: prefs, weightOf: weightOf, isoWeek: isoWeek, showSurvey: showSurvey, showSettings: showSettings,
                      knows: knows, addKnown: addKnown, removeKnown: removeKnown };
   pull();

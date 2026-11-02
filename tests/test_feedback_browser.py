@@ -1,8 +1,8 @@
 """S9 피드백·S30c 관심 학습 — 실제 브라우저로.
 
 기준 (project-plan.md S9·S30c):
-- 피드백을 누른 뒤 다시 열면 배치가 바뀐다
-- 한 분야에 "덜 보기"를 수십 번 눌러도 다양성 슬롯·1면 톱이 유지된다
+- 학습값이 바뀐 뒤 다시 열면 배치가 바뀐다 (기사마다 있던 더/덜 보기 단추는 2026-11-03 뺌)
+- 한 분야를 극단으로 낮춰도 다양성 슬롯·1면 톱이 유지된다
 - 설문은 저절로 뜨지 않는다 (설정 창의 "설문" 단추로만)
 - 설정 창 슬라이더·키워드가 저장되고 지면이 다시 배치되며 중계 서버(/prefs)로 간다. 서버 값이 더 새것이면 받아 쓴다
 - 예전 기기 값(delta)은 절대값으로 옮긴다, "기본값으로"
@@ -43,13 +43,8 @@ def reload_(page):
     page.wait_for_function("window.NEWS && NEWS.state().pages > 0", timeout=20000)
 
 
-def press(page, issue, kind, times=1):
-    for _ in range(times):
-        page.evaluate(f"""() => document.querySelector('#book [data-issue="{issue}"] [data-fb="{kind}"]').click()""")
-
-
 def learn(page, topic, delta):
-    """학습된 가중치를 바로 넣는다 (서버 값 + delta, 0~3) — 같은 단추를 다시 누르면 취소라(S24b) 여러 번 눌러 쌓을 수 없다."""
+    """학습된 가중치를 바로 넣는다 (서버 값 + delta, 0~3)."""
     page.evaluate(f"""() => {{ const p = NEWS_FB.prefs(), b = EDITION.topicWeights["{topic}"] || 0;
                              p.weights["{topic}"] = Math.max(0, Math.min(3, b + {delta}));
                              p.updated = new Date().toISOString(); localStorage.setItem('news.prefs2', JSON.stringify(p)); }}""")
@@ -93,11 +88,9 @@ def test_feedback_changes_layout_on_next_open(browser, tmp_path):
     page.wait_for_timeout(800)
     no_survey(page)
     before = page.evaluate(FLOW)
-    # 정치·안보 섹션의 보장 안 된 기사에 "덜 보기" → 정치 가중치 1.0 → 0 까지 학습된 것으로
+    # 정치 가중치 1.0 → 0 으로 학습된 것으로 → 정치·안보 섹션의 보장 안 된 기사가 단신으로
     target = page.evaluate("""() => [...document.querySelectorAll('#flow section[data-section="politics"] > article.item')]
                                      .find(a => a.dataset.guaranteed === '0').dataset.issue""")
-    press(page, target, "less")
-    assert page.evaluate(FLOW) == before          # 누르는 즉시 지면이 튀지 않는다
     learn(page, "politics", -1.0)
     reload_(page)
     after = page.evaluate(FLOW)
@@ -153,30 +146,15 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     assert total == CFG.editing.total_articles     # 기사가 지면에서 사라지지 않음 (단신으로만 내려감)
 
 
-def test_press_again_cancels(browser, tmp_path):
-    """S24b: 같은 단추를 다시 누르면 취소, 반대 단추로 바꾸면 앞 것을 되돌리고 새 것만."""
+def test_no_more_less_buttons(browser, tmp_path):
+    """2026-11-03 사용자 요청: 기사마다 있던 "더 보기 / 덜 보기" 단추를 뺐다 (관심은 설정 창에서만)."""
     index = make_site(tmp_path)
     ctx, page, errs = open_(browser, index)
-    page.wait_for_timeout(800)
-    no_survey(page)
-    issue, topic = page.evaluate("(() => { const a = document.querySelector('#book article.item[data-topic]'); return [a.dataset.issue, a.dataset.topic]; })()")
-    on = f"""() => [...document.querySelectorAll('#book [data-issue="{issue}"] [data-fb].pressed')].map(b => b.dataset.fb)"""
-    delta = f"Math.round((NEWS_FB.weightOf(NEWS_FB.prefs(), '{topic}') - EDITION.topicWeights['{topic}']) * 100) / 100"
-    press(page, issue, "more")
-    first = (page.evaluate(on), page.evaluate(delta))
-    press(page, issue, "more")
-    undone = (page.evaluate(on), page.evaluate(delta), page.evaluate("JSON.parse(localStorage.getItem('news.pressed'))[EDITION.edition]"))
-    press(page, issue, "more")
-    press(page, issue, "less")
-    switched = (page.evaluate(on), page.evaluate(delta))
-    reload_(page)
-    kept = page.evaluate(on)
+    n = page.evaluate("document.querySelectorAll('[data-fb], .fb').length")
+    words = page.evaluate("[...document.querySelectorAll('#book button')].filter(b => /^(더|덜) 보기$/.test(b.textContent.trim())).length")
     ctx.close()
     assert not errs, errs
-    assert set(first[0]) == {"more"} and first[1] == 0.25
-    assert undone[0] == [] and undone[1] == 0 and issue not in undone[2]
-    assert set(switched[0]) == {"less"} and switched[1] == -0.25
-    assert set(kept) == {"less"}                  # 다시 열어도 덜 보기만 표시
+    assert n == 0 and words == 0
 
 
 def test_no_survey_popup_but_button_still_works(browser, tmp_path):
@@ -281,8 +259,9 @@ def test_works_without_storage(browser, tmp_path):
     ctx, page, errs = open_(browser, index, storage_init=block)
     page.wait_for_timeout(800)
     no_survey(page)
-    issue = page.evaluate("document.querySelector('#book article.item').dataset.issue")
-    press(page, issue, "less")
+    topic = page.evaluate("document.querySelector('#book article.item[data-topic]').dataset.topic")
+    page.evaluate("NEWS_FB.showSettings()")
+    set_slider(page, topic, 0)                     # 저장은 못 해도 오류 없이
     pages = page.evaluate("NEWS.state().pages")
     ctx.close()
     assert pages > 0 and not errs, errs

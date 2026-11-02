@@ -130,12 +130,7 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .bar i { display: block; height: 100%; background: var(--muted); }
 .why p { margin: 2px 0; }
 
-.fb { display: flex; gap: 6px; margin-top: 6px; }
-.fb button { font-size: calc(11px * var(--fs)); padding: 3px 9px; min-height: 28px; border: 1px solid var(--rule); background: var(--card); color: var(--muted); border-radius: 12px; }
-.fb button.pressed { background: var(--ink); color: var(--paper); }
 .item.brief .meta { display: inline-flex; }
-.item.brief .fb { display: inline-flex; margin: 0 0 0 8px; vertical-align: middle; }
-.item.brief .fb button { min-height: 22px; padding: 1px 7px; }
 
 .disclaimer { font-size: 12px; color: var(--muted); border-left: 3px solid var(--rule); padding-left: 8px; margin: 0 0 8px; }
 .cmp h4 { font-size: 12px; margin: 8px 0 4px; color: var(--muted); }
@@ -228,7 +223,7 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .item.brief .brief-line { -webkit-line-clamp: 1; font-size: 0.9em; color: var(--ink); margin: 0 0 2px; }
 .page.endpage .page-inner { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--muted); }
 .end-note { margin: 4px 0; }
-.item.brief .fb, .item.brief .why { display: none; }
+.item.brief .why { display: none; }
 .page-inner.brief-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; align-content: start; }
 .page-inner.brief-grid > .sec-title { grid-column: 1 / -1; }
 .page-inner.brief-grid > .item.brief { min-width: 0; }
@@ -250,9 +245,6 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .reader-body .item { border: 0; }
 .reader-body .item .lead { -webkit-line-clamp: unset; display: block; }
 .reader-body .item .photo img { max-height: 340px; }
-.meta .fb { display: inline-flex; gap: 4px; margin: 0; }
-.meta .fb button { min-height: 22px; padding: 1px 7px; }
-.reader-body .meta .fb { display: inline-flex; }
 /* S17 원문 재배열 보기 */
 .readview { font-size: 1.02em; line-height: 1.75; }
 .readview .rv-back { font: inherit; font-size: 0.85em; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
@@ -297,6 +289,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
   #toolbar .tb-title, #toolbar .tb-page { display: none; }
   #toolbar .tb-link { font-size: 12px; margin-right: 2px; white-space: nowrap; }
   #toolbar button { min-width: 32px; padding: 0 4px; font-size: 13px; }
+  /* 지난 호 지면은 "오늘 호" 링크가 하나 더 (2026-11-03) — 단추를 조금 좁혀 한 줄에 */
+  #toolbar.has-today { gap: 2px; }
+  #toolbar.has-today button { min-width: 29px; padding: 0 3px; }
 }
 /* 한 면 보기는 스크롤이 쪽 넘김을 대신한다 → 좁은 화면에서는 이전·다음 버튼 숨김 (아주 좁으면 확대·축소도 두 손가락으로) */
 @media (max-width: 520px) { body.view-scroll #toolbar button[data-act="prev"], body.view-scroll #toolbar button[data-act="next"] { display: none; } }
@@ -396,8 +391,8 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .item.tight .flow { display: none; }
 .reader-body .flow li { white-space: normal; }
 /* 누르는 영역 넓히기 (S29d 점검: 원문 19px·피드백 22px·관점 원문 17px — 44px 권장). 보이는 크기는 그대로, 투명한 ::after 로 위아래를 넓힌다 */
-.meta .orig-btn, .meta .link-btn, .an-views .view-orig, .fb button, .reader-close, .readview .rv-back, #toolbar button { position: relative; }
-.meta .orig-btn::after, .meta .link-btn::after, .fb button::after, .reader-close::after, .readview .rv-back::after { content: ""; position: absolute; inset: -10px -3px; }
+.meta .orig-btn, .meta .link-btn, .an-views .view-orig, .reader-close, .readview .rv-back, #toolbar button { position: relative; }
+.meta .orig-btn::after, .meta .link-btn::after, .reader-close::after, .readview .rv-back::after { content: ""; position: absolute; inset: -10px -3px; }
 .an-views .view-orig::after { content: ""; position: absolute; inset: -12px -4px; }
 #toolbar button::after { content: ""; position: absolute; inset: -5px 0; }
 #survey .actions, #settings .actions { position: sticky; bottom: -14px; background: var(--card); padding-bottom: 4px; }

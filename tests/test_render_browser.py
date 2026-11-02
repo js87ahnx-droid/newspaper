@@ -184,7 +184,8 @@ def test_item_elements_and_no_body(tmp_path):
     full = [i for i in p.items if not i["brief"]]
     assert full
     for i in full:  # 제목·리드·매체·성향 배지·점수·원문 링크·피드백 2종 (연속 일수는 2일째 이상일 때 — 아래 테스트)
-        assert {"hl", "lead", "src", "badge", "why", "orig-btn", "link-btn", "_link", "_fb_more", "_fb_less"} <= i["classes"], i["classes"]
+        assert {"hl", "lead", "src", "badge", "why", "orig-btn", "link-btn", "_link"} <= i["classes"], i["classes"]
+        assert not {"_fb_more", "_fb_less"} & i["classes"]   # 더/덜 보기 단추는 뺐다 (2026-11-03)
     assert not p.too_long, f"리드 상한({LEAD_MAX}자)을 넘는 글: {p.too_long[0][:40]}"
     # 이미지는 원 주소로만 (복사본·data URI 없음)
     assert "data:image" not in html
