@@ -38,6 +38,10 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 #toolbar .tb-page { color: var(--muted); font-size: 12px; margin-left: 8px; }
 #toolbar .tb-spacer { flex: 1; }
 #toolbar .tb-link { color: var(--ink); font-size: 13px; margin-right: 6px; text-decoration: none; border-bottom: 1px solid var(--rule); }
+/* 목록·오늘 (2026-11-03 시안 A): 글자 링크 대신 다른 단추와 같은 상자. 오늘 호에서는 "오늘"이 눌린 모양 */
+#toolbar .tb-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 34px; padding: 0 8px; margin: 0;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--card); color: var(--ink); font-size: 14px; white-space: nowrap; }
+#toolbar .tb-btn.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 #toolbar button {
   min-width: 44px; height: 34px; border: 1px solid var(--rule); background: var(--card); color: var(--ink);
   border-radius: 6px; font-size: 15px;
@@ -92,6 +96,13 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .item .lead[data-note]::after, .frame[data-note]::after { content: " · " attr(data-note); color: var(--muted); font-size: 0.8em; }
 /* 한 쪽에 안 들어가는 기사 줄이기: 부가 정보(쟁점·점수)부터 → 배경·관점 → 요약은 끝까지 남긴다 (요약이 기사의 핵심) */
 .item.compact .lead { -webkit-line-clamp: 3; }
+/* 빈자리 줄이기 (2026-11-03): 덜 찬 쪽은 리드를 단계마다 더 보여 준다 (app.js roomier) */
+.page-inner .item.roomy .lead { -webkit-line-clamp: 7; }
+.page-inner .item.roomier .lead { -webkit-line-clamp: 10; }
+.page-inner .item.roomiest .lead { -webkit-line-clamp: 16; }
+.page-inner .item.fz.roomy .fz-lead .lead { -webkit-line-clamp: 9; }
+.page-inner .item.fz.roomier .fz-lead .lead { -webkit-line-clamp: 12; }
+.page-inner .item.fz.roomiest .fz-lead .lead { -webkit-line-clamp: 18; }
 .item.compact .an-pts { display: none; }
 /* 본문 기반 이슈 정리 (S14) — 배경·쟁점·매체별 관점. 배치는 S15 에서 다시 짠다 */
 .item .brief-line { -webkit-line-clamp: 1; font-size: 0.92em; }
@@ -288,10 +299,11 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
   #toolbar { gap: 3px; padding-left: max(6px, env(safe-area-inset-left)); padding-right: max(6px, env(safe-area-inset-right)); }
   #toolbar .tb-title, #toolbar .tb-page { display: none; }
   #toolbar .tb-link { font-size: 12px; margin-right: 2px; white-space: nowrap; }
+  #toolbar .tb-btn { min-width: 29px; padding: 0 3px; margin: 0; font-size: 13px; }
   #toolbar button { min-width: 32px; padding: 0 4px; font-size: 13px; }
-  /* 지난 호 지면은 "오늘 호" 링크가 하나 더 (2026-11-03) — 단추를 조금 좁혀 한 줄에 */
-  #toolbar.has-today { gap: 2px; }
-  #toolbar.has-today button { min-width: 29px; padding: 0 3px; }
+  /* 목록·오늘 단추가 둘 (2026-11-03) — 단추를 조금 좁혀 한 줄에 */
+  #toolbar { gap: 2px; }
+  #toolbar button { min-width: 29px; padding: 0 3px; }
 }
 /* 한 면 보기는 스크롤이 쪽 넘김을 대신한다 → 좁은 화면에서는 이전·다음 버튼 숨김 (아주 좁으면 확대·축소도 두 손가락으로) */
 @media (max-width: 520px) { body.view-scroll #toolbar button[data-act="prev"], body.view-scroll #toolbar button[data-act="next"] { display: none; } }
