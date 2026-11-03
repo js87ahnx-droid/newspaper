@@ -132,6 +132,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs data/history .staticrypt.json
           if [ -f data/interests-learned.json ]; then git add data/interests-learned.json; fi   # 주간 관심 학습값 (S30b)
+          if [ -f data/editing-learned.json ]; then git add data/editing-learned.json; fi   # 주간 편집 자동 조정 (S38c)
+          if [ -d data/reviews ]; then git add data/reviews; fi   # 편집 리뷰 — 메모 없이 (S38c)
           if [ -d data/econ ]; then git add data/econ; fi   # 경제 해설 보관 (S33a) — 지난 호 지면은 14일 뒤 지워도 해설은 남긴다
           if git diff --cached --quiet; then echo "바뀐 것 없음"; exit 0; fi
           git commit -m "발행: $(ls -1 docs/archive | grep -E '^[0-9]{4}-' | sort | tail -1)"

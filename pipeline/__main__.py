@@ -555,6 +555,10 @@ def cmd_learn(args: argparse.Namespace) -> int:
 
     r = learn(Path(args.root), date.fromisoformat(args.date), reader.config())
     print("관심 학습: " + r["status"] + "".join(f", {k} {v}" for k, v in r.items() if k != "status"))
+    # 편집 리뷰 (S38c): 매일 받아 메모 없이 data/reviews 에, 주마다 편집 가중치 자동 조정
+    from . import review
+    r = review.learn(Path(args.root), date.fromisoformat(args.date), reader.config(), load_config(Path(args.root), learned=False))
+    print("편집 리뷰: " + r["status"] + "".join(f", {k} {v}" for k, v in r.items() if k != "status"))
     return 0
 
 

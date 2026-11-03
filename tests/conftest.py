@@ -21,3 +21,19 @@ def _no_real_learned(tmp_path, monkeypatch):
     orig = learned.learned_path
     monkeypatch.setattr(learned, "learned_path",
                         lambda root: tmp_path / "_learned.json" if Path(root).resolve() == Path(ROOT).resolve() else orig(root))
+
+
+def _no_real_editing_learned():
+    """편집 자동 조정값(data/editing-learned.json, S38c — 발행이 커밋)도 저장소 루트에서는 없는 것으로.
+    테스트 모듈이 불러올 때 load_config() 를 부르므로(fixture 보다 먼저) 여기서 바로 바꾼다. 임시 폴더 루트(test_review)는 그대로."""
+    from pathlib import Path
+
+    from pipeline import review
+    from pipeline.settings import ROOT
+
+    orig = review.learned_path
+    review.learned_path = lambda root: (Path(ROOT) / "data" / "_no-editing-learned.json"
+                                        if Path(root).resolve() == Path(ROOT).resolve() else orig(root))
+
+
+_no_real_editing_learned()

@@ -381,8 +381,13 @@ def _load(path: Path, model: type[BaseModel]):
         raise SettingsError("\n".join(lines)) from None
 
 
-def load_config(root: Path = ROOT) -> Config:
-    return _load(root / "config.yaml", Config)
+def load_config(root: Path = ROOT, learned: bool = True) -> Config:
+    """config.yaml + 주간 편집 자동 조정값(data/editing-learned.json, S38c). learned=False 면 config.yaml 만."""
+    cfg = _load(root / "config.yaml", Config)
+    if not learned:
+        return cfg
+    from .review import apply   # review 가 이 모듈을 불러오므로 여기서
+    return apply(cfg, root)
 
 
 def load_sources(root: Path = ROOT) -> Sources:
