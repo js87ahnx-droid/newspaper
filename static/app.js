@@ -82,6 +82,76 @@
     node.style.maxHeight = Math.max(80, room) + "px";
   }
 
+  // 빈자리 줄이기 (2026-11-03 사용자 "1면·4면·7면·11면처럼 공백이 많이 남지 않게 — 기사를 하나 더 넣거나 글을 더 길게"):
+  // 덜 찬 쪽은 ① 면의 마지막 쪽이면 같은 면 분야의 단신·예비 기사를 일반 기사 꼴로 더 싣고 ② 그래도 남으면 위 기사부터 리드를 더 보여 준다(roomy 단계)
+  var FILL_MIN = 0.88;   // 이만큼 차면 그대로
+  var ROOMY = ["roomy", "roomier", "roomiest"];
+  var SECTION_TOPICS = { politics: ["politics"], economy: ["economy", "industry", "semis_ai"], international: ["international"], society: ["society", "science"] };
+  function usedRatio(inner) {
+    var r = inner.getBoundingClientRect(), bottom = r.top;
+    Array.prototype.forEach.call(inner.children, function (c) { var b = c.getBoundingClientRect(); if (b.height > 0) bottom = Math.max(bottom, b.bottom); });
+    return r.height ? (bottom - r.top) / r.height : 1;
+  }
+  function roomier(inner) {
+    if (usedRatio(inner) >= FILL_MIN) return;
+    var items = Array.prototype.filter.call(inner.querySelectorAll(".item"), function (it) {
+      return !/(^|\s)(brief|compact|tight|clip)(\s|$)/.test(it.className) && it.querySelector(".lead");
+    });
+    for (var lv = 0; lv < ROOMY.length; lv++) {
+      for (var i = 0; i < items.length; i++) {
+        if (usedRatio(inner) >= FILL_MIN) return;
+        var it = items[i];
+        if (lv > 0 && !it.classList.contains(ROOMY[lv - 1])) continue;   // 앞 단계가 넘쳤던 기사는 더 늘리지 않는다
+        it.classList.add(ROOMY[lv]);
+        if (overflows(inner)) it.classList.remove(ROOMY[lv]);
+      }
+    }
+  }
+  // 면의 끝 쪽에 기사가 조금만 남았으면(절반 못 참) 앞 쪽 기사를 줄여(compact → tight, 아래 기사부터) 그 쪽으로 합치고 끝 쪽을 없앤다.
+  // 비게 된 쪽은 단신·더 읽을 기사가 쓴다. 다 안 들어가는데 끝 쪽이 40% 도 못 차고 기사가 둘 이하면 그 기사들을 단신으로 내리고
+  // 쪽을 없앤다 (면의 점수 낮은 기사 — 쪽 수를 줄이는 쪽이 빈 쪽보다 낫다). 단신으로 내린 기사의 data-issue 를 돌려준다
+  function mergeOrphan(pages) {
+    if (pages.length < 2) return [];
+    var li = pages[pages.length - 1].firstChild, pi = pages[pages.length - 2].firstChild;
+    var ratio = usedRatio(li);
+    if (ratio >= 0.5) return [];
+    var moving = Array.prototype.filter.call(li.children, function (c) { return c.classList.contains("item"); });
+    if (!moving.length || moving.length !== li.children.length - (li.querySelector(".sec-title") ? 1 : 0)) return [];
+    var added = [];
+    moving.forEach(function (n) { pi.appendChild(n); });
+    var items = Array.prototype.slice.call(pi.querySelectorAll(":scope > .item")).reverse();
+    ["compact", "tight"].forEach(function (cls) {
+      items.forEach(function (it) {
+        if (!overflows(pi) || it.classList.contains(cls) || it.classList.contains("fz")) return;
+        it.classList.add(cls); added.push([it, cls]);
+      });
+    });
+    if (overflows(pi)) {
+      added.forEach(function (x) { x[0].classList.remove(x[1]); });
+      moving.forEach(function (n) { li.appendChild(n); });
+      if (ratio >= 0.4 || moving.length > 2) return [];
+      pages.pop().remove();
+      return moving.map(function (n) { return n.getAttribute("data-issue"); });
+    }
+    pages.pop().remove();
+    return [];
+  }
+  function pullReserves(id, pages, reserves, pulled) {
+    var topics = SECTION_TOPICS[id];
+    if (!topics || !pages.length) return;
+    var inner = pages[pages.length - 1].firstChild;
+    for (var k = 0; k < reserves.length && usedRatio(inner) < FILL_MIN; k++) {
+      var el = reserves[k];
+      if (pulled.indexOf(el) >= 0 || topics.indexOf(el.getAttribute("data-topic")) < 0) continue;
+      var node = el.cloneNode(true);
+      node.setAttribute("data-pulled", "1");
+      inner.appendChild(node);
+      if (overflows(inner)) node.classList.add("compact");
+      if (overflows(inner)) { inner.removeChild(node); continue; }
+      pulled.push(el);
+    }
+  }
+
   // 단신 꼴: 제목 + 한 줄 + 시각·매체 (정해진 쪽에 다 못 들어간 기사, 단신·예비 기사)
   function asBrief(el) {
     if (el.classList.contains("brief")) return el.cloneNode(true);
@@ -172,6 +242,16 @@
         return;
       }
       inner.removeChild(node);
+      // 빈자리가 크면(쪽의 30% 넘게 남음) 이 기사를 줄여서라도 이 쪽에 싣는다 (2026-11-03 "공백이 많이 남지 않게")
+      if (!grouped && usedRatio(inner) < 0.7) {
+        inner.appendChild(node);
+        node.classList.add("compact");
+        if (!overflows(inner)) { placedOnPage++; return; }
+        node.classList.add("tight");
+        if (!overflows(inner)) { placedOnPage++; return; }
+        node.classList.remove("compact", "tight");
+        inner.removeChild(node);
+      }
       // 새 쪽으로 넘기기 전에, 뒤 기사 중 남은 자리에 들어가는 것으로 빈자리를 채운다 (한 쪽 아래가 비지 않게)
       for (var j = k + 1; j < nodes.length && !grouped; j++) {
         if (used[j]) continue;
@@ -209,6 +289,11 @@
     var byId = {}, order = [];
     sections.forEach(function (s) { var id = s.getAttribute("data-section"); byId[id] = s; order.push(id); });
     var built = {}, demoted = [], spare = 0, firstId = order[0];
+    // 덜 찬 면 끝 쪽으로 올릴 후보: 같은 분야의 단신(원래 단신 먼저) → 예비 기사. 올린 것은 단신·더 읽을 기사에서 뺀다
+    var bkids = byId.briefs ? Array.prototype.slice.call(byId.briefs.children) : [];
+    var reserveEls = bkids.filter(function (el) { return el.getAttribute("data-reserve") !== "1"; })
+      .concat(bkids.filter(function (el) { return el.getAttribute("data-reserve") === "1"; }));
+    var pulled = [];
     var kids = function (sec) {
       return Array.prototype.filter.call(sec.children, function (el) { return el.getAttribute("data-reserve") !== "1"; })
         .map(function (el) { return { el: el, node: el.cloneNode(true) }; });
@@ -219,6 +304,14 @@
       var b = budgets[id] || 0;
       var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
       built[id] = res.pages;
+      if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) {
+        mergeOrphan(res.pages).forEach(function (iss) {
+          var el = byId[id].querySelector(':scope > [data-issue="' + iss + '"]');
+          if (el) res.rest.push({ el: el });
+        });
+      }
+      if (!res.rest.length) pullReserves(id, res.pages, reserveEls, pulled);   // 넘쳐 내린 기사가 없는 면만 (끝 쪽이 남은 것)
+      if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) res.pages.forEach(function (p) { roomier(p.firstChild); });
       if (id !== "opinion" && id !== "guide" && id !== "analysis") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       if (b) spare += Math.max(0, b - res.pages.length);
@@ -231,8 +324,8 @@
       return s;
     })();
     demoted.sort(function (x, y) { return (+y.getAttribute("data-final2") || +y.getAttribute("data-final")) - (+x.getAttribute("data-final2") || +x.getAttribute("data-final")); });
-    var pool = demoted.concat(Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") !== "1"; }),
-      Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") === "1"; }));   // 한 줄 단신은 제목만으로도 된다 (S17e)
+    var pool = demoted.concat(Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") !== "1" && pulled.indexOf(el) < 0; }),
+      Array.prototype.filter.call(briefSec.children, function (el) { return el.getAttribute("data-reserve") === "1" && pulled.indexOf(el) < 0; }));   // 한 줄 단신은 제목만으로도 된다 (S17e)
     // 오늘 없는 면(예: 논평·사설이 없는 날)에 배정된 쪽도 단신이 쓴다
     Object.keys(budgets).forEach(function (k) { if (k !== "briefs" && k !== "compare" && !byId[k]) spare += budgets[k] || 0; });
     // 남는 쪽은 논평면이 못 실은 사설·칼럼이 먼저 쓴다 (예비 기사보다 우선 — S17e: 사설이 많은 날 사설이 빠지고 예비 단신이 실리던 것)
@@ -265,6 +358,7 @@
           reservesEl.map(function (el) { return { el: el, node: el.cloneNode(true) }; }), null);
         var placedMore = reservesEl.filter(function (el) { return !mres.rest.some(function (r) { return r.el === el; }); });
         built.more = mres.pages;
+        mres.pages.forEach(function (p) { roomier(p.firstChild); });
         spare -= mres.pages.length;
         pool = pool.filter(function (el) { return placedMore.indexOf(el) < 0; });
         if (order.indexOf("more") < 0) order.splice(order.indexOf("briefs") >= 0 ? order.indexOf("briefs") : (order.indexOf("opinion") >= 0 ? order.indexOf("opinion") : order.length), 0, "more");
