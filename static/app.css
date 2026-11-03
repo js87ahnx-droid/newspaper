@@ -103,6 +103,12 @@ body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
 .page-inner .item.fz.roomy .fz-lead .lead { -webkit-line-clamp: 9; }
 .page-inner .item.fz.roomier .fz-lead .lead { -webkit-line-clamp: 12; }
 .page-inner .item.fz.roomiest .fz-lead .lead { -webkit-line-clamp: 18; }
+/* 글을 다 보여 줘도 남으면 사진을 키운다 (사진이 있는 기사만) */
+.page-inner .item.roomier .photo img { max-height: 300px; }
+.page-inner .item.roomiest .photo img { max-height: 400px; }
+.page-inner .item.fz.roomy .fz-lead .photo img { max-height: 440px; }
+.page-inner .item.fz.roomier .fz-lead .photo img { max-height: 520px; }
+.page-inner .item.fz.roomiest .fz-lead .photo img { max-height: 620px; }
 .item.compact .an-pts { display: none; }
 /* 본문 기반 이슈 정리 (S14) — 배경·쟁점·매체별 관점. 배치는 S15 에서 다시 짠다 */
 .item .brief-line { -webkit-line-clamp: 1; font-size: 0.92em; }
@@ -206,8 +212,30 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 #settings .kwadd button { height: 36px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; }
 #settings .sync { margin: 10px 0 2px; font-size: 12px; color: var(--muted); line-height: 1.5; border-left: 3px solid var(--rule); padding-left: 8px; }
 #settings .sync b { color: var(--ink); font-weight: 600; }
+/* 설정 창 탭 (S38b): 관심도 | 편집 리뷰 | 편집 기준 */
+#settings { width: min(440px, calc(100vw - 32px)); }
+#settings .shead { align-items: center; }
+#settings .sclose { border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; min-height: 30px; padding: 0 10px; }
+#settings .stabs { display: flex; gap: 2px; border-bottom: 2px solid var(--ink); margin: 2px 0 10px; }
+#settings .stabs button { flex: 1; min-height: 34px; border: 0; border-radius: 6px 6px 0 0; background: none; color: var(--muted); font: inherit; font-size: 14px; padding: 0 6px; }
+#settings .stabs button.on { background: var(--ink); color: var(--paper); }
+#settings .stop { margin: 0 0 4px; text-align: right; }
+#settings .rvstat { margin: 0 0 8px; font-size: 12px; color: var(--muted); line-height: 1.5; border-left: 3px solid var(--rule); padding-left: 8px; }
+#settings .rvsec { border-bottom: 1px solid var(--rule); }
+#settings .rvsec summary { font-weight: 700; font-size: 14px; padding: 8px 0; cursor: pointer; }
+#settings .rvsec summary small { font-weight: 400; color: var(--muted); font-size: 12px; }
+#settings .rv { padding: 8px 0; border-top: 1px solid var(--rule); }
+#settings .rvt { font-size: 14px; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+#settings .rvt .rk { display: inline-block; min-width: 20px; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+#settings .rvs, #settings .rvw { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.45; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+#settings .rvs b { color: var(--ink); font-weight: 600; }
+#settings .rvb { display: flex; gap: 4px; margin-top: 6px; }
+#settings .rvb button { flex: 1; min-height: 32px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; padding: 0 4px; }
+#settings .rvb button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+#settings .rvmemo { width: 100%; margin-top: 6px; height: 34px; padding: 0 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; }
 @media (max-width: 560px) {
   #settings { left: 0; right: 0; top: auto; bottom: 0; width: 100%; max-width: none; }
+  #settings .rvmemo { font-size: 16px; }
   #settings .card { border-radius: 14px 14px 0 0; max-height: 78vh; max-height: 78dvh; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
 }
 

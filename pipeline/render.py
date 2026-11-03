@@ -216,6 +216,25 @@ def front_single(sections: list[dict], country: dict[str, str]) -> None:
     sections.append({"id": "detail", "title": "", "items": [{**lead, "detail": True}]})
 
 
+REVIEW_SCORES = ("attention", "importance", "headline", "continuity", "interest", "final")
+
+
+def review_list(sections: list[dict]) -> list[dict]:
+    """설정 창 "편집 리뷰" 탭 (S38b): 뉴스 면에 실은 기사(예비 제외)를 면 순서·면 안 순번으로.
+    점수·분야를 같이 넘겨 기기가 리뷰와 함께 보낸다 — 발행 쪽 edition.json 이 없어져도 학습할 수 있게 (worker/src/reviews.js)."""
+    out = []
+    for s in sections:
+        if s["id"] not in NEWS_SECTIONS:
+            continue
+        rows = ([s["lead"]] if s.get("lead") else []) + [r for r in s["items"] if not r.get("reserve")]
+        for n, r in enumerate(rows, 1):
+            sc = r.get("scores") or {}
+            out.append({"id": r["issue_id"], "t": r["view"]["title"][:90], "s": s["id"], "tp": r.get("topic") or "", "r": n,
+                        "sc": {k: min(1.0, max(0.0, round(float(sc.get(k) or 0), 4))) for k in REVIEW_SCORES},
+                        "why": ", ".join(r.get("reasons", []))[:120]})
+    return out
+
+
 def _opinion_view(op: dict | None) -> dict | None:
     """논평·사설면: 사설·칼럼 목록은 6편·5편씩 끊어 쪽 나누기가 자연스럽게 되도록 (칼럼 한 덩어리가 통째로 다음 쪽으로 넘어가 앞 쪽이 비던 것 — S18)."""
     if not op or not (op["compare"] or op["editorials"] or op["columns"]):
@@ -386,6 +405,7 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
     ctx["base"] = base
     client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
     client["base"] = base
+    client["review"] = review_list(ctx["sections"])
     # 원문 재배열 보기 (S17): 중계 서버가 설정됐을 때만. 키는 이 HTML(암호화됨) 안에만 들어간다
     rc = reader_mod.config()
     client["reader"] = rc

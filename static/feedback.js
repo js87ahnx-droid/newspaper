@@ -335,8 +335,15 @@
     var box = document.createElement("div");
     box.id = "settings";
     box.setAttribute("role", "dialog");
-    box.setAttribute("aria-label", "관심 학습");
-    box.innerHTML = '<div class="card"><div class="shead"><h2>관심 학습</h2><span class="hint">많이 볼수록 오른쪽</span></div>' +
+    box.setAttribute("aria-label", "설정");
+    // 탭 셋 (S38b): 관심도 = 예전 관심 학습 창 그대로, 편집 리뷰·편집 기준은 editing.js 가 그린다
+    var tab = store.get("news.settingsTab", "prefs");
+    if (!window.NEWS_EDIT || ["prefs", "review", "rules"].indexOf(tab) < 0) tab = "prefs";
+    box.innerHTML = '<div class="card"><div class="shead"><h2>설정</h2><button type="button" class="sclose" data-x="close" aria-label="닫기">닫기</button></div>' +
+      '<div class="stabs" role="tablist">' + [["prefs", "관심도"], ["review", "편집 리뷰"], ["rules", "편집 기준"]].map(function (t) {
+        return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (t[0] === tab) + '"' + (t[0] === tab ? ' class="on"' : "") + ">" + t[1] + "</button>";
+      }).join("") + "</div>" +
+      '<div class="spane" data-pane="prefs"' + (tab === "prefs" ? "" : " hidden") + '><p class="hint stop">많이 볼수록 오른쪽</p>' +
       '<div class="wscale" aria-hidden="true"><i></i><span><em style="left:0">안 봄</em><em style="left:' + (100 / MAX_W).toFixed(1) +
       '%">보통</em><em style="left:100%">많이</em></span><i></i></div>' +
       '<div class="wrows">' + rowsHTML(p) + "</div>" +
@@ -345,8 +352,21 @@
       '<h3 class="kwh">아는 경제 개념 <small class="hint">해설에서 기초 설명을 뺍니다</small></h3><div class="kwchips knownchips">' + knownHTML(p) + "</div>" +
       '<p class="sync">' + syncText() + "</p>" +
       '<div class="actions"><button type="button" data-x="reset">기본값으로</button><button type="button" data-x="survey">설문</button>' +
-      '<button type="button" data-x="close">닫기</button></div></div>';
+      '<button type="button" data-x="close">닫기</button></div></div>' +
+      '<div class="spane" data-pane="review"' + (tab === "review" ? "" : " hidden") + "></div>" +
+      '<div class="spane" data-pane="rules"' + (tab === "rules" ? "" : " hidden") + "></div></div>";
     document.body.appendChild(box);
+    function showTab(t) {
+      box.querySelectorAll("[data-tab]").forEach(function (b) {
+        var on = b.getAttribute("data-tab") === t;
+        b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on));
+      });
+      box.querySelectorAll("[data-pane]").forEach(function (pn) { pn.hidden = pn.getAttribute("data-pane") !== t; });
+      var pane = box.querySelector('[data-pane="' + t + '"]');
+      if (t !== "prefs" && window.NEWS_EDIT) window.NEWS_EDIT.render(pane, t);
+      store.set("news.settingsTab", t);
+    }
+    if (tab !== "prefs") showTab(tab);
     box.addEventListener("input", function (ev) {
       var t = ev.target.getAttribute && ev.target.getAttribute("data-topic");
       if (!t) return;
@@ -375,6 +395,8 @@
     });
     box.addEventListener("click", function (ev) {
       var t = ev.target, x = t.getAttribute && t.getAttribute("data-x"), kw = t.getAttribute && t.getAttribute("data-kw");
+      var tb = t.getAttribute && t.getAttribute("data-tab");
+      if (tb) { showTab(tb); return; }
       var kn = t.getAttribute && t.getAttribute("data-known");
       if (kn !== null && kn !== undefined) { var kp = prefs(); removeKnown([kp.known[+kn]]); return; }
       if (kw !== null && kw !== undefined) {
