@@ -146,13 +146,81 @@
     });
   }
 
+  // ---- 편집 기준 (S38d) ----
+  var W_LABEL = { attention: "주목도", importance: "중요도", headline: "머리기사", interest: "관심도", continuity: "연속성" };
+  function pct(v) { return Math.round((+v || 0) * 100) + "%"; }
+  function val(cur, base) {
+    var c = (+cur).toFixed(2);
+    return Math.abs(cur - base) >= 0.001 ? "<b>" + c + "</b> <small>(기본 " + (+base).toFixed(2) + ")</small>" : c;
+  }
+  function changeText(c) { return esc(c.label) + " " + (+c.from).toFixed(2) + " → " + (+c.to).toFixed(2); }
+  function weekDay(ed) { var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(ed || ""); return m ? (+m[1]) + "/" + (+m[2]) + " 호" : ""; }
+  function rulesHTML() {
+    var g = E.editing;
+    if (!g) return '<p class="hint">이 호에는 편집 기준 정보가 없습니다.</p>';
+    var w = g.w, bw = g.bw, topics = E.topics || {}, r = g.rules, L = g.learned;
+    var formula = ["attention", "importance", "headline", "interest", "continuity"].map(function (k) {
+      return W_LABEL[k] + " " + val(w[k], bw[k]);
+    }).join(" + ");
+    var ti = Object.keys(g.ti).sort(function (a, b) { return g.ti[b] - g.ti[a]; }).map(function (t) {
+      return '<span class="rlt">' + esc(topics[t] || t) + " " + val(g.ti[t], g.bti[t]) + "</span>";
+    }).join("");
+    var intl = (r.topicMax || {}).international;
+    var auto;
+    if (L && L.week) {
+      auto = "<p>마지막 조정 <b>" + esc(L.week) + "</b> (" + weekDay(L.edition) + ", 리뷰 " + (L.reviews || 0) + "건)</p>" +
+        ((L.changes || []).length ? "<ul>" + L.changes.map(function (c) { return "<li>" + changeText(c) + "</li>"; }).join("") + "</ul>"
+          : "<p>바뀐 값 없음</p>");
+    } else {
+      auto = "<p>" + (L && L.reset_at ? "되돌린 뒤 아직 자동 조정 없음." : "아직 자동 조정 없음.") +
+        " 4주 안에 방향 있는 리뷰(위로·아래로·빼기)가 10건 모이면 그 주에 처음 조정합니다.</p>";
+    }
+    var hist = L && (L.history || []).length > 1 ? '<details class="rlhist"><summary>지난 조정</summary><ul>' +
+      L.history.slice(0, -1).reverse().map(function (h) {
+        return "<li>" + esc(h.week) + " · 리뷰 " + h.reviews + "건 · " + ((h.changes || []).map(changeText).join(", ") || "바뀐 값 없음") + "</li>";
+      }).join("") + "</ul></details>" : "";
+    return '<div class="rules">' +
+      "<h3>종합 점수</h3><p>" + formula + " <small>(가중치 합으로 나눔)</small></p>" +
+      "<table><tr><th>주목도</th><td>다룬 매체 영향력 합 + 다룬 나라 수 + 매체 메인 피드 노출</td></tr>" +
+      "<tr><th>중요도</th><td>분야 기본값 + 핵심어(전쟁·금리·관세 등, 하나에 " + (+g.kwBonus).toFixed(2) + ", 3개까지) + 다룬 나라 수</td></tr>" +
+      "<tr><th>머리기사</th><td>종이신문 1면·홈페이지 맨 위에 올린 매체 (1위 1.0, 2위 0.5, 3위 0.35)</td></tr>" +
+      "<tr><th>관심도</th><td>관심도 탭의 분야 값 + 챙겨 볼 키워드</td></tr>" +
+      "<tr><th>연속성</th><td>전날부터 이어진 날수</td></tr></table>" +
+      '<h3>분야 중요도</h3><p class="rlts">' + ti + "</p>" +
+      "<h3>고르는 순서</h3><ol>" +
+      "<li>1면 톱: 관심도 빼고, 머리기사 비중 " + val(w.front_headline, bw.front_headline) + "로 셈</li>" +
+      "<li>다양성: 지면의 " + pct(r.diversity) + "는 관심도와 상관없이 주목도 상위</li>" +
+      "<li>연속: " + r.contDays + "일 이상 이어진 이슈를 지면의 " + pct(r.contMax) + "까지</li>" +
+      "<li>나머지는 종합 점수 순. 관심도 덕분에 들어온 기사는 " + pct(r.interestCap) + "까지" +
+      (intl ? ", 국제는 " + pct(intl) + "까지" : "") + "</li></ol>" +
+      "<h3>자동 조정</h3>" + auto + hist +
+      '<p class="hint">편집 리뷰를 주마다 모아 주목도·중요도·머리기사·연속성 가중치(기본값의 0.7~1.3배)와 분야 중요도(0.6~1.4배)를 조금씩 바꿉니다. 관심도 가중치는 바꾸지 않습니다.</p>' +
+      (RD ? '<div class="actions"><button type="button" data-rl="reset">자동 조정 되돌리기</button></div><p class="rlstat" aria-live="polite"></p>' : "") +
+      "</div>";
+  }
+  function bindRules(pane) {
+    if (pane.getAttribute("data-bound")) return;
+    pane.setAttribute("data-bound", "1");
+    pane.addEventListener("click", function (ev) {
+      var b = ev.target.closest && ev.target.closest('[data-rl="reset"]');
+      if (!b || !RD) return;
+      if (!window.confirm("자동 조정값을 지우고 config.yaml 값으로 돌릴까요? 다음 발행부터 적용되고, 지금까지의 리뷰는 더 쓰지 않습니다.")) return;
+      var st = pane.querySelector(".rlstat");
+      b.disabled = true;
+      fetch(RD.url + "/reviews/reset", { method: "POST", headers: { "X-Reader-Key": RD.key }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+        .then(function (r) { if (!r.ok) throw new Error("http " + r.status); st.textContent = "되돌리기를 요청했습니다 — 다음 발행 때 기본값으로 돌아갑니다."; })
+        .catch(function () { b.disabled = false; st.textContent = "서버로 보내지 못했습니다. 잠시 뒤 다시 눌러 주세요."; });
+    });
+  }
+
   function render(pane, kind) {
     if (kind === "review") {
       pane.innerHTML = reviewHTML();
       bindReview(pane);
       pull(function () { if (pane.isConnected) { pane.innerHTML = reviewHTML(); } });
     } else if (kind === "rules") {
-      pane.innerHTML = window.NEWS_RULES ? window.NEWS_RULES() : "";
+      pane.innerHTML = rulesHTML();
+      bindRules(pane);
     }
   }
 

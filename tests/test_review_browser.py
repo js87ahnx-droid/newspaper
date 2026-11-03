@@ -8,6 +8,7 @@
 """
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -141,4 +142,73 @@ def test_no_overflow(browser, tmp_path, w, h):
               return b.width && (b.right > r.right + 1 || b.left < r.left - 1); }).map(e => e.className || e.tagName);
             return {bad, page: document.documentElement.scrollWidth - innerWidth, inView: r.left >= -1 && r.right <= innerWidth + 1}; }""")
         assert over["bad"] == [] and over["inView"], (w, t, over)
+    ctx.close()
+
+
+def open_rules(page):
+    page.click('[data-act="settings"]')
+    page.click('#settings [data-tab="rules"]')
+    page.wait_for_selector('#settings [data-pane="rules"] .rules')
+
+
+def test_rules_tab_defaults(browser, tmp_path):
+    """학습값이 없으면 config.yaml 값 그대로, "아직 자동 조정 없음". 서버가 없으면 되돌리기 단추 없음."""
+    from pipeline.settings import load_config
+    cfg = load_config(learned=False)
+    index = make_site(tmp_path)
+    ctx, page, errs = open_(browser, index)
+    open_rules(page)
+    text = page.inner_text('#settings [data-pane="rules"]')
+    assert "아직 자동 조정 없음" in text
+    assert f"주목도 {cfg.weights.attention:.2f}" in text and f"중요도 {cfg.weights.importance:.2f}" in text
+    assert f"머리기사 비중 {cfg.weights.front_headline:.2f}" in text
+    assert f"{round(cfg.editing.diversity_ratio * 100)}%" in text and f"{cfg.editing.continuity_min_days}일 이상" in text
+    assert "기본" not in page.inner_text('#settings .rules p')                      # 바뀐 값 표시 없음
+    assert page.query_selector('#settings [data-rl="reset"]') is None
+    assert not EMOJI.search(text)
+    assert errs == []
+    ctx.close()
+
+
+def test_rules_tab_learned_and_reset(browser, tmp_path, monkeypatch):
+    """학습값이 있으면 그 값(기본값 함께)과 조정 내역, 되돌리기는 확인 뒤 /reviews/reset 으로."""
+    from pipeline import review
+    from pipeline.settings import ROOT, load_config
+    cfg = load_config(learned=False)
+    lp = tmp_path / "editing-learned.json"
+    lp.write_text(json.dumps({"v": 1, "week": "2026-W45", "edition": "2026-11-03", "reviews": 14,
+                              "weights": {"importance": 0.345}, "topic_importance": {"politics": 1.1},
+                              "changes": [{"kind": "weight", "key": "importance", "label": "중요도", "from": 0.3, "to": 0.345}],
+                              "history": [{"week": "2026-W44", "reviews": 11, "changes": []},
+                                          {"week": "2026-W45", "reviews": 14, "changes": []}]}), encoding="utf-8")
+    orig = review.learned_path
+    monkeypatch.setattr(review, "learned_path", lambda root: lp if Path(root).resolve() == Path(ROOT).resolve() else orig(root))
+    index = reader_site(tmp_path, monkeypatch)
+    server = {}
+    posted = []
+
+    def route(r):
+        if r.request.url.endswith("/reviews/reset"):
+            posted.append(r.request.method)
+            return r.fulfill(status=200, headers={"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"},
+                             body='{"ok":true,"reset":"x"}')
+        return fake_reviews(server)(r)
+    ctx, page, errs = open_(browser, index, route=route)
+    assert page.evaluate("EDITION.editing.w.importance") == 0.345                   # 지면 편집도 학습값으로
+    open_rules(page)
+    text = page.inner_text('#settings [data-pane="rules"]')
+    assert "중요도 0.34 (기본 " + f"{cfg.weights.importance:.2f})" in text
+    assert "정치·안보 1.10 (기본 1.00)" in text
+    assert "2026-W45" in text and "리뷰 14건" in text and "중요도 0.30 → 0.34" in text
+    page.on("dialog", lambda d: d.dismiss())
+    page.click('#settings [data-rl="reset"]')
+    assert posted == []                                                             # 취소하면 안 보냄
+    ctx.close()
+    ctx, page, errs = open_(browser, index, route=route)
+    page.on("dialog", lambda d: d.accept())
+    open_rules(page)
+    page.click('#settings [data-rl="reset"]')
+    page.wait_for_function("document.querySelector('#settings .rlstat').textContent.includes('요청했습니다')", timeout=5000)
+    assert posted == ["POST"]
+    assert errs == []
     ctx.close()

@@ -233,6 +233,19 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 #settings .rvb button { flex: 1; min-height: 32px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; padding: 0 4px; }
 #settings .rvb button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 #settings .rvmemo { width: 100%; margin-top: 6px; height: 34px; padding: 0 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--ink); font: inherit; font-size: 13px; }
+/* 편집 기준 탭 (S38d) */
+#settings .rules { font-size: 13px; line-height: 1.6; }
+#settings .rules h3 { font-size: 14px; margin: 12px 0 4px; }
+#settings .rules h3:first-child { margin-top: 0; }
+#settings .rules p, #settings .rules ol, #settings .rules ul { margin: 0 0 6px; }
+#settings .rules ol, #settings .rules ul { padding-left: 20px; }
+#settings .rules small { color: var(--muted); font-size: 11px; }
+#settings .rules table { width: 100%; border-collapse: collapse; margin: 4px 0 6px; }
+#settings .rules th, #settings .rules td { border-bottom: 1px solid var(--rule); padding: 4px 4px; text-align: left; vertical-align: top; font-size: 12px; }
+#settings .rules th { white-space: nowrap; font-weight: 600; width: 1%; }
+#settings .rlts { display: flex; flex-wrap: wrap; gap: 2px 12px; font-variant-numeric: tabular-nums; }
+#settings .rlhist summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+#settings .rlstat { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
 @media (max-width: 560px) {
   #settings { left: 0; right: 0; top: auto; bottom: 0; width: 100%; max-width: none; }
   #settings .rvmemo { font-size: 16px; }

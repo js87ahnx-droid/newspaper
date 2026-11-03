@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
-from .fsutil import write_atomic
+from .fsutil import read_json, write_atomic
 from .interest import build_interest_table
 from . import reader as reader_mod
 from .settings import ROOT, TOPICS, Config, Interests, Sources
@@ -235,6 +235,29 @@ def review_list(sections: list[dict]) -> list[dict]:
     return out
 
 
+def editing_view(cfg: Config) -> dict:
+    """설정 창 "편집 기준" 탭 (S38d): 지금 쓰는 값(자동 조정을 덮은 cfg)과 config.yaml 값, 고르는 규칙, 자동 조정 내역."""
+    from . import review
+    from .settings import load_config
+
+    base = load_config(learned=False)
+    keys = ("attention", "importance", "headline", "interest", "continuity", "front_headline")
+    ed = cfg.editing
+    got = read_json(review.learned_path(ROOT), None)
+    learned = None
+    if isinstance(got, dict):
+        learned = {k: got.get(k) for k in ("week", "edition", "reviews", "changes", "reset_at")}
+        learned["history"] = (got.get("history") or [])[-4:]
+    return {
+        "w": {k: getattr(cfg.weights, k) for k in keys}, "bw": {k: getattr(base.weights, k) for k in keys},
+        "ti": dict(cfg.importance.topic_weights), "bti": dict(base.importance.topic_weights),
+        "kwBonus": cfg.importance.keyword_bonus,
+        "rules": {"diversity": ed.diversity_ratio, "contDays": ed.continuity_min_days, "contMax": ed.continuity_max_ratio,
+                  "interestCap": ed.interest_cap, "topicMax": dict(ed.topic_max_ratio)},
+        "learned": learned,
+    }
+
+
 def _opinion_view(op: dict | None) -> dict | None:
     """논평·사설면: 사설·칼럼 목록은 6편·5편씩 끊어 쪽 나누기가 자연스럽게 되도록 (칼럼 한 덩어리가 통째로 다음 쪽으로 넘어가 앞 쪽이 비던 것 — S18)."""
     if not op or not (op["compare"] or op["editorials"] or op["columns"]):
@@ -406,6 +429,7 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
     client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
     client["base"] = base
     client["review"] = review_list(ctx["sections"])
+    client["editing"] = editing_view(cfg)
     # 원문 재배열 보기 (S17): 중계 서버가 설정됐을 때만. 키는 이 HTML(암호화됨) 안에만 들어간다
     rc = reader_mod.config()
     client["reader"] = rc
