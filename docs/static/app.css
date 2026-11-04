@@ -490,7 +490,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .cn-view { border: 0; line-height: 1.6; }
 .cn-view > * + * { margin-top: 12px; }
 .cn-kicker { margin: 0; color: var(--cn); font-weight: 700; font-size: calc(12px * var(--fs)); letter-spacing: .04em; }
-.cn-title { font-size: calc(1.35em * var(--fs)); line-height: 1.35; margin: 4px 0 0; text-wrap: balance; }
+.cn-title { font-size: calc(1.35em * var(--fs)); line-height: 1.35; margin: 4px 0 0; text-wrap: balance; word-break: keep-all; overflow-wrap: anywhere; }
 .cn-lead { margin: 0; }
 .cn-box { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; min-width: 0; }
 .cn-box h3 { font-size: calc(13px * var(--fs)); margin: 0 0 6px; }
