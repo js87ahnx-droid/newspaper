@@ -50,6 +50,28 @@ def test_china_page_fits(browser, tmp_path, w, h):  # noqa: F811
     assert m["ev"] == 2                           # 근거 기사 → 원문 창
 
 
+def test_china_title_breaks_between_words(browser, tmp_path):  # noqa: F811
+    """제목이 "'환율 안정'으 / 로"처럼 낱말 중간에서 끊기지 않는다 (2026-11-04)."""
+    def mutate(out):
+        add_china(out)
+        out["china"]["title"] = "위안화 상승 억제가 아니라 '환율 안정'으로 — 인민일보의 외화지준율 인상 프레임"
+    index = make_site(tmp_path, mutate=mutate)
+    ctx, page, errors = open_page(browser, index, 390, 844)
+    m = page.evaluate("""() => {
+        const el = document.querySelector('#book .cn-title'), t = el.firstChild, s = t.data, r = document.createRange();
+        const top = i => { r.setStart(t, i); r.setEnd(t, i + 1); return r.getBoundingClientRect().top; };
+        const bad = []; let lines = 1, last = top(0);
+        for (let i = 1; i < s.length; i++) {
+          if (s[i] === ' ') continue;
+          const y = top(i);
+          if (y > last + 2) { lines++; if (s[i - 1] !== ' ') bad.push(s.slice(i - 3, i + 2)); last = y; }
+        }
+        return {bad, lines}; }""")
+    ctx.close()
+    assert not errors, errors
+    assert m["lines"] >= 2 and m["bad"] == [], m
+
+
 def test_no_china_no_page(browser, tmp_path):  # noqa: F811
     index = make_site(tmp_path)
     ctx, page, errors = open_page(browser, index, 1180, 820)
