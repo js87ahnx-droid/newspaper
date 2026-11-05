@@ -17,6 +17,7 @@ from pipeline.prepare import current_edition
 from pipeline.settings import load_config
 print(current_edition(datetime.now(timezone.utc), load_config()))')}"
 echo "호 날짜: $DATE"
+echo "date=$DATE" >> "${GITHUB_OUTPUT:-/dev/null}"   # 커밋·푸시 단계로 (S39)
 
 if [ "${SKIP_IF_PUBLISHED:-0}" = "1" ] && [ -f "docs/archive/$DATE/index.html" ]; then
   echo "이미 발행된 호입니다 — 건너뜀"

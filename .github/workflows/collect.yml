@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # 기다린 뒤에도 최신 main — 아래 "오늘 호가 있나" 확인이 옛 커밋을 보지 않게 (S39)
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -73,7 +75,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          DATE=$(TZ=Asia/Seoul date -d '5 hours 30 minutes ago' +%F)   # config.yaml window.end 05:30
+          DATE=$(TZ=Asia/Seoul date -d '330 minutes ago' +%F)   # config.yaml window.end 05:30 (330분 — daily.yml check 와 같은 까닭, S39)
           HOUR=$(TZ=Asia/Seoul date +%H)
           if [ -f "docs/archive/$DATE/index.html" ]; then echo "$DATE 호 발행됨"; exit 0; fi
           if [ "$HOUR" -ge 12 ]; then echo "정오 지남 — 부르지 않음"; exit 0; fi

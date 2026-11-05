@@ -712,3 +712,9 @@
 - 발행 learn 단계가 매일 받아 메모 없이 data/reviews 에 커밋, 주 1회(방향 리뷰 10건 이상) 가중치·분야 중요도 조금씩 조정 → data/editing-learned.json, load_config 가 덮음. 되돌리기 단추
 - 편집 기준 탭: 지금 값(기본값 함께)·고르는 순서·조정 내역. 지면 기사 점수 펼침은 그대로
 - 테스트 test_review 13건, test_review_browser 10건
+
+## 2026-11-05
+### S39 중복 발행 막기
+- 원인: #222 가 20분 대기 뒤 옛 커밋을 읽어 11/5 호를 다시 만들고 push 충돌. 곁가지로 날짜 식 오류(`5 hours 30 minutes ago` = 4시간 30분 뒤)
+- 고침: daily·collect `ref: main`, scripts/push_edition.sh(같은 호 건너뜀·rebase 재시도·원인 구분), 누적분 저장을 푸시 뒤로(건너뛰면 저장 안 함), 날짜 식
+- 전체 pytest 463건 통과. 남은 일: 11/6 05:30 뒤 실제 동시 실행 2번, 트리거 정리 확인

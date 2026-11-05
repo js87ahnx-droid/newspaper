@@ -52,6 +52,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # 기다린 실행도 최신 main 을 본다 (S39). 기본값은 호출 시점 커밋이라, 11/5 #222 가 20분 기다린 뒤 #221 이 올린 호를 못 보고 다시 만들었다
+          ref: main
           sparse-checkout: docs/archive
       - id: check
         env:
@@ -59,7 +61,8 @@ jobs:
           EDITION_DATE: ${{ inputs.date }}
         run: |
           # 가장 최근에 닫힌 시간창(05:30 KST, config.yaml window.end) 의 호 — daily.sh 의 current_edition 과 같은 날짜
-          DATE="${EDITION_DATE:-$(TZ=Asia/Seoul date -d '5 hours 30 minutes ago' +%F)}"
+          # 330분 = 5시간 30분 ('5 hours 30 minutes ago' 는 "ago" 가 분에만 붙어 4시간 30분 뒤가 된다, S39)
+          DATE="${EDITION_DATE:-$(TZ=Asia/Seoul date -d '330 minutes ago' +%F)}"
           if [ "$SKIP_IF_PUBLISHED" = "1" ] && [ -f "docs/archive/$DATE/index.html" ]; then
             echo "$DATE 호는 이미 발행됨 — 건너뜀"; echo "skip=true" >> "$GITHUB_OUTPUT"
           else
@@ -75,6 +78,8 @@ jobs:
       HAS_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}   # 단계의 if 에서는 secrets 를 직접 못 쓴다
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # check 와 같이 최신 main (S39) — daily.sh 의 재확인도 먼저 올라간 호를 본다
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -105,6 +110,7 @@ jobs:
           path: models
           key: models-multilingual-e5-large-v1
       - name: 발행
+        id: publish
         env:
           NEWS_PASSWORD: ${{ secrets.NEWS_PASSWORD }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -115,32 +121,23 @@ jobs:
           RENDER_ONLY: ${{ inputs.render_only && '1' || '0' }}
           RESET_BUDGET: ${{ inputs.reset_budget && '1' || '0' }}
         run: bash scripts/daily.sh
-      - name: 누적분 저장
-        if: always() && steps.rawguard.outputs.save == 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: data/raw
-          key: raw-${{ github.run_id }}
       - name: 실행 보고 (로그·요약)
         if: always()
         run: |
           cat data/run-report.json 2>/dev/null || echo "보고 없음"
           echo "### 발행 ${{ job.status }} — $(TZ=Asia/Seoul date '+%F %H:%M KST')" >> "$GITHUB_STEP_SUMMARY"
       - name: 커밋·푸시
-        run: |
-          git config user.name "newspaper-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs data/history .staticrypt.json
-          if [ -f data/interests-learned.json ]; then git add data/interests-learned.json; fi   # 주간 관심 학습값 (S30b)
-          if [ -f data/editing-learned.json ]; then git add data/editing-learned.json; fi   # 주간 편집 자동 조정 (S38c)
-          if [ -d data/reviews ]; then git add data/reviews; fi   # 편집 리뷰 — 메모 없이 (S38c)
-          if [ -d data/econ ]; then git add data/econ; fi   # 경제 해설 보관 (S33a) — 지난 호 지면은 14일 뒤 지워도 해설은 남긴다
-          if git diff --cached --quiet; then echo "바뀐 것 없음"; exit 0; fi
-          git commit -m "발행: $(ls -1 docs/archive | grep -E '^[0-9]{4}-' | sort | tail -1)"
-          # 실행 중에 main 에 다른 커밋이 올라오면 push 가 거절되어 그날 호가 버려졌다 (S29d 점검) → rebase 후 3번까지
-          for i in 1 2 3; do
-            if git push; then exit 0; fi
-            git pull --rebase --autostash origin main || { git rebase --abort; break; }
-            sleep $((i * 5))
-          done
-          echo "::error::발행 결과를 push 하지 못함" ; echo "**push 실패 — 그날 호가 저장소에 없음**" >> "$GITHUB_STEP_SUMMARY"; exit 1
+        id: push
+        env:
+          EDITION: ${{ steps.publish.outputs.date }}
+          FORCE: ${{ inputs.force && '1' || '0' }}
+        # 올리기 전에 원격 최신을 받아 rebase, 3번까지. 같은 호가 이미 있으면 덮어쓰지 않고 건너뜀, 실패는 원인(충돌·권한·기타)을 표시
+        run: bash scripts/push_edition.sh "$EDITION" "$FORCE"
+      - name: 누적분 저장
+        # 푸시 뒤에: 같은 호를 건너뛰면 그 실행의 edition.json 등이 발행본을 덮지 않게 저장하지 않는다 (S39).
+        # 발행·푸시가 실패하면 지금처럼 저장한다 — 다시 만들 때 AI 결과를 재사용 (S35a 조건은 그대로)
+        if: always() && steps.rawguard.outputs.save == 'true' && steps.push.outputs.result != 'skipped'
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
