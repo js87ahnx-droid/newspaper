@@ -463,7 +463,15 @@ def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, o
     return out_dir / "index.html"
 
 
-def render_archive_index(dates: list[date], base: str = "../") -> str:
+def lead_title(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> str | None:
+    """지면 첫 쪽에 보이는 1면 메인 기사 제목 (지난 호 목록의 하이라이트, 2026-11-06)."""
+    front = next((s for s in build_context(edition, cfg, interests, sources)["sections"] if s["id"] == "front"), None)
+    return front["lead"]["view"]["title"] if front and front.get("lead") else None
+
+
+def render_archive_index(dates: list[date], base: str = "../", highlights: dict[str, str] | None = None) -> str:
+    """지난 호 목록. highlights: {호 날짜: 1면 메인 제목} — 기록이 없는 호는 비워 둔다."""
+    highlights = highlights or {}
     return _env().get_template("archive.html.j2").render(
-        base=base, items=[{"date": d.isoformat(), "name": masthead(d),
-                           "long": f"{d.year}년 {d.month}월 {d.day}일 {'월화수목금토일'[d.weekday()]}요일"} for d in dates])
+        base=base, items=[{"date": d.isoformat(), "name": masthead(d), "highlight": highlights.get(d.isoformat()),
+                           "day": f"{'월화수목금토일'[d.weekday()]}요일"} for d in dates])

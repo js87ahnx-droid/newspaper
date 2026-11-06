@@ -11,13 +11,16 @@
 <link rel="stylesheet" href="{{ base }}static/app.css?v={{ ver }}">
 <style>
   html, body { overflow: auto; }
-  .archive { max-width: 640px; margin: 0 auto; padding: 24px 16px; background: var(--paper); min-height: 100%; }
+  .archive { max-width: 720px; margin: 0 auto; padding: 24px 16px; background: var(--paper); min-height: 100%; }
   .archive h1 { font-size: 26px; margin: 0 0 4px; }
   .archive .back { color: var(--muted); margin: 0 0 16px; font-size: 13px; }
   .archive ul { list-style: none; padding: 0; margin: 0; }
   .archive li { border-bottom: 1px solid var(--rule); }
-  .archive li a { display: flex; justify-content: space-between; padding: 12px 4px; color: var(--ink); text-decoration: none; font-weight: 700; }
-  .archive li a span { font-weight: 400; color: var(--muted); font-size: 13px; }
+  .archive li a { display: flex; align-items: baseline; gap: 10px; padding: 12px 4px; color: var(--ink); text-decoration: none; font-weight: 700; }
+  .archive .name { flex: none; }
+  .archive .hi { flex: 1 1 auto; min-width: 0; font-weight: 400; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .archive .day { flex: none; font-weight: 400; color: var(--muted); font-size: 13px; }
+  @media (max-width: 520px) { .archive .day { display: none; } }
 </style>
 </head>
 <body>
@@ -26,7 +29,7 @@
   <p class="back"><a href="{{ base }}">오늘 호로 가기</a></p>
   <ul>
   {% for it in items %}
-    <li><a href="{{ it.date }}/">{{ it.name }}<span>{{ it.long }}</span></a></li>
+    <li><a href="{{ it.date }}/"><span class="name">{{ it.name }}</span><span class="hi"{% if it.highlight %} title="{{ it.highlight }}"{% endif %}>{{ it.highlight or "" }}</span><span class="day">{{ it.day }}</span></a></li>
   {% endfor %}
   </ul>
 </main>

@@ -33,6 +33,58 @@ def test_publish_layout_and_archive(tmp_path):
     assert listing.index("10월 16일자 뉴스") < listing.index("10월 15일자 뉴스")  # 최신이 위
 
 
+def test_archive_shows_lead_title_from_history(tmp_path):
+    """지난 호 목록의 하이라이트 = 1면 메인 제목 (2026-11-06). 기록은 data/history 에 남고 기록 없는 호는 비어 있다."""
+    from pipeline.render import lead_title
+
+    site, hist = tmp_path / "docs", tmp_path / "history"
+    hist.mkdir()
+    cfg, interests, sources = load_config(), load_interests(), load_sources()
+    (site / "archive" / "2026-10-14").mkdir(parents=True)     # 기록이 없던 지난 호
+    (hist / "2026-10-15.json").write_text(json.dumps({"v": 2, "edition": "2026-10-15", "issues": [], "lead_title": "어제 <메인> 제목"}, ensure_ascii=False), encoding="utf-8")
+    (site / "archive" / "2026-10-15").mkdir()
+    (hist / "2026-10-16.json").write_text(json.dumps({"v": 2, "edition": "2026-10-16", "issues": [{"id": "x"}]}), encoding="utf-8")
+    ed = edition()
+    publish(ed, cfg, interests, sources, site, history_dir=hist)
+    title = lead_title(ed, cfg, interests, sources)
+    saved = json.loads((hist / "2026-10-16.json").read_text(encoding="utf-8"))
+    assert title and saved["lead_title"] == title and saved["issues"] == [{"id": "x"}]
+    listing = (site / "archive" / "index.html").read_text(encoding="utf-8")
+    assert title in listing and "어제 &lt;메인&gt; 제목" in listing and "<메인>" not in listing
+    row = listing[listing.index("10월 14일자 뉴스"):]
+    assert '<span class="hi"></span>' in row[:row.index("</li>")]
+
+
+def test_archive_row_stays_one_line(tmp_path):
+    """긴 제목은 칸 너비에 맞춰 한 줄로 줄이고, 좁은 화면에서는 요일을 뺀다. 가로로 밀리지 않는다."""
+    import pytest
+    pw = pytest.importorskip("playwright.sync_api")
+    from pipeline.render import render_archive_index
+    from datetime import date
+
+    site = tmp_path / "site"
+    (site / "archive").mkdir(parents=True)
+    (site / "static").mkdir()
+    (site / "static" / "app.css").write_text((ROOT / "static" / "app.css").read_text(encoding="utf-8"), encoding="utf-8")
+    long = "아주 긴 1면 메인 제목이 칸 너비를 넘어가는 경우를 확인하기 위한 문장입니다 " * 3
+    (site / "archive" / "index.html").write_text(
+        render_archive_index([date(2026, 11, 6), date(2026, 11, 5)], highlights={"2026-11-06": long}), encoding="utf-8")
+    with pw.sync_playwright() as p:
+        b = p.chromium.launch()
+        for w, h, day in [(1180, 820, True), (390, 844, False)]:
+            page = b.new_page(viewport={"width": w, "height": h})
+            page.goto((site / "archive" / "index.html").as_uri(), wait_until="domcontentloaded")
+            m = page.evaluate("""() => { const a = document.querySelector('.archive li a'), hi = a.querySelector('.hi'), n = a.querySelector('.name');
+                return {sw: document.scrollingElement.scrollWidth - innerWidth, h: a.getBoundingClientRect().height, cut: hi.scrollWidth > hi.clientWidth,
+                        nameLines: n.getClientRects().length, nh: n.getBoundingClientRect().height, hi: hi.getBoundingClientRect().width,
+                        day: getComputedStyle(a.querySelector('.day')).display !== 'none'}; }""")
+            assert m["sw"] <= 1 and m["cut"] and m["hi"] > 100 and m["nh"] < 30 and m["day"] == day, (w, m)
+            if w == 1180:
+                page.screenshot(path=str(ROOT / "build" / "archive-list.png"))
+            page.close()
+        b.close()
+
+
 def test_static_urls_and_sw_cache_are_versioned(tmp_path):
     """S18: 정적 파일 주소 ?v=<해시> 와 서비스 워커 캐시 이름이 같은 해시 — 고정 이름(news-v1)이면 한 번 연 기기가 옛 app.js 를 계속 썼다."""
     from pipeline.render import asset_version

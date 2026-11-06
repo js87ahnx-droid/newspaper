@@ -584,7 +584,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
             alt = next((imgs[a["id"]] for a in it.get("articles", []) if a.get("id") in imgs), None)
             if alt and not it.get("photo"):
                 it["photo_alt"], it["photo_alt_source"] = alt
-    files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days)
+    files = publish(edition, cfg, interests, sources, Path(args.site), keep_days=args.keep_days, history_dir=Path(args.data) / "history")
     _store_econ(args, _raw_dir(args))   # 지면만 다시 그릴 때도 보관본이 빠진 호를 채운다 (S33a)
     # 암호화할 HTML 목록 (scripts/daily.sh 가 읽는다)
     write_atomic(Path(args.site, ".to-encrypt"), "".join(f.as_posix() + "\n" for f in files), encoding="utf-8")
