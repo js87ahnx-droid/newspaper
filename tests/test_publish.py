@@ -35,7 +35,7 @@ def test_publish_layout_and_archive(tmp_path):
 
 def test_archive_shows_lead_title_from_history(tmp_path):
     """지난 호 목록의 하이라이트 = 1면 메인 제목 (2026-11-06). 기록은 data/history 에 남고 기록 없는 호는 비어 있다."""
-    from pipeline.render import lead_title
+    from pipeline.render import lead_record
 
     site, hist = tmp_path / "docs", tmp_path / "history"
     hist.mkdir()
@@ -46,9 +46,11 @@ def test_archive_shows_lead_title_from_history(tmp_path):
     (hist / "2026-10-16.json").write_text(json.dumps({"v": 2, "edition": "2026-10-16", "issues": [{"id": "x"}]}), encoding="utf-8")
     ed = edition()
     publish(ed, cfg, interests, sources, site, history_dir=hist)
-    title = lead_title(ed, cfg, interests, sources)
+    lead = lead_record(ed, cfg, interests, sources)
+    title = lead["title"]
     saved = json.loads((hist / "2026-10-16.json").read_text(encoding="utf-8"))
     assert title and saved["lead_title"] == title and saved["issues"] == [{"id": "x"}]
+    assert saved["lead_note"]["why"] and "korea" in saved["lead_note"]["signals"]   # 판정 기록 (S42)
     listing = (site / "archive" / "index.html").read_text(encoding="utf-8")
     assert title in listing and "어제 &lt;메인&gt; 제목" in listing and "<메인>" not in listing
     row = listing[listing.index("10월 14일자 뉴스"):]

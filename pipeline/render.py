@@ -166,30 +166,65 @@ def _client_config(edition: dict, cfg: Config, interests: Interests, d: date) ->
 NEWS_SECTIONS = ("front", "politics", "economy", "international", "society", "interest")
 
 
-def lead_story(cands: list[dict], country: dict[str, str]) -> dict:
-    """1면 메인 기사 (S26, 사용자 2026-10-21: "신문을 보는 사람이 알아야 할 가장 중요한 기사. 한국 뉴스 우선,
-    전세계가 주목하는 해외 이슈가 있으면 그것").
-    - 전세계 주목 = 한국 매체 기사가 절반 미만이고, 해외 매체 3곳 이상이 홈페이지·피드 헤드라인으로 올리고 4개국 이상 보도,
-      또는 6개국 이상 보도 → 해외 헤드라인 수·주목도 순
-    - 없으면 한국 기사(한국 매체 기사가 절반 이상) 중 그날 한국 신문 1면에 가장 많이 오른 것 → 1면 후보 → 주목도
-    - 둘 다 없으면 1면 1위"""
-    def kr_share(it):
-        arts = it.get("articles") or []
-        return sum(country.get(a.get("source")) == "KR" for a in arts) / max(1, len(arts))
+LEAD_GLOBAL_BONUS = 3.0   # 전세계 주목 이슈가 한국에서도 크게 다뤄질 때 주는 가점 (신문 1면 한 곳 = 2점)
+LEAD_TOP_WEIGHT = 2.0     # 신문 1면 맨 위 기사에 더 주는 점수 (2026-11-06 시험: 1면에 실린 것과 톱을 구분해야 신문 톱과 맞았다)
 
-    heads = lambda it: (it.get("headline_by") or {}).items()
-    a1 = lambda it: sum(1 for _, v in heads(it) if v[1] == "naver_a1")
-    foreign = lambda it: sum(1 for n, v in heads(it) if v[1] != "naver_a1" and country.get(n) != "KR")
-    countries = lambda it: (it.get("coverage") or {}).get("countries", 0)
-    att = lambda it: (it.get("scores") or {}).get("attention", 0)
 
-    glob = [it for it in cands if kr_share(it) < 0.5 and ((foreign(it) >= 3 and countries(it) >= 4) or countries(it) >= 6)]
+def lead_signals(it: dict, country: dict[str, str]) -> dict:
+    """메인 기사 판정 재료. korea = 한국 언론의 주목도: 신문 1면 2점(맨 위 기사면 2점 더), 그 밖의 한국 매체 머리기사 1점, 보도 매체 0.5점(6곳까지)."""
+    heads = (it.get("headline_by") or {}).items()
+    a1_top = sum(1 for _, v in heads if v[1] == "naver_a1" and v[0] == 1)
+    arts = it.get("articles") or []
+    a1 = sum(1 for _, v in heads if v[1] == "naver_a1")
+    kr_heads = sum(1 for n, v in heads if v[1] != "naver_a1" and country.get(n) == "KR")
+    kr_cov = len({a.get("source") for a in arts if country.get(a.get("source")) == "KR"})
+    return {"a1": a1, "a1_top": a1_top, "kr_heads": kr_heads, "kr_cov": kr_cov,
+            "foreign": sum(1 for n, v in heads if v[1] != "naver_a1" and country.get(n) != "KR"),
+            "countries": (it.get("coverage") or {}).get("countries", 0),
+            "kr_share": sum(country.get(a.get("source")) == "KR" for a in arts) / max(1, len(arts)),
+            "attention": (it.get("scores") or {}).get("attention", 0),
+            "korea": 2 * a1 + LEAD_TOP_WEIGHT * a1_top + kr_heads + 0.5 * min(kr_cov, 6)}
+
+
+def lead_pick(cands: list[dict], country: dict[str, str]) -> tuple[dict, str]:
+    """1면 메인 기사와 고른 까닭 (사용자 2026-11-06: 한국 최대 이슈와 전세계 주목 이슈를 견주되, 전세계 이슈는 한국 언론도 크게 다룰 때만 가점).
+    - 전세계 주목 = 해외 매체 3곳 이상이 머리기사로 올리고 4개국 이상 보도, 또는 6개국 이상 보도
+    - 한국에서도 큼 = 신문 1면에 오름, 한국 매체 머리기사 2곳 이상, 또는 한국 매체 4곳 이상 보도
+    - 한국에서도 큰 전세계 이슈 중 해외 머리기사가 가장 많은 것에 가점을 주어 한국 최대 이슈와 견준다
+    - 그런 이슈가 없으면 한국 최대 이슈. 한국 기사가 하나도 없으면 전세계 이슈, 그것도 없으면 1면 1위"""
+    sig = {id(it): lead_signals(it, country) for it in cands}
+    s = lambda it: sig[id(it)]
+    is_global = lambda it: (s(it)["foreign"] >= 3 and s(it)["countries"] >= 4) or s(it)["countries"] >= 6
+    big_here = lambda it: s(it)["a1"] >= 1 or s(it)["kr_heads"] >= 2 or s(it)["kr_cov"] >= 4
+    glob = [it for it in cands if is_global(it)]
+    kr = [it for it in cands if s(it)["kr_share"] >= 0.5]
+    top_kr = max(kr, key=lambda it: (s(it)["korea"], it.get("_front", False), s(it)["attention"])) if kr else None
+    shared = [it for it in glob if big_here(it)]
+    if shared:
+        top_g = max(shared, key=lambda it: (s(it)["foreign"], s(it)["korea"], s(it)["attention"]))
+        if top_kr is None or s(top_g)["korea"] + LEAD_GLOBAL_BONUS >= s(top_kr)["korea"]:
+            return top_g, "전세계+한국"
+        return top_kr, "한국 우세"
+    if top_kr is not None:
+        return top_kr, "한국 이슈"
     if glob:
-        return max(glob, key=lambda it: (foreign(it), att(it)))
-    kr = [it for it in cands if kr_share(it) >= 0.5]
-    if kr:
-        return max(kr, key=lambda it: (a1(it), it.get("_front", False), att(it)))
-    return cands[0]
+        return max(glob, key=lambda it: (s(it)["foreign"], s(it)["attention"])), "전세계(한국 기사 없음)"
+    return cands[0], "1면 1위"
+
+
+def lead_story(cands: list[dict], country: dict[str, str]) -> dict:
+    return lead_pick(cands, country)[0]
+
+
+def _lead_note(lead: dict, why: str, cands: list[dict], country: dict[str, str]) -> dict:
+    """판정 기록: 고른 까닭·점수와, 그날 신문 1면 톱에 가장 많이 오른 기사. 평소 주간에도 규칙이 맞는지 나중에 견주는 재료."""
+    sig = lead_signals(lead, country)
+    note = {"why": why, "signals": {k: round(v, 2) for k, v in sig.items()}, "a1_leader": None}
+    leader = max(cands, key=lambda it: lead_signals(it, country)["a1_top"])
+    tops = lead_signals(leader, country)["a1_top"]
+    if tops:
+        note["a1_leader"] = {"title": leader["view"]["title"], "tops": tops}
+    return note
 
 
 def front_single(sections: list[dict], country: dict[str, str]) -> None:
@@ -202,7 +237,8 @@ def front_single(sections: list[dict], country: dict[str, str]) -> None:
     for r in front["items"]:
         r["_front"] = True
     cands = [r for s in sections if s["id"] in NEWS_SECTIONS for r in s["items"] if not r.get("reserve")]
-    lead = lead_story(cands, country)
+    lead, why = lead_pick(cands, country)
+    front["lead_note"] = _lead_note(lead, why, cands, country)
     for s in sections:   # 다른 면에 있던 기사가 메인이 되면 그 면에서 뺀다
         if s["id"] != "front":
             s["items"] = [r for r in s["items"] if r is not lead]
@@ -463,10 +499,12 @@ def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, o
     return out_dir / "index.html"
 
 
-def lead_title(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> str | None:
-    """지면 첫 쪽에 보이는 1면 메인 기사 제목 (지난 호 목록의 하이라이트, 2026-11-06)."""
+def lead_record(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict | None:
+    """지면 첫 쪽의 1면 메인 제목(지난 호 목록의 하이라이트)과 판정 기록 (2026-11-06)."""
     front = next((s for s in build_context(edition, cfg, interests, sources)["sections"] if s["id"] == "front"), None)
-    return front["lead"]["view"]["title"] if front and front.get("lead") else None
+    if not front or not front.get("lead"):
+        return None
+    return {"title": front["lead"]["view"]["title"], "note": front["lead_note"]}
 
 
 def render_archive_index(dates: list[date], base: str = "../", highlights: dict[str, str] | None = None) -> str:
