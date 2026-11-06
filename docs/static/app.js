@@ -272,6 +272,27 @@
     return { pages: out, rest: rest };
   }
 
+  // 펼침 보기는 1-2, 3-4쪽이 좌우로 묶인다. 두 쪽짜리 "중국은 지금"이 짝수 쪽에서 시작하면 넘겨 가며 봐야 하므로
+  // (2026-11-06 사용자, 앞 면이 줄어든 날) 홀수 쪽에서 시작하는 가장 가까운 면 사이로 옮긴다. 뒤쪽을 먼저 찾아 1면·주요 뉴스 순서를 지킨다.
+  // 단신·논평·가이드 뒤로는 보내지 않고, 자리가 없으면 그대로 둔다.
+  function chinaOnSpread(order, built) {
+    if (!spread || mode === "scroll" || (built.china || []).length !== 2) return order;
+    var from = order.indexOf("china");
+    var rest = order.filter(function (id) { return id !== "china"; });
+    var isOdd = function (at) {
+      return rest.slice(0, at).reduce(function (n, id) { return n + (built[id] || []).length; }, 0) % 2 === 1;
+    };
+    if (!isOdd(from)) return order;
+    var end = rest.length;
+    ["more", "briefs", "opinion", "guide"].forEach(function (id) { var i = rest.indexOf(id); if (i >= 0) end = Math.min(end, i); });
+    var to = -1, at;
+    for (at = from + 1; at <= end && to < 0; at++) if (!isOdd(at)) to = at;
+    for (at = from - 1; at >= 1 && to < 0; at--) if (!isOdd(at)) to = at;
+    if (to < 0) return order;
+    rest.splice(to, 0, "china");
+    return rest;
+  }
+
   function paginate() {
     dropped = 0;
     var opRest = 0;
@@ -401,7 +422,7 @@
     var total = 0;
     Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
     var out = [];
-    order.forEach(function (id) { out = out.concat(built[id] || []); });
+    chinaOnSpread(order, built).forEach(function (id) { out = out.concat(built[id] || []); });
     // 쪽수 고정: 기사가 모자라 쪽이 남으면 끝 쪽으로 채운다 (같은 화면 크기면 호가 바뀌어도 쪽수가 같다)
     while (total && out.length < total) {
       var end = newPage(g, "end", null, false);
