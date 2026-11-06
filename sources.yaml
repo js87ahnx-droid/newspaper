@@ -237,6 +237,8 @@ sources:
       - {section: opinion, url: "https://rss.nytimes.com/services/xml/rss/nyt/Opinion.xml"}
       # NYT 대표 인터뷰 "The Interview" (2026-10-23 사용자 요청) — Magazine 피드에서 주소가 "-interview" 로 끝나는 글만
       - {section: "column_pick:The Interview (NYT)", url: "https://rss.nytimes.com/services/xml/rss/nyt/Magazine.xml", url_must: '/magazine/[^/]*-interview[.]html'}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:nytimes.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   - name: Wall Street Journal
     country: US
@@ -287,6 +289,8 @@ sources:
       - {section: "column_pick:Money Stuff (Matt Levine)", url: "https://news.google.com/rss/search?q=site%3Abloomberg.com%20%22Matt%20Levine%22%20when%3A7d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^Money Stuff"}
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://news.google.com/rss/search?q=site:bloomberg.com+intitle:%22big+take%22+when:2d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_must: "Big Take", title_not: "^Watch"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:bloomberg.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   - name: Washington Post
     country: US
@@ -325,6 +329,8 @@ sources:
       - {section: economy, url: "https://rss.politico.com/energy.xml", url_must: "/(news|live-updates)/20"}
       - {section: tech, url: "https://rss.politico.com/technology.xml", url_must: "/(news|live-updates)/20"}
       - {section: international, url: "https://rss.politico.com/defense.xml", url_must: "/(news|live-updates)/20"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:politico.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   # ---------------- 영국 ----------------
 
@@ -399,6 +405,8 @@ sources:
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://www.ft.com/analysis?format=rss"}
       - {section: analysis, url: "https://www.ft.com/the-big-read?format=rss"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:ft.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   - name: The Economist
     country: UK
@@ -424,6 +432,8 @@ sources:
       - {section: "column_pick:Chaguan (중국)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Chaguan%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
       - {section: "column_pick:Banyan (아시아)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Banyan%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
       - {section: "column_pick:Free exchange (경제)", url: "https://news.google.com/rss/search?q=site%3Aeconomist.com%20%22Free%20exchange%22%20when%3A14d&hl=en-US&gl=US&ceid=US%3Aen", kind: google_news, title_not: "^[^ ]+( [^ ]+)?$|^(Free [Ee]xchange|Finance (&|and) economics|The world this week|The Americas)$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:economist.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   # ---------------- 유럽 ----------------
   - name: Politico Europe
@@ -481,6 +491,8 @@ sources:
       - {section: opinion, url: "https://www.lemonde.fr/en/opinion/rss_full.xml"}
       # 분석·해설 (S22c, 2026-10-18 실측 — 매체가 쓴 분석. 지면 '분석·해설' 면)
       - {section: analysis, url: "https://www.lemonde.fr/les-decodeurs/rss_full.xml", lang: fr, title_not: "^Ce qu.il faut retenir"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:lemonde.fr+when:1d&hl=fr&gl=FR&ceid=FR:fr", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku", lang: fr}
 
   # ---------------- 일본 ----------------
   - name: 요미우리신문
@@ -589,6 +601,8 @@ sources:
       - {section: china, url: "https://www.scmp.com/rss/4/feed"}
       - {section: asia, url: "https://www.scmp.com/rss/2/feed"}
       - {section: opinion, url: "https://www.scmp.com/rss/93/feed"}
+      # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
+      - {section: top, url: "https://news.google.com/rss/search?q=site:scmp.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
   - name: Global Times
     country: CN

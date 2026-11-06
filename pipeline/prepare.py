@@ -8,8 +8,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from .collect import Article
+from .headlines import _jac
 from .settings import ROOT, Config, Sources
 from .textutil import cap_lead, clean_lead, detect_analysis, detect_interview, detect_opinion, empty_title, title_key
+
+GNEWS_SAME_TITLE = 0.7   # 공식 판과 Google 뉴스 판을 같은 기사로 볼 제목 글자 2-gram 겹침 (S43)
 
 
 DEFAULT_HISTORY = ROOT / "data" / "history"
@@ -100,11 +103,18 @@ def prepare(
 
     # 같은 매체가 주소만 다르게 같은 기사를 낸 경우(섹션별 주소, 모바일 주소 등): 제목 키로 합친다
     by_key: dict[tuple[str, str], Article] = {}
-    for a in sorted(in_window, key=lambda a: a.published or ""):
+    # 공식 피드 기사를 먼저 남긴다: Google 뉴스 판은 주소가 중계 주소이고 리드·사진이 없다 (S43)
+    near: dict[str, list[Article]] = {}
+    for a in sorted(in_window, key=lambda a: (a.kind == "google_news", a.published or "")):
         key = (a.source, title_key(a.title))
         kept = by_key.get(key)
+        if kept is None and a.kind == "google_news":
+            # 같은 기사인데 제목을 조금 고친 Google 뉴스 판 ("Trump's" / "Donald Trump's")
+            kept = next((k for k in near.get(a.source, []) if _jac(a.title, k.title) >= GNEWS_SAME_TITLE), None)
         if kept is None:
             by_key[key] = a
+            if a.kind != "google_news":
+                near.setdefault(a.source, []).append(a)
             continue
         dup_title += 1
         for s in a.sections:

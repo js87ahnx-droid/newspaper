@@ -309,6 +309,51 @@ def test_google_news_items_have_no_fake_lead():
     assert b.lead.startswith("这是")
 
 
+def test_google_news_copy_yields_to_official(tmp_path):
+    """S43: 같은 기사의 Google 뉴스 판은 먼저 나왔어도 공식 판(주소·리드·사진)에 합친다. 제목이 조금 달라도 합치고, 다른 기사는 남긴다."""
+    from dataclasses import replace
+
+    from pipeline.collect import Article
+    from pipeline.settings import load_sources
+
+    cfg, sources = load_config(), load_sources()
+    d = date(2026, 11, 6)
+    start, _ = edition_window(d, cfg)
+    t = lambda m: (start + timedelta(minutes=m)).isoformat()
+    base = Article(id="a", url="https://www.ft.com/content/a", source="Financial Times", country="UK", lean="경제지", media_type="경제지",
+                   weight=1.0, paywall=True, kind="rss", title="America turns on Trump's tech cheerleaders", lead="공식 요약",
+                   lang="en", published=t(60), date_source="feed", sections=["top"], main=True, first_seen=t(60), image="https://img.test/a.jpg")
+    gn = dict(kind="google_news", lead="", image=None, main=False)
+    same = replace(base, id="b", url="https://news.google.com/rss/articles/b", published=t(10), **gn)
+    near = replace(base, id="c", url="https://news.google.com/rss/articles/c", title="America turns on Donald Trump's tech cheerleaders", published=t(10), **gn)
+    other = replace(base, id="d", url="https://news.google.com/rss/articles/d", title="Iran-linked ships hover over subsea cables after threats", published=t(10), **gn)
+    arts, report = prepare({x.id: x for x in (same, near, other, base)}, d, cfg, sources)
+    ft = {a.id: a for a in arts if a.source == "Financial Times"}
+    assert set(ft) == {"a", "d"} and report["merged_same_title"] == 2
+    assert ft["a"].url == base.url and ft["a"].lead == "공식 요약" and ft["a"].image and ft["a"].main
+
+
+def test_gnews_backfill_feeds_filter_noise_and_stay_out_of_headlines():
+    """S43: 봇 차단 매체 보강 피드는 main·머리기사가 아니고, 섹션 페이지·개표·의견란을 거른다. 기사 제목은 통과한다."""
+    import re
+
+    from pipeline.settings import load_sources
+
+    srcs = {s.name: s for s in load_sources().sources}
+    for name in ("Bloomberg", "Politico", "The Economist", "SCMP", "Financial Times", "New York Times", "Le Monde"):
+        gn = [f for f in srcs[name].feeds if f.kind == "google_news" and f.section == "top" and "when:1d" in f.url]
+        assert len(gn) == 1 and not gn[0].main, name
+        assert all("news.google.com" not in (h.url or "") for h in srcs[name].headline), name
+        for noise in ("Artificial Intelligence (AI) | Latest news and analysis from The Economist", "US Senate 2026: live results",
+                      "Opinion | I'm a Republican", "World in Brief: American stock markets slump", "Live Q&A: How Trump's Defeat Affects Asia",
+                      "Business", "Headlines", "Wipeout | November 7th 2026", "MCAP Inc. Reports 3Q EPS of $0.15 Per Share – Company Announcement",
+                      "NYT Crossword Answers for Nov. 6, 2026"):
+            assert re.search(gn[0].title_not, noise), noise
+        assert not re.search(gn[0].title_not, "Wall Street sheds $3.2tn as Democratic midterm sweep triggers brutal AI rout")
+        assert not re.search(gn[0].title_not, "Midterm Elections Live Updates: Democrats Clear 250 House Seats")
+    assert not srcs["Politico"].headline and not srcs["Bloomberg"].headline and not srcs["The Economist"].headline   # 시간순·톱 아님 (실측)
+
+
 def test_late_market_reports_join_this_edition(tmp_path):
     """S28e: 시간창 끝 뒤 발행 시각까지(최대 3시간) 나온 시황 기사는 이번 호에 — 다른 기사는 다음 호로."""
     from email.utils import format_datetime
