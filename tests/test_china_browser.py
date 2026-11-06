@@ -45,9 +45,47 @@ def test_china_page_fits(browser, tmp_path, w, h):  # noqa: F811
     ctx.close()
     assert not errors, errors
     assert m["parts"] == 2 and 1 <= m["cn"] <= 2, m
-    assert m["after"] == 1, m                    # 국제 바로 뒤
+    assert m["after"] == 1 or w > h, m           # 국제 바로 뒤 (펼침 보기는 좌우에 함께 보이게 옮길 수 있다 — 아래 시험)
     assert m["clipped"] == 0 and m["overflow"] == 0 and m["sw"] <= 1 and m["brief"] == 0, m
     assert m["ev"] == 2                           # 근거 기사 → 원문 창
+
+
+def _short_economy(out):
+    """경제 면이 한 쪽으로 줄어 중국은 지금이 짝수 쪽에서 시작하게 되는 날."""
+    add_china(out)
+    out["sections"]["economy"] = out["sections"]["economy"][:1]
+
+
+CHINA_PAGES = """() => {
+    const pages = [...document.querySelectorAll('#book .page')];
+    const cn = pages.filter(p => p.querySelector('.cn-view'));
+    const order = [...new Set(pages.map(p => ([...p.classList].find(c => c.startsWith('sec-')) || '').slice(4)).filter(Boolean))];
+    return {at: cn.map(p => pages.indexOf(p)), left: cn.map(p => p.classList.contains('pg-left')), order,
+            total: pages.length, folio: cn.map(p => p.querySelector('.folio').textContent)}; }"""
+
+
+def test_china_two_pages_stay_on_one_spread(browser, tmp_path):  # noqa: F811
+    """펼침 보기: 짝수 쪽에서 시작할 날은 뒤쪽 면 사이로 옮겨 좌우에 함께 보인다 (2026-11-06)."""
+    index = make_site(tmp_path, mutate=_short_economy)
+    ctx, page, errors = open_page(browser, index, 1180, 820)
+    m = page.evaluate(CHINA_PAGES)
+    ctx.close()
+    assert not errors, errors
+    assert len(m["at"]) == 2 and m["at"][0] % 2 == 0 and m["at"][1] == m["at"][0] + 1, m
+    assert m["left"] == [True, False], m
+    assert m["folio"][0].startswith(f"{m['at'][0] + 1} /") and m["total"] % 2 == 0, m
+    assert m["order"][0] == "front", m
+    assert m["order"].index("china") < m["order"].index("briefs"), m   # 단신·논평 뒤로 가지 않는다
+
+
+def test_china_keeps_place_on_portrait(browser, tmp_path):  # noqa: F811
+    """한 쪽씩 보는 세로 화면은 좌우 묶음이 없으니 국제 바로 뒤 그대로."""
+    index = make_site(tmp_path, mutate=_short_economy)
+    ctx, page, errors = open_page(browser, index, 390, 844)
+    m = page.evaluate(CHINA_PAGES)
+    ctx.close()
+    assert not errors, errors
+    assert m["order"].index("china") - m["order"].index("international") == 1, m
 
 
 def test_china_title_breaks_between_words(browser, tmp_path):  # noqa: F811
