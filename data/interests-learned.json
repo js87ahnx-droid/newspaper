@@ -1,20 +1,20 @@
 {
-  "week": "2026-W45",
-  "edition": "2026-11-02",
-  "applied": "2026-11-01T20:34:46+00:00",
+  "week": "2026-W46",
+  "edition": "2026-11-09",
+  "applied": "2026-11-08T20:34:37+00:00",
   "weights": {
-    "economy": 1.7,
+    "economy": 2.0,
     "semis_ai": 1.0,
-    "politics": 0.5,
+    "politics": 0.8,
     "international": 1.2,
     "industry": 1.0,
     "society": 0.7,
     "entertainment_sports": 0.2,
     "incidents": 0.2,
-    "lifestyle_culture": 0.0,
+    "lifestyle_culture": 0.2,
     "science": 0.5
   },
   "keywords": [],
   "known": [],
-  "updated": "2026-10-31T01:44:11.730Z"
+  "updated": "2026-11-03T00:16:36.359Z"
 }
