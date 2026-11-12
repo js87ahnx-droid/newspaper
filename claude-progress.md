@@ -726,3 +726,4 @@
 - S42: 1면 메인 판정 변경 (render.py lead_pick, 신문 톱 가중 2점, 전세계 가점 3점). 전체 pytest 471건 통과. 다음 발행에서 data/history 의 lead_note 확인 필요. 시험 결과: 공통 톱이 뚜렷한 3일 중 지금 규칙 1일, 톱 가중안 3일 (6개 호, 표본 작음)
 - 남은 확인: S41·S42 푸시 여부, 원격 backtest-lead 브랜치와 공개 실행 로그 42222033641 삭제 여부, 같은 시점 2번 실행(S39), GitHub 발행 시각 줄이기
 - S43: 봇 차단 매체 수집 보강 (sources.yaml Google 뉴스 7곳, prepare.py 공식 판 우선 합치기). 머리기사 신호 추가 없음. 전체 pytest 473건 통과. 다음 발행에서 처리 시간 확인
+- S44: 발행 실행 취소 메일 막기 (collect.yml 발행 부르기 단계·worker/src/morning.js 가 대기·진행 중인 daily 를 확인). 11/12 실패는 GitHub 장애

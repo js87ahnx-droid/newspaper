@@ -79,4 +79,8 @@ jobs:
           HOUR=$(TZ=Asia/Seoul date +%H)
           if [ -f "docs/archive/$DATE/index.html" ]; then echo "$DATE 호 발행됨"; exit 0; fi
           if [ "$HOUR" -ge 12 ]; then echo "정오 지남 — 부르지 않음"; exit 0; fi
+          # S44: 같은 concurrency 그룹의 대기 실행은 하나뿐이라, 새로 부르면 기다리던 daily 가 취소되고 실패 메일이 간다 (11/11).
+          # 목록을 못 읽으면 0 으로 보고 부른다 (발행을 놓치지 않게)
+          BUSY=$(gh run list --workflow daily.yml --limit 20 --json status --jq '[.[] | select(.status != "completed")] | length' 2>/dev/null || echo 0)
+          if [ "${BUSY:-0}" -gt 0 ]; then echo "daily 가 이미 대기·진행 중($BUSY) — 부르지 않음"; exit 0; fi
           gh workflow run daily.yml --ref main && echo "$DATE 호 발행 시작"

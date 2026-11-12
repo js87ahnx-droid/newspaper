@@ -228,3 +228,38 @@ def test_daily_skips_when_edition_on_latest_main(tmp_path):
                        env={**os.environ, "EDITION_DATE": D, "SKIP_IF_PUBLISHED": "1", "GITHUB_OUTPUT": str(out), "NEWS_PASSWORD": ""})
     assert p.returncode == 0 and "이미 발행된 호" in p.stdout
     assert f"date={D}" in out.read_text(encoding="utf-8")
+
+
+def _dispatch_step(tmp_path, busy, published=False, hour="06", gh_fails=False):
+    """collect.yml '아침 발행이 아직이면 daily 부르기' 단계를 가짜 gh·date 로 돌린다. 돌려주는 값: (gh workflow run 호출 여부, 출력)."""
+    step = next(s for s in _wf("collect.yml")["jobs"]["collect"]["steps"] if s.get("name") == "아침 발행이 아직이면 daily 부르기")
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    log = tmp_path / "gh.log"
+    list_out = "exit 1" if gh_fails else f"echo {busy}"
+    (bin_ / "gh").write_text(f'#!/bin/sh\nif [ "$1 $2" = "run list" ]; then {list_out}; fi\n'
+                             f'if [ "$1 $2" = "workflow run" ]; then echo called >> "{log.as_posix()}"; fi\n', encoding="utf-8")
+    (bin_ / "date").write_text(f'#!/bin/sh\ncase "$*" in *%H*) echo {hour};; *) echo 2026-11-12;; esac\n', encoding="utf-8")
+    for f in bin_.iterdir():
+        f.chmod(0o755)
+    if published:
+        (tmp_path / "docs" / "archive" / "2026-11-12").mkdir(parents=True)
+        (tmp_path / "docs" / "archive" / "2026-11-12" / "index.html").write_text("x", encoding="utf-8")
+    env = {**os.environ, "PATH": f"{bin_.as_posix()}:{os.environ.get('PATH', '')}"}
+    r = subprocess.run([BASH, "-e", "-c", step["run"]], cwd=tmp_path, env=env, capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    return log.exists(), r.stdout
+
+
+@needs_bash
+@pytest.mark.parametrize("busy,published,hour,gh_fails,called", [
+    (0, False, "06", False, True),    # 대기·진행 중인 daily 없음 → 부름
+    (1, False, "06", False, False),   # 대기 중인 daily 있음 → 부르지 않음 (새로 부르면 그 실행이 취소됨, 11/11)
+    (0, True, "06", False, False),    # 이미 발행됨
+    (0, False, "13", False, False),   # 정오 지남
+    (0, False, "06", True, True),     # 목록을 못 읽으면 그래도 부름 (발행을 놓치지 않게)
+])
+def test_collect_does_not_cancel_waiting_daily(tmp_path, busy, published, hour, gh_fails, called):
+    """S44: 수집이 끝나며 daily 를 부를 때 이미 대기·진행 중인 daily 가 있으면 건너뛴다."""
+    got, out = _dispatch_step(tmp_path, busy, published, hour, gh_fails)
+    assert got == called, out
