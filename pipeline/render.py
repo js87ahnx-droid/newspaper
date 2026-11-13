@@ -289,7 +289,7 @@ def jonghap(sections: list[dict], title: str, row) -> None:
     ids = {a["issue_id"] for a in picked}
     for s in sections:
         s["items"] = [r for r in s["items"] if r["issue_id"] not in ids]
-    rows = [row(a) for a in picked]
+    rows = [{**row(a), "reserve": False} for a in picked]   # 예비 기사였어도 종합면에서는 정식 기사 (쪽 나누기가 예비는 건너뛴다)
     for r in rows[1:]:   # 사진은 첫 기사만 (시안 A)
         r["photo"] = None
     at = next((k for k, s in enumerate(sections) if s["id"] == "front"), -1) + 1

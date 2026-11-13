@@ -98,45 +98,41 @@ def test_demoted_items_become_briefs_in_score_order(browser, tmp_path):  # noqa:
 
 @pytest.mark.parametrize("w,h", [(1180, 820), (820, 1180), (390, 844)])
 def test_briefs_are_one_line(browser, tmp_path, w, h):  # noqa: F811
-    """S17e: 단신은 기사마다 가로 한 줄 (줄바꿈 없음), 한 단."""
+    """S17e → S47(시안 B): 단신 쪽의 목록은 기사마다 가로 한 줄 (길면 말줄임), 한 단, 단신은 1쪽."""
     index = make_site(tmp_path)
     ctx, page, errors = open_page(browser, index, w, h)
     m = page.evaluate("""() => {
       const ps = [...document.querySelectorAll('#book .page.sec-briefs')];
       ps.forEach(p => p.style.display = '');
-      const rows = ps.flatMap(p => [...p.querySelectorAll('.item.brief')]);
-      const lh = rows.map(r => { const t = r.querySelector('.hl'); return [r.getBoundingClientRect().height, t ? t.getBoundingClientRect().height : 0]; });
-      return {n: rows.length, maxH: Math.max(...lh.map(x => x[0])), maxT: Math.max(...lh.map(x => x[1])),
-              grid: document.querySelectorAll('.brief-grid').length, end: document.querySelectorAll('#book .page.endpage').length}; }""")
+      const rows = ps.flatMap(p => [...p.querySelectorAll('.bt-list:not([hidden]) .bt-row')]);
+      return {n: rows.length, pages: ps.length, maxH: Math.max(...rows.map(r => r.getBoundingClientRect().height)),
+              grid: document.querySelectorAll('.brief-grid').length}; }""")
     ctx.close()
     assert not errors
-    assert m["n"] >= 5 and m["grid"] == 0
-    assert m["maxH"] <= 36 and m["maxT"] <= 30, m   # 한 줄 높이
+    assert m["n"] >= 3 and m["grid"] == 0 and m["pages"] == 1, m
+    assert m["maxH"] <= 36, m   # 한 줄 높이
 
 
 @pytest.mark.parametrize("w,h", [(1180, 820), (390, 844)])
 def test_briefs_grouped_by_topic(browser, tmp_path, w, h):  # noqa: F811
-    """S19c: 단신은 분야 소제목 아래로. 한 분야는 한 묶음(쪽이 바뀌면 "(이어서)"), 소제목은 늘 첫 단신과 함께, 넘친 쪽 0."""
+    """S19c → S47(시안 B): 분야 탭이 분야 중요도 순, 건수 합 = 전체. "모두 보기" 창은 분야 소제목 아래로 같은 순서, 넘친 쪽 0."""
     index = make_site(tmp_path)
     ctx, page, errors = open_page(browser, index, w, h)
     m = page.evaluate("""() => {
-      const ps = [...document.querySelectorAll('#book .page.sec-briefs')];
-      ps.forEach(p => p.style.display = '');
-      const rows = ps.flatMap(p => [...p.querySelectorAll('.item.brief')].map(a => a.dataset.topic));
-      const heads = ps.flatMap(p => [...p.querySelectorAll('.brief-topic')].map(h => h.textContent));
-      const lone = [...document.querySelectorAll('#book .brief-group')].filter(g => !g.querySelector('.item.brief')).length;
-      const firsts = ps.map(p => { const a = p.querySelector('.item.brief'); return a ? !!a.closest('.brief-group') : true; });
-      return {rows, heads, lone, firsts, topics: EDITION.briefTopics, names: EDITION.topics}; }""")
+      const box = document.querySelector('#book .page.sec-briefs .btabs');
+      const tabs = [...box.querySelectorAll('[data-bt]')].map(b => [b.dataset.bt, +b.textContent.split(' ').pop()]);
+      return {tabs, topics: EDITION.briefTopics, names: EDITION.topics}; }""")
+    page.evaluate("() => document.querySelector('#book .page.sec-briefs .bt-all').click()")
+    heads = page.evaluate("() => [...document.querySelectorAll('#reader .bt-full .brief-topic')].map(h => h.textContent)")
     st = page.evaluate(STATE)
     ctx.close()
     assert not errors and st["overflow"] == []
-    runs = [t for i, t in enumerate(m["rows"]) if i == 0 or m["rows"][i - 1] != t]
-    assert len(runs) == len(set(runs)) >= 2                                  # 분야마다 한 번
+    assert m["tabs"][0][0] == "all"
+    keys = [k for k, _ in m["tabs"][1:]]
     rank = {t: i for i, t in enumerate(m["topics"])}
-    assert [rank.get(t, 99) for t in runs] == sorted(rank.get(t, 99) for t in runs)   # 분야 중요도 순
-    fresh = [h for h in m["heads"] if not h.endswith("(이어서)")]
-    assert fresh == [m["names"].get(t, "기타") for t in runs]
-    assert m["lone"] == 0 and all(m["firsts"])                              # 소제목만 남은 곳 없음, 쪽 첫 단신엔 소제목
+    assert len(keys) >= 2 and [rank.get(t, 99) for t in keys] == sorted(rank.get(t, 99) for t in keys)   # 분야 중요도 순
+    assert sum(n for _, n in m["tabs"][1:]) == m["tabs"][0][1]
+    assert heads == [f"{m['names'].get(k, '기타')} {n}" for k, n in m["tabs"][1:]]
 
 
 def _thin_day(out):
@@ -212,14 +208,14 @@ def test_column_list_splits_across_pages(browser, tmp_path):  # noqa: F811
 
 
 def test_brief_click_shows_summary_not_just_title(browser, tmp_path):  # noqa: F811
-    """S22a: 단신 제목을 누르면 자세히 창에 리드(요약)까지 — 전에는 지면 원본도 한 줄 꼴이라 제목만 보였다."""
+    """S22a·S47: 단신 탭 목록의 제목을 누르면 자세히 창에 리드(요약)까지."""
     index = make_site(tmp_path)
     ctx, page, errors = open_page(browser, index, 1180, 820)
     r = page.evaluate("""() => {
-      const b = [...document.querySelectorAll('#book .page.sec-briefs article.item.brief')]
+      const b = [...document.querySelectorAll('#book .page.sec-briefs .bt-row')]
         .find(a => { const f = document.querySelector('#flow [data-issue="' + a.dataset.issue + '"] .lead'); return f && f.textContent.trim(); });
       if (!b) return null;
-      b.closest('.page').style.display = ''; const a = b.querySelector('.hl a'); a.scrollIntoView(); a.click();
+      b.closest('.page').style.display = ''; const a = b.querySelector('a'); a.scrollIntoView(); a.click();
       const body = document.querySelector('#reader .reader-body');
       return {open: !document.getElementById('reader').hidden, lead: (body.querySelector('.lead') || {}).textContent || '',
               oneLine: b.getBoundingClientRect().height}; }""")
