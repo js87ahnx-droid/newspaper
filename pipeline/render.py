@@ -168,22 +168,25 @@ NEWS_SECTIONS = ("front", "politics", "economy", "international", "society", "in
 
 LEAD_GLOBAL_BONUS = 3.0   # 전세계 주목 이슈가 한국에서도 크게 다뤄질 때 주는 가점 (신문 1면 한 곳 = 2점)
 LEAD_TOP_WEIGHT = 2.0     # 신문 1면 맨 위 기사에 더 주는 점수 (2026-11-06 시험: 1면에 실린 것과 톱을 구분해야 신문 톱과 맞았다)
+LEAD_PAGE_WEIGHT = 0.5    # S47 지면 비중: 1면에는 없지만 A2~A6면에 실은 신문마다 (6곳까지)
 
 
 def lead_signals(it: dict, country: dict[str, str]) -> dict:
-    """메인 기사 판정 재료. korea = 한국 언론의 주목도: 신문 1면 2점(맨 위 기사면 2점 더), 그 밖의 한국 매체 머리기사 1점, 보도 매체 0.5점(6곳까지)."""
+    """메인 기사 판정 재료. korea = 한국 언론의 주목도: 신문 1면 2점(맨 위 기사면 2점 더), 그 밖의 한국 매체 머리기사 1점, 보도 매체 0.5점(6곳까지),
+    1면 밖 A2~A6면에 실은 신문 0.5점(6곳까지, S47)."""
     heads = (it.get("headline_by") or {}).items()
     a1_top = sum(1 for _, v in heads if v[1] == "naver_a1" and v[0] == 1)
     arts = it.get("articles") or []
     a1 = sum(1 for _, v in heads if v[1] == "naver_a1")
     kr_heads = sum(1 for n, v in heads if v[1] != "naver_a1" and country.get(n) == "KR")
     kr_cov = len({a.get("source") for a in arts if country.get(a.get("source")) == "KR"})
-    return {"a1": a1, "a1_top": a1_top, "kr_heads": kr_heads, "kr_cov": kr_cov,
+    pages_n = len(it.get("pages_by") or {})
+    return {"a1": a1, "a1_top": a1_top, "kr_heads": kr_heads, "kr_cov": kr_cov, "pages_n": pages_n,
             "foreign": sum(1 for n, v in heads if v[1] != "naver_a1" and country.get(n) != "KR"),
             "countries": (it.get("coverage") or {}).get("countries", 0),
             "kr_share": sum(country.get(a.get("source")) == "KR" for a in arts) / max(1, len(arts)),
             "attention": (it.get("scores") or {}).get("attention", 0),
-            "korea": 2 * a1 + LEAD_TOP_WEIGHT * a1_top + kr_heads + 0.5 * min(kr_cov, 6)}
+            "korea": 2 * a1 + LEAD_TOP_WEIGHT * a1_top + kr_heads + 0.5 * min(kr_cov, 6) + LEAD_PAGE_WEIGHT * min(pages_n, 6)}
 
 
 def lead_pick(cands: list[dict], country: dict[str, str]) -> tuple[dict, str]:

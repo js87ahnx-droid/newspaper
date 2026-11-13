@@ -44,7 +44,9 @@ class ScoredIssue:
     raw: dict = field(default_factory=dict)
     timeline: list[dict] = field(default_factory=list)
     headline: float = 0.0              # 머리기사 점수 (0~1)
-    headline_by: dict = field(default_factory=dict)  # 매체 → [순위, 얻은 곳] (1면·머리기사로 올린 곳)  # 지난 경과: 앞선 호들의 {date, title, summary} (오래된 것부터)
+    headline_by: dict = field(default_factory=dict)  # 매체 → [순위, 얻은 곳] (1면·머리기사로 올린 곳)
+    pages: float = 0.0                 # 지면 비중 점수 (0~1, S47) — 국내 신문 A2~A6면에 실린 정도
+    pages_by: dict = field(default_factory=dict)     # 신문 → 면 ("A3") — A2~A6, 그 신문이 A1 에 실었으면 없음  # 지난 경과: 앞선 호들의 {date, title, summary} (오래된 것부터)
 
 
 SIGNATURE_SIZE = 12
@@ -86,6 +88,8 @@ def issue_signature(arts: list[Article], df: dict[str, int], n_docs: int, limit:
 # 신문 5곳 1면) 때문에 다른 1면 기사(청해부대 — 경향 1면 머리·조선 1면)가 0.4 로 눌려 1면에서 빠졌다.
 # 이 식으로는 한 곳 1면 머리 0.49, 두 곳 0.74, 다섯 곳(순위 섞임) 0.85~0.9
 HEADLINE_SCALE = 1.5
+PAGE_WEIGHT = {2: 0.2, 3: 0.2, 4: 0.1, 5: 0.1, 6: 0.1}   # S47 지면 비중: 신문 A2~A3 0.2, A4~A6 0.1 (× 그 신문 가중치)
+PAGE_SHARE = 0.5   # 지면 비중 항의 비중 = 머리기사 가중치(weights.headline)의 절반. 1면 선정(frontline)에는 안 넣는다
 
 TIMELINE_MAX = 7  # 지난 경과로 들고 다니는 앞선 호 수
 
@@ -199,7 +203,7 @@ def score_issues(
     topic_override: dict[str, str] | None = None,
 ) -> list[ScoredIssue]:
     """topic_override: 이슈 id → 분야 (S21b AI 분류). 없는 이슈는 키워드 규칙(classify)."""
-    from .headlines import RANK_WEIGHT, group_members, issue_headlines
+    from .headlines import RANK_WEIGHT, group_members, issue_headlines, issue_pages
 
     # 같은 기사거리 묶음에 든 이슈끼리는 같은 사건 이웃(near)으로 — 편집에서 한 기사로 합친다
     owner = {a: iss.id for iss in issues for a in iss.article_ids}
@@ -215,6 +219,7 @@ def score_issues(
     rows = []
     all_arts = [articles[i] for iss in issues for i in iss.article_ids]
     df = title_df(all_arts)
+    src_weight = {a.source: a.weight for a in all_arts}
     for iss in issues:
         arts = [articles[i] for i in iss.article_ids]
         topic = (topic_override or {}).get(iss.id) or classify(arts)
@@ -232,6 +237,9 @@ def score_issues(
         hl_by = issue_headlines(headlines or [], iss.article_ids)
         hl_raw = sum(RANK_WEIGHT.get(r, 0) * by_source.get(src, articles[iss.article_ids[0]]).weight
                      for src, (r, _) in hl_by.items())
+        pg_by = issue_pages(headlines or [], iss.article_ids, {src for src, (_, via) in hl_by.items() if via == "naver_a1"})
+        pg_raw = sum(PAGE_WEIGHT.get(int(pg[1:]), 0) * src_weight.get(src, 1.0) for src, pg in pg_by.items())
+        hl_by = (hl_by, pg_by, pg_raw)
         prev = None   # 지난 호 연결은 모든 이슈의 시그니처가 나온 뒤 한꺼번에 (1:1 배정)
         days = 1
         hit = table.topic_weights.get(topic, 0) >= 1 or any(k.lower() in titles.lower() for k in table.keywords)
@@ -250,11 +258,13 @@ def score_issues(
     wsum = w.attention + w.importance + w.continuity + w.interest + w.headline
     front_wsum = (w.attention + w.importance + w.front_headline) or 1
     out = []
-    for iss, topic, a, i, it, days, hit, sig, raw, tl, hl, hl_by in rows:
+    wsum += PAGE_SHARE * w.headline
+    for iss, topic, a, i, it, days, hit, sig, raw, tl, hl, (hl_by, pg_by, pg_raw) in rows:
         att, imp, inte = a / max_att, i / max_imp, min(it / max_int, 1.0)
         cont = min(days - 1, 6) / 6
         head = 1 - math.exp(-hl / HEADLINE_SCALE)
-        base = w.attention * att + w.importance * imp + w.continuity * cont + w.headline * head
+        page = 1 - math.exp(-pg_raw / HEADLINE_SCALE)
+        base = w.attention * att + w.importance * imp + w.continuity * cont + w.headline * head + PAGE_SHARE * w.headline * page
         out.append(
             ScoredIssue(
                 issue=iss, topic=topic,
@@ -263,7 +273,7 @@ def score_issues(
                 frontline=round((w.attention * att + w.importance * imp + w.front_headline * head) / front_wsum, 4),
                 final_no_interest=round(base / ((wsum - w.interest) or 1), 4),
                 days=days, interest_hit=hit, signature=sig, raw=raw, timeline=tl,
-                headline=round(head, 4), headline_by=hl_by,
+                headline=round(head, 4), headline_by=hl_by, pages=round(page, 4), pages_by=pg_by,
             )
         )
     return out

@@ -39,11 +39,12 @@ class Headline:
     source: str
     rank: int
     title: str
-    via: str                  # naver_a1 / feed / homepage
+    via: str                  # naver_a1 / feed / homepage / naver_page (S47: 신문 A2~A6면 — 지면 비중에만 씀)
     url: str | None = None
     article_id: str | None = None
     how: str | None = None    # 맞춘 방법: url / title / embed (못 맞추면 None)
     group: int | None = None  # 같은 기사거리(여러 매체가 각자 다른 기사로 1면에 올린 같은 주제) 번호
+    page: str | None = None   # 신문 면 ("A1"·"A3") — naver_a1·naver_page 만 (S47)
 
 
 def _text(html: str) -> str:
@@ -59,6 +60,21 @@ def norm_url(u: str) -> str:
 def parse_naver_a1(html: str) -> list[str]:
     m = _A1.search(html)
     return [_text(t) for t in _STRONG.findall(m.group(2))][:TOP_N] if m else []
+
+
+# S47: 같은 페이지의 A섹션(또는 번호만 있는 면) 1~6면 — 신문이 한 이슈에 몇 면을 썼는지 (지면 비중)
+_PAGE = re.compile(r'<em>(A?)(\d+)</em>면</span></h3>\s*<ul class="newspaper_article_lst">(.*?)</ul>', re.S)
+PAGE_MAX = 6
+
+
+def parse_naver_pages(html: str) -> list[tuple[str, int, str]]:
+    """[(면 "A1"~"A6", 그 면 안 순서, 제목)]. "1면"·"A1" 은 모두 A1, B·C·E 섹션은 읽지 않는다."""
+    out = []
+    for m in _PAGE.finditer(html):
+        n = int(m.group(2))
+        if 1 <= n <= PAGE_MAX:
+            out += [(f"A{n}", k, t) for k, t in enumerate((_text(x) for x in _STRONG.findall(m.group(3))), 1) if t]
+    return out
 
 
 def parse_feed(xml: bytes) -> list[tuple[str, str]]:
@@ -97,10 +113,14 @@ async def fetch(sources, edition: date, day_articles: list[Article], client=None
     async def one(src) -> tuple[str, list[Headline], str]:
         tried = []
         for h in src.headline:
+            pages: list[Headline] = []
             try:
                 if h.kind == "naver_a1":
                     r = await client.get(f"https://media.naver.com/press/{h.press}/newspaper", params={"date": edition.strftime("%Y%m%d")})
                     rows = [(t, None) for t in parse_naver_a1(r.text)] if r.status_code == 200 else []
+                    if rows:   # S47: 같은 페이지의 A2~A6면 (지면 비중). 머리기사 경로(묶음·1면 표시)에는 안 들어간다
+                        pages = [Headline(src.name, k, t, "naver_page", page=pg)
+                                 for pg, k, t in parse_naver_pages(r.text) if pg != "A1"]
                 elif h.kind == "feed":
                     r = await client.get(h.url)
                     rows = parse_feed(r.content) if r.status_code == 200 else []
@@ -111,7 +131,9 @@ async def fetch(sources, edition: date, day_articles: list[Article], client=None
                 tried.append(f"{h.kind} {type(e).__name__}")
                 continue
             if rows:
-                return src.name, [Headline(src.name, i, t, h.kind, u) for i, (t, u) in enumerate(rows, 1) if t], h.kind
+                heads = [Headline(src.name, i, t, h.kind, u, page="A1" if h.kind == "naver_a1" else None)
+                         for i, (t, u) in enumerate(rows, 1) if t]
+                return src.name, heads + pages, h.kind
             tried.append(f"{h.kind} {r.status_code if r.status_code != 200 else '없음'}")
         return src.name, [], " / ".join(tried) or "설정 없음"
 
@@ -136,6 +158,7 @@ def _jac(a: str, b: str) -> float:
 LEX_MIN = 0.3        # 제목 글자 2-gram 자카드 (10/16자 1면 21건: 같은 기사 0.37~1.0, 다른 기사 0.05)
 EMB_MIN = 0.90       # 또는 임베딩 유사도 + 2위와의 차이 (틀린 2건은 0.842·0.851, 2위와 차 0.01)
 EMB_GAP = 0.03
+PAGE_CROSS_LEX = 0.5   # S47: 신문 A2~A6면 제목을 다른 매체 기사와 맞출 때 — 같은 매체(0.3)보다 엄하게
 
 
 def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray | None = None, embed=None) -> None:
@@ -145,10 +168,26 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
         if len(title_key(a.title)) >= MIN_TITLE:
             pos.setdefault(a.source, []).append(i)
     url_ix = {norm_url(a.url): i for i, a in enumerate(day_articles)}
+    ko = [i for i, a in enumerate(day_articles) if a.lang == "ko" and len(title_key(a.title)) >= MIN_TITLE]
     need = []
     for h in heads:
         idx = pos.get(h.source, [])
-        if not idx or len(title_key(h.title)) < MIN_TITLE:
+        if len(title_key(h.title)) < MIN_TITLE:
+            continue
+        if h.via == "naver_page":
+            # S47: 신문 A2~A6면 제목 — 같은 신문 기사 먼저, 없으면 그날 국내 기사 전체에서 (그 신문 온라인 기사가 수집에 없는 날이 많다)
+            own = [(_jac(h.title, day_articles[i].title), i) for i in idx]
+            best, bi = max(own, default=(0.0, -1))
+            if best >= LEX_MIN:
+                h.article_id, h.how = day_articles[bi].id, "title"
+                continue
+            cross = max(((_jac(h.title, day_articles[i].title), i) for i in ko), default=(0.0, -1))
+            if cross[0] >= PAGE_CROSS_LEX:
+                h.article_id, h.how = day_articles[cross[1]].id, "title-cross"
+            else:
+                need.append((h, ko))
+            continue
+        if not idx:
             continue
         if h.url and (i := url_ix.get(norm_url(h.url))) is not None and i in idx:
             h.article_id, h.how = day_articles[i].id, "url"
@@ -165,8 +204,9 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
             cos = vecs[idx] @ v
             order = np.argsort(cos)[::-1]
             gap = cos[order[0]] - (cos[order[1]] if len(order) > 1 else 0)
-            if cos[order[0]] >= EMB_MIN and gap >= EMB_GAP:
-                h.article_id, h.how = day_articles[idx[order[0]]].id, "embed"
+            # 다른 매체로 맞출 때는 같은 사건 기사가 여럿이라 2위와 차이가 작다 — 그 기준은 같은 매체 안에서만 (S47)
+            if cos[order[0]] >= EMB_MIN and (gap >= EMB_GAP or h.via == "naver_page"):
+                h.article_id, h.how = day_articles[idx[order[0]]].id, "embed" if h.via != "naver_page" else "embed-cross"
 
 
 GROUP_COS = 0.90   # LLM 없이 묶을 때: 같은 언어 기사 임베딩 코사인 (10/16자: 같은 주제 0.891~0.954, 다른 주제 최고 0.892 → 보수적으로)
@@ -185,7 +225,7 @@ def group(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
     돌려주는 값: 쓴 방법."""
     import json as _json
 
-    hs = [h for h in heads if h.article_id]
+    hs = [h for h in heads if h.article_id and h.via != "naver_page"]   # S47: 지면 비중 줄은 기사거리 묶음에 안 넣는다
     if len(hs) < 2:
         return "없음"
     groups: list[list[int]] | None = None
@@ -232,6 +272,7 @@ def issue_headlines(heads: list[dict], issue_articles: list[str]) -> dict[str, l
     """이슈에 실린 매체 머리기사: 매체 → [가장 높은 순위, 얻은 곳(naver_a1/feed/homepage)].
     이 이슈의 기사가 든 기사거리 묶음(group)의 다른 매체 머리기사도 함께 센다 (매체마다 다른 기사로 같은 주제를 1면에 올림)."""
     ids = set(issue_articles)
+    heads = [h for h in heads if h.get("via") != "naver_page"]   # S47: 지면 비중 줄은 issue_pages 로만
     groups = {h["group"] for h in heads if h.get("article_id") in ids and h.get("group") is not None}
     out: dict[str, list] = {}
     for h in heads:
@@ -245,6 +286,19 @@ def group_members(heads: list[dict]) -> list[set[str]]:
     """기사거리 묶음별 기사 id 집합 (편집에서 같은 묶음 이슈를 한 기사로 합칠 때)."""
     by: dict[int, set[str]] = {}
     for h in heads:
-        if h.get("group") is not None and h.get("article_id"):
+        if h.get("group") is not None and h.get("article_id") and h.get("via") != "naver_page":
             by.setdefault(h["group"], set()).add(h["article_id"])
     return list(by.values())
+
+
+def issue_pages(heads: list[dict], issue_articles: list[str], a1_sources: set[str] = frozenset()) -> dict[str, str]:
+    """이슈를 A2~A6면에 실은 국내 신문: 신문 → 가장 앞 면 (S47 지면 비중). a1_sources(이 이슈를 직접 A1 에 실은 신문)는 뺀다."""
+    ids = set(issue_articles)
+    out: dict[str, str] = {}
+    for h in heads:
+        if h.get("via") != "naver_page" or h.get("article_id") not in ids or h["source"] in a1_sources:
+            continue
+        pg = h.get("page") or "A9"
+        if h["source"] not in out or int(pg[1:]) < int(out[h["source"]][1:]):
+            out[h["source"]] = pg
+    return out

@@ -442,9 +442,12 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             "reserve": p.reserve,
             "scores": {
                 "attention": s.attention, "importance": s.importance, "continuity": s.continuity,
-                "interest": s.interest, "final": s.final, "headline": s.headline, "frontline": s.frontline,
+                "interest": s.interest, "final": s.final, "headline": s.headline, "frontline": s.frontline, "pages": s.pages,
             },
             "headline_by": {**s.headline_by, **{k: v for m in p.merged for k, v in m.headline_by.items() if k not in s.headline_by}},
+            # 지면 비중 (S47): 신문 → A2~A6 면. 합친 이슈까지, 1면(A1)에 실은 신문은 뺀다
+            "pages_by": {k: v for k, v in sorted({**{k: v for m in reversed(p.merged) for k, v in m.pages_by.items()}, **s.pages_by}.items())
+                         if not any(k in x.headline_by and x.headline_by[k][1] == "naver_a1" for x in [s, *p.merged])},
             "coverage": coverage,
             "merged": [m.issue.id for m in p.merged],
             "related": [item(r) for r in p.related],

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import asdict
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
@@ -54,6 +55,16 @@ def target_edition(now: datetime, cfg: Config) -> date:
     return current_edition(now, cfg) + timedelta(days=1)
 
 
+# 여러 소식을 모은 기사 (S47): 한 기사에 여러 사건이 섞여 이슈 묶음을 삼킨다 (11/13 "[연합뉴스 이 시각 헤드라인]" 이
+# 충청 메가프로젝트 기사들을 끌어감). 운세도 기사가 아니다
+ROUNDUP = re.compile(r"이\s?시각\s?헤드라인|(?:^|[\[〈<(（【\s])(?:주요\s?뉴스|뉴스\s?브리핑|모닝\s?브리핑|오늘의\s?주요\s?(?:뉴스|일정)|헤드라인\s?뉴스)\s*[\]〉>)）】:]|"
+                     r"오늘의\s?운세|띠별\s?운세|별자리\s?운세")
+
+
+def is_roundup(title: str) -> bool:
+    return bool(ROUNDUP.search(title))
+
+
 LATE_MARKET = timedelta(hours=3)   # 시간창 끝 뒤 이만큼까지 나온 시황 기사는 이번 호에 넣는다 (S28e)
 
 
@@ -71,7 +82,7 @@ def prepare(
     late = 0
     by_name = {s.name: s for s in sources.sources}
     names = frozenset(by_name)
-    no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = empty = 0
+    no_date = out_of_window = dup_title = disabled = wrong_lang = opinion = empty = roundup = 0
     in_window: list[Article] = []
     for a in store.values():
         src = by_name.get(a.source)
@@ -80,6 +91,9 @@ def prepare(
             continue
         if empty_title(a.title, names):   # 제목이 "- 중앙일보" 처럼 매체 이름·기호뿐 (S24d)
             empty += 1
+            continue
+        if is_roundup(a.title):
+            roundup += 1
             continue
         if src.langs and a.lang not in src.langs:
             wrong_lang += 1
@@ -136,6 +150,7 @@ def prepare(
         "dropped_source_disabled": disabled,
         "dropped_wrong_lang": wrong_lang,
         "dropped_empty_title": empty,
+        "dropped_roundup": roundup,
         "dropped_no_date": no_date,
         "opinion_separated": opinion,
         "dropped_out_of_window": out_of_window,

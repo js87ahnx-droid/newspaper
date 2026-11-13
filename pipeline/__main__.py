@@ -146,7 +146,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
     write_atomic(Path(args.data, "run-report.json"), json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     print(
         f"{edition} 호: 기사 {report['articles']}건 "
-        f"(시간창 밖 {report['dropped_out_of_window']}, 시간창 뒤 시황 넣음 {report['late_market']}, 시각 없음 {report['dropped_no_date']}, "
+        f"(시간창 밖 {report['dropped_out_of_window']}, 시간창 뒤 시황 넣음 {report['late_market']}, 시각 없음 {report['dropped_no_date']}, 모음 기사 {report.get('dropped_roundup', 0)}, "
         f"꺼진 매체 {report['dropped_source_disabled']}, 언어 제외 {report['dropped_wrong_lang']}, "
         f"논평·사설 분리 {report['opinion_separated']} (사설 {report['opinions']['editorial']}·칼럼 {report['opinions']['column']}), "
         f"같은 제목 병합 {report['merged_same_title']}), 분석·해설 {report['analysis']}, 지정 칼럼 {report['picks']}, 수집 실행 {len(runs)}회, 오래된 호별 파일 정리 {pruned}"
@@ -396,10 +396,15 @@ def cmd_headlines(args: argparse.Namespace) -> int:
             ask = lambda prompt: call(prompt, cfg.llm, budget, model=cfg.llm.analysis_model)[0]  # noqa: E731
     how = group(heads, arts, vecs, ask)
     write_atomic(raw / f"{args.date}.headlines.json", json.dumps(to_json(heads), ensure_ascii=False, indent=1), encoding="utf-8")
-    got = {h.source for h in heads}
-    matched = sum(1 for h in heads if h.article_id)
-    groups = len({h.group for h in heads if h.group is not None})
-    print(f"{args.date} 호 머리기사: 매체 {len(got)}/{len(status)}곳, {len(heads)}건 중 기사와 맞춤 {matched}건, 같은 기사거리 {groups}묶음({how})"
+    pages = [h for h in heads if h.via == "naver_page"]   # S47 지면 비중 — 머리기사 수에는 안 셈
+    heads_only = [h for h in heads if h.via != "naver_page"]
+    got = {h.source for h in heads_only}
+    matched = sum(1 for h in heads_only if h.article_id)
+    groups = len({h.group for h in heads_only if h.group is not None})
+    no_pages = [h for h in {x.source for x in heads_only if x.via == "naver_a1"} if not any(p.source == h for p in pages)]
+    print(f"{args.date} 호 머리기사: 매체 {len(got)}/{len(status)}곳, {len(heads_only)}건 중 기사와 맞춤 {matched}건, 같은 기사거리 {groups}묶음({how})"
+          f" | 신문 A2~A6면 {len(pages)}건 중 맞춤 {sum(1 for h in pages if h.article_id)}건(다른 매체로 {sum(1 for h in pages if (h.how or '').endswith('cross'))})"
+          f"{f', 면 0: {no_pages}' if no_pages else ''}"
           f" | 못 얻음: {[f'{k}({v})' for k, v in status.items() if k not in got]}")
     return 0
 

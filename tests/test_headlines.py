@@ -138,3 +138,79 @@ def test_short_menu_titles_never_match():
     h = H.Headline("CNN", 1, "Business", "homepage", url="https://edition.cnn.com/business")
     H.match([h], arts)
     assert h.article_id is None
+
+
+# ---- S47 신문 A2~A6면 (지면 비중) ----
+from pathlib import Path  # noqa: E402
+
+PAGES = Path(__file__).parent / "data" / "naver_1113"
+
+
+def test_parse_naver_pages_on_saved_1113_pages():
+    """저장된 11/13 네이버 신문 보기 7곳(면 번호·제목만): A1~A6 만, "1면"(한겨레)·"A1" 둘 다, B·E 섹션은 안 읽음. A1 은 기존과 같음."""
+    for f in sorted(PAGES.glob("*.html")):
+        html = f.read_text(encoding="utf-8")
+        rows = H.parse_naver_pages(html)
+        pages = {pg for pg, _, _ in rows}
+        assert pages <= {f"A{n}" for n in range(1, 7)} and "A1" in pages and len(pages) >= 4, (f.name, pages)
+        assert [t for pg, _, t in rows if pg == "A1"][: H.TOP_N] == H.parse_naver_a1(html), f.name
+        a3 = [k for pg, k, _ in rows if pg == "A3"]
+        assert a3 == list(range(1, len(a3) + 1))   # 면 안 순서
+    joongang = H.parse_naver_pages((PAGES / "025.html").read_text(encoding="utf-8"))
+    assert not any(t.startswith("성북·구로마저") for _, _, t in joongang)   # E1면(경제 섹션)은 안 읽음
+
+
+def _page_heads():
+    return [
+        H.Headline("동아일보", 1, "AI 록스타 몰락하다… 젠슨 황, 불륜으로 엔비디아 CEO 사임", "naver_a1", article_id="a1", page="A1", group=0),
+        H.Headline("한겨레", 1, "젠슨 황 결국 불명예 퇴진", "naver_a1", article_id="a2", page="A1", group=0),
+        H.Headline("동아일보", 2, "베선트 “메가스피드 제재” 러트닉 “中과 무역전쟁 될것”… 백악관 충돌", "naver_page", article_id="a3", page="A4"),
+        H.Headline("한겨레", 1, "미 정부 ‘경제 투톱’ 젠슨 황 스캔들 충돌", "naver_page", article_id="a3", page="A3"),
+        H.Headline("한겨레", 2, "젠슨 황 퇴진 기로", "naver_page", article_id="a1", page="A3"),   # 한겨레는 같은 사건을 A1 에도 — 안 셈
+    ]
+
+
+def test_page_rows_stay_out_of_headline_paths():
+    """naver_page 는 1면·머리기사 표시, 기사거리 묶음, 같은 사건 이웃 어디에도 안 들어간다 (S47 리뷰)."""
+    heads = _page_heads()
+    js = H.to_json(heads)
+    by = H.issue_headlines(js, ["a3"])
+    assert by == {}   # A4·A3 면만 있는 이슈는 1면·머리기사 표시 없음
+    assert all("a3" not in m for m in H.group_members(js))
+    calls = []
+    H.group(heads, [art(1, "동아일보", "x" * 20)], None, ask=lambda p: calls.append(p) or {"groups": []})
+    assert calls and "백악관 충돌" not in calls[0] and "퇴진 기로" not in calls[0]
+
+
+def test_issue_pages_counts_each_paper_once_and_skips_its_a1():
+    js = H.to_json(_page_heads())
+    assert H.issue_pages(js, ["a3"]) == {"동아일보": "A4", "한겨레": "A3"}
+    assert H.issue_pages(js, ["a1"], {"동아일보", "한겨레"}) == {}   # 그 신문이 A1 에 실은 이슈는 안 셈
+
+
+def test_page_titles_fall_back_to_other_outlets():
+    """같은 신문 기사가 수집에 없으면 다른 매체 같은 기사와 맞춘다 (자카드 0.5 이상). 비슷하지 않으면 안 맞춤."""
+    arts = [art(1, "연합뉴스", "베선트 “메가스피드 제재” 러트닉 “中과 무역전쟁 될것”…백악관 충돌"),
+            art(2, "연합뉴스", "국토장관 재초환 집값 안정 효과 있지만 재산권 침해도")]
+    hs = [H.Headline("중앙일보", 1, "베선트 “메가스피드 제재” 러트닉 “中과 무역전쟁 될것”… 백악관 충돌", "naver_page", page="A3"),
+          H.Headline("중앙일보", 2, "엔비디아 플랜B 있나 하루아침에 안 무너져 엇갈린 진단", "naver_page", page="A4")]
+    H.match(hs, arts)
+    assert (hs[0].article_id, hs[0].how) == ("a1", "title-cross")
+    assert hs[1].article_id is None
+    # 1면(naver_a1)은 지금처럼 같은 매체 기사하고만
+    a1 = [H.Headline("중앙일보", 1, hs[0].title, "naver_a1", page="A1")]
+    H.match(a1, arts)
+    assert a1[0].article_id is None
+
+
+def test_fetch_adds_page_rows_after_a1():
+    srcs = Sources.model_validate({"sources": [
+        {"name": "중앙일보", "country": "KR", "lean": "보수", "type": "종합지", "weight": 1.0, "paywall": False, "enabled": True,
+         "feeds": [{"section": "top", "url": "https://j.test/rss"}], "headline": [{"kind": "naver_a1", "press": "025"}]}]})
+    html = (PAGES / "025.html").read_text(encoding="utf-8")
+    client = httpx.AsyncClient(transport=httpx.MockTransport(lambda req: httpx.Response(200, text=html)))
+    heads, status = asyncio.run(H.fetch(srcs, date(2026, 11, 13), [], client=client))
+    a1 = [h for h in heads if h.via == "naver_a1"]
+    pg = [h for h in heads if h.via == "naver_page"]
+    assert [h.page for h in a1] == ["A1"] * len(a1) and len(a1) <= H.TOP_N and status["중앙일보"] == "naver_a1"
+    assert pg and {h.page for h in pg} <= {"A2", "A3", "A4", "A5", "A6"}

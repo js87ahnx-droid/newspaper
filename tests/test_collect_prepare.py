@@ -387,3 +387,21 @@ def test_requested_picks_configured():
     no = ["https://www.nytimes.com/2026/10/22/magazine/billionaire-millionaire-interviews.html",
           "https://www.nytimes.com/2026/10/21/magazine/patient-death-lying-ethics.html"]
     assert re.search(nyt.url_must, ok) and not any(re.search(nyt.url_must, u) for u in no)
+
+
+@pytest.mark.parametrize("title,roundup", [
+    ("[연합뉴스 이 시각 헤드라인] - 14:30", True),
+    ("[주요뉴스] 11월 13일 오후", True),
+    ("모닝브리핑: 젠슨 황 사임, 메가프로젝트 착공", True),
+    ("[오늘의 운세] 11월 13일", True),
+    ("띠별 운세 - 11월 13일 목요일", True),
+    ("헤드라인 뉴스로 본 2026년 한국 경제", False),
+    ("주요 뉴스 플랫폼, AI 요약 경쟁", False),
+    ("운세 앱 이용자 급증… 2030 이 주 고객", False),
+    ("충청서 메가프로젝트 첫삽… 李 '호남-영남 투자도 차질없게'", False),
+])
+def test_roundup_titles(title, roundup):
+    """S47: 여러 소식을 모은 기사·운세는 빼고, 비슷한 낱말이 든 보통 기사는 남긴다."""
+    from pipeline.prepare import is_roundup
+    assert is_roundup(title) is roundup
+

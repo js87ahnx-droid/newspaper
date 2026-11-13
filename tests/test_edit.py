@@ -164,7 +164,7 @@ def test_every_item_has_reasons_and_scores():
     assert items
     for it in items:
         assert it["reasons"]
-        assert set(it["scores"]) == {"attention", "importance", "continuity", "interest", "final", "headline", "frontline"}
+        assert set(it["scores"]) == {"attention", "importance", "continuity", "interest", "final", "headline", "frontline", "pages"}  # pages: 지면 비중 (S47)
         assert all(0 <= v <= 1 for v in it["scores"].values())
 
 
@@ -314,6 +314,32 @@ def test_outlet_headlines_raise_front_and_final():
     assert low.issue.id in front   # 세 곳 1면 머리면 1면에 오른다
     ed0 = arrange(choose(base, CFG, it)[0], CFG, it, arts)
     assert low.issue.id not in {p.scored.issue.id for p in ed0.sections["front"]}   # 머리기사 정보 없이는 1면 밖
+
+
+
+def test_paper_pages_raise_final_but_not_front():
+    """S47 지면 비중: 국내 신문 A2~A6면에 실린 이슈는 최종 점수만 오르고 1면 점수·1면 표시는 그대로. 기사 json 에 pages_by."""
+    arts, issues = build()
+    it = interests_variant("default")
+    base = score_issues(issues, arts, CFG, build_interest_table(it), [])
+    low = sorted(base, key=lambda s: s.final)[len(base) // 2]
+    aid = low.issue.article_ids[0]
+    heads = [{"source": f"신문{k}", "rank": 1, "title": "t", "via": "naver_page", "page": pg, "article_id": aid}
+             for k, pg in enumerate(["A2", "A3", "A5"])]
+    heads.append({"source": "신문0", "rank": 2, "title": "t", "via": "naver_page", "page": "A6", "article_id": aid})   # 같은 신문 둘째 면 — 한 번만
+    scored = score_issues(issues, arts, CFG, build_interest_table(it), [], heads)
+    s = next(x for x in scored if x.issue.id == low.issue.id)
+    b = next(x for x in base if x.issue.id == low.issue.id)
+    assert s.pages_by == {"신문0": "A2", "신문1": "A3", "신문2": "A5"} and s.pages > 0
+    assert s.headline == b.headline == 0 and s.headline_by == {}
+    assert s.frontline == b.frontline and s.final > b.final and s.final_no_interest > b.final_no_interest
+    others = [x for x in scored if x.issue.id != low.issue.id]
+    assert all(x.pages == 0 and x.pages_by == {} for x in others)
+    placed, stats = choose(scored, CFG, it)
+    out = edition_to_json(arrange(placed, CFG, it, arts), "2026-10-16", arts, stats)
+    items = [x for ps in out["sections"].values() for x in ps]
+    hit = [x for x in items if x["issue_id"] == low.issue.id]
+    assert not hit or hit[0]["pages_by"] == s.pages_by
 
 
 # ---------- S21 분야 분류·면 구성·호 단위 예산 ----------
