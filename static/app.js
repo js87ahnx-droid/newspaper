@@ -203,7 +203,27 @@
   // ---------- 단신 탭 쪽 (S47, 사용자 시안 B) ----------
   // 분야 탭(전체·분야별 건수) + 고른 탭의 위 BRIEF_TOP 건(쪽에 들어가는 만큼) 한 줄. 전체 목록은 "모두 보기" → 자세히 창
   var BRIEF_TOP = 10;
-  var briefAll = [];
+  var briefAll = [], briefTabSeq = 0;
+  function selectBriefTab(bt, focus) {
+    var box = bt.closest(".btabs");
+    Array.prototype.forEach.call(box.querySelectorAll("[data-bt]"), function (x) {
+      var on = x === bt;
+      x.setAttribute("aria-selected", on ? "true" : "false");
+      x.tabIndex = on ? 0 : -1;
+    });
+    Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x) { x.hidden = x.getAttribute("data-bt-list") !== bt.getAttribute("data-bt"); });
+    if (focus) bt.focus();
+  }
+  document.addEventListener("keydown", function (e) {   // 탭: 좌우 화살표·Home·End
+    var bt = e.target && e.target.closest ? e.target.closest("[data-bt]") : null;
+    if (!bt) return;
+    var all = Array.prototype.slice.call(bt.closest(".bt-tabs").querySelectorAll("[data-bt]"));
+    var i = all.indexOf(bt), to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: all.length - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    e.stopPropagation();   // 지면 넘기기 화살표와 겹치지 않게
+    selectBriefTab(all[(to + all.length) % all.length], true);
+  }, true);
   function briefRow(el) {
     var li = mk("li", "bt-row");
     li.setAttribute("data-issue", el.getAttribute("data-issue"));
@@ -237,18 +257,24 @@
     allBtn.setAttribute("data-bt-all", "1");
     box.appendChild(allBtn);
     var groups = [{ key: "all", name: "전체", els: els }].concat(briefGroups(els));
+    briefTabSeq++;
     groups.forEach(function (gr, i) {
       var b = mk("button", "bt-tab", gr.name + " " + gr.els.length);
       b.type = "button";
+      b.id = "bt-" + briefTabSeq + "-" + gr.key;
       b.setAttribute("role", "tab");
       b.setAttribute("data-bt", gr.key);
+      b.setAttribute("aria-controls", "btl-" + briefTabSeq + "-" + gr.key);
       b.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      b.tabIndex = i === 0 ? 0 : -1;   // 탭 목록은 한 번에 들어가고, 안에서는 화살표로 (roving tabindex)
       tabs.appendChild(b);
     });
     groups.forEach(function (gr) {
       var ol = mk("ol", "bt-list");
+      ol.id = "btl-" + briefTabSeq + "-" + gr.key;
       ol.setAttribute("data-bt-list", gr.key);
       ol.setAttribute("role", "tabpanel");
+      ol.setAttribute("aria-labelledby", "bt-" + briefTabSeq + "-" + gr.key);
       box.insertBefore(ol, allBtn);
       // 쪽에 들어가는 만큼만 (휴대폰은 10건이 다 안 들어갈 수 있다) — 재는 동안은 이 목록만 보인다
       Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x) { x.hidden = x !== ol; });
@@ -460,6 +486,7 @@
     } else {
       built.briefs = [];
       dropped += pool.length;
+      briefAll = [];
     }
     var total = 0;
     Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
@@ -1027,6 +1054,13 @@
     var mb = node.querySelector("[data-more]");
     if (mb) mb.remove();
     var body = reader.querySelector(".reader-body");
+    var list = !reader.hidden && body.querySelector(".bt-full") ? Array.prototype.slice.call(body.childNodes) : null;
+    if (list) {   // 단신 모두 보기에서 열었으면 목록으로 돌아가기 (S47 리뷰)
+      var bb = mk("button", "rv-back", "← 단신 목록");
+      bb.type = "button";
+      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", "단신 모두 보기"); });
+      node.insertBefore(bb, node.firstChild);
+    }
     body.innerHTML = "";
     body.appendChild(node);
     readSeq++;
@@ -1243,12 +1277,7 @@
     if (ev && window.NEWS_FB && t.closest(".ev-skip-btn")) { window.NEWS_FB.addKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-undo").focus(); return; }
     if (ev && window.NEWS_FB && t.closest(".ev-undo")) { window.NEWS_FB.removeKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-skip-btn").focus(); return; }
     var bt = t.closest("[data-bt]");                            // 단신 분야 탭 (S47)
-    if (bt) {
-      var box = bt.closest(".btabs");
-      Array.prototype.forEach.call(box.querySelectorAll("[data-bt]"), function (x) { x.setAttribute("aria-selected", x === bt ? "true" : "false"); });
-      Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x) { x.hidden = x.getAttribute("data-bt-list") !== bt.getAttribute("data-bt"); });
-      return;
-    }
+    if (bt) { selectBriefTab(bt, false); return; }
     if (t.closest("[data-bt-all]")) { openBriefAll(); return; }   // 단신 모두 보기 → 창
     var d = t.closest("a[data-detail]");                      // 기사 제목 → AI 정리(자세히 창)
     if (d && !mod) { e.preventDefault(); var ai = d.closest("[data-issue]"); if (ai) openReader(ai.getAttribute("data-issue")); return; }

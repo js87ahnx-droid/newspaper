@@ -60,11 +60,22 @@ def test_jonghap_and_folded_briefs(browser, tmp_path, w, h):
     page.locator(".page.sec-briefs .bt-tab:visible").nth(1).click()
     vis = page.locator(".page.sec-briefs .bt-list:not([hidden])").first
     assert vis.get_attribute("data-bt-list") != "all" and vis.locator(".bt-row").count() <= int(tab.text_content().split()[-1])
+    # 키보드: 탭 목록 안은 화살표로 (roving tabindex)
+    first = page.locator(".page.sec-briefs .bt-tab:visible").first
+    first.focus()
+    page.keyboard.press("ArrowRight")
+    assert page.evaluate("() => document.activeElement.getAttribute('aria-selected')") == "true"
+    assert page.evaluate("() => [...document.activeElement.parentNode.children].filter(b => b.tabIndex === 0).length") == 1
     # 모두 보기 → 창에 전체
     page.locator(".page.sec-briefs .bt-all:visible").first.click()
     page.wait_for_selector("#reader:not([hidden]) .bt-full")
     assert page.locator("#reader .bt-full .item.brief").count() == total
     assert name in page.locator("#reader .bt-full").text_content()
+    # 목록에서 기사를 누르면 자세히, "← 단신 목록"으로 돌아감
+    page.locator("#reader .bt-full .item.brief .hl a").first.click()
+    page.wait_for_selector("#reader .rv-back")
+    page.locator("#reader .rv-back").click()
+    assert page.locator("#reader .bt-full .item.brief").count() == total
     ctx.close()
 
 

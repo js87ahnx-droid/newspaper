@@ -45,6 +45,7 @@ class Headline:
     how: str | None = None    # 맞춘 방법: url / title / embed (못 맞추면 None)
     group: int | None = None  # 같은 기사거리(여러 매체가 각자 다른 기사로 1면에 올린 같은 주제) 번호
     page: str | None = None   # 신문 면 ("A1"·"A3") — naver_a1·naver_page 만 (S47)
+    weight: float | None = None   # 그 신문의 매체 가중치 (sources.yaml) — 지면 비중 점수에 (S47)
 
 
 def _text(html: str) -> str:
@@ -119,7 +120,7 @@ async def fetch(sources, edition: date, day_articles: list[Article], client=None
                     r = await client.get(f"https://media.naver.com/press/{h.press}/newspaper", params={"date": edition.strftime("%Y%m%d")})
                     rows = [(t, None) for t in parse_naver_a1(r.text)] if r.status_code == 200 else []
                     if rows:   # S47: 같은 페이지의 A2~A6면 (지면 비중). 머리기사 경로(묶음·1면 표시)에는 안 들어간다
-                        pages = [Headline(src.name, k, t, "naver_page", page=pg)
+                        pages = [Headline(src.name, k, t, "naver_page", page=pg, weight=src.weight)
                                  for pg, k, t in parse_naver_pages(r.text) if pg != "A1"]
                 elif h.kind == "feed":
                     r = await client.get(h.url)
@@ -159,6 +160,7 @@ LEX_MIN = 0.3        # 제목 글자 2-gram 자카드 (10/16자 1면 21건: 같�
 EMB_MIN = 0.90       # 또는 임베딩 유사도 + 2위와의 차이 (틀린 2건은 0.842·0.851, 2위와 차 0.01)
 EMB_GAP = 0.03
 PAGE_CROSS_LEX = 0.5   # S47: 신문 A2~A6면 제목을 다른 매체 기사와 맞출 때 — 같은 매체(0.3)보다 엄하게
+PAGE_CROSS_EMB = 0.93  # 다른 매체로 임베딩 맞출 때: 같은 사건 기사가 여럿이라 2위와 차이는 안 보고, 대신 기준을 올린다 (S47 리뷰)
 
 
 def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray | None = None, embed=None) -> None:
@@ -198,6 +200,7 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
             h.article_id, h.how = day_articles[bi].id, "title"
         else:
             need.append((h, idx))
+    need = [(h, idx) for h, idx in need if idx]   # 맞출 기사가 없으면 건너뜀 (S47 리뷰: 빈 목록이면 order[0] 오류)
     if need and vecs is not None and embed is not None:
         hv = embed([h.title for h, _ in need])
         for (h, idx), v in zip(need, hv):
@@ -205,7 +208,7 @@ def match(heads: list[Headline], day_articles: list[Article], vecs: np.ndarray |
             order = np.argsort(cos)[::-1]
             gap = cos[order[0]] - (cos[order[1]] if len(order) > 1 else 0)
             # 다른 매체로 맞출 때는 같은 사건 기사가 여럿이라 2위와 차이가 작다 — 그 기준은 같은 매체 안에서만 (S47)
-            if cos[order[0]] >= EMB_MIN and (gap >= EMB_GAP or h.via == "naver_page"):
+            if (cos[order[0]] >= EMB_MIN and gap >= EMB_GAP) if h.via != "naver_page" else cos[order[0]] >= PAGE_CROSS_EMB:
                 h.article_id, h.how = day_articles[idx[order[0]]].id, "embed" if h.via != "naver_page" else "embed-cross"
 
 

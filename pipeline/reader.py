@@ -34,6 +34,9 @@ def page_urls(edition: dict) -> list[str]:
     # 분석·해설 면(S22c)·지정 칼럼(S22d)도 — 빠져 있어 Google 뉴스로 받는 조선비즈 지정 칼럼이 원문 창에서 못 열렸다 (S18)
     urls += [a["url"] for a in (edition.get("analysis") or []) + (edition.get("picks") or [])]
     urls += [e["url"] for e in (edition.get("china") or {}).get("evidence", [])]   # 중국은 지금 근거 기사 (S37 — 인민일보는 Google 뉴스 경유)
+    # 종합면 후보 (S47): 1면 메인이 될 만한 기사(1면, 또는 매체 머리기사·신문 지면에 오른 기사)의 후보만 — 전부 풀면 수백 건
+    urls += [a["url"] for it in items if it in edition["sections"].get("front", []) or it.get("headline_by") or it.get("pages_by")
+             for a in (it.get("angles") or [])[:6]]
     return list(dict.fromkeys(urls))
 
 

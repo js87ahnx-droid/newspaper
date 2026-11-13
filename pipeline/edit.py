@@ -412,6 +412,17 @@ ANGLE_MAX = 8            # 기사마다 종합면 후보 수
 ANGLE_PAGES = ("A2", "A3", "A4")   # 신문이 1면 톱을 펼치는 면 (11/13 실측: A2~A4)
 
 
+def _front_pages(issues: list[ScoredIssue]) -> dict[str, str]:
+    """합친 이슈까지 신문마다 가장 앞 면 (S47). 그 신문이 이 기사(합친 이슈 포함)를 1면에 실었으면 뺀다."""
+    out: dict[str, str] = {}
+    for x in issues:
+        for k, v in x.pages_by.items():
+            if k not in out or int(v[1:]) < int(out[k][1:]):
+                out[k] = v
+    return {k: v for k, v in sorted(out.items())
+            if not any(k in x.headline_by and x.headline_by[k][1] == "naver_a1" for x in issues)}
+
+
 def _angle_finder(ed: Edition, scored: list[ScoredIssue]):
     """종합면 후보 (S47): 이 기사와 같은 사건의 다른 이슈 — 합쳐진 이슈(merged), 같은 사건 이웃(near), 이 기사를 A1 에 실은 신문이
     A2~A4면에 함께 실은 이슈 중 시그니처 낱말이 겹치는 것. 지면에 따로 실린 이슈(다른 기사에 합쳐진 것 포함)는 빼고, 점수 순."""
@@ -491,8 +502,7 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             },
             "headline_by": {**s.headline_by, **{k: v for m in p.merged for k, v in m.headline_by.items() if k not in s.headline_by}},
             # 지면 비중 (S47): 신문 → A2~A6 면. 합친 이슈까지, 1면(A1)에 실은 신문은 뺀다
-            "pages_by": {k: v for k, v in sorted({**{k: v for m in reversed(p.merged) for k, v in m.pages_by.items()}, **s.pages_by}.items())
-                         if not any(k in x.headline_by and x.headline_by[k][1] == "naver_a1" for x in [s, *p.merged])},
+            "pages_by": _front_pages([s, *p.merged]),
             "coverage": coverage,
             "merged": [m.issue.id for m in p.merged],
             "related": [item(r) for r in p.related],

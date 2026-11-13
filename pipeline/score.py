@@ -220,6 +220,7 @@ def score_issues(
     all_arts = [articles[i] for iss in issues for i in iss.article_ids]
     df = title_df(all_arts)
     src_weight = {a.source: a.weight for a in all_arts}
+    src_weight.update({h["source"]: h["weight"] for h in headlines or [] if h.get("weight") is not None})   # 신문 자신의 가중치 (S47 리뷰)
     for iss in issues:
         arts = [articles[i] for i in iss.article_ids]
         topic = (topic_override or {}).get(iss.id) or classify(arts)

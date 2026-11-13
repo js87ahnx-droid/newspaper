@@ -327,10 +327,14 @@ def test_paper_pages_raise_final_but_not_front():
     heads = [{"source": f"신문{k}", "rank": 1, "title": "t", "via": "naver_page", "page": pg, "article_id": aid}
              for k, pg in enumerate(["A2", "A3", "A5"])]
     heads.append({"source": "신문0", "rank": 2, "title": "t", "via": "naver_page", "page": "A6", "article_id": aid})   # 같은 신문 둘째 면 — 한 번만
+    for h in heads:
+        h["weight"] = 0.5   # 신문 자신의 가중치 (sources.yaml) — 그날 기사가 없어도 이 값으로
     scored = score_issues(issues, arts, CFG, build_interest_table(it), [], heads)
     s = next(x for x in scored if x.issue.id == low.issue.id)
     b = next(x for x in base if x.issue.id == low.issue.id)
     assert s.pages_by == {"신문0": "A2", "신문1": "A3", "신문2": "A5"} and s.pages > 0
+    import math
+    assert abs(s.pages - (1 - math.exp(-(0.2 * 0.5 + 0.2 * 0.5 + 0.1 * 0.5) / 1.5))) < 1e-3
     assert s.headline == b.headline == 0 and s.headline_by == {}
     assert s.frontline == b.frontline and s.final > b.final and s.final_no_interest > b.final_no_interest
     others = [x for x in scored if x.issue.id != low.issue.id]
@@ -577,3 +581,13 @@ def test_related_ignores_common_fragments():
     attach_related(sections)
     assert host_kq.related == []
     assert {p.scored.issue.id for p in host_ny.related} == {"e957", "e958"}
+
+
+def test_front_pages_keeps_front_most_page_across_merged():
+    """S47 리뷰: 합친 이슈까지 신문마다 가장 앞 면, 그 신문이 1면에 실은 기사면 뺀다."""
+    from types import SimpleNamespace as NS
+    from pipeline.edit import _front_pages
+    a = NS(pages_by={"가": "A5", "나": "A3"}, headline_by={})
+    b = NS(pages_by={"가": "A2", "다": "A4"}, headline_by={"다": [1, "naver_a1"]})
+    assert _front_pages([a, b]) == {"가": "A2", "나": "A3"}
+

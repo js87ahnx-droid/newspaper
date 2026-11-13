@@ -214,3 +214,13 @@ def test_fetch_adds_page_rows_after_a1():
     pg = [h for h in heads if h.via == "naver_page"]
     assert [h.page for h in a1] == ["A1"] * len(a1) and len(a1) <= H.TOP_N and status["중앙일보"] == "naver_a1"
     assert pg and {h.page for h in pg} <= {"A2", "A3", "A4", "A5", "A6"}
+
+
+def test_page_rows_without_korean_articles_do_not_crash():
+    """S47 리뷰: 맞출 국내 기사가 하나도 없으면 임베딩 단계에서 건너뛴다 (전에는 빈 목록에서 order[0] 오류)."""
+    hs = [H.Headline("중앙일보", 1, "엔비디아 플랜B 있나 하루아침에 안 무너져 엇갈린 진단", "naver_page", page="A4")]
+    eng = Article(id="e1", url="https://x.test/1", source="AP", country="US", lean="통신·공영", media_type="통신", weight=1.0,
+                  paywall=False, kind="rss", title="Nvidia CEO resigns after board review", lead="", lang="en",
+                  published="2026-11-12T12:00:00+00:00", date_source="feed", sections=["top"], first_seen="2026-11-12T12:00:00+00:00")
+    H.match(hs, [eng], np.ones((1, 3)) / np.sqrt(3), embed=lambda ts: np.ones((len(ts), 3)) / np.sqrt(3))
+    assert hs[0].article_id is None

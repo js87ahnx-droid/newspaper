@@ -585,7 +585,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
     if day_path.exists():
         # 1면 메인 기사 사진 (S26g): 사진 자리가 아닌 기사가 메인으로 올라오면 그 이슈 기사들의 RSS 대표 이미지로
         imgs = {d["id"]: (d["image"], d["source"]) for d in json.loads(day_path.read_text(encoding="utf-8")) if d.get("image")}
-        for it in (i for ps in edition["sections"].values() for i in ps):
+        for it in (x for ps in edition["sections"].values() for i in ps for x in [i, *(i.get("angles") or [])]):   # 종합면 후보도 (S47)
             alt = next((imgs[a["id"]] for a in it.get("articles", []) if a.get("id") in imgs), None)
             if alt and not it.get("photo"):
                 it["photo_alt"], it["photo_alt_source"] = alt
