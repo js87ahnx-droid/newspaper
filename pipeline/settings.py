@@ -103,7 +103,7 @@ class Editing(Strict):
         return self
 
 
-SectionId = Literal["front", "politics", "economy", "international", "society", "interest", "analysis", "china", "compare", "briefs", "opinion", "guide"]
+SectionId = Literal["front", "jonghap", "politics", "economy", "international", "society", "interest", "analysis", "china", "compare", "briefs", "opinion", "guide"]
 
 
 class Section(Strict):

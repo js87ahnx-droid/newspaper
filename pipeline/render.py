@@ -255,6 +255,47 @@ def front_single(sections: list[dict], country: dict[str, str]) -> None:
     sections.append({"id": "detail", "title": "", "items": [{**lead, "detail": True}]})
 
 
+JONGHAP_MIN, JONGHAP_MAX = 3, 6   # 종합면 기사 수 (S47). 3건이 안 되면 종합면 없음
+JONGHAP_SAME_TITLE = 0.5          # 제목이 이만큼 겹치면 같은 기사로 보고 하나만
+
+
+def jonghap(sections: list[dict], title: str, row) -> None:
+    """종합면 (S47, 사용자 시안 A): 1면 메인 기사의 같은 사건 다른 기사(angles — 편집이 붙임)에서 3~6건.
+    메인 기사·서로와 다른 매체, 제목이 거의 같은 것은 하나만, 점수 순. 지면에 이미 실린 이슈는 뺀다. 1면 바로 뒤에 둔다."""
+    from .headlines import _jac
+
+    front = next((s for s in sections if s["id"] == "front"), None)
+    lead = front and front.get("lead")
+    if not lead:
+        return
+    shown = {lead["issue_id"]}
+    for s in sections:
+        for r in s["items"]:
+            if r.get("reserve"):   # 예비 기사(쪽이 남을 때만 단신·더 읽을 기사)는 종합면에 쓰면 거기서 뺀다
+                continue
+            shown |= {r["issue_id"], *r.get("merged", []), *(x["issue_id"] for x in r.get("related", []))}
+    shown -= set(lead.get("merged", []))
+    picked, srcs, titles = [], {lead.get("source")}, [lead["title"]]
+    for a in lead.get("angles") or []:
+        if len(picked) >= JONGHAP_MAX:
+            break
+        if a["issue_id"] in shown or a.get("source") in srcs or any(_jac(a["title"], t) >= JONGHAP_SAME_TITLE for t in titles):
+            continue
+        picked.append(a)
+        srcs.add(a.get("source"))
+        titles.append(a["title"])
+    if len(picked) < JONGHAP_MIN:
+        return
+    ids = {a["issue_id"] for a in picked}
+    for s in sections:
+        s["items"] = [r for r in s["items"] if r["issue_id"] not in ids]
+    rows = [row(a) for a in picked]
+    for r in rows[1:]:   # 사진은 첫 기사만 (시안 A)
+        r["photo"] = None
+    at = next((k for k, s in enumerate(sections) if s["id"] == "front"), -1) + 1
+    sections.insert(at, {"id": "jonghap", "title": title, "items": rows, "theme": lead["view"]["title"]})
+
+
 REVIEW_SCORES = ("attention", "importance", "headline", "continuity", "interest", "final")
 
 
@@ -357,6 +398,29 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
     titles = {s.id: s.title for s in cfg.sections}
     compare_ids = {it["issue_id"] for it in edition.get("compare", [])}
     rel_ops = related_opinions(edition.get("opinion"))
+
+    def row(it: dict) -> dict:
+        view = _display(it, interests.foreign_display)
+        rep = next((a for a in it["articles"] if a.get("url") == it.get("url")), it["articles"][0])
+        return {
+            **it, "view": view, "photo": larger_photo(it.get("photo")), "headline_label": headline_label(it.get("headline_by", {})),
+            "time": time_label(rep.get("published"), cfg.timezone),
+            # 흐름 (S29b): 오늘 앞선 보도(지난 소식으로 빠졌거나 같은 묶음의 앞선 시점) → 지금 이 기사
+            "updates_view": [{**u, "time": time_label(u.get("published"), cfg.timezone)} for u in it.get("updates", [])],
+            "brief_text": brief_text(it, view),
+            "stance_links": stance_links(it, view.get("analysis")),
+            # 관련 기사 (S22b): 단신에서 옮겨 온 이어진 기사 — 제목(외국어는 번역 제목) → 원문 창
+            "related_view": [{**r, "view": _display(r, interests.foreign_display), "cls": LEAN_CLASS.get(r["lean"], "mid"),
+                              "rep": next((a for a in r["articles"] if a.get("url") == r.get("url")), r["articles"][0])}
+                             for r in it.get("related", [])],
+            # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)
+            "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
+            # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
+            "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", [])),
+            # 관련 사설·칼럼 (S17e): 같은 사건으로 합쳐진 이슈에 연결된 것도
+            "opinions": [o for iid in [it["issue_id"], *it.get("merged", [])] for o in rel_ops.get(iid, [])],
+        }
+
     sections = []
     for s in cfg.sections:
         if s.id in ("compare", "guide", "opinion"):
@@ -381,30 +445,9 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         items = edition["sections"].get(s.id, [])
         if not items:
             continue
-        rows = []
-        for it in items:
-            view = _display(it, interests.foreign_display)
-            rep = next((a for a in it["articles"] if a.get("url") == it.get("url")), it["articles"][0])
-            rows.append({
-                **it, "view": view, "photo": larger_photo(it.get("photo")), "headline_label": headline_label(it.get("headline_by", {})),
-                "time": time_label(rep.get("published"), cfg.timezone),
-                # 흐름 (S29b): 오늘 앞선 보도(지난 소식으로 빠졌거나 같은 묶음의 앞선 시점) → 지금 이 기사
-                "updates_view": [{**u, "time": time_label(u.get("published"), cfg.timezone)} for u in it.get("updates", [])],
-                "brief_text": brief_text(it, view),
-                "stance_links": stance_links(it, view.get("analysis")),
-                # 관련 기사 (S22b): 단신에서 옮겨 온 이어진 기사 — 제목(외국어는 번역 제목) → 원문 창
-                "related_view": [{**r, "view": _display(r, interests.foreign_display), "cls": LEAN_CLASS.get(r["lean"], "mid"),
-                                  "rep": next((a for a in r["articles"] if a.get("url") == r.get("url")), r["articles"][0])}
-                                 for r in it.get("related", [])],
-                # 입장 차이: 따로 면을 두지 않고 대표 기사 바로 아래에 (S15, 요청 2)
-                "cmp_groups": _lean_groups(it) if it["issue_id"] in compare_ids and len(it.get("stance", {}).get("lean", [])) >= 2 else [],
-                # 1면 톱·다양성·연속 보장 기사는 피드백으로도 빼지 않는다 (feedback.js)
-                "guaranteed": any(r.startswith(("1면 톱", "다양성", "연속")) for r in it.get("reasons", [])),
-                # 관련 사설·칼럼 (S17e): 같은 사건으로 합쳐진 이슈에 연결된 것도
-                "opinions": [o for iid in [it["issue_id"], *it.get("merged", [])] for o in rel_ops.get(iid, [])],
-            })
-        sections.append({"id": s.id, "title": titles[s.id], "items": rows})
+        sections.append({"id": s.id, "title": titles[s.id], "items": [row(it) for it in items]})
     front_single(sections, {s.name: s.country for s in sources.sources})
+    jonghap(sections, titles.get("jonghap", "종합"), row)   # 1면 메인이 정해진 뒤 (S47)
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})

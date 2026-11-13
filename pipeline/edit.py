@@ -407,8 +407,53 @@ def attach_related(sections: dict[str, list[Placed]], links: dict[str, str] | No
     return moved
 
 
-def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article], choose_stats: dict) -> dict:
-    """지면 생성(S8)이 읽을 데이터. 기사 본문은 없다(제목·RSS 리드·링크·이미지 주소만)."""
+ANGLE_SECTIONS = ("front", "politics", "economy", "international", "society", "interest")   # 1면 메인 후보가 나오는 면 (render.NEWS_SECTIONS)
+ANGLE_MAX = 8            # 기사마다 종합면 후보 수
+ANGLE_PAGES = ("A2", "A3", "A4")   # 신문이 1면 톱을 펼치는 면 (11/13 실측: A2~A4)
+
+
+def _angle_finder(ed: Edition, scored: list[ScoredIssue]):
+    """종합면 후보 (S47): 이 기사와 같은 사건의 다른 이슈 — 합쳐진 이슈(merged), 같은 사건 이웃(near), 이 기사를 A1 에 실은 신문이
+    A2~A4면에 함께 실은 이슈 중 시그니처 낱말이 겹치는 것. 지면에 따로 실린 이슈(다른 기사에 합쳐진 것 포함)는 빼고, 점수 순."""
+    by_id = {s.issue.id: s for s in scored}
+    on_page: dict[str, str] = {}   # 이슈 → 그 이슈가 실린(또는 합쳐진) 기사
+    for ps in ed.sections.values():
+        for p in ps:
+            if p.reserve:
+                continue
+            for q in [p, *p.related]:
+                on_page[q.scored.issue.id] = p.scored.issue.id
+                for m in q.merged:
+                    on_page[m.issue.id] = p.scored.issue.id
+
+    def find(p: Placed, articles: dict[str, Article]) -> list[Placed]:
+        me = p.scored
+        own = [me, *p.merged]
+        a1 = {src for x in own for src, v in x.headline_by.items() if v[1] == "naver_a1"}
+        sig = {t for x in own for t in x.signature}
+        cands: dict[str, ScoredIssue] = {m.issue.id: m for m in p.merged}
+        for x in own:
+            for nid in x.issue.extra.get("near", []):
+                if nid in by_id:
+                    cands.setdefault(nid, by_id[nid])
+        if a1:
+            for s in scored:
+                if any(src in a1 and pg in ANGLE_PAGES for src, pg in s.pages_by.items()) and sig & set(s.signature):
+                    cands.setdefault(s.issue.id, s)
+        out = [s for iid, s in cands.items() if iid != me.issue.id and on_page.get(iid, me.issue.id) == me.issue.id
+               and s.issue.rep_article in articles]
+        out.sort(key=lambda s: (-s.final, s.issue.id))
+        placed = [Placed(s, ["종합면 후보: 1면 메인과 같은 사건"]) for s in out[:ANGLE_MAX]]
+        for q in placed:
+            pick_photo(q, articles)
+        return placed
+    return find
+
+
+def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article], choose_stats: dict,
+                    scored: list[ScoredIssue] | None = None) -> dict:
+    """지면 생성(S8)이 읽을 데이터. 기사 본문은 없다(제목·RSS 리드·링크·이미지 주소만).
+    scored(모든 이슈)를 주면 뉴스 면 기사마다 종합면 후보 angles 를 붙인다 (S47)."""
 
     def best_lead(rep: Article, issue_ids: list[str]) -> str:
         """대표 기사 리드가 비었거나 부실하면 같은 언어의 다른 기사 리드 중 가장 충실한 것 (같은 사건이므로)."""
@@ -461,9 +506,17 @@ def edition_to_json(ed: Edition, edition_date: str, articles: dict[str, Article]
             ],
         }
 
+    angles_of = _angle_finder(ed, scored or [])
+
+    def with_angles(p: Placed, sid: str) -> dict:
+        d = item(p)
+        if sid in ANGLE_SECTIONS and not p.reserve:
+            d["angles"] = [item(q) for q in angles_of(p, articles)]
+        return d
+
     return {
         "edition": edition_date,
-        "sections": {sid: [item(p) for p in ps] for sid, ps in ed.sections.items()},
+        "sections": {sid: [with_angles(p, sid) for p in ps] for sid, ps in ed.sections.items()},
         "compare": [item(p) for p in ed.compare],
         "stats": {**choose_stats, **ed.stats},
     }

@@ -35,10 +35,11 @@ editing:
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
-# pages: 고정 쪽 수 (S15). 합 26쪽(펼침 13면 — S22c 분석·해설 2쪽 추가 — S19d "지면 좀 더 많이") — 짝수여야 펼침면이 맞는다.
+# pages: 고정 쪽 수 (S15). 합 30쪽(펼침 15면 — S47 종합면 2쪽 추가) — 짝수여야 펼침면이 맞는다.
 # S21c(10/18호 "단신이 너무 많다"): 사회·과학 면을 새로, 관심면 확대, 단신 5 → 3쪽. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 논평·단신이 쓴다
 sections:
   - {id: front, title: "1면", max_articles: 5, pages: 2}
+  - {id: jonghap, title: "종합", max_articles: 6, pages: 2}  # 1면 메인 이슈를 다른 매체·다른 각도 기사 3~6건으로 펼침 (S47 — 국내 신문 A2~A3면처럼). 지면 생성 때 메인이 정해진 뒤 채움, 3건 미만이면 없음
   - {id: politics, title: "정치·안보", max_articles: 9, pages: 3}
   - {id: economy, title: "경제·산업", max_articles: 9, pages: 3}
   - {id: international, title: "국제", max_articles: 12, pages: 4}

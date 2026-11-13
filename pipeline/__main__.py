@@ -331,7 +331,7 @@ def cmd_edit(args: argparse.Namespace) -> int:
         ed.stats["related_moved"] += n
         ed.stats["by_section"]["briefs"] = len(ed.sections["briefs"])
         related_note += f" + AI {n} ({st})"
-    out = edition_to_json(ed, args.date, articles, cstats)
+    out = edition_to_json(ed, args.date, articles, cstats, scored)   # scored: 종합면 후보(angles)를 찾는 데 (S47)
     out["stats"]["history_previous"] = prev_date.isoformat() if prev_date else None
     from .china import watch as china_watch   # 중국은 지금 (S37): 그날 인민일보 제목과 후보 이슈 — 분석은 enrich 가
     out["china_watch"] = china_watch(out, articles)
