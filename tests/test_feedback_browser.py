@@ -136,7 +136,7 @@ def test_dozens_of_less_keep_diversity_and_top(browser, tmp_path):
     for t in topics:
         learn(page, t, -7.5)
     reload_(page)
-    book = set(page.evaluate(BOOK_IDS))
+    book = set(page.evaluate(BOOK_IDS)) | set(page.evaluate("NEWS.state().briefIds"))   # 단신은 탭 쪽·"모두 보기" 창에 (S47)
     first = page.evaluate("document.querySelector('#book .page[data-page=\"0\"] .fz-lead').dataset.issue")
     total = len(page.evaluate("[...document.querySelectorAll('#flow article.item[data-a]:not([data-reserve=\"1\"])')]"))
     ctx.close()
