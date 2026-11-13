@@ -511,3 +511,20 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .cn-note { font-size: calc(11px * var(--fs)); color: var(--muted); margin-bottom: 0; }
 .cn-ev .orig-btn { font: inherit; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
 .item.tight.cn-view .cn-words, .item.tight.cn-more .cn-agenda { display: none; }
+
+/* 종합면 (S47, 시안 A): 1면 메인 이슈를 다른 매체 기사로 펼침 — 이슈 제목 띠 */
+.jh-theme { margin: 0 0 8px; padding: 4px 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-weight: 700; font-size: calc(15px * var(--fs)); }
+.jh-theme::before { content: "오늘의 이슈 · "; color: var(--accent); }
+
+/* 단신 탭 쪽 (S47, 시안 B): 분야 탭 + 위 10건 한 줄, "모두 보기"는 창 */
+.btabs { display: flex; flex-direction: column; gap: 6px; }
+.bt-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.bt-tab { font: inherit; font-size: calc(12.5px * var(--fs)); min-height: 32px; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 16px; background: var(--card); color: var(--ink); cursor: pointer; }
+.bt-tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.bt-list { margin: 0; padding: 0 0 0 1.4em; }
+.bt-row { padding: 4px 0; border-bottom: 1px solid var(--rule); font-size: calc(14px * var(--fs)); line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-row a { color: var(--ink); text-decoration: none; }
+.bt-src { color: var(--muted); font-size: 0.85em; margin-left: 6px; white-space: nowrap; }
+.bt-all { align-self: flex-start; font: inherit; font-size: calc(13px * var(--fs)); min-height: 34px; padding: 4px 12px; border: 1px solid var(--accent); border-radius: 17px; background: var(--card); color: var(--accent); font-weight: 700; cursor: pointer; }
+.bt-full-h { margin: 0 0 6px; font-size: 1.1em; }
+.bt-full .item.brief { margin: 0 0 6px; }
