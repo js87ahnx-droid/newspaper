@@ -7,6 +7,7 @@
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -263,3 +264,70 @@ def test_collect_does_not_cancel_waiting_daily(tmp_path, busy, published, hour, 
     """S44: 수집이 끝나며 daily 를 부를 때 이미 대기·진행 중인 daily 가 있으면 건너뛴다."""
     got, out = _dispatch_step(tmp_path, busy, published, hour, gh_fails)
     assert got == called, out
+
+
+# S46: 아침 발행을 뉴욕 장 마감 + 30분 뒤로 (겨울 06:30, 여름 05:30 KST)
+WAIT_PY = ROOT / "scripts" / "ny_close_wait.py"
+
+
+def _wait(edition, now):
+    r = subprocess.run([sys.executable, str(WAIT_PY), edition], env={**os.environ, "NOW": now},
+                       capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    return r.stdout.strip()
+
+
+@pytest.mark.parametrize("edition,now,expect", [
+    ("2026-11-13", "2026-11-13T06:29:00+09:00", "wait 06:30"),   # 겨울, 뉴욕 11/12(목) 장 → 06:00 마감
+    ("2026-11-13", "2026-11-13T06:31:00+09:00", "go"),
+    ("2026-07-15", "2026-07-15T05:29:00+09:00", "wait 05:30"),   # 여름(서머타임) → 05:00 마감
+    ("2026-07-15", "2026-07-15T05:31:00+09:00", "go"),
+    ("2026-11-15", "2026-11-15T05:31:00+09:00", "go"),           # 일요일 호: 뉴욕 11/14 토요일 — 기다리지 않음
+    ("2026-11-16", "2026-11-16T05:31:00+09:00", "go"),           # 월요일 호: 뉴욕 11/15 일요일
+    ("2026-11-27", "2026-11-27T05:31:00+09:00", "go"),           # 뉴욕 11/26 추수감사절 휴장
+    ("2026-11-10", "2026-11-11T01:40:00+09:00", "go"),           # 놓친 호를 다음 날 새벽에 — 호 날짜 기준이라 막지 않음
+    ("2026-03-09", "2026-03-09T05:31:00+09:00", "go"),           # 3/8 서머타임 시작 뒤 첫 장(뉴욕 3/9 아님 — 3/8 일요일)
+    ("2026-03-10", "2026-03-10T05:31:00+09:00", "go"),           # 뉴욕 3/9(월) 서머타임 → 05:00 마감
+    ("2026-11-03", "2026-11-03T05:31:00+09:00", "wait 06:30"),   # 뉴욕 11/2(월) 표준시 (11/1 서머타임 끝)
+])
+def test_ny_close_wait(edition, now, expect):
+    assert _wait(edition, now) == expect
+
+
+def _check_step(tmp_path, now, edition_date="", skip_if_published="1", published=False):
+    """daily.yml check 단계를 가짜 date·python3 로 돌린다. 돌려주는 값: (skip, 출력)."""
+    job = _wf("daily.yml")["jobs"]["check"]
+    step = next(s for s in job["steps"] if s.get("id") == "check")
+    assert "pipeline" in job["steps"][0]["with"]["sparse-checkout"] and "scripts" in job["steps"][0]["with"]["sparse-checkout"]
+    (tmp_path / "scripts").mkdir()
+    shutil.copy(WAIT_PY, tmp_path / "scripts")
+    shutil.copytree(ROOT / "pipeline", tmp_path / "pipeline", ignore=shutil.ignore_patterns("__pycache__"))
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    (bin_ / "date").write_text("#!/bin/sh\necho 2026-11-13\n", encoding="utf-8")
+    (bin_ / "python3").write_text(f'#!/bin/sh\nexec "{Path(sys.executable).as_posix()}" "$@"\n', encoding="utf-8")
+    for f in bin_.iterdir():
+        f.chmod(0o755)
+    if published:
+        (tmp_path / "docs" / "archive" / "2026-11-13").mkdir(parents=True)
+        (tmp_path / "docs" / "archive" / "2026-11-13" / "index.html").write_text("x", encoding="utf-8")
+    out = tmp_path / "out.txt"
+    env = {**os.environ, "PATH": f"{bin_.as_posix()}:{os.environ.get('PATH', '')}", "NOW": now, "GITHUB_OUTPUT": str(out),
+           "EDITION_DATE": edition_date, "SKIP_IF_PUBLISHED": skip_if_published}
+    r = subprocess.run([BASH, "-e", "-c", step["run"]], cwd=tmp_path, env=env, capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, r.stderr
+    return out.read_text(encoding="utf-8").strip(), r.stdout
+
+
+@needs_bash
+@pytest.mark.parametrize("now,edition_date,skip_if_published,published,skip", [
+    ("2026-11-13T05:33:00+09:00", "", "1", False, "skip=true"),            # 겨울 05:33 (Cloudflare 첫 호출) → 기다림
+    ("2026-11-13T06:03:00+09:00", "", "1", False, "skip=true"),
+    ("2026-11-13T06:33:00+09:00", "", "1", False, "skip=false"),           # 06:33 → 발행
+    ("2026-11-13T06:33:00+09:00", "", "1", True, "skip=true"),             # 이미 발행됨
+    ("2026-11-13T05:33:00+09:00", "2026-11-13", "1", False, "skip=false"),  # 날짜를 준 실행은 기다리지 않음
+    ("2026-11-13T05:33:00+09:00", "", "0", False, "skip=false"),           # force 는 기다리지 않음
+])
+def test_daily_check_waits_for_ny_close(tmp_path, now, edition_date, skip_if_published, published, skip):
+    got, out = _check_step(tmp_path, now, edition_date, skip_if_published, published)
+    assert got == skip, out

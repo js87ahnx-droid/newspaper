@@ -10,9 +10,10 @@ ALLOWED_ORIGINS = "https://js87ahnx-droid.github.io"
 # 아침 발행을 부를 저장소 (S25b). 토큰은 npx wrangler secret put GH_TOKEN
 GH_REPO = "js87ahnx-droid/newspaper"
 
-# 아침 발행 시작 (S25b) — UTC. 05:33·06:03·06:33 KST. 이미 발행됐으면 daily 의 check 작업이 바로 끝낸다
+# 아침 발행 시작 (S25b) — UTC. 05:33·06:03·06:33·07:03 KST. 이미 발행됐으면 daily 의 check 작업이 바로 끝낸다.
+# 겨울엔 뉴욕 장 마감 + 30분(06:30 KST) 전 실행을 check 가 건너뛰어, 06:33·07:03 이 실제 발행 기회 (S46)
 [triggers]
-crons = ["33 20 * * *", "3 21 * * *", "33 21 * * *"]
+crons = ["33 20 * * *", "3 21 * * *", "33 21 * * *", "3 22 * * *"]
 
 # 관심 학습값 (S30a) — 지면 설정 창의 슬라이더·키워드 한 칸. 원문은 저장하지 않는다 (D16)
 [[kv_namespaces]]

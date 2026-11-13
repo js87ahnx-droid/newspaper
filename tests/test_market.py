@@ -127,7 +127,8 @@ def test_apply_switches_to_newest_report_and_drops_stale():
 
 
 def test_same_session_reports_merged_and_older_ones_become_updates():
-    """S29a: 뉴욕 22일 마감 이슈 셋은 점수 높은 하나로 합치고, 빠진 21일 마감·22일 장중은 그 이슈의 앞선 보도(시각순)로."""
+    """S29a: 뉴욕 22일 마감 이슈 셋은 점수 높은 하나로 합치고, 빠진 22일 장중은 그 이슈의 앞선 보도로.
+    S46: 지난 거래일(21일) 마감은 앞선 보도로도 붙이지 않는다 ("과거 기사는 꼭 필요한 경우가 아니면 배제")."""
     from tests.test_edit import _sc
     rows = [
         ("old", "뉴욕증시, 스페이스X 실적에 기술주 강세…나스닥 1.1%↑(종합)", "2026-10-21T21:14:00+00:00", 3.0),
@@ -147,8 +148,9 @@ def test_same_session_reports_merged_and_older_ones_become_updates():
     host = kept[0]
     assert set(host.issue.article_ids) == {"c1", "c2", "c3"} and st["merged"] == 2
     ups = sorted(host.issue.extra["updates"], key=lambda u: u["published"])
-    assert [u["title"] for u in ups] == [rows[0][1], rows[1][1]] and st["attached"] == 2
-    assert ups[0]["asof"] == "뉴욕증시 21일(현지) 마감" and ups[1]["asof"] == "뉴욕증시 22일(현지) 장중"
+    assert [u["title"] for u in ups] == [rows[1][1]] and st["attached"] == 1
+    assert ups[0]["asof"] == "뉴욕증시 22일(현지) 장중"
+    assert any("21일" not in d and "2026-10-21" in d for d in st["dropped"])   # 21일 마감은 빠진 목록에만
 
 
 def test_earlier_reports_inside_issue_become_updates():
@@ -161,3 +163,26 @@ def test_earlier_reports_inside_issue_become_updates():
     kept, _ = apply([s], arts, REF_1023)
     assert kept[0].issue.rep_article == "c"
     assert [(u["title"], u["asof"]) for u in kept[0].issue.extra["updates"]] == [(arts["o"].title, "뉴욕증시 22일(현지) 장중")]
+
+
+def test_previous_session_close_inside_issue_is_removed():
+    """S46 (11/13호): 같은 묶음에 든 지난 거래일 마감은 앞선 보도로도, 다른 매체 줄로도 남지 않는다. 같은 거래일 출발은 남음."""
+    from tests.test_edit import _sc
+    arts = {a.id: a for a in [_art("old", "코어위브 훈풍에 뉴욕증시 일제히 상승…나스닥 1.6%↑", "2026-10-21T21:02:00+00:00"),
+                              _art("o", "뉴욕증시, AI 불안에 하락 출발", "2026-10-22T13:53:00+00:00"),
+                              _art("c", "뉴욕증시, AI 불안 재고조에 기술주 급락…나스닥 2.6%↓", "2026-10-22T20:15:00+00:00")]}
+    s = _sc("x", arts["old"].title, [])
+    s.issue.article_ids, s.issue.rep_article = ["old", "o", "c"], "old"
+    kept, _ = apply([s], arts, REF_1023)
+    assert kept[0].issue.rep_article == "c" and kept[0].issue.article_ids == ["o", "c"]
+    assert [u["title"] for u in kept[0].issue.extra["updates"]] == [arts["o"].title]
+
+
+def test_previous_close_stays_when_nothing_newer():
+    """S46: 더 새 거래일 시황이 없으면 기준 시각에 끝난 가장 최근 장 마감은 그대로 실린다 (꼭 필요한 경우)."""
+    from tests.test_edit import _sc
+    a = _art("c", "뉴욕증시, AI 불안 재고조에 기술주 급락…나스닥 2.6%↓", "2026-10-22T21:15:00+00:00")
+    s = _sc("x", a.title, [])
+    s.issue.article_ids, s.issue.rep_article = ["c"], "c"
+    kept, st = apply([s], {"c": a}, REF_1023)
+    assert [k.issue.id for k in kept] == ["x"] and not st["dropped"]

@@ -1,4 +1,5 @@
-# 아침 발행: Cloudflare 예약(worker/src/morning.js)이 05:33·06:03·06:33 KST 에 부르고, 여기 예약은 07:03·07:33 예비 (S45).
+# 아침 발행: Cloudflare 예약(worker/src/morning.js)이 05:33·06:03·06:33·07:03 KST 에 부르고, 여기 예약은 07:33·08:03 예비 (S45·S46).
+# 날짜 없이 불린 실행은 뉴욕 장 마감 + 30분 뒤에만 발행한다 (S46 — 겨울 06:30, 여름 05:30 KST).
 # 10/19 에는 06:00·06:30 예약이 둘 다 시작조차 안 됐고 수집 예약도 2~3시간 늦었다 — 붐비는 정각·30분을 피한다.
 # 시간창이 05:30 에 닫히므로(config.yaml window.end) 그 뒤에 시작해야 오늘 호가 된다.
 # 이미 발행된 호면 check 단계에서 바로 끝난다 (몇 초). 지면은 암호화(StaticCrypt)한 뒤에만 커밋한다.
@@ -11,10 +12,10 @@ name: daily
 
 on:
   schedule:
-    # S45: 발행은 Cloudflare 예약(05:33·06:03·06:33)과 수집 끝 호출이 맡는다. 여기는 그 뒤 +30분·+1시간 예비 2개만
+    # S45: 발행은 Cloudflare 예약(05:33·06:03·06:33·07:03, S46)과 수집 끝 호출이 맡는다. 여기는 마지막 호출 뒤 +30분·+1시간 예비 2개만
     # (실측 10/25~11/13: GitHub 예약은 3~6시간 늦게 도착하고, 이미 발행된 호면 몇 초 만에 끝남)
-    - cron: "3 22 * * *"    # 07:03 KST (예비)
     - cron: "33 22 * * *"   # 07:33 KST (예비)
+    - cron: "3 23 * * *"    # 08:03 KST (예비)
   workflow_dispatch:
     inputs:
       date:
@@ -52,7 +53,10 @@ jobs:
         with:
           # 기다린 실행도 최신 main 을 본다 (S39). 기본값은 호출 시점 커밋이라, 11/5 #222 가 20분 기다린 뒤 #221 이 올린 호를 못 보고 다시 만들었다
           ref: main
-          sparse-checkout: docs/archive
+          sparse-checkout: |
+            docs/archive
+            pipeline
+            scripts
       - id: check
         env:
           SKIP_IF_PUBLISHED: ${{ (github.event_name == 'schedule' || !inputs.force) && '1' || '0' }}
@@ -61,8 +65,12 @@ jobs:
           # 가장 최근에 닫힌 시간창(05:30 KST, config.yaml window.end) 의 호 — daily.sh 의 current_edition 과 같은 날짜
           # 330분 = 5시간 30분 ('5 hours 30 minutes ago' 는 "ago" 가 분에만 붙어 4시간 30분 뒤가 된다, S39)
           DATE="${EDITION_DATE:-$(TZ=Asia/Seoul date -d '330 minutes ago' +%F)}"
+          # S46: 날짜·force 없이 불린 실행은 직전 뉴욕 거래일 장 마감 + 30분 뒤에 (겨울 06:30, 여름 05:30 KST — 그 전엔 마감 기사가 없다)
+          WAIT=$([ -z "$EDITION_DATE" ] && [ "$SKIP_IF_PUBLISHED" = "1" ] && python3 scripts/ny_close_wait.py "$DATE" || echo go)
           if [ "$SKIP_IF_PUBLISHED" = "1" ] && [ -f "docs/archive/$DATE/index.html" ]; then
             echo "$DATE 호는 이미 발행됨 — 건너뜀"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif [ "${WAIT%% *}" = "wait" ]; then
+            echo "$DATE 호: 뉴욕 장 마감 기사를 기다림 (${WAIT#wait } KST 뒤 발행) — 건너뜀"; echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi

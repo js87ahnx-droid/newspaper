@@ -3,10 +3,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { dispatchDaily } from "../src/morning.js";
 
-const RUNS = "https://api.github.com/repos/o/r/actions/workflows/daily.yml/runs?per_page=20";
+const RUNS = "https://api.github.com/repos/o/r/actions/runs?per_page=30";
 const DISPATCH = "https://api.github.com/repos/o/r/actions/workflows/daily.yml/dispatches";
 
-// 실행 목록 응답(runs: 상태 목록 또는 상태 코드)과 dispatch 응답을 흉내 낸다
+// 실행 목록 응답(runs: 상태 목록 — "상태" 는 daily, "collect:상태" 는 collect — 또는 상태 코드)과 dispatch 응답을 흉내 낸다
 function fakeGitHub(runs, dispatchStatus = 204) {
   const seen = [];
   const fake = async (url, init = {}) => {
@@ -14,7 +14,11 @@ function fakeGitHub(runs, dispatchStatus = 204) {
     if (url === RUNS) {
       if (typeof runs === "number") return new Response("{}", { status: runs });
       if (runs instanceof Error) throw runs;
-      return new Response(JSON.stringify({ workflow_runs: runs.map((status) => ({ status })) }), { status: 200 });
+      const rows = runs.map((r) => {
+        const [wf, status] = r.includes(":") ? r.split(":") : ["daily", r];
+        return { status, path: `.github/workflows/${wf}.yml` };
+      });
+      return new Response(JSON.stringify({ workflow_runs: rows }), { status: 200 });
     }
     return new Response(null, { status: dispatchStatus });
   };
@@ -40,6 +44,20 @@ for (const status of ["queued", "in_progress", "waiting", "pending", "requested"
     assert.deepEqual(seen.map((s) => s.url), [RUNS]);
   });
 }
+
+test("collect 가 대기 중이면 부르지 않음 — 새로 부르면 그 collect 가 취소된다 (S46)", async () => {
+  const { fake, seen } = fakeGitHub(["completed", "collect:pending"]);
+  const r = await dispatchDaily({ GH_TOKEN: "t", GH_REPO: "o/r" }, fake);
+  assert.deepEqual(r, { ok: true, skipped: true, busy: 1 });
+  assert.deepEqual(seen.map((s) => s.url), [RUNS]);
+});
+
+test("collect 가 진행 중일 뿐이면 부른다 (daily 가 그 뒤에 대기)", async () => {
+  const { fake, seen } = fakeGitHub(["completed", "collect:in_progress", "collect:completed"]);
+  const r = await dispatchDaily({ GH_TOKEN: "t", GH_REPO: "o/r" }, fake);
+  assert.deepEqual(r, { ok: true, status: 204 });
+  assert.deepEqual(seen.map((s) => s.url), [RUNS, DISPATCH]);
+});
 
 test("실행 목록을 못 읽으면(거절·네트워크 오류) 그래도 부른다 — 발행을 놓치지 않게", async () => {
   for (const runs of [403, 500, new Error("network")]) {

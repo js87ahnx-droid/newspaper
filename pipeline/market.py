@@ -180,7 +180,8 @@ def apply(scored: list, articles: dict, ref: datetime) -> tuple[list, dict]:
         a, m = newest[s.issue.id], mkt[s.issue.id]
         if not v["keep"]:
             dropped.append(f"{s.issue.title[:40]} — {v['why']}")
-            if m in latest:   # 빠진 지난·앞선 시황은 그 시장 최신 이슈의 "앞선 보도"로 (S29a·b)
+            # 빠진 같은 거래일 앞선 시점 시황은 그 시장 최신 이슈의 "앞선 보도"로 (S29a). 지난 거래일 소식은 붙이지 않는다 (S46)
+            if m in latest and v["session"] == latest[m][0][0]:
                 add_update(latest[m][1], a, v["asof"])
                 attached += 1
             continue
@@ -194,20 +195,27 @@ def apply(scored: list, articles: dict, ref: datetime) -> tuple[list, dict]:
             switched += 1
         s.issue.extra["asof"] = v["asof"]
         kept.append(s)
-    # 묶음(합친 것 포함) 안의 앞선 시점 시황 기사도 앞선 보도로 — "22:53 하락 출발 → 05:15 급락 마감" 흐름 (S29b)
+    # 묶음(합친 것 포함) 안의 같은 거래일 앞선 시점 시황 기사도 앞선 보도로 — "22:53 하락 출발 → 05:15 급락 마감" 흐름 (S29b).
+    # 지난 거래일 시황 기사는 묶음에서 뺀다 — 지면의 다른 매체 줄에도 안 보이게 (S46: 꼭 필요할 때만 지난 소식)
     for h in hosts.values():
         if h not in kept:
             continue
         top = verdict[h.issue.id]
-        top_key = (date.fromisoformat(top["session"]), PHASE_RANK[top["phase"]])
+        top_ses = date.fromisoformat(top["session"])
+        top_key = (top_ses, PHASE_RANK[top["phase"]])
+        old = []
         for i in h.issue.article_ids:
             a = articles.get(i)
             m = a and a.published and market_of(a.title)
             if not m:
                 continue
             ses, ph = session_of(m, a.title, datetime.fromisoformat(a.published))
-            if (ses, PHASE_RANK[ph]) < top_key:
+            if ses < top_ses:
+                old.append(i)
+            elif (ses, PHASE_RANK[ph]) < top_key:
                 add_update(h, a, label(m, a.title, ses, ph))
+        if old and h.issue.rep_article not in old:
+            h.issue.article_ids = [i for i in h.issue.article_ids if i not in old]
     return kept, {"reports": len(reports), "dropped": dropped, "switched": switched, "merged": merged, "attached": attached}
 
 
