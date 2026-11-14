@@ -106,6 +106,66 @@
         if (overflows(inner)) it.classList.remove(ROOMY[lv]);
       }
     }
+    // S48: 요약을 다 보여 줘도 남으면(요약이 짧은 기사) 지면에서 접어 둔 배경 → 매체별 관점·입장 차이를 편다
+    for (var lx = 0; lx < MORE.length; lx++) {
+      for (var j = 0; j < items.length; j++) {
+        if (usedRatio(inner) >= FILL_MIN) return;
+        var x = items[j];
+        if (lx > 0 && !x.classList.contains(MORE[lx - 1])) continue;
+        if (!x.querySelector(MORE_SEL[lx])) { if (lx === 0) x.classList.add(MORE[0]); continue; }   // 배경이 없으면 관점 단계로 바로
+        x.classList.add(MORE[lx]);
+        if (overflows(inner)) x.classList.remove(MORE[lx]);
+      }
+    }
+  }
+  var MORE = ["more-bg", "more-views"], MORE_SEL = [".an-bg", ".an-views, .cmp-inline"];
+  function unroom(inner) {
+    Array.prototype.forEach.call(inner.querySelectorAll(".item"), function (it) {
+      ROOMY.concat(MORE).forEach(function (c) { it.classList.remove(c); });
+    });
+  }
+  // S48 (2026-11-14 사용자 "패드에서 4면에 기사 하나만 짧게 — 3면 마지막 기사를 넘기든지, 미리보기를 늘리든지, 기기별로"):
+  // 면 안에서 덜 찬 쪽이 있으면 앞 쪽의 마지막 기사를 이 쪽 맨 앞으로 옮겨 보고, 두 쪽 모두 다시 늘려(roomier) 덜 찬 쪽이 나아질 때만 남긴다.
+  // 쪽 크기에서 재므로 휴대폰·패드가 저마다 다르게 맞춰진다. 기사 순서는 그대로
+  // 한 쪽이 덜 찼으면 이웃 쪽 기사 하나를 옮겨 본다: 덜 찬 쪽이 뒤면 앞 쪽의 마지막 기사를 맨 앞으로, 앞이면 뒤 쪽의 첫 기사를 맨 끝으로.
+  // 옮긴 뒤 두 쪽 모두 넘치지 않고 덜 찬 쪽 비율이 나아질 때만 남긴다 (아니면 되돌림)
+  function bodyItems(inner) { return Array.prototype.filter.call(inner.children, function (c) { return c.classList.contains("item"); }); }
+  function tryMove(prev, cur, backward) {
+    var from = backward ? prev : cur, to = backward ? cur : prev;
+    if (prev.querySelector("[data-page-end]")) return false;   // 1면 첫 쪽은 메인 기사 하나 (S26)
+    var its = bodyItems(from);
+    var mv = backward ? from.lastElementChild : its[0];
+    if (!mv || !mv.classList.contains("item") || mv.classList.contains("clip") || its.length < 2) return false;
+    var before = Math.min(usedRatio(prev), usedRatio(cur));
+    var snap = Array.prototype.map.call(prev.querySelectorAll(".item"), function (it) { return [it, it.className]; })
+      .concat(Array.prototype.map.call(cur.querySelectorAll(".item"), function (it) { return [it, it.className]; }));
+    var home = mv.nextSibling;
+    unroom(prev); unroom(cur);
+    if (backward) {
+      var at = Array.prototype.filter.call(cur.children, function (c) { return !c.classList.contains("sec-title"); })[0] || null;
+      cur.insertBefore(mv, at);
+    } else prev.appendChild(mv);
+    // 앞 쪽 끝에 맞추느라 줄였던 기사(compact·tight)는 새 쪽에서 원래 꼴로 되돌려 본다 (리뷰 Major 1)
+    mv.classList.remove("compact", "tight");
+    if (overflows(to)) mv.classList.add("compact");
+    if (overflows(to)) mv.classList.add("tight");
+    var ok = !overflows(to);
+    if (ok) { roomier(prev); roomier(cur); ok = !overflows(prev) && !overflows(cur) && Math.min(usedRatio(prev), usedRatio(cur)) > before + 0.02; }
+    if (!ok) {
+      from.insertBefore(mv, home);
+      snap.forEach(function (s) { s[0].className = s[1]; });
+    }
+    return ok;
+  }
+  function balance(pages) {
+    pages.forEach(function (p) { roomier(p.firstChild); });
+    var i, tries;
+    for (i = pages.length - 1; i >= 1; i--)      // 뒤 쪽이 덜 찼으면 앞 쪽 끝 기사를 넘겨 받는다
+      for (tries = 0; tries < 3 && usedRatio(pages[i].firstChild) < FILL_MIN; tries++)
+        if (!tryMove(pages[i - 1].firstChild, pages[i].firstChild, true)) break;
+    for (i = 0; i < pages.length - 1; i++)       // 앞 쪽이 덜 찼으면 뒤 쪽 첫 기사를 당겨 온다 (S48 재시험: 종합면 첫 쪽 70%)
+      for (tries = 0; tries < 3 && usedRatio(pages[i].firstChild) < FILL_MIN; tries++)
+        if (!tryMove(pages[i].firstChild, pages[i + 1].firstChild, false)) break;
   }
   // 면의 끝 쪽에 기사가 조금만 남았으면(절반 못 참) 앞 쪽 기사를 줄여(compact → tight, 아래 기사부터) 그 쪽으로 합치고 끝 쪽을 없앤다.
   // 비게 된 쪽은 단신·더 읽을 기사가 쓴다. 다 안 들어가는데 끝 쪽이 40% 도 못 차고 기사가 둘 이하면 그 기사들을 단신으로 내리고
@@ -201,8 +261,9 @@
   }
 
   // ---------- 단신 탭 쪽 (S47, 사용자 시안 B) ----------
-  // 분야 탭(전체·분야별 건수) + 고른 탭의 위 BRIEF_TOP 건(쪽에 들어가는 만큼) 한 줄. 전체 목록은 "모두 보기" → 자세히 창
-  var BRIEF_TOP = 10;
+  // 분야 탭(전체·분야별 건수) + 고른 탭의 위 기사를 쪽에 들어가는 만큼 한 줄씩 (S48: 기기마다 — 휴대폰 10건 안팎, 패드 20건 안팎).
+  // 탭마다 "○○ 전체 보기"(그 탭 목록 → 자세히 창). 그 탭을 다 보여 줬으면 단추를 끈다
+  var BRIEF_TOP = 40;   // 쪽이 아무리 커도 이 이상은 창으로
   var briefAll = [], briefTabSeq = 0;
   function selectBriefTab(bt, focus) {
     var box = bt.closest(".btabs");
@@ -211,7 +272,9 @@
       x.setAttribute("aria-selected", on ? "true" : "false");
       x.tabIndex = on ? 0 : -1;
     });
-    Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x) { x.hidden = x.getAttribute("data-bt-list") !== bt.getAttribute("data-bt"); });
+    Array.prototype.forEach.call(box.querySelectorAll(".bt-list, .bt-all"), function (x) {
+      x.hidden = (x.getAttribute("data-bt-list") || x.getAttribute("data-bt-all")) !== bt.getAttribute("data-bt");
+    });
     if (focus) bt.focus();
   }
   document.addEventListener("keydown", function (e) {   // 탭: 좌우 화살표·Home·End
@@ -252,10 +315,6 @@
     tabs.setAttribute("role", "tablist");
     box.appendChild(tabs);
     inner.appendChild(box);
-    var allBtn = mk("button", "bt-all", els.length + "건 모두 보기");
-    allBtn.type = "button";
-    allBtn.setAttribute("data-bt-all", "1");
-    box.appendChild(allBtn);
     var groups = [{ key: "all", name: "전체", els: els }].concat(briefGroups(els));
     briefTabSeq++;
     groups.forEach(function (gr, i) {
@@ -275,31 +334,54 @@
       ol.setAttribute("data-bt-list", gr.key);
       ol.setAttribute("role", "tabpanel");
       ol.setAttribute("aria-labelledby", "bt-" + briefTabSeq + "-" + gr.key);
-      box.insertBefore(ol, allBtn);
-      // 쪽에 들어가는 만큼만 (휴대폰은 10건이 다 안 들어갈 수 있다) — 재는 동안은 이 목록만 보인다
-      Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x) { x.hidden = x !== ol; });
-      for (var k = 0; k < gr.els.length && k < BRIEF_TOP; k++) {
+      box.appendChild(ol);
+      var more = mk("button", "bt-all", (gr.key === "all" ? "" : gr.name + " ") + "전체 보기 · " + gr.els.length + "건");
+      more.type = "button";
+      more.setAttribute("data-bt-all", gr.key);
+      box.appendChild(more);
+      // 쪽에 들어가는 만큼만 (S48: 기기마다 다름) — 재는 동안은 이 목록·단추만 보인다
+      Array.prototype.forEach.call(box.querySelectorAll(".bt-list, .bt-all"), function (x) { x.hidden = x !== ol && x !== more; });
+      var k = 0;
+      for (; k < gr.els.length && k < BRIEF_TOP; k++) {
         var li = briefRow(gr.els[k]);
         ol.appendChild(li);
         if (overflows(inner)) { ol.removeChild(li); break; }
       }
+      if (k >= gr.els.length) {   // 이 탭은 쪽에 다 보였다 → 더 볼 것 없음
+        more.disabled = true;
+        more.textContent = (gr.key === "all" ? "" : gr.name + " ") + gr.els.length + "건 모두 보임";
+        if (overflows(inner) && ol.lastChild) {   // 글이 바뀌어 넘치면 한 줄 빼고 단추를 다시 켠다 (리뷰 Nit 8)
+          ol.removeChild(ol.lastChild);
+          more.disabled = false;
+          more.textContent = (gr.key === "all" ? "" : gr.name + " ") + "전체 보기 · " + gr.els.length + "건";
+        }
+      }
     });
-    Array.prototype.forEach.call(box.querySelectorAll(".bt-list"), function (x, i) { x.hidden = i !== 0; });
+    Array.prototype.forEach.call(box.querySelectorAll(".bt-list, .bt-all"), function (x) {
+      x.hidden = (x.getAttribute("data-bt-list") || x.getAttribute("data-bt-all")) !== "all";
+    });
     return page;
   }
-  function openBriefAll() {
+  // 단신 전체 보기 창: key 가 "all" 이면 분야별로 모두, 분야면 그 분야만 (S48)
+  function openBriefAll(key) {
     if (!reader) return;
+    var groups = briefGroups(briefAll);
+    if (key && key !== "all") groups = groups.filter(function (gr) { return gr.key === key; });
+    if (!groups.length) return;
+    var n = groups.reduce(function (s, gr) { return s + gr.els.length; }, 0);
     var body = reader.querySelector(".reader-body");
     body.innerHTML = "";
     var wrap = mk("div", "bt-full");
-    wrap.appendChild(mk("h3", "bt-full-h", "단신 " + briefAll.length + "건"));
-    briefGroups(briefAll).forEach(function (gr) {
+    var label = (key && key !== "all" ? groups[0].name + " 단신 " : "단신 ") + n + "건";
+    wrap.appendChild(mk("h3", "bt-full-h", label));
+    groups.forEach(function (gr) {
       wrap.appendChild(mk("h4", "brief-topic", gr.name + " " + gr.els.length));
-      gr.els.forEach(function (el) { var n = asBrief(el); n.classList.remove("demoted"); wrap.appendChild(n); });
+      gr.els.forEach(function (el) { var b = asBrief(el); b.classList.remove("demoted"); wrap.appendChild(b); });
     });
     body.appendChild(wrap);
     readSeq++;
-    reader.setAttribute("aria-label", "단신 모두 보기");
+    reader.setAttribute("aria-label", label);
+    reader.setAttribute("data-list-label", label);
     showReader();
   }
 
@@ -435,12 +517,12 @@
         });
       }
       if (!res.rest.length) pullReserves(id, res.pages, reserveEls, pulled);   // 넘쳐 내린 기사가 없는 면만 (끝 쪽이 남은 것)
-      if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) res.pages.forEach(function (p) { roomier(p.firstChild); });
+      if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) balance(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       if (b) spare += Math.max(0, b - res.pages.length);
     });
-    // 2) 단신 (S47, 사용자 시안 B): 1쪽 — 분야 탭 + 고른 탭의 위 10건, 전체는 "모두 보기" 창. 단신 예산의 나머지 쪽은 남는 쪽으로:
+    // 2) 단신 (S47, 사용자 시안 B): 1쪽 — 분야 탭 + 고른 탭의 위 기사(쪽에 들어가는 만큼, S48), 탭마다 "전체 보기" 창. 단신 예산의 나머지 쪽은 남는 쪽으로:
     //    ① 논평면이 못 실은 사설·칼럼 ② "더 읽을 기사"(다른 면에서 내려온 기사 → 예비 기사, 일반 기사 꼴) ③ 끝 쪽
     var briefSec = byId.briefs || (function () {
       var s = document.createElement("section");
@@ -474,7 +556,7 @@
         reservesEl.map(function (el) { return { el: el, node: el.cloneNode(true) }; }), null);
       var placedMore = reservesEl.filter(function (el) { return !mres.rest.some(function (r) { return r.el === el; }); });
       built.more = mres.pages;
-      mres.pages.forEach(function (p) { roomier(p.firstChild); });
+      balance(mres.pages);
       spare -= mres.pages.length;
       pool = pool.filter(function (el) { return placedMore.indexOf(el) < 0; });
       if (order.indexOf("more") < 0) order.splice(order.indexOf("briefs") >= 0 ? order.indexOf("briefs") : (order.indexOf("opinion") >= 0 ? order.indexOf("opinion") : order.length), 0, "more");
@@ -506,7 +588,7 @@
     overflowPages = out.filter(function (p) { return overflows(p.querySelector(".page-inner")); }).map(function (p) { return +p.getAttribute("data-page"); });
     clipped = stage.querySelectorAll(".item.clip").length;
     demotedCount = stage.querySelectorAll(".item.demoted").length;
-    briefCount = briefAll.length;   // 단신 탭 쪽·"모두 보기" 창에 실린 단신 (S47)
+    briefCount = briefAll.length;   // 단신 탭 쪽·"전체 보기" 창에 실린 단신 (S47·S48)
     emptySummary = Array.prototype.filter.call(stage.querySelectorAll(".item:not(.oplist):not(.opcmp):not(.oppick):not(.an):not(.guide-intro):not(.guide-table)"), function (el) {
       return !el.querySelector(".lead");
     }).length;
@@ -1058,7 +1140,8 @@
     if (list) {   // 단신 모두 보기에서 열었으면 목록으로 돌아가기 (S47 리뷰)
       var bb = mk("button", "rv-back", "← 단신 목록");
       bb.type = "button";
-      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", "단신 모두 보기"); });
+      var listLabel = reader.getAttribute("data-list-label") || "단신 모두 보기";
+      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", listLabel); });
       node.insertBefore(bb, node.firstChild);
     }
     body.innerHTML = "";
@@ -1278,7 +1361,8 @@
     if (ev && window.NEWS_FB && t.closest(".ev-undo")) { window.NEWS_FB.removeKnown(econConcepts(ev)); econSkip(ev); ev.querySelector(".ev-skip-btn").focus(); return; }
     var bt = t.closest("[data-bt]");                            // 단신 분야 탭 (S47)
     if (bt) { selectBriefTab(bt, false); return; }
-    if (t.closest("[data-bt-all]")) { openBriefAll(); return; }   // 단신 모두 보기 → 창
+    var ba = t.closest("[data-bt-all]");                        // 탭별 전체 보기 → 창 (S48)
+    if (ba) { if (!ba.disabled) openBriefAll(ba.getAttribute("data-bt-all")); return; }
     var d = t.closest("a[data-detail]");                      // 기사 제목 → AI 정리(자세히 창)
     if (d && !mod) { e.preventDefault(); var ai = d.closest("[data-issue]"); if (ai) openReader(ai.getAttribute("data-issue")); return; }
     var o = t.closest("[data-art]");                           // "원문"·작은 제목 → 원문 창
