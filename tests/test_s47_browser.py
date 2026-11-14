@@ -50,7 +50,7 @@ def test_jonghap_and_folded_briefs(browser, tmp_path, w, h):
     assert 3 <= m["jh"] <= 6 and m["theme"], m
     assert m["briefPages"] == 1 and m["tabs"][0].startswith("전체 ")
     total = int(m["tabs"][0].split()[-1])
-    assert total == m["briefs"] and 0 < m["rows"] <= 10
+    assert total == m["briefs"] and 0 < m["rows"] <= total   # S48: 건수는 쪽에 들어가는 만큼 (test_s48_browser)
     assert sum(int(t.split()[-1]) for t in m["tabs"][1:]) == total   # 분야 탭 건수 합 = 전체
     # 분야 탭 → 그 분야만
     tab = page.locator(".page.sec-briefs .bt-tab").nth(1)
@@ -66,16 +66,10 @@ def test_jonghap_and_folded_briefs(browser, tmp_path, w, h):
     page.keyboard.press("ArrowRight")
     assert page.evaluate("() => document.activeElement.getAttribute('aria-selected')") == "true"
     assert page.evaluate("() => [...document.activeElement.parentNode.children].filter(b => b.tabIndex === 0).length") == 1
-    # 모두 보기 → 창에 전체
-    page.locator(".page.sec-briefs .bt-all:visible").first.click()
-    page.wait_for_selector("#reader:not([hidden]) .bt-full")
-    assert page.locator("#reader .bt-full .item.brief").count() == total
-    assert name in page.locator("#reader .bt-full").text_content()
-    # 목록에서 기사를 누르면 자세히, "← 단신 목록"으로 돌아감
-    page.locator("#reader .bt-full .item.brief .hl a").first.click()
-    page.wait_for_selector("#reader .rv-back")
-    page.locator("#reader .rv-back").click()
-    assert page.locator("#reader .bt-full .item.brief").count() == total
+    # 전체 보기 단추는 탭마다 (S48) — 창·돌아가기는 단신이 많은 test_s48_browser 에서
+    page.locator(".page.sec-briefs .bt-tab:visible").first.click()
+    btn = page.locator(".page.sec-briefs .bt-all:visible")
+    assert btn.count() == 1 and btn.is_disabled() == (m["rows"] == total), (btn.text_content(), m)
     ctx.close()
 
 

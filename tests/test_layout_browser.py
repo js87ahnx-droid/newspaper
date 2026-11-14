@@ -122,7 +122,8 @@ def test_briefs_grouped_by_topic(browser, tmp_path, w, h):  # noqa: F811
       const box = document.querySelector('#book .page.sec-briefs .btabs');
       const tabs = [...box.querySelectorAll('[data-bt]')].map(b => [b.dataset.bt, +b.textContent.split(' ').pop()]);
       return {tabs, topics: EDITION.briefTopics, names: EDITION.topics}; }""")
-    page.evaluate("() => document.querySelector('#book .page.sec-briefs .bt-all').click()")
+    # S48: 견본은 단신이 다 보여 단추가 꺼져 있다 — 창 구성만 보려고 켜서 누른다
+    page.evaluate("() => { const b = document.querySelector('#book .page.sec-briefs .bt-all'); b.disabled = false; b.click(); }")
     heads = page.evaluate("() => [...document.querySelectorAll('#reader .bt-full .brief-topic')].map(h => h.textContent)")
     st = page.evaluate(STATE)
     ctx.close()

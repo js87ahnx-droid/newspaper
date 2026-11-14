@@ -85,7 +85,8 @@ def _display(item: dict, display) -> dict:
     elif rep["lang"] not in ("ko", "en") and display.other == "translated_title" and llm.get("ko_title"):
         title, orig, lead_note = llm["ko_title"], item["title"], "AI 번역 제목"
     return {
-        "title": title, "orig_title": orig, "lead": cap_lead(lead or ""), "lead_note": lead_note,
+        # AI 요약은 자르지 않는다 (S48: 지면은 CSS 로 줄여 보이고, 자세히 창은 전체) — 피드 리드만 상한
+        "title": title, "orig_title": orig, "lead": (lead or "") if lead_note == "AI 요약" else cap_lead(lead or ""), "lead_note": lead_note,
         "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
     }
 

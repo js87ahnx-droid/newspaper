@@ -286,6 +286,9 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .item.sub .an-bg, .item.sub .an-pts, .item.sub .an-views, .item.sub .cmp-inline, .item.sub .why, .item.sub .orig { display: none; }
 .item.sub .lead { -webkit-line-clamp: 4; }
 .item.sub::after { content: ""; display: block; clear: both; }
+/* S48: 요약을 다 펴도 쪽이 남으면 접어 둔 배경 → 매체별 관점·입장 차이를 편다 (app.js roomier) */
+.page-inner .item.sub.more-bg:not(.tight):not(.brief) .an-bg { display: block; }
+.page-inner .item.sub.more-views:not(.tight):not(.brief) .an-views, .page-inner .item.sub.more-views:not(.tight):not(.brief) .cmp-inline { display: block; }
 .meta .orig-btn, .meta .link-btn { font: inherit; font-size: 0.85em; padding: 1px 8px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; text-decoration: none; line-height: 1.5; }
 .an-views .view-orig { font: inherit; font-size: 0.8em; padding: 0 7px; margin-left: 2px; border: 1px solid var(--rule, #c9bfae); border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; line-height: 1.4; vertical-align: baseline; }
 .hl a[data-detail] { cursor: pointer; }
@@ -525,6 +528,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .bt-row { padding: 4px 0; border-bottom: 1px solid var(--rule); font-size: calc(14px * var(--fs)); line-height: 1.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bt-row a { color: var(--ink); text-decoration: none; }
 .bt-src { color: var(--muted); font-size: 0.85em; margin-left: 6px; white-space: nowrap; }
+.bt-all:disabled { border-color: var(--rule); color: var(--muted); cursor: default; font-weight: 400; }
 .bt-all { align-self: flex-start; font: inherit; font-size: calc(13px * var(--fs)); min-height: 34px; padding: 4px 12px; border: 1px solid var(--accent); border-radius: 17px; background: var(--card); color: var(--accent); font-weight: 700; cursor: pointer; }
 .bt-full-h { margin: 0 0 6px; font-size: 1.1em; }
 .bt-full .item.brief { margin: 0 0 6px; }
