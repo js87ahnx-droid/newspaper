@@ -405,7 +405,9 @@ SAME_EVENT_PROMPT = """아래는 오늘 지면에 오를 이슈들이다(번호,
 
 SAME_EVENT_VERIFY = """아래 묶음마다, 들어 있는 기사들이 정말 같은 하나의 사건(같은 발표·같은 사고·같은 공격·같은 결정)을 다뤘는지 엄격하게 확인하라.
 같은 인물·같은 회사·같은 나라·같은 원인·같은 분야라는 것만으로는 같은 사건이 아니다.
-예: 학교 지붕 붕괴와 선박 드론 피격은 다름, 다리 개통과 미사일 발사는 다름, 규제 당국 조사와 기업 상장 연기 요구는 다름.
+예: 학교 지붕 붕괴와 선박 드론 피격은 다름, 다리 개통과 미사일 발사는 다름, 규제 당국 조사와 기업 상장 연기 요구는 다름,
+중국의 10월 대출 통계 발표와 한국의 다음 주 가계신용 발표 예정은 다름(같은 분야 지표라도 나라·발표 주체가 다르면 다른 사건).
+"국가"는 보도한 매체의 나라다 — 나라가 다른 매체가 같은 사건을 다룰 수는 있지만, 다룬 나라·기관이 다르면 같은 사건이 아니다.
 각 묶음에서 같은 사건인 기사 번호만 남겨라(2개 미만이 되면 그 묶음은 버린다). 확신이 없으면 버린다.
 출력 형식: {{"groups": [[번호, 번호, ...], ...]}}
 {data}"""
@@ -417,11 +419,14 @@ def same_event_groups(items: list[dict], ask) -> tuple[dict[str, int], str]:
     ask(prompt) → dict|None. 돌려주는 값: (issue_id → 묶음 번호, 상태)."""
     rows, ids = [], []
     for it in items:
-        an = it.get("llm", {}).get("analysis")
+        llm = it.get("llm", {})
+        an = llm.get("analysis")
+        nation = "·".join(sorted({a.get("country") or "" for a in it.get("articles", [])} - {""}))
         if an:
-            rows.append({"번호": len(ids), "제목": an.get("headline") or it["title"], "요약": an.get("summary", "")[:160]})
-        else:
-            rows.append({"번호": len(ids), "제목": it["title"], "요약": (it.get("lead") or "")[:160]})
+            rows.append({"번호": len(ids), "제목": an.get("headline") or it["title"], "요약": an.get("summary", "")[:160], "국가": nation})
+        else:   # S49a: 한국어 제목·요약을 받았으면 그것으로 (11/15: 중국어 원제목 그대로 들어가 한국 기사와 잘못 묶임)
+            rows.append({"번호": len(ids), "제목": llm.get("ko_title") or it["title"],
+                         "요약": (llm.get("ko_summary") or it.get("lead") or "")[:160], "국가": nation})
         ids.append(it["issue_id"])
     if len(rows) < 2:
         return {}, "대상 없음"
@@ -456,6 +461,7 @@ def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> lis
     LLM 이 한국어로 정리한 분석끼리의 글자 겹침을 본다 — 언어가 달라 임베딩으로는 못 합친 같은 사건(영어 ↔ 한국어)을 잡는다.
     돌려주는 값: (남긴 id, 합친 id)."""
     groups = groups or {}
+    edition.get("stats", {}).pop("an_moved", None)   # 같은 호를 다시 enrich 할 때 지난 기록이 남지 않게
     kept: list[dict] = []
     merged: list[tuple[str, str]] = []
     for sid, items in edition["sections"].items():
@@ -474,6 +480,9 @@ def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> lis
                 continue
             if an and not host.get("llm", {}).get("analysis"):   # 남는 쪽에 분석이 없으면 합쳐지는 쪽 분석을 옮긴다
                 host["llm"] = {**host.get("llm", {}), "analysis": an}
+                # S49a: 옮겨 붙인 분석은 발행 로그에 — 잘못된 같은 사건 묶음(11/15 인민일보 ← 가계신용)을 다음 발행에서 확인하게
+                edition.setdefault("stats", {}).setdefault("an_moved", []).append(
+                    {"id": host["issue_id"], "title": host["title"][:60], "headline": an.get("headline", "")[:60]})
             seen = {a["id"] for a in host["articles"]}
             host["articles"] += [a for a in it["articles"] if a["id"] not in seen]
             host["merged"] = host.get("merged", []) + [it["issue_id"]] + it.get("merged", [])

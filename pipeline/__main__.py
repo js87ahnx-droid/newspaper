@@ -531,6 +531,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
             llm_note += f" | 경제 해설 버림 {st['econ']['rejected']}"
         if st.get("merged_duplicates"):
             llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
+        if edition.get("stats", {}).get("an_moved"):   # S49a: 분석을 다른 기사에 옮겨 붙인 합침 — 잘못 묶였는지 확인용
+            llm_note += " | 분석 옮김 " + "; ".join(f"{x['title']} ← {x['headline']}" for x in edition["stats"]["an_moved"])
         _history_summaries(Path(args.data) / "history" / f"{args.date}.json", edition)
     write_atomic(raw / f"{args.date}.edition.json", json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
     _store_econ(args, raw, edition)

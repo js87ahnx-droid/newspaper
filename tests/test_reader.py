@@ -406,3 +406,18 @@ def test_stance_view_orig_opens_that_outlets_article(browser, tmp_path, monkeypa
     get = [s for s in seen if s["method"] == "GET"]
     assert parse_qs(urlsplit(get[-1]["url"]).query)["url"] == [info["read"]]
     ctx.close()
+
+
+def test_same_event_rows_use_korean_text_and_country_and_log_moved_analysis():
+    """S49a: 묶기 줄은 한국어 제목·요약(받았으면)과 매체 국가, 분석을 옮겨 붙인 합침은 stats 에 (11/15 인민일보 ← 가계신용)."""
+    from pipeline.llm import SAME_EVENT_VERIFY, merge_duplicates, same_event_groups
+    cn = {"issue_id": "cn", "title": "前10月人民币贷款增加11.42万亿元", "lead": "人民银行发布",
+          "articles": [{"id": "c1", "source": "인민일보", "country": "CN"}], "llm": {"ko_title": "1~10월 위안화 대출 11조4200억 위안 증가", "ko_summary": "중국 인민은행 발표."}}
+    kr = _issue("kr", "다음주 가계신용", "다음주 가계신용·KDI·IMF 전망 줄줄이 공개")
+    asked = []
+    same_event_groups([cn, kr], lambda p: asked.append(p) or {"groups": [[0, 1]]})
+    assert "위안화 대출" in asked[0] and "人民币" not in asked[0] and '"국가": "CN"' in asked[0] and '"국가": "KR"' in asked[0]
+    assert "가계신용 발표 예정은 다름" in SAME_EVENT_VERIFY
+    ed = {"sections": {"economy": [cn, kr]}, "stats": {"an_moved": [{"id": "old"}]}}
+    merge_duplicates(ed, {"cn": 0, "kr": 0})
+    assert ed["stats"]["an_moved"] == [{"id": "cn", "title": "前10月人民币贷款增加11.42万亿元", "headline": "다음주 가계신용·KDI·IMF 전망 줄줄이 공개"}]
