@@ -494,11 +494,13 @@ def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> lis
 
 
 def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, runner=None,
-           bodies: dict | None = None, known: list[str] | None = None, past_econ: dict | None = None) -> dict:
+           bodies: dict | None = None, known: list[str] | None = None, past_econ: dict | None = None,
+           jonghap_ctx: tuple[list[str], dict[str, str]] | None = None) -> dict:
     """edition(dict)에 llm 결과를 붙여 돌려준다. 실패해도 edition 은 그대로 쓸 수 있다.
     bodies(기사 주소 → 본문)는 이슈 분석 프롬프트에만 쓰고 어디에도 저장하지 않는다."""
     cache = read_json(cache_path, {})
     status: dict[str, str] = {}
+    edition.pop("jonghap_plan", None)   # S49: 다시 enrich 할 때 지난 계획이 남지 않게 (AI 실패·메인 바뀜)
     items = [it for ps in edition["sections"].values() for it in ps]
     related = [r for it in items for r in it.get("related", [])]   # 관련 기사 (S22b): 제목 번역·요약만 (같은 사건 묶기·분석에는 안 넣음)
     stopped: list[str] = []  # 인증·설치 문제로 멈췄으면 그 이유
@@ -571,48 +573,17 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         if res and isinstance(res.get("summaries"), dict):
             cache["compare"] = res["summaries"]
 
-    # 2. 영어 기사 한국어 요약 / 3. 그 밖의 언어 제목 번역
-    #    프랑스어·독일어(S20b)는 제목 번역과 한국어 요약을 둘 다 — 리드를 읽을 수 없으므로
-    def want(lang: str, mode: str) -> bool:
-        if lang in TRANSLATE_BOTH:
-            return True
-        target = display.english if lang == "en" else display.other
-        return lang != "ko" and target == mode
-
-    for key, mode, instr, out_key in (
-        ("ko_summary", "original_with_ko_summary",
-         "각 기사를 한국어 한두 문장으로 요약하라. 제목·요약에 있는 내용만 쓴다.", "summaries"),
-        ("ko_title", "translated_title", "각 기사 제목을 자연스러운 한국어 신문 제목으로 번역하라.", "titles"),
-    ):
-        if key in cache:
-            continue
-        todo = [it for it in items + related if want(_lang_of(it), mode) and it["issue_id"] not in analysis]
-        # 프랑스어·독일어 → 지면 기사 → 예비 기사 순 (S20 평가: 24쪽에서 한 번에 100건 넘게 보내 120초 시간 초과)
-        todo.sort(key=lambda it: (_lang_of(it) not in TRANSLATE_BOTH, bool(it.get("reserve"))))
-        rows = [{"id": it["issue_id"], "제목": it["title"], "요약": it["lead"][:300]} for it in todo][: BATCH * MAX_BATCHES]
-        if not rows:
-            continue
-        got: dict = {}
-        sts = []
-        for i in range(0, len(rows), BATCH):
-            prompt = instr + f'\n출력 형식: {{"{out_key}": {{"<id>": "한국어"}}}}\n' + _data_block(rows[i:i + BATCH])
-            res, st = guarded(prompt)
-            sts.append(st)
-            if res and isinstance(res.get(out_key), dict):
-                got.update(res[out_key])
-        status[key] = sts[0] if len(set(sts)) == 1 else " / ".join(sts)
-        if got:
-            cache[key] = got
-
-    # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설 — 영어는 지금처럼 원문)
+    # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설. S49: 한국어 제목 설정이면 영어도 — 분석·해설 제목 포함)
+    from .render import want_title
     op = edition.get("opinion") or {}
     op_all = [o for o in op.get("editorials", []) + op.get("columns", []) + [e for c in op.get("compare", []) for g in c["groups"] for e in g["editorials"]]
               + edition.get("analysis", [])   # 분석·해설(S22c) 제목도
-              if o.get("lang") not in ("ko", "en", None)]
+              if o.get("lang") not in ("ko", None) and (o.get("lang") != "en" or want_title("en", display))]
     op_all += [o for o in edition.get("picks", []) if o.get("lang") not in ("ko", None)]   # 지정 칼럼은 영어도 (S23b — 칼럼 칸 맨 앞)
     want_ids = sorted({o["id"] for o in op_all})
-    if want_ids and not set(want_ids) <= set(cache.get("op_title", {})):
-        rows = [{"id": i, "제목": next(o["title"] for o in op_all if o["id"] == i)} for i in want_ids]
+    todo_ids = [i for i in want_ids if i not in cache.get("op_title", {})]
+    for k0 in range(0, len(todo_ids), BATCH_OP):   # S49: 영어까지 늘어 나눠 보낸다
+        rows = [{"id": i, "제목": next(o["title"] for o in op_all if o["id"] == i)} for i in todo_ids[k0:k0 + BATCH_OP]]
         prompt = ("각 사설·칼럼 제목을 자연스러운 한국어 신문 제목으로 번역하라. '社説' 같은 머리말은 빼라.\n"
                   '출력 형식: {"titles": {"<id>": "한국어"}}\n' + _data_block(rows))
         res, st = guarded(prompt)
@@ -654,10 +625,6 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items + related + edition.get("compare", []):
         llm = {}
-        if it["issue_id"] in cache.get("ko_summary", {}):
-            llm["ko_summary"] = cache["ko_summary"][it["issue_id"]]
-        if it["issue_id"] in cache.get("ko_title", {}):
-            llm["ko_title"] = cache["ko_title"][it["issue_id"]]
         if it["issue_id"] in cache.get("compare", {}):
             llm["frame_summary"] = cache["compare"][it["issue_id"]]
         if it["issue_id"] in analysis:
@@ -666,6 +633,9 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             llm["econ"] = econ[it["issue_id"]]
         if llm:
             it["llm"] = llm
+    # 2·3. 한국어 패스 (S49b): 한국어 제목·요약·부제를 한 번에 — 같은 사건 묶기가 한국어 제목을 쓰게 그 앞에서
+    status["korean"] = korean_pass(edition, display, cache, guarded)
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     # 같은 사건 묶음 (S17d): 분석 결과가 바뀌지 않았으면 캐시를 쓴다
     analyzed = [it for it in items if not it.get("reserve")]   # 지면 이슈 전부 (예비 기사 제외)
     key = ",".join(sorted(it["issue_id"] + ("*" if it.get("llm", {}).get("analysis") else "") for it in analyzed))
@@ -688,9 +658,203 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             cache["same_event"] = {"key": key, "groups": groups}
             write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     dups = merge_duplicates(edition, groups)
+    if edition.get("stats", {}).get("an_moved"):   # 분석이 옮겨 붙은 기사는 부제를 다시 (S49 3차 리뷰 M1 — 캐시 키에 분석 유무)
+        status["korean"] += " / 합침 뒤 " + korean_pass(edition, display, cache, guarded)
+        write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    jstats = None
+    if jonghap_ctx is not None:   # 종합면 각도별 (S49c): 합치기가 끝난 지면에서 메인·둘째 이슈 → 각도 호출 → 후보 한국어
+        jstats = plan_jonghap(edition, display, cache, guarded, cfg, *jonghap_ctx)
+        status["jonghap"] = jstats["status"]
+        write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "spent_today": budget.spent, "analysis": astats,
-                                              "econ": estats, "merged_duplicates": dups}
+                                              "econ": estats, "merged_duplicates": dups, "jonghap": jstats}
     return edition
+
+
+KOREAN_BATCH, KOREAN_MAX_BATCHES = 30, 8   # S49b: 제목·요약·부제를 한 번에 받아 출력이 늘었다 — 30건씩, 8번까지
+BATCH_OP = 40
+KOREAN_PROMPT = """아래 기사마다 "필요"에 적힌 칸만 한국어로 써라. 제목·리드(또는 정리)에 있는 내용만 쓰고 지어내지 마라.
+- title: 원제목을 자연스러운 한국어 신문 제목으로
+- summary: 한국어 2~3문장 요약, 끝까지 완결된 문장으로 (리드가 중간에서 끊겼으면 있는 내용까지만 완결해서)
+- deck: 신문 부제 한 줄(40자 이하). 제목을 되풀이하지 말고, 요약·정리에 이미 쓴 문장과 다른 핵심 사실·숫자·반응 하나. 근거가 없으면 빈 문자열
+출력 형식: {{"items": {{"<id>": {{"title": "", "summary": "", "deck": ""}}}}}}
+{data}"""
+
+
+def _korean_key(it: dict) -> str:
+    import hashlib
+    an = bool(it.get("llm", {}).get("analysis"))
+    return f'{it["issue_id"]}|{hashlib.sha1(it["title"].encode("utf-8")).hexdigest()[:8]}|{"a" if an else ""}'
+
+
+def korean_targets(edition: dict, display) -> list[tuple[dict, list[str]]]:
+    """한국어 패스 대상과 받을 칸 (S49b). 우선순위: 1면 → 뉴스 면 → 관련 기사(제목만) → 단신 → 예비.
+    - 한국어 아닌 기사: title·summary (표시 설정이 원할 때) — 분석이 있으면 분석이 제목·요약을 대신
+    - 지면 뉴스 면 기사(단신·예비 아님): deck, 그리고 국내 리드가 문장 중간에서 끊겼으면 summary (자세히 창에서 끊기지 않게)
+    - 종합면 후보(angles)는 여기서 받지 않는다 — 메인이 정해진 뒤 따로 (jonghap_korean)"""
+    from .render import want_summary, want_title
+    from .textutil import lead_complete
+
+    rank = []
+    for sid, ps in edition["sections"].items():
+        for it in ps:
+            lang, an = _lang_of(it), bool(it.get("llm", {}).get("analysis"))
+            news = sid != "briefs" and not it.get("reserve")
+            f = []
+            if not an and want_title(lang, display):
+                f.append("title")
+            if not an and (want_summary(lang, display) or (news and lang == "ko" and not lead_complete(it.get("lead") or ""))):
+                f.append("summary")
+            if news:
+                f.append("deck")
+            if f:
+                rank.append((0 if sid == "front" else 1 if news else 4 if it.get("reserve") else 3, it, f))
+            for r in it.get("related", []):
+                if want_title(_lang_of(r), display):
+                    rank.append((2, r, ["title"]))
+    rank.sort(key=lambda x: x[0])   # 안정 정렬 — 같은 순위 안은 지면 순서
+    return [(it, f) for _, it, f in rank]
+
+
+def korean_pass(edition: dict, display, cache: dict, guarded, targets: list[tuple[dict, list[str]]] | None = None) -> str:
+    """대상마다 모자란 칸만 받아 it["llm"] 에 ko_title·ko_summary·deck 으로 붙인다 (S49b). 캐시 키는 issue_id + 대표 제목 + 분석 유무
+    (제목이 바뀌거나 분석이 생기면 다시). 받은 칸은 다시 안 보낸다. 돌려주는 값: 상태 문자열."""
+    store = cache.setdefault("korean", {})
+    targets = korean_targets(edition, display) if targets is None else targets
+    seen, rows = set(), []
+    for it, fields in targets:
+        k = _korean_key(it)
+        miss = [f for f in fields if f not in store.get(k, {})]
+        if miss and k not in seen:
+            seen.add(k)
+            an = it.get("llm", {}).get("analysis")
+            rows.append({"id": k, "제목": it["title"], "리드": (an["summary"] if an else (it.get("lead") or ""))[:400],
+                         **({"정리됨": True} if an else {}), "필요": miss})
+    rows = rows[: KOREAN_BATCH * KOREAN_MAX_BATCHES]   # 우선순위 순 — 넘치면 예비부터 빠진다
+    sts = []
+    for i in range(0, len(rows), KOREAN_BATCH):
+        part = rows[i:i + KOREAN_BATCH]
+        res, st = guarded(KOREAN_PROMPT.format(data=_data_block(part)))
+        sts.append(st)
+        got = res.get("items") if isinstance(res, dict) else None
+        if not isinstance(got, dict):
+            continue
+        for r in part:
+            v = got.get(r["id"])
+            if not isinstance(v, dict):
+                continue
+            ent = store.setdefault(r["id"], {})
+            for f in r["필요"]:
+                ent[f] = str(v.get(f) or "").strip()   # 빈 값도 받은 것으로 (근거 없는 부제 — 다시 묻지 않음)
+    for it, fields in targets:
+        ent = store.get(_korean_key(it), {})
+        llm = it.setdefault("llm", {})
+        for f, key in (("title", "ko_title"), ("summary", "ko_summary"), ("deck", "deck")):
+            if f in fields and ent.get(f):
+                llm[key] = ent[f]
+        if not llm:
+            it.pop("llm")
+    by_id = {it["issue_id"]: it.get("llm", {}) for it, _ in targets}
+    for c in edition.get("compare", []):   # 입장 비교 칸은 같은 이슈의 다른 dict
+        src = by_id.get(c["issue_id"], {})
+        if src.get("ko_title") or src.get("ko_summary"):
+            c.setdefault("llm", {}).update({k: src[k] for k in ("ko_title", "ko_summary") if k in src})
+    if not rows:
+        return "캐시"
+    return (sts[0] if len(set(sts)) == 1 else " / ".join(sts)) + f" ({len(rows)}건)"
+
+
+ANGLES = ("경위", "배경", "인물", "시장 반응", "각계 반응", "국내 영향", "정책", "책임론", "후임", "쟁점", "현장", "전망", "기타")
+ANGLE_CANDS = 8         # 묶음마다 각도를 묻는 후보 수 (편집이 붙인 angles 앞에서부터)
+JONGHAP_KOREAN_MAX = 16
+JONGHAP_FALLBACK = 6    # 계획이 없을 때(각도 호출 실패) 한국어를 받는 메인 후보 수
+BAND_MAX = 16
+ANGLE_PROMPT = """종합일간지 종합면 편집이다. 묶음마다 "중심 기사"와 같은 사건을 다룬 "후보" 기사들이 있다.
+신문은 한 사건을 여러 각도로 나눠 싣는다 — 같은 내용을 매체만 바꿔 되풀이하지 않는다.
+후보마다:
+- angle: 이 기사가 다루는 각도 하나 — 경위·배경·인물·시장 반응·각계 반응·국내 영향·정책·책임론·후임·쟁점·현장·전망·기타 중에서
+- dup: 중심 기사 또는 다른 후보와 내용이 사실상 같으면 true (같은 사실을 다른 매체가 쓴 스트레이트 등)
+- dup_of: dup 이면 같은 기사의 id (중심 기사면 중심 기사 id), 아니면 null
+묶음마다 band: 이 묶음의 이름 16자 이하 (예: "젠슨 황 사임 후폭풍", "충청 메가프로젝트 착공")
+제목·요약에 있는 내용으로만 판단하라.
+출력 형식: {{"groups": {{"<중심 id>": {{"band": "", "angles": {{"<후보 id>": {{"angle": "", "dup": false, "dup_of": null}}}}}}}}}}
+{data}"""
+
+
+def _row_text(it: dict) -> dict:
+    llm = it.get("llm", {})
+    an = llm.get("analysis") or {}
+    return {"id": it["issue_id"], "매체": it.get("source", ""),
+            "제목": an.get("headline") or llm.get("ko_title") or it["title"],
+            "요약": (an.get("summary") or llm.get("ko_summary") or it.get("lead") or "")[:240]}
+
+
+def _clean_plan(res, hosts: list[tuple[dict, list[dict]]]) -> dict | None:
+    """각도 응답 다듬기 (S49 2차 리뷰 M10): 목록에 없는 각도 → 기타, 답 없는 후보 → 기타·dup 아님, 없는 id 를 가리키는 dup_of → dup 아님,
+    이름 16자 넘으면 자름(없으면 중심 기사 제목은 render 가). JSON 이 아니거나 메인 묶음 후보가 하나도 없으면 None."""
+    if not isinstance(res, dict) or not isinstance(res.get("groups"), dict) or not hosts or not hosts[0][1]:
+        return None
+    groups = []
+    for host, cands in hosts:
+        g = res["groups"].get(host["issue_id"])
+        g = g if isinstance(g, dict) else {}
+        raw = g.get("angles") if isinstance(g.get("angles"), dict) else {}
+        ids = {host["issue_id"], *(c["issue_id"] for c in cands)}
+        out = {}
+        for c in cands:
+            v = raw.get(c["issue_id"]) if isinstance(raw.get(c["issue_id"]), dict) else {}
+            ang = str(v.get("angle") or "").strip()
+            dup_of = v.get("dup_of") if v.get("dup_of") in ids and v.get("dup_of") != c["issue_id"] else None
+            out[c["issue_id"]] = {"angle": ang if ang in ANGLES else "기타", "dup": bool(v.get("dup")) and dup_of is not None,
+                                  "dup_of": dup_of if v.get("dup") else None}
+        band = str(g.get("band") or "").strip()[:BAND_MAX]
+        groups.append({"host": host["issue_id"], "band": band, "angles": out})
+    return {"lead": hosts[0][0]["issue_id"], "groups": groups}
+
+
+def plan_jonghap(edition: dict, display, cache: dict, guarded, cfg: Llm, order: list[str], country: dict[str, str]) -> dict:
+    """종합면 계획 (S49c): render 와 같은 함수(jonghap_hosts)로 메인·둘째 이슈를 정하고, 후보마다 각도·같은 내용을 AI 한 번으로.
+    캐시 키 = 메인 id + 둘째 id + 후보 id. 계획은 edition["jonghap_plan"] 에 — render 는 이것만 읽는다.
+    그다음 뽑힐 수 있는 후보(계획이 없으면 메인 후보 앞 6건)에 한국어 제목·요약·부제 (16건 이하)."""
+    from .render import jonghap_hosts, want_summary, want_title
+    from .textutil import lead_complete
+
+    lead, second, _ = jonghap_hosts([(sid, edition["sections"].get(sid, [])) for sid in order], country)
+    st = {"lead": lead and lead["issue_id"], "second": second and second["issue_id"], "dups": [], "status": "대상 없음"}
+    if lead is None or not lead.get("angles"):
+        return st
+    main = (lead.get("angles") or [])[:ANGLE_CANDS]
+    hosts = [(lead, main)]
+    if second is not None:
+        taken = {a["issue_id"] for a in main}
+        sec = [a for a in (second.get("angles") or []) if a["issue_id"] not in taken][:ANGLE_CANDS]
+        if len(sec) >= 2:
+            hosts.append((second, sec))
+    key = "|".join(h["issue_id"] + ":" + ",".join(c["issue_id"] for c in cs) for h, cs in hosts)
+    got = cache.get("jonghap_angles", {})
+    if got.get("key") == key:
+        plan, st["status"] = got.get("plan"), "캐시"
+    else:
+        data = [{"중심": _row_text(h), "후보": [_row_text(c) for c in cs]} for h, cs in hosts]
+        res, call_st = guarded(ANGLE_PROMPT.format(data=_data_block(data)), model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
+        plan = _clean_plan(res, hosts)
+        st["status"] = call_st if plan is None else "ok"
+        if res is not None:
+            cache["jonghap_angles"] = {"key": key, "plan": plan}
+    if plan:
+        edition["jonghap_plan"] = plan
+        st["dups"] = [{"id": cid, "of": v["dup_of"], "angle": v["angle"]} for g in plan["groups"] for cid, v in g["angles"].items() if v["dup"]]
+        cands = [c for (h, cs), g in zip(hosts, plan["groups"]) for c in cs if not g["angles"][c["issue_id"]]["dup"]]
+    else:
+        cands = main[:JONGHAP_FALLBACK]
+    targets = []
+    for c in cands[:JONGHAP_KOREAN_MAX]:
+        lang = _lang_of(c)
+        f = (["title"] if want_title(lang, display) else []) + (
+            ["summary"] if want_summary(lang, display) or (lang == "ko" and not lead_complete(c.get("lead") or "")) else []) + ["deck"]
+        targets.append((c, f))
+    st["status"] += " / 후보 한국어 " + korean_pass(edition, display, cache, guarded, targets)
+    return st
 
 
 INTERVIEW_SHOW = 4

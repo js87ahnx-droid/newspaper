@@ -89,6 +89,36 @@ def cap_lead(s: str) -> str:
     return cut + "…"
 
 
+_SENT_END = ".!?。！？"
+_CLOSERS = "\"'”’)」』】》〉"
+_SENT_RE = re.compile(r"[.!?][\"'”’)」』】》〉]*(?=\s|$)|[。！？][\"'”’)」』】》〉]*")   # 일본어·중국어 마침표는 띄어쓰기 없이
+
+
+def lead_complete(s: str) -> bool:
+    """리드가 완결 문장으로 끝나는가 (S49). 말줄임("…", "...", "···")으로 끝나면 잘린 것.
+    끝 글자가 닫는 따옴표·괄호면 그 앞 글자를 본다. 빈 리드는 완결로 본다(채울 것이 없음)."""
+    t = (s or "").rstrip()
+    if not t:
+        return True
+    if t.endswith(("…", "...", "···", "‥")):
+        return False
+    t = t.rstrip(_CLOSERS)
+    return bool(t) and t[-1] in _SENT_END
+
+
+def trim_lead(s: str) -> str:
+    """잘린 리드를 마지막 완결 문장까지 + " …" (S49 — 자세히 창에서 "트럼프 대통령이 앨"처럼 끊기지 않게).
+    완결 부분이 리드의 40% 미만이면 끊지 않고 끝에 "…"만. 완결 리드는 그대로."""
+    t = (s or "").rstrip()
+    if lead_complete(t):
+        return t
+    body = re.sub(r"\s*(…|\.\.\.|···|‥)+$", "", t)
+    ends = [m.end() for m in _SENT_RE.finditer(body)]
+    if ends and ends[-1] >= len(body) * 0.4:
+        return body[: ends[-1]] + " …"
+    return body + "…"
+
+
 def title_key(title: str) -> str:
     """같은 매체 안 중복 판정용 제목 키: 말머리([단독] 등)·문장부호·공백 제거, 소문자."""
     t = re.sub(r"^\s*(\[[^\]]{1,12}\]\s*)+", "", title)

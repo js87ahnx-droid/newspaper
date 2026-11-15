@@ -304,8 +304,9 @@ COMPARE_TOPICS = {
 
 
 class ForeignDisplay(Strict):
-    english: Literal["original", "original_with_ko_summary", "translated_title"]
-    other: Literal["original", "original_with_ko_summary", "translated_title"]
+    # ko_title_and_summary (S49, 2026-11-15 사용자 "영어/일본어로 나오면 한 눈에 확인이 안되니 한글로"): 한국어 제목 + 한국어 요약, 원제목은 작게
+    english: Literal["original", "original_with_ko_summary", "translated_title", "ko_title_and_summary"]
+    other: Literal["original", "original_with_ko_summary", "translated_title", "ko_title_and_summary"]
 
 
 class Interests(Strict):

@@ -25,7 +25,7 @@ from .settings import ROOT, TOPICS, Config, Interests, Sources
 from .stance import COUNTRY_LABEL, LEAN_ORDER
 
 COUNTRY_KO = {**COUNTRY_LABEL, "FR": "프랑스", "DE": "독일", "BE": "벨기에"}   # 중국은 지금 비교표 (S37)
-from .textutil import LEAD_MAX, TRANSLATE_BOTH, cap_lead, title_key
+from .textutil import LEAD_MAX, TRANSLATE_BOTH, cap_lead, title_key, trim_lead
 
 LEAN_CLASS = {"보수": "con", "중도": "mid", "진보": "pro", "경제지": "biz", "통신·공영": "pub", "관영": "state"}
 KIND_NOTE = {"google_news": "Google 뉴스 경유 (리드 없음)"}
@@ -63,30 +63,54 @@ def larger_photo(url: str | None) -> str | None:
     return url
 
 
+DECK_MAX = 40   # 부제 한 줄 (S49) — 넘으면 버린다
+
+
+def want_title(lang: str, display) -> bool:
+    """한국어 제목을 받아 보일 언어인가 (S49 — llm 한국어 패스와 같은 규칙)."""
+    if lang == "ko":
+        return False
+    mode = display.english if lang == "en" else display.other
+    return lang in TRANSLATE_BOTH or mode in ("translated_title", "ko_title_and_summary")
+
+
+def want_summary(lang: str, display) -> bool:
+    if lang == "ko":
+        return False
+    mode = display.english if lang == "en" else display.other
+    return lang in TRANSLATE_BOTH or mode in ("original_with_ko_summary", "ko_title_and_summary")
+
+
+def deck_of(llm: dict, title: str) -> str | None:
+    """부제 한 줄 (S49): 40자 넘거나 제목과 같으면 버린다."""
+    d = (llm.get("deck") or "").strip()
+    return d if d and len(d) <= DECK_MAX and title_key(d) != title_key(title) else None
+
+
 def _display(item: dict, display) -> dict:
-    """언어별 표시: 영어 = 원문 제목 + 한국어 요약(있으면), 그 밖 = 번역 제목(있으면) + 원문 제목."""
+    """언어별 표시 (S49): 한국어 제목이 있으면 제목 = 한국어·원제목은 작게, 한국어 요약이 있으면 리드 = 요약(AI 요약).
+    없으면 원문 그대로. 피드 리드가 문장 중간에서 끝나면 마지막 완결 문장까지 (자세히 창에서 끊기지 않게)."""
     rep = next((a for a in item["articles"] if a["title"] == item["title"]), item["articles"][0])
     llm = item.get("llm", {})
     title, orig, lead, lead_note = item["title"], None, item.get("lead", ""), None
     an = llm.get("analysis")
     if an:  # 본문 기반 이슈 정리 (S14): 한국어 제목 + 요약, 원 제목은 작게
+        t = an["headline"] or item["title"]
         return {
-            "title": an["headline"] or item["title"], "orig_title": item["title"] if an["headline"] else None,
-            "lead": an["summary"], "lead_note": "AI 정리", "analysis": an,
+            "title": t, "orig_title": item["title"] if an["headline"] else None,
+            "lead": an["summary"], "lead_note": "AI 정리", "analysis": an, "deck": deck_of(llm, t),
             "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
         }
-    if rep["lang"] in TRANSLATE_BOTH:   # S20b·S20d: 한국어 제목 + 한국어 요약, 원 제목은 작게
-        if llm.get("ko_title"):
-            title, orig = llm["ko_title"], item["title"]
-        if llm.get("ko_summary"):
-            lead, lead_note = llm["ko_summary"], "AI 요약"
-    elif rep["lang"] == "en" and display.english == "original_with_ko_summary" and llm.get("ko_summary"):
+    if llm.get("ko_title") and want_title(rep["lang"], display):
+        title, orig = llm["ko_title"], item["title"]
+    if llm.get("ko_summary"):   # 외국어 요약, 또는 잘린 국내 리드 대신 받은 요약 (S49)
         lead, lead_note = llm["ko_summary"], "AI 요약"
-    elif rep["lang"] not in ("ko", "en") and display.other == "translated_title" and llm.get("ko_title"):
-        title, orig, lead_note = llm["ko_title"], item["title"], "AI 번역 제목"
+    elif orig:
+        lead_note = "AI 번역 제목"
     return {
-        # AI 요약은 자르지 않는다 (S48: 지면은 CSS 로 줄여 보이고, 자세히 창은 전체) — 피드 리드만 상한
-        "title": title, "orig_title": orig, "lead": (lead or "") if lead_note == "AI 요약" else cap_lead(lead or ""), "lead_note": lead_note,
+        # AI 요약은 자르지 않는다 (S48: 지면은 CSS 로 줄여 보이고, 자세히 창은 전체) — 피드 리드만 상한·완결 문장까지(S49)
+        "title": title, "orig_title": orig, "lead": (lead or "") if lead_note == "AI 요약" else trim_lead(cap_lead(lead or "")),
+        "lead_note": lead_note, "deck": deck_of(llm, title),
         "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
     }
 
@@ -256,47 +280,142 @@ def front_single(sections: list[dict], country: dict[str, str]) -> None:
     sections.append({"id": "detail", "title": "", "items": [{**lead, "detail": True}]})
 
 
+def jonghap_hosts(ordered: list[tuple[str, list[dict]]], country: dict[str, str]) -> tuple[dict | None, dict | None, str]:
+    """종합면 묶음의 중심 기사 (S49 — render·enrich 가 같은 함수로 같은 답을 낸다).
+    ordered: (면 id, 기사들) — 설정의 면 순서. 메인 = lead_pick(뉴스 면, 예비 제외, 1면 기사 _front).
+    둘째 이슈 = 1면 기사(1면 순서, 메인 제외) 중 처음으로 ① 종합면 후보 2건 이상 ② 메인의 후보·합친 이슈와 겹치지 않음
+    ③ 제목이 메인과 거의 같지 않음(자카드 0.5 미만). 돌려주는 값: (메인, 둘째 또는 None, 메인 고른 까닭)."""
+    from .headlines import _jac
+
+    for sid, ps in ordered:
+        if sid == "front":
+            for r in ps:
+                r["_front"] = True
+    cands = [r for sid, ps in ordered if sid in NEWS_SECTIONS for r in ps if not r.get("reserve")]
+    if not cands:
+        return None, None, ""
+    lead, why = lead_pick(cands, country)
+    taken = {lead["issue_id"], *lead.get("merged", []), *(a["issue_id"] for a in lead.get("angles") or [])}
+    second = None
+    for r in next((ps for sid, ps in ordered if sid == "front"), []):
+        if r is lead or r.get("reserve"):
+            continue
+        mine = {r["issue_id"], *r.get("merged", []), *(a["issue_id"] for a in r.get("angles") or [])}
+        if len(r.get("angles") or []) >= 2 and not (mine & taken) and _jac(r["title"], lead["title"]) < JONGHAP_SAME_TITLE:
+            second = r
+            break
+    return lead, second, why
+
+
 JONGHAP_MIN, JONGHAP_MAX = 3, 6   # 종합면 기사 수 (S47). 3건이 안 되면 종합면 없음
+JONGHAP_MAIN_MAX, JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX, JONGHAP_TOTAL = 5, 2, 3, 7   # S49 각도별: 메인 3~5, 둘째 2~3, 합 7
+JONGHAP_MAIN_WITH_SECOND = 4   # 둘째 묶음이 있으면 메인은 4건까지
 JONGHAP_SAME_TITLE = 0.5          # 제목이 이만큼 겹치면 같은 기사로 보고 하나만
 
 
-def jonghap(sections: list[dict], title: str, row) -> None:
-    """종합면 (S47, 사용자 시안 A): 1면 메인 기사의 같은 사건 다른 기사(angles — 편집이 붙임)에서 3~6건.
-    메인 기사·서로와 다른 매체, 제목이 거의 같은 것은 하나만, 점수 순. 지면에 이미 실린 이슈는 뺀다. 1면 바로 뒤에 둔다."""
+def _shown_ids(sections: list[dict], hosts: list[dict]) -> set[str]:
+    """지면에 이미 실린 이슈 (예비 기사 빼고). 묶음 중심 기사의 합친 이슈는 후보로 다시 허용 (S49 — 둘째 이슈도 메인처럼)."""
+    shown = {h["issue_id"] for h in hosts}
+    for s in sections:
+        for r in s["items"]:
+            if r.get("reserve"):   # 예비 기사(쪽이 남을 때만 단신·더 읽을 기사)는 종합면에 쓰면 거기서 뺀다
+                continue
+            shown |= {r["issue_id"], *r.get("merged", []), *(x["issue_id"] for x in r.get("related", []))}
+    for h in hosts:
+        shown -= set(h.get("merged", []))
+    return shown
+
+
+def _pick_planned(host: dict, plan_angles: dict, shown: set[str], used: set[str], lo: int, hi: int) -> list[tuple[dict, str]]:
+    """계획(각도·dup)대로 고르기 (S49): 점수 순(편집이 붙인 angles 순서)으로, dup 은 가리키는 기사가 이 묶음 중심이거나 이미 고른
+    후보일 때만 뺀다(서로 가리키면 점수 높은 쪽이 남음). ① 각도가 안 겹치게 hi 건까지 ② lo 건이 안 되면 같은 각도도 lo 건까지."""
+    pool = [a for a in host.get("angles") or [] if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles]
+    kept: list[tuple[dict, str]] = []
+    ok_ids = {host["issue_id"]}
+    live = []
+    for a in pool:
+        g = plan_angles[a["issue_id"]]
+        if g.get("dup") and g.get("dup_of") in ok_ids:
+            continue
+        live.append((a, g.get("angle") or "기타"))
+        ok_ids.add(a["issue_id"])   # 뒤 후보가 이 후보를 가리키면 뒤 것이 빠진다
+    angles_seen: set[str] = set()
+    for a, ang in live:
+        if len(kept) >= hi:
+            break
+        if ang not in angles_seen:
+            kept.append((a, ang))
+            angles_seen.add(ang)
+    for a, ang in live:
+        if len(kept) >= lo:
+            break
+        if all(a is not k for k, _ in kept):
+            kept.append((a, ang))
+    order = {id(a): n for n, (a, _) in enumerate(live)}
+    return sorted(kept, key=lambda x: order[id(x[0])])
+
+
+def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, second: dict | None = None) -> None:
+    """종합면 (S47 → S49 각도별). 1면 메인 기사의 같은 사건 다른 기사(angles — 편집이 붙임)에서 고른다.
+    plan(edition["jonghap_plan"], enrich 가 AI 로 각도·같은 내용을 판정)이 있고 메인이 같으면: 각도가 겹치지 않게 메인 묶음 3~5건 +
+    둘째 이슈 묶음 2~3건(합 7). 없으면 S47 방식(다른 매체, 제목이 거의 같은 것은 하나, 3~6건). 1면 바로 뒤에 둔다."""
     from .headlines import _jac
 
     front = next((s for s in sections if s["id"] == "front"), None)
     lead = front and front.get("lead")
     if not lead:
         return
-    shown = {lead["issue_id"]}
-    for s in sections:
-        for r in s["items"]:
-            if r.get("reserve"):   # 예비 기사(쪽이 남을 때만 단신·더 읽을 기사)는 종합면에 쓰면 거기서 뺀다
+    groups = {g["host"]: g for g in (plan or {}).get("groups", [])}
+    planned = bool(plan) and plan.get("lead") == lead["issue_id"] and lead["issue_id"] in groups
+    hosts = [lead] + ([second] if planned and second is not None and second["issue_id"] in groups else [])
+    shown = _shown_ids(sections, hosts)
+    picked: list[tuple[dict, str | None, int]] = []   # (후보, 각도, 묶음 번호)
+    if planned:
+        used: set[str] = set()
+        main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, JONGHAP_MIN, JONGHAP_MAIN_MAX)
+        if len(main) < JONGHAP_MIN:
+            return
+        used |= {a["issue_id"] for a, _ in main}
+        picked += [(a, ang, 0) for a, ang in main]
+        if len(hosts) > 1:
+            sec = _pick_planned(second, groups[second["issue_id"]]["angles"], shown | {lead["issue_id"]}, used,
+                                JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX)
+            if len(sec) >= JONGHAP_SECOND_MIN:
+                # 둘째 묶음이 있으면 메인 묶음은 4건까지 (종합면 두 쪽에 둘째 묶음이 실리게 — S49 견본 패드에서 5+3 이면 둘째가 1건만 남음)
+                picked = picked[:JONGHAP_MAIN_WITH_SECOND]
+                picked += [(a, ang, 1) for a, ang in sec[: JONGHAP_TOTAL - len(picked)]]
+    else:
+        srcs, titles = {lead.get("source")}, [lead["title"]]
+        for a in lead.get("angles") or []:
+            if len(picked) >= JONGHAP_MAX:
+                break
+            if a["issue_id"] in shown or a.get("source") in srcs or any(_jac(a["title"], t) >= JONGHAP_SAME_TITLE for t in titles):
                 continue
-            shown |= {r["issue_id"], *r.get("merged", []), *(x["issue_id"] for x in r.get("related", []))}
-    shown -= set(lead.get("merged", []))
-    picked, srcs, titles = [], {lead.get("source")}, [lead["title"]]
-    for a in lead.get("angles") or []:
-        if len(picked) >= JONGHAP_MAX:
-            break
-        if a["issue_id"] in shown or a.get("source") in srcs or any(_jac(a["title"], t) >= JONGHAP_SAME_TITLE for t in titles):
-            continue
-        picked.append(a)
-        srcs.add(a.get("source"))
-        titles.append(a["title"])
-    if len(picked) < JONGHAP_MIN:
-        return
-    ids = {a["issue_id"] for a in picked}
+            picked.append((a, None, 0))
+            srcs.add(a.get("source"))
+            titles.append(a["title"])
+        if len(picked) < JONGHAP_MIN:
+            return
+    ids = {a["issue_id"] for a, _, _ in picked}
     for s in sections:
         s["items"] = [r for r in s["items"] if r["issue_id"] not in ids]
-    rows = [{**row(a), "reserve": False} for a in picked]
-    if rows and not rows[0].get("photo") and picked[0].get("photo_alt"):   # 첫 기사 사진: RSS 대표 이미지로라도 (S47)
-        rows[0]["photo"], rows[0]["photo_source"] = larger_photo(picked[0]["photo_alt"]), picked[0].get("photo_alt_source")   # 예비 기사였어도 종합면에서는 정식 기사 (쪽 나누기가 예비는 건너뛴다)
-    for r in rows[1:]:   # 사진은 첫 기사만 (시안 A)
+    rows = []
+    for n, (a, ang, grp) in enumerate(picked):
+        r = {**row(a), "reserve": False, "jh_group": grp}
+        first_of_group = n == 0 or picked[n - 1][2] != grp
+        r["jh_angle"] = None if (grp == 0 and n == 0) else ang   # 메인 묶음 첫 기사만 각도 칸 없음 (시안 B)
+        if grp == 1 and first_of_group:
+            g = groups[second["issue_id"]]
+            r["jh_band"] = g.get("band") or second["view"]["title"]
+        rows.append(r)
+    if rows and not rows[0].get("photo") and picked[0][0].get("photo_alt"):   # 첫 기사 사진: RSS 대표 이미지로라도 (S47)
+        rows[0]["photo"], rows[0]["photo_source"] = larger_photo(picked[0][0]["photo_alt"]), picked[0][0].get("photo_alt_source")
+    for r in rows[1:]:   # 사진은 첫 기사만
         r["photo"] = None
+    band = groups[lead["issue_id"]].get("band") if planned else None
     at = next((k for k, s in enumerate(sections) if s["id"] == "front"), -1) + 1
-    sections.insert(at, {"id": "jonghap", "title": title, "items": rows, "theme": lead["view"]["title"]})
+    sections.insert(at, {"id": "jonghap", "title": title, "items": rows, "theme": band or lead["view"]["title"],
+                         "theme_named": bool(band)})
 
 
 REVIEW_SCORES = ("attention", "importance", "headline", "continuity", "interest", "final")
@@ -449,8 +568,19 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         if not items:
             continue
         sections.append({"id": s.id, "title": titles[s.id], "items": [row(it) for it in items]})
-    front_single(sections, {s.name: s.country for s in sources.sources})
-    jonghap(sections, titles.get("jonghap", "종합"), row)   # 1면 메인이 정해진 뒤 (S47)
+    country = {s.name: s.country for s in sources.sources}
+    front_single(sections, country)
+    # 종합면 (S47·S49): 둘째 이슈는 enrich 와 같은 함수로 — 원본 기사 순서(설정의 면 순서)에서 다시 계산해 계획과 견준다
+    plan = edition.get("jonghap_plan")
+    second = None
+    if plan:
+        _, sec_raw, _ = jonghap_hosts([(s.id, edition["sections"].get(s.id, [])) for s in cfg.sections], country)
+        want = next((g["host"] for g in plan.get("groups", [])[1:]), None)
+        if sec_raw is not None and sec_raw["issue_id"] == want:
+            second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)
+            if second is None:   # 둘째 이슈가 메인 자리로 빠졌거나 없으면 둘째 묶음 없음
+                second = None
+    jonghap(sections, titles.get("jonghap", "종합"), row, plan, second)
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})

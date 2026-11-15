@@ -516,8 +516,9 @@ def cmd_enrich(args: argparse.Namespace) -> int:
             every = [it for ps in edition["sections"].values() for it in ps]
             past_econ = past_for(econ_targets(every, cfg.llm.econ_issues), Path(args.data), date.fromisoformat(args.date))
             print(f"지난 경제 해설 참고: {len(past_econ)}건")
+        sources = load_sources(root)   # 종합면 메인을 render 와 같게 고르려면 매체 국가가 필요하다 (S49c)
         edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies, known=known,
-                         past_econ=past_econ)
+                         past_econ=past_econ, jonghap_ctx=([s.id for s in cfg.sections], {s.name: s.country for s in sources.sources}))
         del bodies
         st = edition["stats"]["llm"]
         sp = st.get("spent_today") or {}

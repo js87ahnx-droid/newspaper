@@ -74,6 +74,13 @@ def edition_fixture():
     return {"sections": {"front": [en, ko], "briefs": [ja]}, "compare": [en], "stats": {}}
 
 
+def korean_reply(prompt, table):
+    """한국어 패스(S49b) 응답 흉내: 프롬프트의 줄 id("issue|hash|")마다 table[issue] 를 돌려준다."""
+    import re as _re
+    ids = _re.findall(r'"id": "([^"|]+\|[^"]*)"', prompt)
+    return {"items": {k: table[k.split("|")[0]] for k in ids if k.split("|")[0] in table}}
+
+
 def test_llm_disabled_never_imports(tmp_path):
     """enabled=false 면 llm 모듈을 불러오지도, CLI 를 부르지도 않는다 (별도 프로세스에서 확인)."""
     code = (
@@ -112,21 +119,27 @@ def test_llm_enrich_batches_and_respects_budget(tmp_path):
         calls.append(prompt)
         if "프레임" in prompt or "다르게" in prompt:
             body = {"summaries": {"e1": "프레임 요약"}}
-        elif "번역" in prompt:
-            body = {"titles": {"j1": "총리가 사임"}}
+        elif '"필요"' in prompt:
+            body = korean_reply(prompt, {"e1": {"title": "교황 수술", "summary": "교황이 수술을 받았다.", "deck": "회복에 2주"},
+                                         "k1": {"summary": "국내 소식이다.", "deck": "부제"}, "j1": {"title": "총리가 사임", "summary": "총리가 물러났다."}})
         else:
-            body = {"summaries": {"e1": "교황이 수술을 받았다"}}
+            body = {"groups": []}
         return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
 
     cfg = Llm(enabled=True, model="haiku", max_calls_per_day=2, timeout_sec=10, analysis_issues=0)
-    display = load_interests().foreign_display  # 영어: 요약, 그 밖: 제목 번역
+    display = load_interests().foreign_display  # S49: 영어·그 밖 모두 한국어 제목 + 요약
     budget = Budget(tmp_path / "usage.json", date(2026, 10, 16), cfg.max_calls_per_day)
     ed = enrich(edition_fixture(), cfg, display, tmp_path / "llm.json", budget, runner=runner)
-    assert len(calls) == 2  # 상한 2회 — 세 번째(번역)는 호출하지 않음
-    assert ed["stats"]["llm"]["status"]["ko_title"].startswith("하루 호출 상한")
+    assert len(calls) == 2  # 상한 2회 — 세 번째(같은 사건 묶기)는 호출하지 않음
+    assert ed["stats"]["llm"]["status"]["same_event"].startswith("하루 호출 상한")
     front = ed["sections"]["front"][0]
-    assert front["llm"]["frame_summary"] == "프레임 요약" and front["llm"]["ko_summary"] == "교황이 수술을 받았다"
-    assert "llm" not in ed["sections"]["front"][1]  # 한국어 기사는 손대지 않음
+    assert front["llm"]["frame_summary"] == "프레임 요약" and front["llm"]["ko_summary"] == "교황이 수술을 받았다."
+    assert front["llm"]["ko_title"] == "교황 수술" and front["llm"]["deck"] == "회복에 2주"
+    ko = ed["sections"]["front"][1]   # 한국어 기사: 제목은 그대로, 잘린 리드("lead")라 요약 + 부제
+    assert "ko_title" not in ko["llm"] and ko["llm"]["ko_summary"] == "국내 소식이다." and ko["llm"]["deck"] == "부제"
+    ja = ed["sections"]["briefs"][0]   # 단신: 제목·요약, 부제 없음
+    assert ja["llm"] == {"ko_title": "총리가 사임", "ko_summary": "총리가 물러났다."}
+    assert ed["compare"][0]["llm"]["ko_title"] == "교황 수술"   # 입장 비교 칸도
     # 기사 데이터는 <data> 안에 넣고, 지시를 따르지 말라는 시스템 지시를 둔다
     assert all("<data>" in c for c in calls)
 
@@ -166,7 +179,9 @@ def test_llm_cache_prevents_recall(tmp_path):
 
     def runner(prompt):
         calls.append(1)
-        return json.dumps({"result": '{"summaries": {"e1": "x"}, "titles": {"j1": "y"}}'})
+        body = korean_reply(prompt, {"e1": {"title": "x", "summary": "x.", "deck": ""}, "k1": {"summary": "y.", "deck": ""},
+                                     "j1": {"title": "z", "summary": "z."}}) if '"필요"' in prompt else {"summaries": {"e1": "x"}, "groups": []}
+        return json.dumps({"result": json.dumps(body, ensure_ascii=False)})
 
     cfg = Llm(enabled=True, model="haiku", max_calls_per_day=10, timeout_sec=10, analysis_issues=0)
     budget = Budget(tmp_path / "usage.json", date(2026, 10, 16), 10)
@@ -201,10 +216,9 @@ def test_french_gets_korean_title_and_summary(tmp_path):
 
     def runner(prompt):
         asked.append(prompt)
-        if "번역" in prompt:
-            body = {"titles": {"f1": "마크롱, 개각 발표"}}
-        elif "요약하라" in prompt and "성향" not in prompt:
-            body = {"summaries": {"e1": "교황 수술", "f1": "마크롱 대통령이 개각을 발표했다."}}
+        if '"필요"' in prompt:
+            body = korean_reply(prompt, {"f1": {"title": "마크롱, 개각 발표", "summary": "마크롱 대통령이 개각을 발표했다.", "deck": ""},
+                                         "j1": {"title": "총리가 사임", "summary": "총리가 물러났다."}})
         else:
             body = {"summaries": {}}
         return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
@@ -222,7 +236,7 @@ def test_french_gets_korean_title_and_summary(tmp_path):
     assert (v["title"], v["orig_title"], v["lead"], v["lead_note"], v["lang"]) == (
         "마크롱, 개각 발표", "Macron annonce un remaniement", "마크롱 대통령이 개각을 발표했다.", "AI 요약", "fr")
     ja = next(i for i in out["sections"]["briefs"] if i["issue_id"] == "j1")
-    assert "ko_summary" not in ja.get("llm", {})       # 일본어는 지금처럼 제목 번역만
+    assert ja["llm"]["ko_summary"] == "총리가 물러났다."   # S49: 일본어도 제목 + 요약 (ko_title_and_summary)
     from pipeline.textutil import TRANSLATE_BOTH
     assert TRANSLATE_BOTH == {"fr", "de", "zh"}        # 중국어(S20d)도 제목 번역 + 요약
     zh = {**fr, "articles": [{**fr["articles"][0], "lang": "zh"}]}
@@ -247,13 +261,14 @@ def test_feed_lang_marks_french_and_german():
 
 
 def test_opinion_titles_in_japanese_get_korean(tmp_path):
-    """S20c: 논평면 일본어·독일어·프랑스어 사설 제목은 한국어로 (영어는 그대로), 사설 비교 묶음도 같이. 두 번째는 캐시."""
+    """S20c: 논평면 일본어·독일어·프랑스어 사설 제목은 한국어로, 사설 비교 묶음도 같이. 두 번째는 캐시.
+    S49: 한국어 제목 설정(ko_title_and_summary)이면 영어 사설도."""
     from pipeline.llm import Budget, enrich
     asked = []
 
     def runner(prompt):
         asked.append(prompt)
-        body = {"titles": {"y1": "중의원 해산을 서두르지 마라"}} if "사설·칼럼 제목" in prompt else {}
+        body = {"titles": {"y1": "중의원 해산을 서두르지 마라", "g1": "가디언 사설: X"}} if "사설·칼럼 제목" in prompt else {}
         return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
 
     def ed():
@@ -266,7 +281,7 @@ def test_opinion_titles_in_japanese_get_korean(tmp_path):
     disp = load_interests().foreign_display
     out = enrich(ed(), cfg, disp, tmp_path / "llm.json", Budget(tmp_path / "u.json", date(2026, 10, 17), 20), runner=runner)
     op = out["opinion"]
-    assert op["editorials"][0]["ko_title"] == "중의원 해산을 서두르지 마라" and "ko_title" not in op["editorials"][1]
+    assert op["editorials"][0]["ko_title"] == "중의원 해산을 서두르지 마라" and op["editorials"][1]["ko_title"] == "가디언 사설: X"
     assert op["compare"][0]["groups"][0]["editorials"][0]["ko_title"] == "중의원 해산을 서두르지 마라"
     n = sum("사설·칼럼 제목" in p for p in asked)
     out2 = enrich(ed(), cfg, disp, tmp_path / "llm.json", Budget(tmp_path / "u.json", date(2026, 10, 17), 20), runner=runner)

@@ -30,6 +30,6 @@ compare_topics: [diplomacy_security, economic_policy, domestic_politics, tech_re
 #   english: original_with_ko_summary — 영어 제목은 원문 그대로, 한국어 요약을 함께 제공
 #   other:   translated_title         — 그 외 언어는 제목을 한국어로 번역
 #   번역·요약은 LLM 훅(구독, 하루 호출 상한 안)으로 처리하고, 실패하면 원문만 표시한다.
-foreign_display:
-  english: original_with_ko_summary
-  other: translated_title
+foreign_display:   # S49 (2026-11-15): 영어·그 밖 모두 한국어 제목 + 한국어 요약 (전: english original_with_ko_summary, other translated_title)
+  english: ko_title_and_summary
+  other: ko_title_and_summary
