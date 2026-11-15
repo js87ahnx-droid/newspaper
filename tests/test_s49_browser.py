@@ -50,6 +50,10 @@ JH = """() => { const ps = [...document.querySelectorAll('#book .leaf > .page.se
     [...inn.children].forEach(c => { const q = c.getBoundingClientRect(); if (q.height > 0) b = Math.max(b, q.bottom); }); return (b - r.top) / r.height; });
   return { fill, ids: items.map(x => x.getAttribute('data-issue')), groups: items.map(x => x.getAttribute('data-jh-group')),
     angled: items.map(x => !!x.querySelector(':scope > .jh-angle')), band: items.map(x => !!x.querySelector('.jh-band')),
+    bandLayout: (() => { const it = items.find(x => x.querySelector('.jh-band')); if (!it) return null;
+      const r = s => it.querySelector(s).getBoundingClientRect();
+      return { bandAbove: r('.jh-band').bottom <= r('.jh-angle').top + 1, angleBesideTitle: Math.abs(r('.jh-angle').top - r('.hl').top) < 8,
+               angleLeft: r('.jh-angle').right <= r('.hl').left + 1 }; })(),
     theme: (ps[0] && ps[0].querySelector('.jh-theme') || {}).textContent || '',
     bandText: (ps.map(p => p.querySelector('.jh-band')).find(Boolean) || {}).textContent || '',
     flow: [...document.querySelectorAll('#flow section[data-section=jonghap] > .item')].map(x => x.getAttribute('data-issue')),
@@ -76,6 +80,7 @@ def test_jonghap_angles_bands_and_decks(browser, tmp_path, w, h):
     assert m["theme"] == f"젠슨 황 사임 후폭풍 · 기사 {n0}건", m
     if n1:
         assert m["band"][m["groups"].index("1")] and m["bandText"] == f"충청 메가프로젝트 · 기사 {n1}건", m
+        assert m["bandLayout"] == {"bandAbove": True, "angleBesideTitle": True, "angleLeft": True}, m["bandLayout"]   # 시안 B: 띠가 위, 각도 칸은 제목 왼쪽
     else:
         assert not any(m["band"]), m                                         # 둘째 묶음이 빠지면 띠도 없음
     if w >= 1000:

@@ -601,7 +601,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         prompt = ("각 사설·칼럼 제목을 자연스러운 한국어 신문 제목으로 번역하라. '社説' 같은 머리말은 빼라.\n"
                   '출력 형식: {"titles": {"<id>": "한국어"}}\n' + _data_block(rows))
         res, st = guarded(prompt)
-        status["op_title"] = st
+        status["op_title"] = st if "op_title" not in status or status["op_title"] == st else status["op_title"] + " / " + st
         if res and isinstance(res.get("titles"), dict):
             cache["op_title"] = {**cache.get("op_title", {}), **{k: str(v) for k, v in res["titles"].items()}}
     for o in op_all:
@@ -709,7 +709,7 @@ def korean_targets(edition: dict, display) -> list[tuple[dict, list[str]]]:
                 f.append("title")
             if not an and (want_summary(lang, display) or (news and lang == "ko" and not lead_complete(it.get("lead") or ""))):
                 f.append("summary")
-            if news:
+            if news or it.get("reserve"):   # 예비 기사는 "더 읽을 기사"로 일반 기사 꼴이 된다 (3차 구현 리뷰 M1) — 순위는 맨 뒤 그대로
                 f.append("deck")
             if f:
                 rank.append((0 if sid == "front" else 1 if news else 4 if it.get("reserve") else 3, it, f))

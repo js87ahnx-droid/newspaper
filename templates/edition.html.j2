@@ -164,8 +164,8 @@
              data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
              data-top="{{ 1 if (sec.id == 'front' and loop.first and not sec.lead) else 0 }}"
              data-brief="{{ it.brief_text }}" data-reserve="{{ 1 if it.reserve else 0 }}">
-      {% if it.jh_angle %}<span class="jh-angle">{{ it.jh_angle }}</span>{% endif %}{# 종합면 각도 칸 (S49 시안 B) #}
       {% if it.jh_band %}<p class="jh-band"><span class="jh-name">{{ it.jh_band }}</span><span class="jh-n"> · 기사 {{ sec["items"]|selectattr("jh_group", "equalto", 1)|list|length }}건</span></p>{% endif %}
+      {% if it.jh_angle %}<span class="jh-angle">{{ it.jh_angle }}</span>{% endif %}{# 종합면 각도 칸 (S49 시안 B) — 띠 뒤에 둬야 CSS(.jh-band ~ .jh-angle)가 2행부터 놓는다 #}
       {% if it.photo and not brief and not it.detail %}{# 자세히 원본: 사진은 1면에 #}
       <figure class="photo">
         <img src="{{ it.photo }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">

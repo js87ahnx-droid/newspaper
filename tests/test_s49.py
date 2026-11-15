@@ -78,7 +78,7 @@ def test_korean_targets_fields_and_priority():
     assert t == [("f1", ["title", "summary", "deck"]),
                  ("i1", ["title", "summary", "deck"]), ("i2", ["summary", "deck"]), ("i3", ["deck"]), ("i4", ["deck"]),
                  ("r1", ["title"]),                                      # 관련 기사는 제목만 (한국어 관련 기사는 없음)
-                 ("b1", ["title", "summary"]), ("b2", ["title", "summary"])]   # 단신 → 예비, 부제 없음. 국내 단신 잘린 리드는 요약 안 받음
+                 ("b1", ["title", "summary"]), ("b2", ["title", "summary", "deck"])]   # 단신은 부제 없음, 예비는 더 읽을 기사가 되므로 부제. 국내 단신 잘린 리드는 요약 안 받음
 
 
 def _runner(log, table=None):
