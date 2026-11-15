@@ -517,7 +517,26 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 
 /* 종합면 (S47, 시안 A): 1면 메인 이슈를 다른 매체 기사로 펼침 — 이슈 제목 띠 */
 .jh-theme { margin: 0 0 8px; padding: 4px 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-weight: 700; font-size: calc(15px * var(--fs)); }
-.jh-theme::before { content: "오늘의 이슈 · "; color: var(--accent); }
+.jh-theme:not(.jh-named)::before { content: "오늘의 이슈 · "; color: var(--accent); }
+.jh-theme.jh-named .jh-name, .jh-band .jh-name { color: var(--accent); }
+.jh-theme .jh-n, .jh-band .jh-n { font-weight: 400; color: var(--muted); font-size: 0.9em; }
+/* S49 종합면 각도별 (시안 B): 둘째 묶음 띠는 그 첫 기사 안 — 쪽 나누기에서 함께 움직인다 */
+.jh-band { margin: 4px 0 10px; padding: 4px 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-weight: 700; font-size: calc(15px * var(--fs)); }
+.item.angled { display: grid; grid-template-columns: 3.6em minmax(0, 1fr); column-gap: 10px; align-items: start; }
+.item.angled > * { grid-column: 2; min-width: 0; }
+.item.angled > .jh-band { grid-column: 1 / -1; }
+.item.angled > .jh-angle { grid-column: 1; grid-row: 1 / span 30; align-self: stretch; text-align: right; padding: 3px 6px 0 0; border-right: 2px solid var(--accent);
+  color: var(--accent); font-weight: 800; font-size: calc(12px * var(--fs)); line-height: 1.3; word-break: keep-all; }
+.item.angled > .jh-band ~ .jh-angle { grid-row: 2 / span 30; }
+.reader-body .jh-band, .reader-body .jh-angle { display: none; }
+.reader-body .item.angled { display: block; }
+/* 부제 한 줄 (S49): 제목·원제목 아래 굵게. 부제가 있으면 기본 리드를 한 줄 줄여 쪽 높이를 지킨다(늘리기 단계는 그대로) */
+.item .deck { margin: 0 0 4px; font-weight: 600; font-size: calc(14.5px * var(--fs)); line-height: 1.45; color: var(--ink); }
+/* 지면 쪽 안에서만 — 자세히 창(.reader-body)은 줄 제한 없이 전체 요약. 늘리기 단계(roomy…)는 :not(.roomy) 로 그대로 */
+.page-inner .item.has-deck:not(.roomy) .lead { -webkit-line-clamp: 3; }
+.sec-front .page-inner .item.has-deck:not(.top):not(.roomy) .lead { -webkit-line-clamp: 2; }
+.page-inner .item.has-deck.compact .lead, .page-inner .item.has-deck.tight .lead { -webkit-line-clamp: 2; }
+.item.brief .deck { display: none; }
 
 /* 단신 탭 쪽 (S47, 시안 B): 분야 탭 + 위 10건 한 줄, "모두 보기"는 창 */
 .btabs { display: flex; flex-direction: column; gap: 6px; }

@@ -389,6 +389,7 @@
   // opts.grouped: 단신 분야 묶음 — 뒤 기사로 빈자리 채우기를 하지 않고(분야 순서 유지), 새 쪽엔 소제목을 다시 단다
   function placeSection(stage, g, sec, first, budget, nodes, mast, opts) {
     var grouped = opts && opts.grouped;
+    var keepOrder = grouped || (opts && opts.keepOrder);   // S49 종합면: 묶음·띠 순서가 흐트러지지 않게 뒤 기사 끼워 넣기만 끈다
     var id = sec.getAttribute("data-section"), title = sec.getAttribute("data-title");
     var out = [], rest = [];
     var grid = false;   // 단신은 기사마다 가로 한 줄 (S17e — 예전엔 폭이 넉넉하면 두 단)
@@ -438,7 +439,7 @@
         inner.removeChild(node);
       }
       // 새 쪽으로 넘기기 전에, 뒤 기사 중 남은 자리에 들어가는 것으로 빈자리를 채운다 (한 쪽 아래가 비지 않게)
-      for (var j = k + 1; j < nodes.length && !grouped; j++) {
+      for (var j = k + 1; j < nodes.length && !keepOrder; j++) {
         if (used[j]) continue;
         inner.appendChild(nodes[j].node);
         if (overflows(inner)) inner.removeChild(nodes[j].node); else { used[j] = true; placedOnPage++; }
@@ -478,6 +479,25 @@
     return rest;
   }
 
+  // 종합면 묶음 정리 (S49): 둘째 묶음의 띠 기사가 쪽에 못 실렸으면 그 묶음 나머지도 빼고(띠 없이 메인 묶음처럼 보이지 않게),
+  // 띠의 "기사 n건"을 실제로 실린 수로 고친다
+  function fixJonghap(pages) {
+    var items = [];
+    pages.forEach(function (p) { Array.prototype.push.apply(items, p.firstChild.querySelectorAll(":scope > .item[data-jh-group]")); });
+    var g1 = items.filter(function (el) { return el.getAttribute("data-jh-group") === "1"; });
+    if (g1.length && !g1.some(function (el) { return el.querySelector(".jh-band"); })) {
+      g1.forEach(function (el) { el.remove(); dropped++; });
+      g1 = [];
+    }
+    var n0 = items.filter(function (el) { return el.getAttribute("data-jh-group") === "0"; }).length;
+    pages.forEach(function (p) {
+      var th = p.firstChild.querySelector(".jh-theme.jh-named .jh-n");
+      if (th) th.textContent = " · 기사 " + n0 + "건";
+      var bd = p.firstChild.querySelector(".jh-band .jh-n");
+      if (bd) bd.textContent = " · 기사 " + g1.length + "건";
+    });
+  }
+
   function paginate() {
     dropped = 0;
     var opRest = 0;
@@ -508,7 +528,7 @@
     order.forEach(function (id) {
       if (id === "briefs") return;
       var b = budgets[id] || 0;
-      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast);
+      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "jonghap" ? { keepOrder: true } : null);
       built[id] = res.pages;
       if (["opinion", "guide", "analysis", "china", "jonghap"].indexOf(id) < 0) {   // 종합면(S47)은 두 쪽 그대로 — 끝 쪽 기사를 단신으로 내리지 않는다
         mergeOrphan(res.pages).forEach(function (iss) {
@@ -518,6 +538,7 @@
       }
       if (!res.rest.length) pullReserves(id, res.pages, reserveEls, pulled);   // 넘쳐 내린 기사가 없는 면만 (끝 쪽이 남은 것)
       if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) balance(res.pages);
+      if (id === "jonghap") fixJonghap(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       if (b) spare += Math.max(0, b - res.pages.length);
