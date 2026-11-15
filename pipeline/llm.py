@@ -662,7 +662,7 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     if edition.get("stats", {}).get("an_moved"):   # 분석이 옮겨 붙은 기사는 부제를 다시 (S49 3차 리뷰 M1 — 캐시 키에 분석 유무)
         moved = {x["id"] for x in edition["stats"]["an_moved"]}
         redo = [(it, ["deck"]) for sid, ps in edition["sections"].items() for it in ps
-                if it["issue_id"] in moved and sid != "briefs" and not it.get("reserve")]
+                if it["issue_id"] in moved and (sid != "briefs" or it.get("reserve"))]   # 예비 기사도 부제를 가진다
         status["korean"] += " / 합침 뒤 부제 " + korean_pass(edition, display, cache, guarded, redo)
         write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     jstats = None
