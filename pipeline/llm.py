@@ -660,7 +660,10 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     dups = merge_duplicates(edition, groups)
     if edition.get("stats", {}).get("an_moved"):   # 분석이 옮겨 붙은 기사는 부제를 다시 (S49 3차 리뷰 M1 — 캐시 키에 분석 유무)
-        status["korean"] += " / 합침 뒤 " + korean_pass(edition, display, cache, guarded)
+        moved = {x["id"] for x in edition["stats"]["an_moved"]}
+        redo = [(it, ["deck"]) for sid, ps in edition["sections"].items() for it in ps
+                if it["issue_id"] in moved and sid != "briefs" and not it.get("reserve")]
+        status["korean"] += " / 합침 뒤 부제 " + korean_pass(edition, display, cache, guarded, redo)
         write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     jstats = None
     if jonghap_ctx is not None:   # 종합면 각도별 (S49c): 합치기가 끝난 지면에서 메인·둘째 이슈 → 각도 호출 → 후보 한국어
@@ -722,15 +725,20 @@ def korean_pass(edition: dict, display, cache: dict, guarded, targets: list[tupl
     (제목이 바뀌거나 분석이 생기면 다시). 받은 칸은 다시 안 보낸다. 돌려주는 값: 상태 문자열."""
     store = cache.setdefault("korean", {})
     targets = korean_targets(edition, display) if targets is None else targets
-    seen, rows = set(), []
+    by_key: dict[str, dict] = {}
+    rows = []
     for it, fields in targets:
         k = _korean_key(it)
         miss = [f for f in fields if f not in store.get(k, {})]
-        if miss and k not in seen:
-            seen.add(k)
-            an = it.get("llm", {}).get("analysis")
-            rows.append({"id": k, "제목": it["title"], "리드": (an["summary"] if an else (it.get("lead") or ""))[:400],
-                         **({"정리됨": True} if an else {}), "필요": miss})
+        if not miss:
+            continue
+        if k in by_key:   # 같은 기사가 두 자리(관련 기사·단신)에 있으면 칸을 합친다 (재리뷰 N1)
+            by_key[k]["필요"] += [f for f in miss if f not in by_key[k]["필요"]]
+            continue
+        an = it.get("llm", {}).get("analysis")
+        by_key[k] = {"id": k, "제목": it["title"], "리드": (an["summary"] if an else (it.get("lead") or ""))[:400],
+                     **({"정리됨": True} if an else {}), "필요": miss}
+        rows.append(by_key[k])
     rows = rows[: KOREAN_BATCH * KOREAN_MAX_BATCHES]   # 우선순위 순 — 넘치면 예비부터 빠진다
     sts = []
     for i in range(0, len(rows), KOREAN_BATCH):
@@ -852,9 +860,10 @@ def plan_jonghap(edition: dict, display, cache: dict, guarded, cfg: Llm, order: 
     if plan:
         edition["jonghap_plan"] = plan
         st["dups"] = [{"id": cid, "of": v["dup_of"], "angle": v["angle"]} for g in plan["groups"] for cid, v in g["angles"].items() if v["dup"]]
-        cands = [c for (h, cs), g in zip(hosts, plan["groups"]) for c in cs if not g["angles"][c["issue_id"]]["dup"]]
+        # dup 후보도 실릴 수 있다(가리키는 기사가 안 뽑히면 — render._pick_planned) → 후보 전부(묶음마다 8, 합 16 이하)에 한국어 (재리뷰 B2)
+        cands = [c for _, cs in hosts for c in cs]
     else:
-        cands = main[:JONGHAP_FALLBACK]
+        cands = main   # S47 고르기는 앞 8건 안에서 매체·제목을 건너뛰며 고른다 — 8건 모두 (재리뷰 M2)
     targets = []
     for c in cands[:JONGHAP_KOREAN_MAX]:
         lang = _lang_of(c)

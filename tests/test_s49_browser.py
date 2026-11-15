@@ -84,6 +84,11 @@ def test_jonghap_angles_bands_and_decks(browser, tmp_path, w, h):
     # 부제: 뉴스 면 기사에 있고 단신 한 줄엔 없음, 부제 있는 기사의 기본 리드는 3줄
     assert m["decks"] > 10 and m["briefDecks"] == 0, m
     assert m["clamp"] == "3", m
+    # 줄여 넣은(compact·tight) 부제 기사는 2줄 (재리뷰 B1)
+    c2 = page.evaluate("""() => { const el = document.querySelector('#book .leaf > .page:not(.sec-front) .item.has-deck:not(.top)');
+      el.classList.remove('roomy', 'roomier', 'roomiest'); el.classList.add('compact');
+      const v = getComputedStyle(el.querySelector('.lead')).webkitLineClamp; el.classList.remove('compact'); return v; }""")
+    assert c2 == "2", c2
     # 창: 부제 + 전체 요약, 띠·각도 칸은 숨김
     page.evaluate("(i) => NEWS.goTo(i)", int(page.locator("#book .leaf > .page.sec-jonghap").first.get_attribute("data-page")))
     page.wait_for_timeout(500)

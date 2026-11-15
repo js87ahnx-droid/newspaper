@@ -249,14 +249,14 @@ def test_plan_jonghap_calls_once_caches_and_koreanizes_candidates():
     plan = ed["jonghap_plan"]
     assert plan["lead"] == "F1" and [g["host"] for g in plan["groups"]] == ["F1", "F4"]
     angles = ed["sections"]["front"][0]["angles"]
-    assert angles[0]["llm"]["ko_title"] == "한국어 a" and "llm" not in angles[1]     # dup 후보는 한국어 안 받음
+    assert angles[0]["llm"]["ko_title"] == "한국어 a" and angles[1]["llm"]["ko_title"] == "한국어 b"   # dup 후보도 실릴 수 있어 한국어 (재리뷰 B2)
     assert len(calls) == 2
     ed2 = _host_ed()
     st2 = plan_jonghap(ed2, DISP, cache, guarded, _Cfg, ["front", "jonghap", "politics"], COUNTRY)
     assert st2["status"].startswith("캐시") and len(calls) == 2 and ed2["jonghap_plan"] == plan
 
 
-def test_plan_failure_still_koreanizes_first_six():
+def test_plan_failure_still_koreanizes_all_candidates():
     def guarded(prompt, **kw):
         if "종합면 편집" in prompt:
             return None, "호출 실패: x"
@@ -267,7 +267,7 @@ def test_plan_failure_still_koreanizes_first_six():
     st = plan_jonghap(ed, DISP, {}, guarded, _Cfg, ["front", "politics"], COUNTRY)
     assert "jonghap_plan" not in ed and st["status"].startswith("호출 실패")
     got = [bool(a.get("llm", {}).get("ko_title")) for a in ed["sections"]["front"][0]["angles"]]
-    assert got == [True] * 6 + [False] * 2
+    assert got == [True] * 8   # S47 고르기가 앞 8건 안에서 고르므로 모두 (재리뷰 M2)
 
 
 
@@ -346,3 +346,18 @@ def test_reader_resolves_eight_angles():
     ed = {"sections": {"front": [{**_it("F", "ko", "t"), "url": "u0", "angles": [{**_it(f"a{k}", "en", "x"), "url": f"https://news.google.com/{k}"} for k in range(9)]}]}}
     urls = page_urls(ed)
     assert sum(u.startswith("https://news.google.com/") for u in urls) == 8
+
+
+
+def test_lead_complete_korean_da_without_period_and_wave_ellipsis():
+    assert lead_complete("A했다. B라고 밝혔다") and trim_lead("A했다. B라고 밝혔다") == "A했다. B라고 밝혔다"
+    assert not lead_complete("계획⋯") and trim_lead("계획⋯") == "계획…"
+
+
+def test_korean_pass_merges_fields_of_same_article_in_two_places():
+    rel = _it("x", "en", "Same", "L.")
+    ed = {"sections": {"front": [_it("f", "ko", "앞", "끝.", related=[rel])], "briefs": [_it("x", "en", "Same", "L.")]}, "compare": []}
+    log = []
+    korean_pass(ed, DISP, {}, _runner(log))
+    assert re.search(r'"id": "x\|[^"]*",.*?"필요": \[\s*"title",\s*"summary"\s*\]', log[0], re.S)
+    assert ed["sections"]["briefs"][0]["llm"]["ko_summary"] == "x-summary"

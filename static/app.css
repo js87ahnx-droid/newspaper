@@ -535,7 +535,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 /* 지면 쪽 안에서만 — 자세히 창(.reader-body)은 줄 제한 없이 전체 요약. 늘리기 단계(roomy…)는 :not(.roomy) 로 그대로 */
 .page-inner .item.has-deck:not(.roomy):not(.top) .lead { -webkit-line-clamp: 3; }
 .sec-front .page-inner .item.has-deck:not(.top):not(.roomy) .lead { -webkit-line-clamp: 2; }
-.page-inner .item.has-deck.compact .lead, .page-inner .item.has-deck.tight .lead { -webkit-line-clamp: 2; }
+.page-inner .item.has-deck.compact:not(.roomy):not(.top) .lead, .page-inner .item.has-deck.tight:not(.roomy):not(.top) .lead { -webkit-line-clamp: 2; }   /* 위 3줄 규칙보다 명시도가 높아야 (재리뷰 B1) */
 .item.brief .deck { display: none; }
 
 /* 단신 탭 쪽 (S47, 시안 B): 분야 탭 + 위 10건 한 줄, "모두 보기"는 창 */

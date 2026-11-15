@@ -101,10 +101,11 @@ def lead_complete(s: str) -> bool:
     t = (s or "").rstrip()
     if not t:
         return True
-    if t.endswith(("…", "...", "···", "‥")):
+    if t.endswith(("…", "...", "···", "‥", "⋯")):
         return False
     t = t.rstrip(_CLOSERS)
-    return bool(t) and t[-1] in _SENT_END
+    # 마침표 없이 "~다"로 끝나는 국내 리드도 완결로 (재리뷰 M3 — "B라고 밝혔다"를 잘린 것으로 봐 앞 문장까지 줄이지 않게)
+    return bool(t) and (t[-1] in _SENT_END or (t[-1] == "다" and len(t) > 1 and "\uac00" <= t[-2] <= "\ud7a3"))
 
 
 def trim_lead(s: str) -> str:
@@ -113,7 +114,7 @@ def trim_lead(s: str) -> str:
     t = (s or "").rstrip()
     if lead_complete(t):
         return t
-    body = re.sub(r"\s*(…|\.\.\.|···|‥)+$", "", t)
+    body = re.sub(r"\s*(…|\.\.\.|···|‥|⋯)+$", "", t)
     ends = [m.end() for m in _SENT_RE.finditer(body) if not _ABBR.search(body[: m.start() + 1])]
     if ends and ends[-1] >= len(body) * 0.4:
         return body[: ends[-1]] + " …"
