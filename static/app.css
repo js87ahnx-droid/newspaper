@@ -533,7 +533,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 /* 부제 한 줄 (S49): 제목·원제목 아래 굵게. 부제가 있으면 기본 리드를 한 줄 줄여 쪽 높이를 지킨다(늘리기 단계는 그대로) */
 .item .deck { margin: 0 0 4px; font-weight: 600; font-size: calc(14.5px * var(--fs)); line-height: 1.45; color: var(--ink); }
 /* 지면 쪽 안에서만 — 자세히 창(.reader-body)은 줄 제한 없이 전체 요약. 늘리기 단계(roomy…)는 :not(.roomy) 로 그대로 */
-.page-inner .item.has-deck:not(.roomy) .lead { -webkit-line-clamp: 3; }
+.page-inner .item.has-deck:not(.roomy):not(.top) .lead { -webkit-line-clamp: 3; }
 .sec-front .page-inner .item.has-deck:not(.top):not(.roomy) .lead { -webkit-line-clamp: 2; }
 .page-inner .item.has-deck.compact .lead, .page-inner .item.has-deck.tight .lead { -webkit-line-clamp: 2; }
 .item.brief .deck { display: none; }

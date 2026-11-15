@@ -55,7 +55,7 @@ JH = """() => { const ps = [...document.querySelectorAll('#book .leaf > .page.se
     flow: [...document.querySelectorAll('#flow section[data-section=jonghap] > .item')].map(x => x.getAttribute('data-issue')),
     decks: document.querySelectorAll('#book .leaf > .page:not(.sec-briefs) .item .deck').length,
     briefDecks: [...document.querySelectorAll('#book .leaf > .page.sec-briefs .bt-row .deck')].filter(d => d.offsetHeight > 0).length,
-    clamp: (() => { const l = document.querySelector('#book .leaf > .page.sec-politics .item.has-deck:not(.roomy):not(.compact):not(.tight) .lead');
+    clamp: (() => { const l = document.querySelector('#book .leaf > .page:not(.sec-front):not(.sec-jonghap) .item.has-deck:not(.roomy):not(.compact):not(.tight) .lead');
                     return l ? getComputedStyle(l).webkitLineClamp : null; })() }; }"""
 
 
@@ -83,12 +83,12 @@ def test_jonghap_angles_bands_and_decks(browser, tmp_path, w, h):
         assert min(m["fill"]) >= 0.8, m["fill"]
     # 부제: 뉴스 면 기사에 있고 단신 한 줄엔 없음, 부제 있는 기사의 기본 리드는 3줄
     assert m["decks"] > 10 and m["briefDecks"] == 0, m
-    if m["clamp"] is not None:
-        assert m["clamp"] == "3", m
+    assert m["clamp"] == "3", m
     # 창: 부제 + 전체 요약, 띠·각도 칸은 숨김
     page.evaluate("(i) => NEWS.goTo(i)", int(page.locator("#book .leaf > .page.sec-jonghap").first.get_attribute("data-page")))
     page.wait_for_timeout(500)
-    page.evaluate("(id) => NEWS.openReader(id)", m["ids"][-1])
+    target = m["ids"][m["groups"].index("1")] if n1 else m["ids"][-1]   # 띠가 있는 기사를 열어 띠가 숨는지 본다
+    page.evaluate("(id) => NEWS.openReader(id)", target)
     page.wait_for_selector("#reader:not([hidden]) .reader-body .item")
     r = page.evaluate("""() => { const b = document.querySelector('#reader .reader-body');
       const vis = s => [...b.querySelectorAll(s)].some(e => e.offsetHeight > 0);
@@ -100,15 +100,17 @@ def test_jonghap_angles_bands_and_decks(browser, tmp_path, w, h):
 
 @pytest.mark.parametrize("w,h", SIZES)
 def test_decks_do_not_push_more_articles_to_briefs(browser, tmp_path, w, h):
-    got = {}
-    for decks in (False, True):
-        index = make_site(tmp_path / str(decks), mutate=_site(decks=decks, plan=False, long=False))
-        ctx, page, errors = open_page(browser, index, w, h)
-        st = page.evaluate("() => NEWS.state()")
-        ctx.close()
-        assert not errors and st["pages"] == 30 and not st["overflow"], st
-        got[decks] = st["demoted"]
-    assert got[True] <= got[False], got
+    """부제 없는 같은 견본(S48 꼴)과 견줌 — 짧은 요약·계획 없음, 긴 요약·계획 있음 두 가지."""
+    for plan, long in ((False, False), (True, True)):
+        got = {}
+        for decks in (False, True):
+            index = make_site(tmp_path / f"{plan}{decks}", mutate=_site(decks=decks, plan=plan, long=long))
+            ctx, page, errors = open_page(browser, index, w, h)
+            st = page.evaluate("() => NEWS.state()")
+            ctx.close()
+            assert not errors and st["pages"] == 30 and not st["overflow"], st
+            got[decks] = st["demoted"]
+        assert got[True] <= got[False], (plan, got)
 
 
 def test_no_plan_short_summaries_still_fit(browser, tmp_path):
@@ -120,4 +122,4 @@ def test_no_plan_short_summaries_still_fit(browser, tmp_path):
         m = page.evaluate(JH)
         ctx.close()
         assert not errors and st["pages"] == 30 and not st["overflow"], (w, st)
-        assert not any(m["angled"]) and not any(m["band"]) and m["theme"].startswith(""), m
+        assert not any(m["angled"]) and not any(m["band"]) and "· 기사" not in m["theme"], m

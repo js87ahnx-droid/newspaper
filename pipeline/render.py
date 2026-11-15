@@ -327,31 +327,27 @@ def _shown_ids(sections: list[dict], hosts: list[dict]) -> set[str]:
 
 
 def _pick_planned(host: dict, plan_angles: dict, shown: set[str], used: set[str], lo: int, hi: int) -> list[tuple[dict, str]]:
-    """계획(각도·dup)대로 고르기 (S49): 점수 순(편집이 붙인 angles 순서)으로, dup 은 가리키는 기사가 이 묶음 중심이거나 이미 고른
-    후보일 때만 뺀다(서로 가리키면 점수 높은 쪽이 남음). ① 각도가 안 겹치게 hi 건까지 ② lo 건이 안 되면 같은 각도도 lo 건까지."""
-    pool = [a for a in host.get("angles") or [] if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles]
+    """계획(각도·dup)대로 고르기 (S49): 점수 순(편집이 붙인 angles 순서)으로 ① 각도가 안 겹치게 hi 건까지 ② lo 건이 안 되면 같은 각도도
+    lo 건까지. dup 은 가리키는 기사가 이 묶음 중심이거나 이미 고른 후보일 때만 뺀다(서로 가리키면 점수 높은 쪽이 남음)."""
+    pool = [(a, plan_angles[a["issue_id"]]) for a in host.get("angles") or []
+            if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles]
     kept: list[tuple[dict, str]] = []
-    ok_ids = {host["issue_id"]}
-    live = []
-    for a in pool:
-        g = plan_angles[a["issue_id"]]
-        if g.get("dup") and g.get("dup_of") in ok_ids:
-            continue
-        live.append((a, g.get("angle") or "기타"))
-        ok_ids.add(a["issue_id"])   # 뒤 후보가 이 후보를 가리키면 뒤 것이 빠진다
-    angles_seen: set[str] = set()
-    for a, ang in live:
-        if len(kept) >= hi:
-            break
-        if ang not in angles_seen:
+
+    def dup(g) -> bool:
+        return bool(g.get("dup")) and (g.get("dup_of") == host["issue_id"] or g.get("dup_of") in {k["issue_id"] for k, _ in kept})
+
+    seen: set[str] = set()
+    for a, g in pool:
+        ang = g.get("angle") or "기타"
+        if len(kept) < hi and ang not in seen and not dup(g):
             kept.append((a, ang))
-            angles_seen.add(ang)
-    for a, ang in live:
+            seen.add(ang)
+    for a, g in pool:
         if len(kept) >= lo:
             break
-        if all(a is not k for k, _ in kept):
-            kept.append((a, ang))
-    order = {id(a): n for n, (a, _) in enumerate(live)}
+        if all(a is not k for k, _ in kept) and not dup(g):
+            kept.append((a, g.get("angle") or "기타"))
+    order = {id(a): n for n, (a, _) in enumerate(pool)}
     return sorted(kept, key=lambda x: order[id(x[0])])
 
 
@@ -412,10 +408,10 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
         rows[0]["photo"], rows[0]["photo_source"] = larger_photo(picked[0][0]["photo_alt"]), picked[0][0].get("photo_alt_source")
     for r in rows[1:]:   # 사진은 첫 기사만
         r["photo"] = None
-    band = groups[lead["issue_id"]].get("band") if planned else None
+    band = (groups[lead["issue_id"]].get("band") or lead["view"]["title"]) if planned else None   # 이름이 없어도 "이름 · 기사 n건" (구현 리뷰 M6)
     at = next((k for k, s in enumerate(sections) if s["id"] == "front"), -1) + 1
     sections.insert(at, {"id": "jonghap", "title": title, "items": rows, "theme": band or lead["view"]["title"],
-                         "theme_named": bool(band)})
+                         "theme_named": planned})
 
 
 REVIEW_SCORES = ("attention", "importance", "headline", "continuity", "interest", "final")
@@ -577,9 +573,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         _, sec_raw, _ = jonghap_hosts([(s.id, edition["sections"].get(s.id, [])) for s in cfg.sections], country)
         want = next((g["host"] for g in plan.get("groups", [])[1:]), None)
         if sec_raw is not None and sec_raw["issue_id"] == want:
-            second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)
-            if second is None:   # 둘째 이슈가 메인 자리로 빠졌거나 없으면 둘째 묶음 없음
-                second = None
+            second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)   # 지면에 없으면 둘째 묶음 없음
     jonghap(sections, titles.get("jonghap", "종합"), row, plan, second)
     compare = []
     for it in edition.get("compare", []):

@@ -174,7 +174,7 @@
       {% endif %}
       <h3 class="hl">{% if it.asof %}<span class="asof" title="이 시황 기사가 전하는 시점 (S28e)">{{ it.asof }}</span> {% endif %}<a href="{{ it.url }}" target="_blank" rel="noopener noreferrer" data-detail>{{ v.title }}</a></h3>
       {% if v.orig_title %}<p class="orig" lang="{{ v.lang }}">{{ v.orig_title }}</p>{% endif %}
-      {% if v.deck %}<p class="deck">{{ v.deck }}</p>{% endif %}{# 부제 한 줄 (S49 — 신문처럼 제목 아래 핵심) #}
+      {% if it.detail and it.sub %}<p class="deck">{{ it.sub }}</p>{% elif v.deck %}<p class="deck">{{ v.deck }}</p>{% endif %}{# 부제 한 줄 (S49 — 신문처럼 제목 아래 핵심). 1면 메인 자세히 창은 지면과 같은 sub #}
       {% if v.lead and not brief and not it.detail %}
       <p class="lead"{% if v.lead_note %} data-note="{{ v.lead_note }}"{% endif %}>{{ v.lead }}</p>
       {% endif %}

@@ -573,6 +573,20 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         if res and isinstance(res.get("summaries"), dict):
             cache["compare"] = res["summaries"]
 
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    for it in items + related + edition.get("compare", []):
+        llm = {}
+        if it["issue_id"] in cache.get("compare", {}):
+            llm["frame_summary"] = cache["compare"][it["issue_id"]]
+        if it["issue_id"] in analysis:
+            llm["analysis"] = analysis[it["issue_id"]]
+        if it["issue_id"] in econ:
+            llm["econ"] = econ[it["issue_id"]]
+        if llm:
+            it["llm"] = llm
+    # 2·3. 한국어 패스 (S49b): 한국어 제목·요약·부제를 한 번에 — 사설 제목·분석 요약보다 먼저(하루 상한에 가까운 날 지면 기사가 먼저), 같은 사건 묶기 앞
+    status["korean"] = korean_pass(edition, display, cache, guarded)
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     # 4. 논평면 사설·칼럼 제목 번역 (S20c: 일본어·독일어·프랑스어 사설. S49: 한국어 제목 설정이면 영어도 — 분석·해설 제목 포함)
     from .render import want_title
     op = edition.get("opinion") or {}
@@ -622,23 +636,10 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
         edition["interviews"], status["interviews"] = review_interviews(
             cands, lambda p: guarded(p, model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec), cache)
 
-    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
-    for it in items + related + edition.get("compare", []):
-        llm = {}
-        if it["issue_id"] in cache.get("compare", {}):
-            llm["frame_summary"] = cache["compare"][it["issue_id"]]
-        if it["issue_id"] in analysis:
-            llm["analysis"] = analysis[it["issue_id"]]
-        if it["issue_id"] in econ:
-            llm["econ"] = econ[it["issue_id"]]
-        if llm:
-            it["llm"] = llm
-    # 2·3. 한국어 패스 (S49b): 한국어 제목·요약·부제를 한 번에 — 같은 사건 묶기가 한국어 제목을 쓰게 그 앞에서
-    status["korean"] = korean_pass(edition, display, cache, guarded)
-    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     # 같은 사건 묶음 (S17d): 분석 결과가 바뀌지 않았으면 캐시를 쓴다
     analyzed = [it for it in items if not it.get("reserve")]   # 지면 이슈 전부 (예비 기사 제외)
-    key = ",".join(sorted(it["issue_id"] + ("*" if it.get("llm", {}).get("analysis") else "") for it in analyzed))
+    key = ",".join(sorted(it["issue_id"] + ("*" if it.get("llm", {}).get("analysis") else "") + ("k" if it.get("llm", {}).get("ko_title") else "")
+                          for it in analyzed))   # S49: 한국어 제목이 생기면 다시 묶는다
     same = cache.get("same_event", {})
     if same.get("key") == key:
         groups, status["same_event"] = same.get("groups", {}), "캐시"
@@ -745,13 +746,17 @@ def korean_pass(edition: dict, display, cache: dict, guarded, targets: list[tupl
                 continue
             ent = store.setdefault(r["id"], {})
             for f in r["필요"]:
-                ent[f] = str(v.get(f) or "").strip()   # 빈 값도 받은 것으로 (근거 없는 부제 — 다시 묻지 않음)
+                val = str(v.get(f) or "").strip()
+                if val or f == "deck":   # 빈 부제는 받은 것으로(근거 없음 — 다시 묻지 않음), 빈 제목·요약은 다음에 다시
+                    ent[f] = val
     for it, fields in targets:
         ent = store.get(_korean_key(it), {})
         llm = it.setdefault("llm", {})
         for f, key in (("title", "ko_title"), ("summary", "ko_summary"), ("deck", "deck")):
             if f in fields and ent.get(f):
                 llm[key] = ent[f]
+            elif f in fields and f in ent:   # 빈 값을 받았으면 지난 값을 남기지 않는다 (합침 뒤 다시 받은 부제 — 구현 리뷰 M5)
+                llm.pop(key, None)
         if not llm:
             it.pop("llm")
     by_id = {it["issue_id"]: it.get("llm", {}) for it, _ in targets}
@@ -794,6 +799,8 @@ def _clean_plan(res, hosts: list[tuple[dict, list[dict]]]) -> dict | None:
     이름 16자 넘으면 자름(없으면 중심 기사 제목은 render 가). JSON 이 아니거나 메인 묶음 후보가 하나도 없으면 None."""
     if not isinstance(res, dict) or not isinstance(res.get("groups"), dict) or not hosts or not hosts[0][1]:
         return None
+    if not isinstance(res["groups"].get(hosts[0][0]["issue_id"]), dict):   # 메인 묶음 답이 없으면 계획 없음(S47 방식) — 구현 리뷰 B2
+        return None
     groups = []
     for host, cands in hosts:
         g = res["groups"].get(host["issue_id"])
@@ -804,7 +811,8 @@ def _clean_plan(res, hosts: list[tuple[dict, list[dict]]]) -> dict | None:
         for c in cands:
             v = raw.get(c["issue_id"]) if isinstance(raw.get(c["issue_id"]), dict) else {}
             ang = str(v.get("angle") or "").strip()
-            dup_of = v.get("dup_of") if v.get("dup_of") in ids and v.get("dup_of") != c["issue_id"] else None
+            d = v.get("dup_of")
+            dup_of = d if isinstance(d, str) and d in ids and d != c["issue_id"] else None   # 목록·숫자 등은 무시 (구현 리뷰 B1)
             out[c["issue_id"]] = {"angle": ang if ang in ANGLES else "기타", "dup": bool(v.get("dup")) and dup_of is not None,
                                   "dup_of": dup_of if v.get("dup") else None}
         band = str(g.get("band") or "").strip()[:BAND_MAX]
@@ -839,7 +847,7 @@ def plan_jonghap(edition: dict, display, cache: dict, guarded, cfg: Llm, order: 
         res, call_st = guarded(ANGLE_PROMPT.format(data=_data_block(data)), model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
         plan = _clean_plan(res, hosts)
         st["status"] = call_st if plan is None else "ok"
-        if res is not None:
+        if plan is not None:   # 쓸 수 없는 응답은 남기지 않는다 — 다음 실행에서 다시 묻게 (구현 리뷰 M8)
             cache["jonghap_angles"] = {"key": key, "plan": plan}
     if plan:
         edition["jonghap_plan"] = plan

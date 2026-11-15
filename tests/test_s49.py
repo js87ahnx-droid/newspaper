@@ -268,3 +268,81 @@ def test_plan_failure_still_koreanizes_first_six():
     assert "jonghap_plan" not in ed and st["status"].startswith("호출 실패")
     got = [bool(a.get("llm", {}).get("ko_title")) for a in ed["sections"]["front"][0]["angles"]]
     assert got == [True] * 6 + [False] * 2
+
+
+
+# ---------- 구현 리뷰 반영 ----------
+def test_clean_plan_bad_shapes_and_missing_main_group():
+    lead = {"issue_id": "L"}
+    cands = [{"issue_id": "a"}, {"issue_id": "b"}]
+    weird = {"groups": {"L": {"angles": {"a": {"angle": "경위", "dup": True, "dup_of": ["b"]}, "b": {"dup_of": {"x": 1}, "dup": True}}}}}
+    plan = _clean_plan(weird, [(lead, cands)])                                   # 목록·dict dup_of 에도 예외 없음 (B1)
+    assert plan["groups"][0]["angles"]["a"] == {"angle": "경위", "dup": False, "dup_of": None}
+    assert _clean_plan({"groups": {}}, [(lead, cands)]) is None                  # 메인 묶음 답 없음 → 계획 없음 (B2)
+    assert _clean_plan({"groups": {"WRONG": {}}}, [(lead, cands)]) is None
+
+
+def test_pick_planned_dup_only_against_kept():
+    """b 는 같은 각도라 안 실리므로, b 를 가리키는 c 는 남는다 (구현 리뷰 M2)."""
+    main = [_a(k, k, "M") for k in "abcde"]
+    plan = _plan("L", [("L", "x", [("a", "경위", None), ("b", "경위", None), ("c", "전망", "b"), ("d", "현장", None), ("e", "인물", None)])])
+    secs = _secs(main)
+    jonghap(secs, "종합", ROW, plan, None)
+    assert [r["issue_id"] for r in secs[1]["items"]] == ["a", "c", "d", "e"]
+
+
+def test_band_name_missing_still_counts():
+    plan = _plan("L", [("L", "", [(k, ang, None) for k, ang in zip("abc", ("경위", "배경", "인물"))])])
+    secs = _secs([_a(k, k, "M") for k in "abc"])
+    jonghap(secs, "종합", ROW, plan, None)
+    assert secs[1]["theme"] == "젠슨 황 사임" and secs[1]["theme_named"] is True   # 이름 없으면 메인 제목, "· 기사 n건" 은 보임 (M6)
+
+
+def test_trim_lead_skips_abbreviations():
+    assert trim_lead("The minister met Mr. Kim and the U.S. envoy. They discussed the trade deal and the") == \
+        "The minister met Mr. Kim and the U.S. envoy. …"
+
+
+def test_korean_pass_empty_deck_clears_old_and_empty_title_asked_again():
+    ed = {"sections": {"international": [_it("i1", "en", "News", "L.", llm={"deck": "옛 부제"})]}, "compare": []}
+    store = {}
+
+    def g(prompt, **kw):
+        ids = re.findall(r'"id": "([^"]+)"', prompt)
+        return {"items": {k: {"title": "", "summary": "요약.", "deck": ""} for k in ids}}, "ok"
+    korean_pass(ed, DISP, store, g)
+    llm = ed["sections"]["international"][0]["llm"]
+    assert "deck" not in llm and "ko_title" not in llm and llm["ko_summary"] == "요약."   # 빈 부제는 옛 부제를 지운다 (M5)
+    ent = next(iter(store["korean"].values()))
+    assert "title" not in ent and ent["deck"] == ""                                       # 빈 제목은 다음에 다시 (M8)
+
+
+def test_unusable_angle_answer_not_cached():
+    ed, cache, calls = _host_ed(), {}, []
+
+    def g(prompt, **kw):
+        calls.append(prompt)
+        if "종합면 편집" in prompt:
+            return {"groups": {}}, "ok"
+        return {"items": {}}, "ok"
+    plan_jonghap(ed, DISP, cache, g, _Cfg, ["front", "politics"], COUNTRY)
+    assert "jonghap_plan" not in ed and "jonghap_angles" not in cache
+    n = sum("종합면 편집" in c for c in calls)
+    plan_jonghap(_host_ed(), DISP, cache, g, _Cfg, ["front", "politics"], COUNTRY)
+    assert sum("종합면 편집" in c for c in calls) == n + 1                                # 다시 묻는다 (M8)
+
+
+def test_jonghap_hosts_lead_outside_front():
+    ed = _host_ed()
+    ed["sections"]["politics"][0]["headline_by"] = {k: [1, "naver_a1"] for k in ("조선", "동아", "S")}
+    ed["sections"]["politics"][0]["articles"][0]["source"] = "조선"
+    ed["sections"]["front"][0]["headline_by"] = {}
+    lead, second, _ = jonghap_hosts([(k, ed["sections"].get(k, [])) for k in ("front", "politics")], COUNTRY)
+    assert lead["issue_id"] == "P1" and second["issue_id"] == "F1"              # 메인이 1면 밖이면 1면 첫 기사부터 둘째 조건
+
+
+def test_reader_resolves_eight_angles():
+    from pipeline.reader import page_urls
+    ed = {"sections": {"front": [{**_it("F", "ko", "t"), "url": "u0", "angles": [{**_it(f"a{k}", "en", "x"), "url": f"https://news.google.com/{k}"} for k in range(9)]}]}}
+    urls = page_urls(ed)
+    assert sum(u.startswith("https://news.google.com/") for u in urls) == 8

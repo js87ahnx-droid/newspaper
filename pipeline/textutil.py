@@ -91,6 +91,7 @@ def cap_lead(s: str) -> str:
 
 _SENT_END = ".!?。！？"
 _CLOSERS = "\"'”’)」』】》〉"
+_ABBR = re.compile(r"(?:\b(?:Mr|Mrs|Ms|Dr|St|Jr|Sr|vs|No|Gov|Sen|Rep|Gen|Prof|Inc|Corp|Co|Ltd|U\.S|U\.K|U\.N|E\.U)|\b[A-Z])\.$")   # 약어 뒤 마침표는 문장 끝 아님 (구현 리뷰 M3)
 _SENT_RE = re.compile(r"[.!?][\"'”’)」』】》〉]*(?=\s|$)|[。！？][\"'”’)」』】》〉]*")   # 일본어·중국어 마침표는 띄어쓰기 없이
 
 
@@ -113,7 +114,7 @@ def trim_lead(s: str) -> str:
     if lead_complete(t):
         return t
     body = re.sub(r"\s*(…|\.\.\.|···|‥)+$", "", t)
-    ends = [m.end() for m in _SENT_RE.finditer(body)]
+    ends = [m.end() for m in _SENT_RE.finditer(body) if not _ABBR.search(body[: m.start() + 1])]
     if ends and ends[-1] >= len(body) * 0.4:
         return body[: ends[-1]] + " …"
     return body + "…"
