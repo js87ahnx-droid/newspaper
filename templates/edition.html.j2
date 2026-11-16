@@ -54,14 +54,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="{{ base }}static/app.css?v={{ ver }}">
 </head>
-<body>
+<body{% if curated %} class="ed-curated"{% endif %}>
 <div id="toolbar" role="toolbar" aria-label="보기 설정">
   <span class="tb-title">{{ masthead }}</span>
   <span class="tb-page" id="pageInfo" aria-live="polite"></span>
   <span class="tb-spacer"></span>
   {# 호 이동 (2026-11-03 사용자 요청, 시안 A): 다른 단추와 같은 상자. "목록" = 지난 호 목록, "오늘" = 맨 앞 오늘 호 — 오늘 호에서는 눌린 모양 #}
   <a class="tb-link tb-btn" href="{{ base }}archive/" aria-label="지난 호 목록">목록</a>
-  <a class="tb-link tb-btn{% if not base %} on{% endif %}" href="{{ base or './' }}" aria-label="오늘 호"{% if not base %} aria-current="page"{% endif %}>오늘</a>
+  <a class="tb-link tb-btn{% if is_today %} on{% endif %}" href="{{ today_href }}" aria-label="오늘 호"{% if is_today %} aria-current="page"{% endif %}>오늘</a>
+  {% if alt_href %}<a class="tb-btn tb-var" href="{{ alt_href }}" aria-label="{{ '기존 판으로 보기' if curated else '큐레이션 판으로 보기' }}">{{ '기존 판' if curated else '큐레이션 판' }}</a>{% endif %}{# S50: 같은 호 두 판 바꾸기 — .tb-link 가 아님(끝 쪽 "지난 호 보기"가 첫 .tb-link 를 씀) #}
   <button type="button" data-act="front" aria-label="1면으로 돌아가기">1면</button>
   <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
   <button type="button" data-act="next" aria-label="다음 쪽">›</button>
@@ -93,7 +94,8 @@
   </div>
 
 {% for sec in sections %}
-  {% if sec.id == 'detail' %}<div class="detail-src" hidden>{# 1면 메인 기사 "자세히 보기" 원본 (S26) — 지면에는 안 실림 #}
+  {% if sec.id == 'curated_src' %}<div class="curated-src" hidden>{# S50: "함께 볼 기사" 목록 기사의 원본 — 기사 창이 여기서 복제, 지면에는 안 실림 #}
+  {% elif sec.id == 'detail' %}<div class="detail-src" hidden>{# 1면 메인 기사 "자세히 보기" 원본 (S26) — 지면에는 안 실림 #}
   {% else %}<section class="sec sec-{{ sec.id }}" data-section="{{ sec.id }}" data-title="{{ sec.title }}">{% endif %}
   {% if sec.theme %}<p class="jh-theme{% if sec.theme_named %} jh-named{% endif %}"><span class="jh-name">{{ sec.theme }}</span><span class="jh-n">{% if sec.theme_named %} · 기사 {{ sec["items"]|selectattr("jh_group", "equalto", 0)|list|length }}건{% endif %}</span></p>{% endif %}{# 종합면 (S47): 1면 메인 이슈. S49: AI 묶음 이름 · 실린 건수(app.js 가 고침) #}
   {% if sec.analysis or sec.interviews %}{# 분석·해설 (S22c): 매체가 쓴 분석 기사 — 제목·요약 → 원문 창 #}
@@ -157,7 +159,7 @@
   {% for it in sec["items"] %}
     {% set v = it.view %}
     {% set brief = false %}{# 단신도 원본은 일반 기사 모양 — 쪽 나누기(app.js asBrief)가 한 줄로 줄이고, 누르면 요약·AI 정리가 보인다 (S22a; S21c 예비 기사도) #}
-    <article class="item{% if sec.id == 'front' and loop.first and not sec.lead %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}{% if v.deck %} has-deck{% endif %}{% if it.jh_angle %} angled{% endif %}"{% if it.jh_group is not none and it.jh_group is defined %} data-jh-group="{{ it.jh_group }}"{% endif %}
+    <article class="item{% if it.sec_head %} sec-head{% endif %}{% if sec.id == 'front' and loop.first and not sec.lead %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}{% if v.deck %} has-deck{% endif %}{% if it.jh_angle %} angled{% endif %}"{% if it.jh_group is not none and it.jh_group is defined %} data-jh-group="{{ it.jh_group }}"{% endif %}
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
              data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
              data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}" data-h="{{ it.scores.headline or 0 }}"
@@ -284,7 +286,8 @@
       {% endif %}
     </article>
   {% endfor %}
-  {% if sec.id == 'detail' %}</div>{% else %}</section>{% endif %}
+  {% if sec.more %}<div class="more-list"><h4>함께 볼 기사</h4><ul>{% for r in sec.more %}<li data-topic="{{ r.topic }}"><a href="{{ r.url }}" target="_blank" rel="noopener noreferrer" data-open="{{ r.issue_id }}">{{ r.title }}</a> <span class="src">{{ r.source }}</span></li>{% endfor %}</ul></div>{% endif %}{# S50 큐레이션 판: 면 끝 제목 목록 → 기사 창 #}
+  {% if sec.id in ('detail', 'curated_src') %}</div>{% else %}</section>{% endif %}
 {% endfor %}
 
 {% if opinion or picks %}

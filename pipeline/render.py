@@ -414,6 +414,57 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
                          "theme_named": planned})
 
 
+CURATE_SECTIONS = ("jonghap", "politics", "economy", "international", "society", "interest")
+
+
+def _on_paper(r: dict) -> bool:
+    """국내 신문 지면 신호 (S50): 그 신문이 A1(naver_a1 머리기사)이나 A2~A6면(pages_by)에 실었다."""
+    return any(v[1] == "naver_a1" for v in (r.get("headline_by") or {}).values()) or bool(r.get("pages_by"))
+
+
+def curate(sections: list[dict], ccfg) -> None:
+    """큐레이션 판 (S50 시안 B): 뉴스 면마다 면 머리 + 신문 지면 신호·보장 기사 먼저 정한 수만 기사 꼴로 남기고,
+    나머지는 면 끝 "함께 볼 기사"(sec["more"], list_max 건까지) — 그 기사 창이 열리게 원본은 숨은 칸(curated_src)에.
+    목록 상한을 넘긴 것은 단신 후보로. 어떤 기사도 사라지지 않는다. front_single·jonghap 뒤에 부른다(두 판의 1면·종합면 고르기가 같게)."""
+    briefs = next((s for s in sections if s["id"] == "briefs"), None)
+    src: list[dict] = []
+    for s in sections:
+        k = ccfg.keep.get(s["id"])
+        if s["id"] not in CURATE_SECTIONS:
+            continue
+        items = [r for r in s["items"] if not r.get("reserve")]
+        reserve = [r for r in s["items"] if r.get("reserve")]   # 면에 딸린 예비 기사는 쪽 나누기가 따로 다룬다 — 그대로
+        if k and len(items) > k:
+            if s["id"] == "jonghap":
+                g0 = [r for r in items if not r.get("jh_group")]
+                g1 = [r for r in items if r.get("jh_group") == 1]
+                kept = g0[: k - 2] + g1[:2] if len(g1) >= 2 and k >= 3 else g0[:k]
+            else:
+                head, rest = items[0], items[1:]
+                pri = sorted(range(len(rest)), key=lambda i: (0 if _on_paper(rest[i]) or rest[i].get("guaranteed") else 1, i))
+                pick = set(pri[: k - 1])
+                kept = [head] + [r for i, r in enumerate(rest) if i in pick]
+            ids = {id(r) for r in kept}
+            out = [r for r in items if id(r) not in ids]
+            for r in out:   # 종합면 묶음 표시는 목록·창·단신에선 뜻이 없다
+                for f in ("jh_angle", "jh_band", "jh_group"):
+                    r.pop(f, None)
+            listed, over = out[: ccfg.list_max], out[ccfg.list_max:]
+            if briefs is None:   # 단신 면이 없는 날은 목록에 모두
+                listed, over = out, []
+            s["items"] = kept + reserve
+            s["more"] = [{"issue_id": r["issue_id"], "title": r["view"]["title"], "source": r.get("source"),
+                          "topic": r.get("topic"), "url": r.get("url")} for r in listed]
+            src += listed
+            if over:
+                briefs["items"] += over
+        heads = [r for r in s["items"] if not r.get("reserve")]
+        if heads:
+            heads[0]["sec_head"] = True
+    if src:
+        sections.append({"id": "curated_src", "title": "", "items": src})
+
+
 REVIEW_SCORES = ("attention", "importance", "headline", "continuity", "interest", "final")
 
 
@@ -511,7 +562,7 @@ def related_opinions(op: dict | None) -> dict[str, list[dict]]:
     return out
 
 
-def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources) -> dict:
+def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources, variant: str | None = None) -> dict:
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
     compare_ids = {it["issue_id"] for it in edition.get("compare", [])}
@@ -575,6 +626,8 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         if sec_raw is not None and sec_raw["issue_id"] == want:
             second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)   # 지면에 없으면 둘째 묶음 없음
     jonghap(sections, titles.get("jonghap", "종합"), row, plan, second)
+    if variant == "b" and cfg.curated.enabled:
+        curate(sections, cfg.curated)   # S50: 큐레이션 판 — 1면·종합면을 고른 뒤
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})
@@ -631,13 +684,25 @@ def _env() -> Environment:
     return env
 
 
-def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "") -> str:
-    """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../")."""
-    ctx = build_context(edition, cfg, interests, sources)
+def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "",
+                variant: str | None = None, alt_href: str | None = None) -> str:
+    """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../").
+    variant="b" 는 큐레이션 판 (S50): base 는 오늘 "../", 보관 "../../../". alt_href 는 다른 판 주소(판 바꾸기 단추)."""
+    curated = variant == "b" and cfg.curated.enabled
+    ctx = build_context(edition, cfg, interests, sources, variant="b" if curated else None)
     ctx["base"] = base
+    ctx["curated"], ctx["alt_href"] = curated, alt_href
+    # "오늘" 단추: 같은 판의 오늘 호 (S50 — b 판은 b/)
+    ctx["today_href"] = base + "b/" if curated else (base or "./")
+    ctx["is_today"] = base == ("../" if curated else "")
     client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
     client["base"] = base
-    client["review"] = review_list(ctx["sections"])
+    # 편집 리뷰는 기존 판 목록으로 (S50 — 같은 호 학습에 두 판의 순번이 섞이지 않게)
+    client["review"] = review_list(build_context(edition, cfg, interests, sources)["sections"] if curated else ctx["sections"])
+    if curated:
+        client["curated"] = True
+        client["sectionPages"] = {**client["sectionPages"], **cfg.curated.pages}
+        client["sectionCaps"] = {**client["sectionCaps"], **cfg.curated.keep}
     client["editing"] = editing_view(cfg)
     # 원문 재배열 보기 (S17): 중계 서버가 설정됐을 때만. 키는 이 HTML(암호화됨) 안에만 들어간다
     rc = reader_mod.config()
