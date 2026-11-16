@@ -52,6 +52,14 @@ sections:
   - {id: opinion, title: "논평·사설", max_articles: 0, pages: 3}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0, pages: 1}
 
+# 큐레이션 판 (S50, 2026-11-16 시안 B): 같은 호를 면마다 핵심 기사만 기사 꼴로 + 면 끝 "함께 볼 기사" 목록으로 다시 그려 docs/b/ 에 나란히 발행.
+# 지면에선 원제목·흐름·관련·사설·점수를 숨기고(기사 창엔 다 보임), 입장 차이는 면 첫 기사만. AI 호출 추가 없음. 끄면 b 판을 지운다
+curated:
+  enabled: true
+  keep: {jonghap: 5, politics: 4, economy: 4, international: 5, society: 3, interest: 5}
+  list_max: 6
+  pages: {politics: 2, economy: 2, international: 2, society: 1, interest: 2}   # 합 24쪽 이하 (나머지 면은 위 값)
+
 clustering:
   # S5 실측: MiniLM·mpnet·potion 은 한국어 짧은 문장 구별이나 다국어 연결이 약해 탈락 (docs-internal/cluster-review-*.md)
   model: multilingual-e5-large

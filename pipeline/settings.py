@@ -166,6 +166,33 @@ class Llm(Strict):
     econ_timeout_sec: int = Field(default=600, gt=0, le=1200)
 
 
+class Curated(Strict):
+    """큐레이션 판 (S50, 시안 B): 같은 호 데이터로 면마다 핵심 기사만 기사 꼴로, 나머지는 면 끝 "함께 볼 기사" 목록.
+    docs/b/ 에 기존 판과 나란히 발행. 꺼지면 b 판을 쓰지 않고 지운다."""
+    enabled: bool = False
+    keep: dict[SectionId, int] = Field(default_factory=dict)    # 면별 기사 꼴로 남길 수 (종합면은 둘째 묶음 포함 합)
+    list_max: int = Field(default=6, ge=0, le=12)               # 면 끝 목록 상한 — 넘친 기사는 단신 후보
+    pages: dict[SectionId, int] = Field(default_factory=dict)   # 큐레이션 판 면별 쪽 수 (없는 면은 기존 값)
+
+    @field_validator("keep", "pages")
+    @classmethod
+    def _nonneg(cls, v: dict) -> dict:
+        bad = {k: n for k, n in v.items() if n < 0 or n > 20}
+        if bad:
+            raise ValueError(f"0~20 이어야 함: {bad}")
+        return v
+
+    @field_validator("keep")
+    @classmethod
+    def _news_only(cls, v: dict) -> dict:
+        bad = sorted(set(v) - {"jonghap", "politics", "economy", "international", "society", "interest"})
+        if bad:
+            raise ValueError(f"남길 수는 뉴스 면(종합·정치·경제·국제·사회·관심)만: {bad}")
+        if any(n < 1 for n in v.values()):
+            raise ValueError("남길 수는 1 이상 (면 머리는 늘 남김)")
+        return v
+
+
 class Config(Strict):
     timezone: str
     window: Window
@@ -177,6 +204,7 @@ class Config(Strict):
     importance: Importance
     photos: Photos
     llm: Llm
+    curated: Curated = Field(default_factory=Curated)
 
     @field_validator("publish_time")
     @classmethod
