@@ -91,7 +91,7 @@
   function apply() {
     var p = prefs();
     var moved = { demoted: 0, promoted: 0 };
-    var arts = Array.prototype.slice.call(flow.querySelectorAll("section.sec > article.item[data-a]"));
+    var arts = Array.prototype.slice.call(flow.querySelectorAll("section.sec > article.item[data-a], .curated-src > article.item[data-a]"));
     arts.forEach(function (a) { a.setAttribute("data-final2", rescore(a, p).toFixed(4)); });
 
     var briefs = sectionEl("briefs");
@@ -105,6 +105,22 @@
           briefs.appendChild(a); asBrief(a, true); a.setAttribute("data-moved", "down"); moved.demoted++;
         }
       });
+      // 큐레이션 판 (S50): 내린 분야의 "함께 볼 기사" 줄도 지우고 원본을 단신으로. 면 기사가 다 내려가면 목록 칸도 없애고 남은 원본을 단신으로
+      var ml = sec.querySelector(":scope > .more-list");
+      if (!ml) return;
+      var toBriefs = function (li) {
+        var a = li.querySelector("[data-open]");
+        var src = a && flow.querySelector('.curated-src > article.item[data-issue="' + a.getAttribute("data-open") + '"]');
+        if (src) { briefs.appendChild(src); asBrief(src, true); src.setAttribute("data-moved", "down"); moved.demoted++; }
+        li.remove();
+      };
+      Array.prototype.slice.call(ml.querySelectorAll("li")).forEach(function (li) {
+        if (weightOf(p, li.getAttribute("data-topic")) <= 0.1) toBriefs(li);
+      });
+      if (!sec.querySelector(":scope > article.item") || !ml.querySelector("li")) {
+        Array.prototype.slice.call(ml.querySelectorAll("li")).forEach(toBriefs);
+        ml.remove();
+      }
     });
     // 올리기: 서버 값보다 많이 올린 분야의 단신 — 관심 상한 안에서
     var room = Math.max(0, (E.interestCap || 0) - (E.interestCounted || 0));
@@ -124,16 +140,19 @@
         var inSec = Array.prototype.slice.call(interest.querySelectorAll("article.item"));
         if (inSec.length >= cap) {
           // 관심면이 차 있으면 다시 계산한 점수가 더 낮은 보장 안 된 기사와 자리를 바꾼다
-          var weakest = inSec.filter(function (x) { return x.getAttribute("data-guaranteed") !== "1" && x.getAttribute("data-moved") !== "up"; })
+          var weakest = inSec.filter(function (x) { return x.getAttribute("data-guaranteed") !== "1" && x.getAttribute("data-moved") !== "up" && !x.classList.contains("sec-head"); })   // 큐레이션 판 면 머리는 그대로 (S50)
             .sort(function (x, y) { return +x.getAttribute("data-final2") - +y.getAttribute("data-final2"); })[0];
           if (!weakest || +weakest.getAttribute("data-final2") >= +a.getAttribute("data-final2")) return;
           briefs.appendChild(weakest); asBrief(weakest, true); weakest.setAttribute("data-moved", "down"); moved.demoted++;
         }
-        interest.appendChild(a); asBrief(a, false); a.setAttribute("data-moved", "up"); moved.promoted++;
+        interest.insertBefore(a, interest.querySelector(":scope > .more-list")); asBrief(a, false); a.setAttribute("data-moved", "up"); moved.promoted++;   // 목록 칸 앞에 (S50)
       });
     }
     // 섹션 안 순서: 다시 계산한 점수 순 (1면 톱은 맨 앞 고정)
     Array.prototype.forEach.call(flow.querySelectorAll("section.sec"), function (sec) {
+      if (sec.getAttribute("data-section") === "jonghap") return;   // 종합면은 편집 순서(묶음·각도) 그대로 (S49 — 둘째 묶음이 메인 묶음 사이에 끼었다)
+      // 큐레이션 판: 면 머리·순서는 편집 그대로 (S50)
+      if (E.curated && ["politics", "economy", "international", "society", "interest"].indexOf(sec.getAttribute("data-section")) >= 0) return;
       var items = Array.prototype.slice.call(sec.querySelectorAll(":scope > article.item[data-a]"));
       if (!items.length) return;
       var top = items.filter(function (a) { return a.getAttribute("data-top") === "1"; });
