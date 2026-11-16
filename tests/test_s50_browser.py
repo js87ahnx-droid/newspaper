@@ -102,38 +102,63 @@ def test_curated_reader_and_list_click(browser, tmp_path):
     ctx.close()
 
 
+def _set_weights(page, w, cap=None):
+    page.evaluate("""([w, cap]) => { if (cap !== null) window.EDITION.interestCap = cap;
+      localStorage.setItem('news.prefs2', JSON.stringify({v: 1, weights: w, keywords: null, updated: null})); NEWS_FB.reapply(); }""", [w, cap])
+    page.wait_for_timeout(800)
+
+
 def test_curated_topic_off_moves_list_to_briefs(browser, tmp_path):
+    """두 갈래: ① 면 기사는 남고 목록의 한 분야 줄만 지움 ② 면 기사가 다 내려가면 목록 칸도 없음. 지운 줄 기사는 단신 탭에 (구현 리뷰 M3)."""
     index = _b_site(tmp_path, _site())
     ctx, page, errors = open_page(browser, index, 1180, 820)
-    info = page.evaluate("""() => { const ml = document.querySelector('#flow section[data-section=politics] > .more-list');
-      return ml ? { topics: [...new Set([...ml.querySelectorAll('li')].map(li => li.getAttribute('data-topic')))],
-                    ids: [...ml.querySelectorAll('a[data-open]')].map(a => a.getAttribute('data-open')) } : null; }""")
-    assert info and info["ids"], info
-    weights = {t: 0 for t in info["topics"]}
-    page.evaluate("(w) => { localStorage.setItem('news.prefs2', JSON.stringify({v: 1, weights: w, keywords: null, updated: null})); NEWS_FB.reapply(); }", weights)
-    page.wait_for_timeout(800)
+    info = page.evaluate("""() => { const out = {};
+      document.querySelectorAll('#flow section.sec > .more-list').forEach(ml => { const sec = ml.parentNode.getAttribute('data-section');
+        out[sec] = { items: [...ml.parentNode.querySelectorAll(':scope > article.item')].map(a => [a.getAttribute('data-topic'), a.getAttribute('data-guaranteed')]),
+                     rows: [...ml.querySelectorAll('li')].map(li => [li.getAttribute('data-topic'), li.querySelector('a').getAttribute('data-open')]) }; });
+      return out; }""")
+    # ① 한 분야 줄만: 면 기사 분야에 없는 목록 분야를 찾는다
+    one = next(((sec, t) for sec, v in info.items() if sec != "jonghap" for t, _ in v["rows"] if t not in {x for x, _ in v["items"]}), None)
+    if one:
+        sec, t = one
+        ids = [i for x, i in info[sec]["rows"] if x == t]
+        _set_weights(page, {t: 0})
+        r = page.evaluate("""([sec, ids]) => ({ left: ids.filter(i => document.querySelector(`#flow .more-list a[data-open="${i}"]`)),
+          list: !!document.querySelector(`#flow section[data-section=${sec}] > .more-list`), tab: NEWS.state().briefIds })""", [sec, ids])
+        assert not r["left"] and r["list"] and set(ids) <= set(r["tab"]), (one, r)
+    # ② 정치면 기사·목록 분야를 모두 내림
+    pol = info["politics"]
+    _set_weights(page, {t: 0 for t, _ in pol["items"] + pol["rows"]})
+    ids = [i for _, i in pol["rows"]]
+    r = page.evaluate("""(ids) => ({ left: ids.filter(i => document.querySelector(`#flow .more-list a[data-open="${i}"]`)),
+      items: document.querySelectorAll('#flow section[data-section=politics] > article.item').length,
+      list: !!document.querySelector('#flow section[data-section=politics] > .more-list'), tab: NEWS.state().briefIds })""", ids)
+    guaranteed = sum(1 for _, g in pol["items"] if g == "1")
+    assert not r["left"] and set(ids) <= set(r["tab"]), r
+    assert r["items"] == guaranteed and (r["list"] is False or r["items"] > 0), r
     st = page.evaluate("() => NEWS.state()")
-    left = page.evaluate("""(ids) => ids.filter(i => document.querySelector(`#flow .more-list a[data-open="${i}"]`))""", info["ids"])
-    in_briefs = page.evaluate("""(ids) => ids.filter(i => document.querySelector(`#flow section[data-section=briefs] > article.item[data-issue="${i}"]`))""", info["ids"])
     m = page.evaluate(M, KEEP)
-    assert not left and sorted(in_briefs) == sorted(info["ids"]), (left, in_briefs)
     assert not st["overflow"] and not m["listOnly"] and all(m["listLast"].values()), (st, m)
     assert not errors, errors
     ctx.close()
 
 
 def test_curated_interest_promotion_before_list(browser, tmp_path):
+    """관심 올리기가 실제로 일어나고(올린 기사 > 0), 올린 기사는 목록 칸 앞, 면 머리는 바꿔치기되지 않음 (구현 리뷰 M1)."""
     index = _b_site(tmp_path, _site())
     ctx, page, errors = open_page(browser, index, 1180, 820)
+    head = page.evaluate("() => (document.querySelector('#flow section[data-section=interest] > article.item.sec-head') || {}).getAttribute?.('data-issue')")
     topics = page.evaluate("() => [...new Set([...document.querySelectorAll('#flow section[data-section=briefs] > article.item')].map(a => a.getAttribute('data-topic')))]")
-    page.evaluate("(w) => { localStorage.setItem('news.prefs2', JSON.stringify({v: 1, weights: w, keywords: null, updated: null})); NEWS_FB.reapply(); }",
-                  {t: 3 for t in topics})
-    page.wait_for_timeout(800)
+    _set_weights(page, {t: 3 for t in topics}, cap=99)
     r = page.evaluate("""() => { const s = document.querySelector('#flow section[data-section=interest]'); if (!s) return null;
       const kids = [...s.children].filter(c => c.matches('article.item, .more-list'));
-      return { up: s.querySelectorAll(':scope > article.item[data-moved=up]').length, last: !s.querySelector(':scope > .more-list') || kids[kids.length - 1].matches('.more-list'),
-               head: !!s.querySelector(':scope > article.item.sec-head') }; }""")
+      return { up: s.querySelectorAll(':scope > article.item[data-moved=up]').length, n: s.querySelectorAll(':scope > article.item').length,
+               last: !s.querySelector(':scope > .more-list') || kids[kids.length - 1].matches('.more-list'),
+               head: (s.querySelector(':scope > article.item.sec-head') || {}).getAttribute?.('data-issue') || null,
+               promoted: window.NEWS_FB_LAST.promoted, demoted: window.NEWS_FB_LAST.demoted }; }""")
     m = page.evaluate(M, KEEP)
-    assert r and r["last"] and r["head"], r
+    assert r and r["up"] > 0 and r["last"], r
+    assert head and r["head"] == head, (head, r)                             # 면 머리는 그대로
+    assert r["n"] <= KEEP["interest"], r                                      # 관심 상한(큐레이션 5) 안에서 바꿔치기
     assert all(m["listLast"].values()) and not errors, (m, errors)
     ctx.close()

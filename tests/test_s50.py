@@ -84,6 +84,7 @@ def test_curate_counts_and_nothing_lost():
         rest = set(b) - set(c)
         assert rest == set(listed) | (rest & added_briefs)               # 남김 ∪ 목록 ∪ 단신 = 원래
         assert not (set(c) & set(listed))
+        assert not (set(listed) & added_briefs)                           # 목록과 단신 추가분도 겹치지 않음 (구현 리뷰 N4)
         assert c == [i for i in b if i in c]                              # 남긴 것은 원래 순서
         trimmed += len(rest)
     assert trimmed > 0

@@ -150,8 +150,9 @@
     }
     // 섹션 안 순서: 다시 계산한 점수 순 (1면 톱은 맨 앞 고정)
     Array.prototype.forEach.call(flow.querySelectorAll("section.sec"), function (sec) {
-      if (sec.getAttribute("data-section") === "jonghap") return;
-      if (E.curated && ["politics", "economy", "international", "society", "interest"].indexOf(sec.getAttribute("data-section")) >= 0) return;   // 큐레이션 판: 면 머리·순서는 편집 그대로 (S50)   // 종합면은 편집 순서(묶음·각도) 그대로 (S49 — 둘째 묶음이 메인 묶음 사이에 끼었다)
+      if (sec.getAttribute("data-section") === "jonghap") return;   // 종합면은 편집 순서(묶음·각도) 그대로 (S49 — 둘째 묶음이 메인 묶음 사이에 끼었다)
+      // 큐레이션 판: 면 머리·순서는 편집 그대로 (S50)
+      if (E.curated && ["politics", "economy", "international", "society", "interest"].indexOf(sec.getAttribute("data-section")) >= 0) return;
       var items = Array.prototype.slice.call(sec.querySelectorAll(":scope > article.item[data-a]"));
       if (!items.length) return;
       var top = items.filter(function (a) { return a.getAttribute("data-top") === "1"; });

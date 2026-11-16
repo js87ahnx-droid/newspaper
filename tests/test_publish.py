@@ -25,7 +25,7 @@ def test_publish_layout_and_archive(tmp_path):
     cfg, interests, sources = load_config(), load_interests(), load_sources()
     for d in ("2026-10-15", "2026-10-16"):
         files = publish(edition(d), cfg, interests, sources, site)
-    assert [f.relative_to(site).as_posix() for f in files] == ["index.html", "archive/2026-10-16/index.html", "archive/index.html"]
+    assert [f.relative_to(site).as_posix() for f in files][:3] == ["index.html", "archive/2026-10-16/index.html", "archive/index.html"]   # S50: 큐레이션 판(b) 2개가 뒤에 (tests/test_s50.py)
     assert (site / ".nojekyll").exists() and (site / "static" / "app.js").exists()
     arch = (site / "archive" / "2026-10-16" / "index.html").read_text(encoding="utf-8")
     assert 'href="../../static/app.css?v=' in arch and '"base": "../../"' in arch
