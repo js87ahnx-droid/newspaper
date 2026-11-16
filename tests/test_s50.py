@@ -163,3 +163,28 @@ def test_render_b_client_config_and_review():
     assert 'class="ed-curated"' in html and 'class="more-list"' in html and 'class="curated-src" hidden' in html
     assert 'href="../b/"' in html and 'aria-current="page"' in html          # b 오늘 판의 "오늘"
     assert '<a class="tb-btn tb-var" href="../"' in html
+
+
+# ---------- S50e 두 판 발행 ----------
+def test_publish_two_editions(tmp_path):
+    from pipeline.publish import publish
+    ed = _edition()
+    cfg = load_config()
+    site = tmp_path / "docs"
+    files = publish(copy.deepcopy(ed), cfg, load_interests(), load_sources(), site)
+    rel = sorted(f.relative_to(site).as_posix() for f in files)
+    assert rel == ["archive/2026-10-16/b/index.html", "archive/2026-10-16/index.html", "archive/index.html", "b/index.html", "index.html"]
+    a, b = (site / "index.html").read_text(encoding="utf-8"), (site / "b/index.html").read_text(encoding="utf-8")
+    aa, ab = (site / "archive/2026-10-16/index.html").read_text(encoding="utf-8"), (site / "archive/2026-10-16/b/index.html").read_text(encoding="utf-8")
+    assert 'class="tb-btn tb-var" href="b/"' in a and 'class="tb-btn tb-var" href="b/"' in aa
+    assert 'class="tb-btn tb-var" href="../"' in b and 'class="tb-btn tb-var" href="../"' in ab
+    assert 'href="../static/app.css' in b and 'href="../../../static/app.css' in ab
+    assert 'href="../b/" aria-label="오늘 호" aria-current="page"' in b                     # b 오늘 판 "오늘" = b 오늘
+    assert 'href="../../../b/" aria-label="오늘 호"' in ab and 'aria-current' not in ab.split('aria-label="오늘 호"')[1][:30]
+    assert 'href="./" aria-label="오늘 호" aria-current="page"' in a
+    assert "ed-curated" in b and "ed-curated" in ab and "ed-curated" not in a
+    # 끄면 b 판을 지운다
+    off = cfg.model_copy(update={"curated": cfg.curated.model_copy(update={"enabled": False})})
+    files = publish(copy.deepcopy(ed), off, load_interests(), load_sources(), site)
+    assert len(files) == 3 and not (site / "b").exists() and not (site / "archive/2026-10-16/b").exists()
+    assert "tb-var" not in (site / "index.html").read_text(encoding="utf-8")

@@ -161,7 +161,7 @@
     {% set brief = false %}{# 단신도 원본은 일반 기사 모양 — 쪽 나누기(app.js asBrief)가 한 줄로 줄이고, 누르면 요약·AI 정리가 보인다 (S22a; S21c 예비 기사도) #}
     <article class="item{% if it.sec_head %} sec-head{% endif %}{% if sec.id == 'front' and loop.first and not sec.lead %} top{% endif %}{% if brief %} brief{% elif not loop.first %} sub{% endif %}{% if it.reserve %} reserve{% endif %}{% if v.deck %} has-deck{% endif %}{% if it.jh_angle %} angled{% endif %}"{% if it.jh_group is not none and it.jh_group is defined %} data-jh-group="{{ it.jh_group }}"{% endif %}
              data-issue="{{ it.issue_id }}" data-topic="{{ it.topic }}" data-final="{{ it.scores.final }}"
-             data-section="{{ sec.id }}" data-lang="{{ v.lang }}"
+             data-section="{{ it.home_section or sec.id }}" data-lang="{{ v.lang }}"
              data-a="{{ it.scores.attention }}" data-i="{{ it.scores.importance }}" data-c="{{ it.scores.continuity }}" data-n="{{ it.scores.interest }}" data-h="{{ it.scores.headline or 0 }}"
              data-guaranteed="{{ 1 if it.guaranteed else 0 }}"
              data-top="{{ 1 if (sec.id == 'front' and loop.first and not sec.lead) else 0 }}"

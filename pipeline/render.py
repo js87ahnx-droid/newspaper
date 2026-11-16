@@ -449,6 +449,7 @@ def curate(sections: list[dict], ccfg) -> None:
             for r in out:   # 종합면 묶음 표시는 목록·창·단신에선 뜻이 없다
                 for f in ("jh_angle", "jh_band", "jh_group"):
                     r.pop(f, None)
+                r["home_section"] = s["id"]   # 숨은 원본·단신으로 가도 원래 면 (계획 리뷰 4차 N2)
             listed, over = out[: ccfg.list_max], out[ccfg.list_max:]
             if briefs is None:   # 단신 면이 없는 날은 목록에 모두
                 listed, over = out, []

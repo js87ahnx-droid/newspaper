@@ -54,11 +54,22 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
     site.mkdir(parents=True, exist_ok=True)
     write_assets(site, masthead(d))
     write_atomic(site / ".nojekyll", "", encoding="utf-8")
+    two = cfg.curated.enabled   # S50: 큐레이션 판(b)을 나란히 — 판 바꾸기 단추가 서로를 가리킨다
     today = site / "index.html"
-    write_atomic(today, render_html(edition, cfg, interests, sources, base=""), encoding="utf-8")
+    write_atomic(today, render_html(edition, cfg, interests, sources, base="", alt_href="b/" if two else None), encoding="utf-8")
     arch = site / "archive" / d.isoformat()
     arch.mkdir(parents=True, exist_ok=True)
-    write_atomic(arch / "index.html", render_html(edition, cfg, interests, sources, base="../../"), encoding="utf-8")
+    write_atomic(arch / "index.html", render_html(edition, cfg, interests, sources, base="../../", alt_href="b/" if two else None), encoding="utf-8")
+    extra: list[Path] = []
+    if two:
+        for page, base in ((site / "b" / "index.html", "../"), (arch / "b" / "index.html", "../../../")):
+            page.parent.mkdir(parents=True, exist_ok=True)
+            write_atomic(page, render_html(edition, cfg, interests, sources, base=base, variant="b", alt_href="../"), encoding="utf-8")
+            extra.append(page)
+    else:   # 끄면 b 판을 남기지 않는다 (지난 날짜 보관본 b 는 날짜 폴더와 함께 기간이 지나면 지워짐)
+        for old in (site / "b", arch / "b"):
+            if old.is_dir():
+                shutil.rmtree(old)
     # 보관 기간이 지난 호 정리
     cutoff = d - timedelta(days=keep_days)
     dates = []
@@ -76,4 +87,4 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
     index = site / "archive" / "index.html"
     highlights = _archive_highlights(history_dir, d, lead_record(edition, cfg, interests, sources), dates)
     write_atomic(index, render_archive_index(sorted(dates, reverse=True), highlights=highlights), encoding="utf-8")
-    return [today, arch / "index.html", index]
+    return [today, arch / "index.html", index, *extra]

@@ -551,3 +551,28 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .bt-all { align-self: flex-start; font: inherit; font-size: calc(13px * var(--fs)); min-height: 34px; padding: 4px 12px; border: 1px solid var(--accent); border-radius: 17px; background: var(--card); color: var(--accent); font-weight: 700; cursor: pointer; }
 .bt-full-h { margin: 0 0 6px; font-size: 1.1em; }
 .bt-full .item.brief { margin: 0 0 6px; }
+
+/* ---------- S50 큐레이션 판 (시안 B): 뉴스 면 지면(.page-inner)에서만 덜어 보임 — 분석·논평·중국·단신·가이드는 그대로, 기사 창(#reader, 원본 복제)은 다 보임 ---------- */
+#toolbar .tb-var { color: var(--accent); border-color: var(--accent); font-size: 12.5px; }
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .orig,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .flow,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .rel-arts,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .op-rel,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .why,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .meta .tm,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .meta .days,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .meta .cover,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .meta .note,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz) .meta .link-btn,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.sec-head) .cmp-inline,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.sec-head) .an-views,
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.sec-head) .an-pts { display: none !important; }   /* 늘리기(roomy·MORE) 뒤에도 */
+body.ed-curated .page:is(.sec-front, .sec-jonghap, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.sec-head):not(.brief) .lead { -webkit-line-clamp: 2 !important; }
+.more-list { margin: 10px 0 0; padding-top: 7px; border-top: 2px solid var(--ink); }
+.more-list h4 { margin: 0 0 4px; font-size: 13px; }
+.more-list ul { margin: 0; padding-left: 16px; }
+.more-list li { font-size: 13px; line-height: 1.5; margin: 0 0 2px; }
+.more-list li a { color: var(--ink); text-decoration: none; }
+.more-list li a:hover, .more-list li a:focus-visible { text-decoration: underline; }
+.more-list .src { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
+.curated-src { display: none; }
