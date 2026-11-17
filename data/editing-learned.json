@@ -1,0 +1,140 @@
+{
+  "v": 1,
+  "week": "2026-W47",
+  "edition": "2026-11-18",
+  "applied": "2026-11-17T21:34:55+00:00",
+  "reviews": 24,
+  "weights": {
+    "attention": 0.355,
+    "importance": 0.295,
+    "headline": 0.257,
+    "continuity": 0.102
+  },
+  "topic_importance": {
+    "economy": 0.9,
+    "semis_ai": 0.9,
+    "politics": 1.0,
+    "international": 0.827,
+    "industry": 0.7,
+    "society": 0.6,
+    "entertainment_sports": 0.2,
+    "incidents": 0.4,
+    "lifestyle_culture": 0.3,
+    "science": 0.5
+  },
+  "changes": [
+    {
+      "kind": "weight",
+      "key": "attention",
+      "label": "주목도",
+      "from": 0.35,
+      "to": 0.355
+    },
+    {
+      "kind": "weight",
+      "key": "importance",
+      "label": "중요도",
+      "from": 0.3,
+      "to": 0.295
+    },
+    {
+      "kind": "weight",
+      "key": "headline",
+      "label": "머리기사",
+      "from": 0.25,
+      "to": 0.257
+    },
+    {
+      "kind": "weight",
+      "key": "continuity",
+      "label": "연속성",
+      "from": 0.1,
+      "to": 0.102
+    },
+    {
+      "kind": "topic",
+      "key": "economy",
+      "label": "경제·증시",
+      "from": 1.0,
+      "to": 0.9,
+      "reviews": 5
+    },
+    {
+      "kind": "topic",
+      "key": "semis_ai",
+      "label": "반도체·AI",
+      "from": 0.8,
+      "to": 0.9,
+      "reviews": 3
+    },
+    {
+      "kind": "topic",
+      "key": "international",
+      "label": "국제",
+      "from": 0.9,
+      "to": 0.827,
+      "reviews": 15
+    }
+  ],
+  "history": [
+    {
+      "week": "2026-W47",
+      "edition": "2026-11-18",
+      "reviews": 24,
+      "changes": [
+        {
+          "kind": "weight",
+          "key": "attention",
+          "label": "주목도",
+          "from": 0.35,
+          "to": 0.355
+        },
+        {
+          "kind": "weight",
+          "key": "importance",
+          "label": "중요도",
+          "from": 0.3,
+          "to": 0.295
+        },
+        {
+          "kind": "weight",
+          "key": "headline",
+          "label": "머리기사",
+          "from": 0.25,
+          "to": 0.257
+        },
+        {
+          "kind": "weight",
+          "key": "continuity",
+          "label": "연속성",
+          "from": 0.1,
+          "to": 0.102
+        },
+        {
+          "kind": "topic",
+          "key": "economy",
+          "label": "경제·증시",
+          "from": 1.0,
+          "to": 0.9,
+          "reviews": 5
+        },
+        {
+          "kind": "topic",
+          "key": "semis_ai",
+          "label": "반도체·AI",
+          "from": 0.8,
+          "to": 0.9,
+          "reviews": 3
+        },
+        {
+          "kind": "topic",
+          "key": "international",
+          "label": "국제",
+          "from": 0.9,
+          "to": 0.827,
+          "reviews": 15
+        }
+      ]
+    }
+  ]
+}

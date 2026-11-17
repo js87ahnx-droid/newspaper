@@ -500,7 +500,7 @@
 
   // 큐레이션 판 (S50): 면마다 핵심 기사 + 면 끝 "함께 볼 기사" 목록 칸(.more-list, 기사 원본은 #flow 의 숨은 .curated-src)
   var CURATED = !!E.curated;
-  var CURATE_IDS = ["jonghap", "politics", "economy", "international", "society", "interest"];
+  var CURATE_IDS = ["politics", "economy", "international", "society", "interest"];   // 종합면은 큐레이션 판에서 창으로 접힘 (S51)
   function listSources(list) {   // 목록 칸 줄이 가리키는 숨은 원본 기사들
     return Array.prototype.map.call(list.querySelectorAll("[data-open]"), function (a) {
       return flow.querySelector('.curated-src > article.item[data-issue="' + a.getAttribute("data-open") + '"]');
@@ -514,6 +514,38 @@
     var lis = Array.prototype.slice.call(ml.querySelectorAll("li"));
     while (overflows(inner) && lis.length) { out = out.concat(listSources(lis[lis.length - 1])); lis.pop().remove(); }
     if (!lis.length) ml.remove();
+    return out;
+  }
+  // 큐레이션 면 끝 쪽에 기사가 1건 이하·절반도 안 차면(S51 ⑤ — 11/17 정치면 둘째 쪽 30%) 끝 쪽의 기사·목록 칸을 앞 쪽으로 옮기고
+  // 아래 기사부터 줄여(compact → tight) 맞춘다. 그래도 넘치면 목록 줄을 아래부터 빼 보고(뺀 기사는 단신 후보), 안 되면 되돌린다
+  function mergeTail(res) {
+    var pages = res.pages, out = [];
+    if (pages.length < 2) return out;
+    var li = pages[pages.length - 1].firstChild, pi = pages[pages.length - 2].firstChild;
+    if (li.querySelectorAll(":scope > article.item").length > 1 || usedRatio(li) >= 0.5) return out;
+    var moving = Array.prototype.filter.call(li.children, function (c) { return c.matches("article.item, .more-list"); });
+    if (!moving.length || moving.length !== li.children.length - (li.querySelector(".sec-title") ? 1 : 0)) return out;   // 다른 칸이 있으면 손대지 않음 (재리뷰 N1)
+    moving.forEach(function (n) { pi.appendChild(n); });
+    var added = [], cut = [];
+    var items = Array.prototype.slice.call(pi.querySelectorAll(":scope > article.item")).reverse();
+    ["compact", "tight"].forEach(function (cls) {
+      items.forEach(function (it) {
+        if (!overflows(pi) || it.classList.contains(cls)) return;
+        it.classList.add(cls); added.push([it, cls]);
+      });
+    });
+    var ml = pi.querySelector(":scope > .more-list");
+    var lis = ml ? Array.prototype.slice.call(ml.querySelectorAll("li")) : [];
+    while (overflows(pi) && lis.length) { var l = lis.pop(); cut.push(l); l.remove(); }
+    if (overflows(pi)) {   // 못 합침 — 그대로
+      cut.reverse().forEach(function (l) { ml.querySelector("ul").appendChild(l); });
+      added.forEach(function (x) { x[0].classList.remove(x[1]); });
+      moving.forEach(function (n) { li.appendChild(n); });
+      return out;
+    }
+    cut.forEach(function (l) { out = out.concat(listSources(l)); });
+    if (ml && !ml.querySelector("li")) ml.remove();
+    pages.pop().remove();
     return out;
   }
   function fixMoreList(res) {
@@ -567,6 +599,7 @@
       var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "jonghap" || cur ? { keepOrder: true } : null);
       built[id] = res.pages;
       var fromList = cur ? fixMoreList(res) : [];
+      if (cur) fromList = fromList.concat(mergeTail(res));   // S51 ⑤
       if (["opinion", "guide", "analysis", "china", "jonghap"].indexOf(id) < 0 && !cur) {   // 종합면(S47)은 두 쪽 그대로 — 끝 쪽 기사를 단신으로 내리지 않는다
         mergeOrphan(res.pages).forEach(function (iss) {
           var el = byId[id].querySelector(':scope > [data-issue="' + iss + '"]');
@@ -575,7 +608,7 @@
       }
       if (!res.rest.length && !CURATED) pullReserves(id, res.pages, reserveEls, pulled);   // 큐레이션 판은 예비 기사를 면에 끌어오지 않는다 (S50)   // 넘쳐 내린 기사가 없는 면만 (끝 쪽이 남은 것)
       if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) balance(res.pages);
-      if (cur) fromList = fromList.concat(fixMoreList(res));   // 쪽 고르기 뒤 목록 칸만 남은 끝 쪽도 (S50)
+      if (cur) fromList = fromList.concat(mergeTail(res), fixMoreList(res));   // 쪽 고르기(balance)가 끝 쪽을 다시 1건으로 만들 수 있어 한 번 더 (재리뷰 M2), 목록 칸만 남은 끝 쪽도 (S50)
       if (id === "jonghap") fixJonghap(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }

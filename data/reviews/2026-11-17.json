@@ -1,0 +1,231 @@
+{
+ "v": 1,
+ "edition": "2026-11-17",
+ "items": {
+  "18eabe87505bdaa7": {
+   "verdict": "up",
+   "topic": "semis_ai",
+   "section": "front",
+   "rank": 3,
+   "scores": {
+    "attention": 0.1857,
+    "importance": 0.6207,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.4,
+    "final": 0.4708
+   }
+  },
+  "7b01d74e47521a4b": {
+   "verdict": "down",
+   "topic": "economy",
+   "section": "economy",
+   "rank": 5,
+   "scores": {
+    "attention": 0.1762,
+    "importance": 0.8621,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.8,
+    "final": 0.3784
+   }
+  },
+  "1cbec557530a87ba": {
+   "verdict": "down",
+   "topic": "economy",
+   "section": "economy",
+   "rank": 8,
+   "scores": {
+    "attention": 0.181,
+    "importance": 0.7586,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.8,
+    "final": 0.357
+   }
+  },
+  "7b6bfc4cb07136c0": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 6,
+   "scores": {
+    "attention": 0.4476,
+    "importance": 0.931,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.4043
+   }
+  },
+  "b689b7492c6301ba": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 7,
+   "scores": {
+    "attention": 0.4476,
+    "importance": 0.931,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.4043
+   }
+  },
+  "77bc3dd9bbd0cac7": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 8,
+   "scores": {
+    "attention": 0.4667,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.1667,
+    "interest": 0.48,
+    "final": 0.3987
+   }
+  },
+  "2c1411d81f5331c0": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 10,
+   "scores": {
+    "attention": 0.4667,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3866
+   }
+  },
+  "f86039ebb97c2fb8": {
+   "verdict": "up",
+   "topic": "international",
+   "section": "international",
+   "rank": 11,
+   "scores": {
+    "attention": 0.3524,
+    "importance": 0.931,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3801
+   }
+  },
+  "099da9ba74d13535": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 9,
+   "scores": {
+    "attention": 0.419,
+    "importance": 0.7586,
+    "headline": 0.0,
+    "continuity": 0.5,
+    "interest": 0.48,
+    "final": 0.3958
+   }
+  },
+  "a7ed75857fdda23c": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "international",
+   "rank": 12,
+   "scores": {
+    "attention": 0.4619,
+    "importance": 0.7586,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3704
+   }
+  },
+  "6a7244d10539b0c1": {
+   "verdict": "up",
+   "topic": "semis_ai",
+   "section": "interest",
+   "rank": 1,
+   "scores": {
+    "attention": 0.5333,
+    "importance": 0.7586,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.4,
+    "final": 0.374
+   }
+  },
+  "9f1d503923651e95": {
+   "verdict": "up",
+   "topic": "international",
+   "section": "interest",
+   "rank": 2,
+   "scores": {
+    "attention": 0.2857,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.3333,
+    "interest": 0.48,
+    "final": 0.3648
+   }
+  },
+  "1f6a6238dfb87608": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "interest",
+   "rank": 4,
+   "scores": {
+    "attention": 0.3667,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3612
+   }
+  },
+  "e266826e1a84bee1": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "interest",
+   "rank": 6,
+   "scores": {
+    "attention": 0.3571,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3587
+   }
+  },
+  "be1b5ec378ce1270": {
+   "verdict": "down",
+   "topic": "international",
+   "section": "interest",
+   "rank": 7,
+   "scores": {
+    "attention": 0.3429,
+    "importance": 0.8276,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.48,
+    "final": 0.3551
+   }
+  },
+  "80bee33ec0c620e5": {
+   "verdict": "drop",
+   "topic": "economy",
+   "section": "interest",
+   "rank": 12,
+   "scores": {
+    "attention": 0.1333,
+    "importance": 0.7586,
+    "headline": 0.0,
+    "continuity": 0.0,
+    "interest": 0.8,
+    "final": 0.3449
+   }
+  }
+ },
+ "updated": "2026-11-16T22:52:55.513Z"
+}
