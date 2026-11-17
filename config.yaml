@@ -56,9 +56,9 @@ sections:
 # 지면에선 원제목·흐름·관련·사설·점수를 숨기고(기사 창엔 다 보임), 입장 차이는 면 첫 기사만. AI 호출 추가 없음. 끄면 b 판을 지운다
 curated:
   enabled: true
-  keep: {jonghap: 5, politics: 4, economy: 4, international: 5, society: 3, interest: 5}
+  keep: {politics: 4, economy: 4, international: 5, society: 3, interest: 5}   # 종합면은 큐레이션 판에서 1면 기사 창의 "다른 각도"로 접힘 (S51)
   list_max: 6
-  pages: {politics: 2, economy: 2, international: 2, society: 1, interest: 2}   # 합 24쪽 이하 (나머지 면은 위 값)
+  pages: {jonghap: 0, politics: 2, economy: 2, international: 2, society: 1, interest: 2}   # 합 22쪽 이하 (나머지 면은 위 값). 종합면 0 — 접혀서 쪽 없음 (S51)
 
 clustering:
   # S5 실측: MiniLM·mpnet·potion 은 한국어 짧은 문장 구별이나 다국어 연결이 약해 탈락 (docs-internal/cluster-review-*.md)

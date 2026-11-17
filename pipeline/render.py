@@ -342,7 +342,8 @@ def _pick_planned(host: dict, plan_angles: dict, shown: set[str], used: set[str]
     lo 건까지. dup 은 가리키는 기사가 이 묶음 중심이거나 이미 고른 후보일 때만 뺀다(서로 가리키면 점수 높은 쪽이 남음)."""
     pool = [(a, plan_angles[a["issue_id"]]) for a in content_first(host.get("angles") or [])
             if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles
-            and plan_angles[a["issue_id"]].get("angle") != "무관"]   # 다른 사건은 싣지 않음 (S51 ③)
+            and plan_angles[a["issue_id"]].get("angle") != "무관"   # 다른 사건은 싣지 않음 (S51 ③)
+            and not (plan_angles[a["issue_id"]].get("angle") == "기타" and not has_content(a))]   # AI 도 각도를 못 붙였고 보일 내용도 없는 후보 (11/17 "창업기업…")
     pool = sorted(pool, key=lambda x: x[1].get("angle") == "기타")   # 기타는 맨 뒤 (S51 결정 18)
     kept: list[tuple[dict, str]] = []
 
@@ -364,7 +365,7 @@ def _pick_planned(host: dict, plan_angles: dict, shown: set[str], used: set[str]
     return sorted(kept, key=lambda x: order[id(x[0])])
 
 
-def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, second: dict | None = None) -> None:
+def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, second: dict | None = None, fold: bool = False) -> None:
     """종합면 (S47 → S49 각도별). 1면 메인 기사의 같은 사건 다른 기사(angles — 편집이 붙임)에서 고른다.
     plan(edition["jonghap_plan"], enrich 가 AI 로 각도·같은 내용을 판정)이 있고 메인이 같으면: 각도가 겹치지 않게 메인 묶음 3~5건 +
     둘째 이슈 묶음 2~3건(합 7). 없으면 S47 방식(다른 매체, 제목이 거의 같은 것은 하나, 3~6건). 1면 바로 뒤에 둔다."""
@@ -408,6 +409,20 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
     ids = {a["issue_id"] for a, _, _ in picked}
     for s in sections:
         s["items"] = [r for r in s["items"] if r["issue_id"] not in ids]
+    if fold:   # 큐레이션 판 (S51 ②④, 시안 A): 종합면 대신 각 중심 기사의 창에 "다른 각도" — 고르기는 기존 판과 같다
+        hosts_by = {0: [lead, *(s["items"][0] for s in sections if s["id"] == "detail" and s["items"])], 1: [second] if second is not None else []}
+        for grp in (0, 1):
+            ang_rows = []
+            for a, ang, g in picked:
+                if g != grp:
+                    continue
+                v = row(a)["view"]
+                ang_rows.append({"issue_id": a["issue_id"], "angle": ang or "관련", "title": v["title"], "source": a.get("source"),
+                                 "url": a.get("url"), "lang": v.get("lang"), "summary": v.get("lead") if has_content(a) else ""})
+            for h in hosts_by[grp]:
+                if ang_rows:
+                    h["angle_rows"] = ang_rows
+        return
     rows = []
     for n, (a, ang, grp) in enumerate(picked):
         r = {**row(a), "reserve": False, "jh_group": grp}
@@ -427,7 +442,7 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
                          "theme_named": planned})
 
 
-CURATE_SECTIONS = ("jonghap", "politics", "economy", "international", "society", "interest")
+CURATE_SECTIONS = ("politics", "economy", "international", "society", "interest")   # 종합면은 큐레이션 판에서 창으로 접힘 (S51)
 
 
 def _on_paper(r: dict) -> bool:
@@ -448,15 +463,10 @@ def curate(sections: list[dict], ccfg) -> None:
         items = [r for r in s["items"] if not r.get("reserve")]
         reserve = [r for r in s["items"] if r.get("reserve")]   # 면에 딸린 예비 기사는 쪽 나누기가 따로 다룬다 — 그대로
         if k and len(items) > k:
-            if s["id"] == "jonghap":
-                g0 = [r for r in items if not r.get("jh_group")]
-                g1 = [r for r in items if r.get("jh_group") == 1]
-                kept = g0[: k - 2] + g1[:2] if len(g1) >= 2 and k >= 3 else g0[:k]
-            else:
-                head, rest = items[0], items[1:]
-                pri = sorted(range(len(rest)), key=lambda i: (0 if _on_paper(rest[i]) or rest[i].get("guaranteed") else 1, i))
-                pick = set(pri[: k - 1])
-                kept = [head] + [r for i, r in enumerate(rest) if i in pick]
+            head, rest = items[0], items[1:]
+            pri = sorted(range(len(rest)), key=lambda i: (0 if _on_paper(rest[i]) or rest[i].get("guaranteed") else 1, i))
+            pick = set(pri[: k - 1])
+            kept = [head] + [r for i, r in enumerate(rest) if i in pick]
             ids = {id(r) for r in kept}
             out = [r for r in items if id(r) not in ids]
             for r in out:   # 종합면 묶음 표시는 목록·창·단신에선 뜻이 없다
@@ -645,7 +655,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         want = next((g["host"] for g in plan.get("groups", [])[1:]), None)
         if sec_raw is not None and sec_raw["issue_id"] == want:
             second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)   # 지면에 없으면 둘째 묶음 없음
-    jonghap(sections, titles.get("jonghap", "종합"), row, plan, second)
+    jonghap(sections, titles.get("jonghap", "종합"), row, plan, second, fold=variant == "b" and cfg.curated.enabled)
     if variant == "b" and cfg.curated.enabled:
         curate(sections, cfg.curated)   # S50: 큐레이션 판 — 1면·종합면을 고른 뒤
     compare = []

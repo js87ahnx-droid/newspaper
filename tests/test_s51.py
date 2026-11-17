@@ -74,9 +74,46 @@ def test_clean_plan_keeps_unrelated():
 
 
 def test_pick_planned_drops_unrelated_and_puts_other_last():
-    main = [_a(k, k, "M") for k in "abcde"]
+    main = [{**_a(k, k, "M"), "lead": "내용."} for k in "abcde"]
     plan = _plan("L", [("L", "x", [("a", "기타", None), ("b", "무관", None), ("c", "현장", None), ("d", "전망", None), ("e", "배경", None)])])
     secs = _secs(main)
     jonghap(secs, "종합", ROW, plan, None)
     ids = [r["issue_id"] for r in secs[1]["items"]]
     assert "b" not in ids and ids[-1] == "a" and set(ids) == {"a", "c", "d", "e"}
+
+
+def test_pick_planned_drops_other_without_content():
+    main = [{**_a(k, k, "M"), "lead": "내용."} for k in "abcd"]
+    main[0]["lead"] = ""                                                     # 기타 + 내용 없음 → 뺌
+    main[1]["lead"] = ""                                                     # 현장 + 내용 없음 → 남음(원문 보기)
+    plan = _plan("L", [("L", "x", [("a", "기타", None), ("b", "현장", None), ("c", "전망", None), ("d", "배경", None)])])
+    secs = _secs(main)
+    jonghap(secs, "종합", ROW, plan, None)
+    ids = [r["issue_id"] for r in secs[1]["items"]]
+    assert "a" not in ids and ids[-1] == "b"                                  # 내용 없는 후보는 뒤로
+
+
+# ---------- S51d 종합면 접기 (②④) ----------
+def test_curated_folds_jonghap_into_hosts():
+    import copy
+    from pipeline.render import build_context
+    from pipeline.settings import load_config, load_interests, load_sources
+    from tests.test_s49_browser import _site
+    from tests.test_s50 import _edition
+    ed = _edition(_site())
+    args = (load_config(), load_interests(), load_sources())
+    base = build_context(copy.deepcopy(ed), *args)["sections"]
+    cur = build_context(copy.deepcopy(ed), *args, variant="b")["sections"]
+    jh = next(s for s in base if s["id"] == "jonghap")["items"]
+    g0 = [r["issue_id"] for r in jh if not r.get("jh_group")]
+    g1 = [r["issue_id"] for r in jh if r.get("jh_group") == 1]
+    assert g0 and not any(s["id"] == "jonghap" for s in cur)
+    front = next(s for s in cur if s["id"] == "front")
+    detail = next(s for s in cur if s["id"] == "detail")["items"][0]
+    assert [r["issue_id"] for r in front["lead"]["angle_rows"]] == g0 == [r["issue_id"] for r in detail["angle_rows"]]
+    assert all(r["angle"] and r["title"] for r in detail["angle_rows"])
+    if g1:
+        host = next(r for r in front["items"] if r.get("angle_rows"))
+        assert [r["issue_id"] for r in host["angle_rows"]] == g1
+    shown = {r["issue_id"] for s in cur for r in s["items"] if s["id"] not in ("detail", "curated_src")}
+    assert not (set(g0 + g1) & shown)                                       # 접힌 기사는 지면에 따로 안 실림

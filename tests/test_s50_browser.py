@@ -17,7 +17,7 @@ from tests.test_s49_browser import _site
 from tests.test_s50 import _edition
 
 SIZES = [(1180, 820), (1366, 1024), (390, 844)]
-KEEP = {"jonghap": 5, "politics": 4, "economy": 4, "international": 5, "society": 3, "interest": 5}
+KEEP = {"politics": 4, "economy": 4, "international": 5, "society": 3, "interest": 5}
 
 
 def _b_site(tmp_path, mutate=None):

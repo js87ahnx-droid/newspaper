@@ -203,6 +203,10 @@
             </div>{% endfor %}
           </div>{% endif %}
         </div>{% endif %}
+        {% if it.angle_rows %}{% set n.i = n.i + 1 %}{# 큐레이션 판 (S51 시안 A): 종합면 대신 다른 각도 기사 #}
+        <div class="pkg-part ang-rows"><h4><span>{{ n.i }}</span>다른 각도 <small>· 기사 {{ it.angle_rows|length }}건</small></h4>
+          {% for r in it.angle_rows %}<div class="angrow"><span class="ang">{{ r.angle }}</span><a href="{{ real_url(r.url) }}" target="_blank" rel="noopener noreferrer"{{ art(r.url, r.source, r.lang or 'ko') }}>{{ r.title }}</a> <span class="src">{{ r.source }}</span>{% if r.summary %}<p>{{ r.summary }}</p>{% else %}<p class="ang-none">요약 없음 — 제목을 누르면 원문</p>{% endif %}</div>{% endfor %}
+        </div>{% endif %}
         {% if it.related_view %}{% set n.i = n.i + 1 %}
         <div class="pkg-part rel-arts"><h4><span>{{ n.i }}</span>함께 볼 보도</h4>
           {% for r in it.related_view %}<p><span class="badge lean-{{ r.cls }}">{{ r.lean }}</span> <span class="src">{{ r.source }}</span>{% if r.asof %} <span class="asof">{{ r.asof }}</span>{% endif %}
@@ -240,6 +244,11 @@
             <a href="{{ real_url(u.url) }}" target="_blank" rel="noopener noreferrer"{{ art(u.url, u.source, u.lang or 'ko') }}>{{ u.title }}</a> <span class="src">{{ u.source }}</span></li>
           {% endfor %}<li class="now"><time>{{ it.time }}</time> 지금 이 기사</li>
         </ol>
+      </div>
+      {% endif %}
+      {% if it.angle_rows and not pkg %}{# 큐레이션 판 (S51 ④): 둘째 이슈 기사의 다른 각도 — 지면에선 숨기고 창에서만 (app.css) #}
+      <div class="ang-rows" aria-label="다른 각도"><h4>다른 각도 <small>· 기사 {{ it.angle_rows|length }}건</small></h4>
+        {% for r in it.angle_rows %}<div class="angrow"><span class="ang">{{ r.angle }}</span><a href="{{ real_url(r.url) }}" target="_blank" rel="noopener noreferrer"{{ art(r.url, r.source, r.lang or 'ko') }}>{{ r.title }}</a> <span class="src">{{ r.source }}</span>{% if r.summary %}<p>{{ r.summary }}</p>{% else %}<p class="ang-none">요약 없음 — 제목을 누르면 원문</p>{% endif %}</div>{% endfor %}
       </div>
       {% endif %}
       {% if it.related_view and not pkg %}

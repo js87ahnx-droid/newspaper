@@ -500,7 +500,7 @@
 
   // 큐레이션 판 (S50): 면마다 핵심 기사 + 면 끝 "함께 볼 기사" 목록 칸(.more-list, 기사 원본은 #flow 의 숨은 .curated-src)
   var CURATED = !!E.curated;
-  var CURATE_IDS = ["jonghap", "politics", "economy", "international", "society", "interest"];
+  var CURATE_IDS = ["politics", "economy", "international", "society", "interest"];   // 종합면은 큐레이션 판에서 창으로 접힘 (S51)
   function listSources(list) {   // 목록 칸 줄이 가리키는 숨은 원본 기사들
     return Array.prototype.map.call(list.querySelectorAll("[data-open]"), function (a) {
       return flow.querySelector('.curated-src > article.item[data-issue="' + a.getAttribute("data-open") + '"]');

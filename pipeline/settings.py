@@ -185,9 +185,9 @@ class Curated(Strict):
     @field_validator("keep")
     @classmethod
     def _news_only(cls, v: dict) -> dict:
-        bad = sorted(set(v) - {"jonghap", "politics", "economy", "international", "society", "interest"})
+        bad = sorted(set(v) - {"politics", "economy", "international", "society", "interest"})
         if bad:
-            raise ValueError(f"남길 수는 뉴스 면(종합·정치·경제·국제·사회·관심)만: {bad}")
+            raise ValueError(f"남길 수는 뉴스 면(정치·경제·국제·사회·관심)만 — 종합면은 큐레이션 판에서 창으로 접힘(S51): {bad}")
         if any(n < 1 for n in v.values()):
             raise ValueError("남길 수는 1 이상 (면 머리는 늘 남김)")
         return v

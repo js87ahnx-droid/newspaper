@@ -17,6 +17,7 @@ def test_curated_config_loads():
 
 @pytest.mark.parametrize("bad", [
     {"keep": {"front": 3}},          # 1면은 줄이지 않음
+    {"keep": {"jonghap": 5}},        # 종합면은 큐레이션 판에서 창으로 접힘 (S51)
     {"keep": {"briefs": 3}},
     {"keep": {"politics": 0}},       # 면 머리는 늘 남김
     {"pages": {"politics": -1}},
@@ -39,7 +40,7 @@ from pipeline.settings import load_interests, load_sources  # noqa: E402
 from pipeline.stance import day_prior, stance  # noqa: E402
 from tests.test_edit import build  # noqa: E402
 
-KEEP = {"jonghap": 5, "politics": 4, "economy": 4, "international": 5, "society": 3, "interest": 5}
+KEEP = {"politics": 4, "economy": 4, "international": 5, "society": 3, "interest": 5}   # 종합면은 S51 에서 창으로 접힘
 
 
 def _edition(mutate=None, n=90):
@@ -125,21 +126,6 @@ def test_curate_pages_by_counts_as_paper():
     secs = [{"id": "politics", "items": [_r("h"), _r("a"), _r("b"), r]}, {"id": "briefs", "items": []}]
     curate(secs, _C)
     assert [x["issue_id"] for x in secs[0]["items"]] == ["h", "a", "p"]   # A3면 신호가 점수 순보다 먼저
-
-
-def test_curate_jonghap_main3_plus_second2():
-    rows = [dict(_r(k), jh_group=0, jh_angle="경위") for k in "abcde"] + [dict(_r(k), jh_group=1, jh_angle="배경") for k in "xyz"]
-    rows[5]["jh_band"] = "둘째"
-
-    class C:
-        keep = {"jonghap": 5}
-        list_max = 6
-    secs = [{"id": "jonghap", "items": rows}, {"id": "briefs", "items": []}]
-    curate(secs, C)
-    assert [r["issue_id"] for r in secs[0]["items"]] == ["a", "b", "c", "x", "y"]
-    assert secs[0]["items"][3]["jh_band"] == "둘째"
-    moved = secs[2]["items"]
-    assert [r["issue_id"] for r in moved] == ["d", "e", "z"] and not any("jh_group" in r or "jh_angle" in r for r in moved)
 
 
 def test_curate_off_or_no_variant_changes_nothing():
