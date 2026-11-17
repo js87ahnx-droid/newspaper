@@ -553,17 +553,23 @@ def related_opinions(op: dict | None) -> dict[str, list[dict]]:
     """논평면에서 지면 이슈와 연결한 사설·칼럼(관련: …)을 이슈별로 (S17e — 기사 곁에 보인다). 사설이 칼럼보다 먼저."""
     if not op:
         return {}
+    from .textutil import opinion_key
+
     out: dict[str, list[dict]] = {}
-    seen: set[str] = set()
+    seen: set = set()
     for o in sorted(op.get("editorials", []) + op.get("columns", []), key=lambda o: o.get("kind") != "editorial"):
-        if not o.get("issue_id") or o["url"] in seen:
+        k = opinion_key(o.get("source"), o.get("title", ""))   # 같은 글이 다른 주소로 두 번 (S51 ⑧)
+        if not o.get("issue_id") or o["url"] in seen or k in seen:
             continue
-        seen.add(o["url"])
+        seen |= {o["url"], k}
         out.setdefault(o["issue_id"], []).append({**o, "cls": LEAN_CLASS.get(o.get("lean"), "mid")})
     return out
 
 
 def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sources, variant: str | None = None) -> dict:
+    from .textutil import fix_kana_tree
+
+    edition = fix_kana_tree(edition)   # AI 한국어 글에 섞인 가나 → 한글 (S51 ⑥) — 한글이 든 글만, 원문 일본어 제목은 그대로
     d = date.fromisoformat(edition["edition"])
     titles = {s.id: s.title for s in cfg.sections}
     compare_ids = {it["issue_id"] for it in edition.get("compare", [])}

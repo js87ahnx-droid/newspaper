@@ -135,7 +135,23 @@ def _row(a: Article, link: tuple[str, float] | None, titles: dict[str, str]) -> 
     }
 
 
+def dedupe_opinions(opinions: list[Article]) -> list[Article]:
+    """같은 매체의 같은 글은 하나만 (S51 ⑧) — 사설이 칼럼보다 먼저, 같은 종류면 먼저 온 것."""
+    from .textutil import opinion_key
+
+    seen: set[tuple[str, str]] = set()
+    out = []
+    for o in sorted(opinions, key=lambda o: o.opinion != "editorial"):
+        k = opinion_key(o.source, o.title)
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(o)
+    return out
+
+
 def organize(opinions: list[Article], edition: dict, day_articles: list[Article] | None = None) -> dict:
+    opinions = dedupe_opinions(opinions)
     items = [it for ps in edition["sections"].values() for it in ps]
     order = {it["issue_id"]: i for i, it in enumerate(items)}  # 지면 순서 = 대략 중요도 순
     titles = {it["issue_id"]: it["title"] for it in items}

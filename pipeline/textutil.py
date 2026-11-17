@@ -257,3 +257,69 @@ def detect_analysis(title: str, url: str, feed_section: str = "") -> bool:
     if _AN_NOT.search(title) or re.search(r"/sports?/|/football/", url, re.I):   # 스포츠 면 주소 (S22c 평가: WaPo NFL 분석)
         return False
     return feed_section == "analysis" or bool(_AN_URL.search(url)) or any(p.search(title) for p in _AN_TITLE)
+
+
+_OP_HEAD = re.compile(r"^\s*(?:opinion|commentary|op-ed|column|editorial)\s*[|:：]\s*", re.I)
+
+
+def opinion_key(source: str | None, title: str) -> tuple[str, str]:
+    """같은 사설·칼럼 판정 키 (S51 ⑧): 같은 매체 + "Opinion |" 같은 머리를 떼고 공백·대소문자를 고른 제목.
+    WSJ 같은 글이 두 피드(?mod=…)로 들어와 주소가 달랐다. 주소만 같고 제목이 다르면 다른 글로 둔다."""
+    t = _OP_HEAD.sub("", title or "")
+    return (source or "", re.sub(r"\s+", " ", t).strip().lower())
+
+
+# ---------- 가나 → 한글 (S51 ⑥): AI 한국어 글에 섞여 나온 가나("라ム슈타인")를 한글 소리로 ----------
+_KANA_ROWS = ("アイウエオ 아이우에오", "カキクケコ 카키쿠케코", "ガギグゲゴ 가기구게고", "サシスセソ 사시스세소", "ザジズゼゾ 자지즈제조",
+              "タチツテト 타치쓰테토", "ダヂヅデド 다지즈데도", "ナニヌネノ 나니누네노", "ハヒフヘホ 하히후헤호", "バビブベボ 바비부베보",
+              "パピプペポ 파피푸페포", "マミムメモ 마미무메모", "ヤユヨ 야유요", "ラリルレロ 라리루레로", "ワヲ 와오", "ァィゥェォ 아이우에오", "ヴ 부")
+_KANA = {k: h for row in _KANA_ROWS for ks, hs in [row.split()] for k, h in zip(ks, hs)}
+_KANA_YO = {"ャ": "ㅑ", "ュ": "ㅠ", "ョ": "ㅛ"}
+_KANA_RE = re.compile(r"[ぁ-ゖァ-ヺー]")
+_HANGUL_RE = re.compile(r"[가-힣]")
+_YO_VOWEL = {"ㅑ": 2, "ㅠ": 17, "ㅛ": 12}   # 한글 중성 번호
+
+
+def _with_vowel(syl: str, v: int) -> str:
+    c = ord(syl) - 0xAC00
+    return chr(0xAC00 + (c // 588) * 588 + v * 28) if 0 <= c < 11172 else syl
+
+
+def kana_to_hangul(s: str) -> str:
+    """한글이 들어 있는 글에서만 가나를 한글 소리로 (원문 일본어 제목은 그대로). 장음 "ー"는 지우고 "・"는 둔다."""
+    if not s or not _KANA_RE.search(s) or not _HANGUL_RE.search(s):
+        return s
+    out: list[str] = []
+    for ch in s:
+        if "ぁ" <= ch <= "ゖ":
+            ch = chr(ord(ch) + 0x60)   # 히라가나 → 가타카나
+        if ch == "ー":
+            continue
+        if ch in _KANA_YO and out and out[-1] in _KANA.values():   # 시+ュ → 슈
+            out[-1] = _with_vowel(out[-1], _YO_VOWEL[_KANA_YO[ch]]) if out[-1] not in "지치" else _with_vowel(out[-1], {"ㅑ": 0, "ㅠ": 13, "ㅛ": 8}[_KANA_YO[ch]])
+            continue
+        if ch == "ン":
+            c = ord(out[-1]) - 0xAC00 if out else -1
+            if 0 <= c < 11172 and c % 28 == 0:
+                out[-1] = chr(0xAC00 + c + 4)   # 받침 ㄴ
+            else:
+                out.append("은")
+            continue
+        if ch == "ッ":
+            continue
+        out.append(_KANA.get(ch, ch))
+    return "".join(out)
+
+
+def fix_kana_tree(o):
+    """호 데이터 전체에서 한글이 들어 있는 글의 가나를 고친다. 바뀐 곳만 새로 만들고 나머지는 같은 객체 (S51 ⑥)."""
+    if isinstance(o, str):
+        return kana_to_hangul(o)
+    if isinstance(o, dict):
+        new = {k: fix_kana_tree(v) for k, v in o.items()}
+        return o if all(new[k] is o[k] for k in o) else new
+    if isinstance(o, list):
+        new = [fix_kana_tree(v) for v in o]
+        return o if all(a is b for a, b in zip(new, o)) else new
+    return o
+
