@@ -326,11 +326,24 @@ def _shown_ids(sections: list[dict], hosts: list[dict]) -> set[str]:
     return shown
 
 
+def has_content(a: dict) -> bool:
+    """창에 보일 내용(리드·한국어 요약·AI 정리)이 있는 기사 (S51 ② — 국내외 RSS 다수가 리드 없이 온다)."""
+    llm = a.get("llm") or {}
+    return bool((a.get("lead") or "").strip() or llm.get("ko_summary") or (llm.get("analysis") or {}).get("summary"))
+
+
+def content_first(xs: list[dict]) -> list[dict]:
+    """종합면 후보 순서: 내용 있는 기사 먼저(같은 안에선 원래 순서) — 빼지는 않는다 (S51 계획 결정 18)."""
+    return sorted(xs, key=lambda a: not has_content(a))
+
+
 def _pick_planned(host: dict, plan_angles: dict, shown: set[str], used: set[str], lo: int, hi: int) -> list[tuple[dict, str]]:
     """계획(각도·dup)대로 고르기 (S49): 점수 순(편집이 붙인 angles 순서)으로 ① 각도가 안 겹치게 hi 건까지 ② lo 건이 안 되면 같은 각도도
     lo 건까지. dup 은 가리키는 기사가 이 묶음 중심이거나 이미 고른 후보일 때만 뺀다(서로 가리키면 점수 높은 쪽이 남음)."""
-    pool = [(a, plan_angles[a["issue_id"]]) for a in host.get("angles") or []
-            if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles]
+    pool = [(a, plan_angles[a["issue_id"]]) for a in content_first(host.get("angles") or [])
+            if a["issue_id"] not in shown and a["issue_id"] not in used and a["issue_id"] in plan_angles
+            and plan_angles[a["issue_id"]].get("angle") != "무관"]   # 다른 사건은 싣지 않음 (S51 ③)
+    pool = sorted(pool, key=lambda x: x[1].get("angle") == "기타")   # 기타는 맨 뒤 (S51 결정 18)
     kept: list[tuple[dict, str]] = []
 
     def dup(g) -> bool:
@@ -382,7 +395,7 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
                 picked += [(a, ang, 1) for a, ang in sec[: JONGHAP_TOTAL - len(picked)]]
     else:
         srcs, titles = {lead.get("source")}, [lead["title"]]
-        for a in lead.get("angles") or []:
+        for a in content_first(lead.get("angles") or []):   # 내용 있는 후보 먼저 (S51 ②)
             if len(picked) >= JONGHAP_MAX:
                 break
             if a["issue_id"] in shown or a.get("source") in srcs or any(_jac(a["title"], t) >= JONGHAP_SAME_TITLE for t in titles):

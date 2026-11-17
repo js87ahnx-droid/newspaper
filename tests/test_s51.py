@@ -53,3 +53,30 @@ def test_fix_kana_tree_only_changed_copied():
     out = fix_kana_tree(ed)
     assert out["a"]["b"] == "라무슈타인" and out["e"] == ["리비우 방문", "ニュース"]
     assert out["c"] is ed["c"] and ed["a"]["b"] == "라ム슈타인"                      # 원본은 안 바뀜
+
+
+# ---------- S51c 각도 후보 순서·무관 (②③) ----------
+from pipeline.llm import _clean_plan  # noqa: E402
+from pipeline.render import content_first, jonghap  # noqa: E402
+from tests.test_s49 import ROW, _a, _plan, _secs  # noqa: E402
+
+
+def test_content_first_keeps_all_and_order():
+    xs = [{"issue_id": "a", "lead": ""}, {"issue_id": "b", "lead": "내용"}, {"issue_id": "c", "lead": "", "llm": {"ko_summary": "요약"}},
+          {"issue_id": "d", "lead": " "}]
+    assert [x["issue_id"] for x in content_first(xs)] == ["b", "c", "a", "d"]
+
+
+def test_clean_plan_keeps_unrelated():
+    lead, cands = {"issue_id": "L"}, [{"issue_id": "a"}, {"issue_id": "b"}]
+    plan = _clean_plan({"groups": {"L": {"angles": {"a": {"angle": "무관"}, "b": {"angle": "현장"}}}}}, [(lead, cands)])
+    assert plan["groups"][0]["angles"]["a"]["angle"] == "무관"
+
+
+def test_pick_planned_drops_unrelated_and_puts_other_last():
+    main = [_a(k, k, "M") for k in "abcde"]
+    plan = _plan("L", [("L", "x", [("a", "기타", None), ("b", "무관", None), ("c", "현장", None), ("d", "전망", None), ("e", "배경", None)])])
+    secs = _secs(main)
+    jonghap(secs, "종합", ROW, plan, None)
+    ids = [r["issue_id"] for r in secs[1]["items"]]
+    assert "b" not in ids and ids[-1] == "a" and set(ids) == {"a", "c", "d", "e"}

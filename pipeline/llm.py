@@ -780,7 +780,7 @@ def korean_pass(edition: dict, display, cache: dict, guarded, targets: list[tupl
     return (sts[0] if len(set(sts)) == 1 else " / ".join(sts)) + f" ({len(rows)}건)"
 
 
-ANGLES = ("경위", "배경", "인물", "시장 반응", "각계 반응", "국내 영향", "정책", "책임론", "후임", "쟁점", "현장", "전망", "기타")
+ANGLES = ("경위", "배경", "인물", "시장 반응", "각계 반응", "국내 영향", "정책", "책임론", "후임", "쟁점", "현장", "전망", "기타", "무관")   # 무관 = 다른 사건(S51 ③ — 싣지 않음)
 ANGLE_CANDS = 8         # 묶음마다 각도를 묻는 후보 수 (편집이 붙인 angles 앞에서부터)
 JONGHAP_KOREAN_MAX = 16
 JONGHAP_FALLBACK = 6    # 계획이 없을 때(각도 호출 실패) 한국어를 받는 메인 후보 수
@@ -788,7 +788,8 @@ BAND_MAX = 16
 ANGLE_PROMPT = """종합일간지 종합면 편집이다. 묶음마다 "중심 기사"와 같은 사건을 다룬 "후보" 기사들이 있다.
 신문은 한 사건을 여러 각도로 나눠 싣는다 — 같은 내용을 매체만 바꿔 되풀이하지 않는다.
 후보마다:
-- angle: 이 기사가 다루는 각도 하나 — 경위·배경·인물·시장 반응·각계 반응·국내 영향·정책·책임론·후임·쟁점·현장·전망·기타 중에서
+- angle: 이 기사가 다루는 각도 하나 — 경위·배경·인물·시장 반응·각계 반응·국내 영향·정책·책임론·후임·쟁점·현장·전망·기타 중에서.
+  중심 기사와 다른 사건·주제를 다룬 후보(같은 낱말만 겹친 기사)는 "무관"
 - dup: 중심 기사 또는 다른 후보와 내용이 사실상 같으면 true (같은 사실을 다른 매체가 쓴 스트레이트 등)
 - dup_of: dup 이면 같은 기사의 id (중심 기사면 중심 기사 id), 아니면 null
 묶음마다 band: 이 묶음의 이름 16자 이하 (예: "젠슨 황 사임 후폭풍", "충청 메가프로젝트 착공")
@@ -842,11 +843,13 @@ def plan_jonghap(edition: dict, display, cache: dict, guarded, cfg: Llm, order: 
     st = {"lead": lead and lead["issue_id"], "second": second and second["issue_id"], "dups": [], "status": "대상 없음"}
     if lead is None or not lead.get("angles"):
         return st
-    main = (lead.get("angles") or [])[:ANGLE_CANDS]
+    from .render import content_first
+
+    main = content_first(lead.get("angles") or [])[:ANGLE_CANDS]   # 리드·요약이 있는 후보 먼저 (S51 ②)
     hosts = [(lead, main)]
     if second is not None:
         taken = {a["issue_id"] for a in main}
-        sec = [a for a in (second.get("angles") or []) if a["issue_id"] not in taken][:ANGLE_CANDS]
+        sec = [a for a in content_first(second.get("angles") or []) if a["issue_id"] not in taken][:ANGLE_CANDS]
         if len(sec) >= 2:
             hosts.append((second, sec))
     key = "|".join(h["issue_id"] + ":" + ",".join(c["issue_id"] for c in cs) for h, cs in hosts)
