@@ -41,7 +41,10 @@ def main(site: Path, edition_path: Path | None) -> int:
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
         leaked = [s for s in samples if s in text]
-        if leaked:
+        if leaked and p == site / "status.json":
+            # S52: 발행 상태는 원격(API)에서만 쓰고 이 발행이 만들지 않는다 — 지난 실패의 상태가 막아 발행이 멈추지 않게 경고만
+            print(f"::warning::발행 상태 파일에 기사 글로 보이는 문자열: {p}")
+        elif leaked:
             problems.append(f"기사 글이 평문으로 있음: {p} — 예: {leaked[0][:30]}")
         if SECRET_LIKE.search(text):
             problems.append(f"비밀값처럼 보이는 문자열: {p}")

@@ -44,7 +44,7 @@ ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 STAMP = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z\s+")   # Actions 로그 시각 머리
 WIN = 10   # 기사 글 조각으로 보는 길이
 URL = re.compile(r"https?://\S+")
-SENTENCE = re.compile(r"(?:[^\W\d_]{2,}\W+){3,}[^\W\d_]{2,}")   # 낱말 4개 이상 이어진 문장꼴 (로마자 기사 제목일 수 있음)
+SENTENCE = re.compile(r"(?:[^\W\d_]{2,}\W+){2,}[^\W\d_]{2,}")   # 낱말 3개 이상 이어진 문장꼴 (로마자 기사 제목일 수 있음, 구현 리뷰 M1)
 NO_POST = {6, 7}   # 몇 분이면 끝나는 단계는 기록만 하고 올리지 않는다 — 상태 커밋·Pages 빌드 줄이기 (시간당 약 10회 권장, 계획 리뷰 2·3차)
 LAST_HIDDEN = "로그 마지막 줄은 글이 들어 있어 생략 — Actions 로그 확인"
 NO_LOG = "발행 준비(설치·캐시)에서 실패 — Actions 로그 확인"
@@ -121,9 +121,10 @@ def scrub(msg: str, secrets: list[str], samples: list[str]) -> str:
         msg = msg.replace(s, "***")
     msg = SECRET_LIKE.sub("***", msg)
     msg = URL.sub("<주소>", msg)
-    if samples and len(msg) >= WIN:
+    if samples:
         wins = {msg[i:i + WIN] for i in range(len(msg) - WIN + 1)}
-        if any(s[i:i + WIN] in wins for s in samples for i in range(len(s) - WIN + 1)):
+        hit = any(s in msg if len(s) <= WIN else any(s[i:i + WIN] in wins for i in range(len(s) - WIN + 1)) for s in samples)   # 10자 이하 표본은 통째로
+        if hit:
             kind = EXC.match(msg)
             msg = (kind.group(1) + " — " if kind else "") + "(기사 글이 들어 있어 생략)"
     msg = " ".join(msg.split())

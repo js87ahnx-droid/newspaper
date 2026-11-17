@@ -57,9 +57,10 @@
     try { return d.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }); }
     catch (e) { return ""; }
   }
-  function name(date) { var p = date.split("-"); return (+p[1]) + "월 " + (+p[2]) + "일 자"; }
+  function name(date) { var p = date.split("-"); return (+p[1]) + "월 " + (+p[2]) + "일자 뉴스"; }   // masthead() 와 같은 꼴
   function draw(s) {
     document.querySelectorAll("[data-st]").forEach(function (n) { n.remove(); });
+    list.querySelectorAll("li.st-run, li.st-err, li.st-done").forEach(function (n) { n.classList.remove("st-run", "st-err", "st-done"); });
     if (!s || !/^\d{4}-\d\d-\d\d$/.test(s.date || "")) return;
     var rows = list.querySelectorAll("li[data-date]");
     var top = rows.length ? rows[0].getAttribute("data-date") : "";
@@ -119,9 +120,9 @@
       .catch(function () { return null; })
       .then(function (s) {
         if (seen === "running" && s && s.state === "done") { location.reload(); return; }
-        seen = s && s.state;
+        if (s) seen = s.state;   // 한 번 못 읽어도 "running 을 보던 중"은 기억 (구현 리뷰 N2)
         try { draw(s); } catch (e) { /* 그리기 실패는 목록에 영향 없게 */ }
-        setTimeout(load, seen === "running" ? RUN : IDLE);
+        setTimeout(load, s && s.state === "running" ? RUN : seen === "running" ? RUN : IDLE);
       });
   }
   window.NEWS_STATUS = { draw: draw, load: load };

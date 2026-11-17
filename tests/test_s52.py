@@ -209,14 +209,15 @@ def test_workflow_pipefail_and_status_steps():
     pub = WF.split("- name: 발행\n", 1)[1].split("- name:", 1)[0]
     push = WF.split("- name: 커밋·푸시", 1)[1].split("- name:", 1)[0]
     assert "set -o pipefail" in pub and "| tee data/run/daily.log" in pub and "STATUS_TOKEN: ${{ github.token }}" in pub
-    assert "set -o pipefail" in push and "| tee data/run/push.log" in push and "run_status.py set \"$EDITION\" 7" in push
+    assert "set -o pipefail" in push and "| tee data/run/push.log" in push and "run_status.py set \"$EDITION\" 7 || true" in push
+    assert "unset STATUS_TOKEN_IN" in push and "STATUS_TOKEN:" not in push                     # 토큰은 상태 호출에만
     assert "GH_TOKEN" not in pub
     fail = WF.split("- name: 발행 상태 — 실패", 1)[1].split("- name:", 1)[0]
     assert "(failure() || cancelled())" in fail and "steps.push.outputs.result" in fail and "run_status.py fail" in fail
     for k in ("NEWS_PASSWORD", "READER_URL", "READER_KEY", "CLAUDE_CODE_OAUTH_TOKEN"):
         assert f"{k}: ${{{{ secrets.{k} }}}}" in fail
     done = WF.split("- name: 발행 상태 — 끝", 1)[1].split("- name:", 1)[0]
-    assert "run_status.py done" in done and "pushed" in done
+    assert "run_status.py done \"$EDITION\" || true" in done and "pushed" in done and "run_status.py fail $IS_CANCELLED || true" in fail
 
 
 def test_tee_pipe_keeps_exit_code(tmp_path):
@@ -273,3 +274,22 @@ def test_newer_running_or_error_not_overwritten(run_dir):
     assert rs.cmd_set("2026-11-10", 1, env=ENV, opener=_opener(calls, get=done_newer)).startswith("올림")
     older = {"sha": "s", "content": base64.b64encode(json.dumps({"date": "2026-11-09", "state": "running"}).encode()).decode()}
     assert rs.cmd_set("2026-11-10", 1, env=ENV, opener=_opener(calls, get=older)).startswith("올림")
+
+
+def test_short_titles_and_three_word_names_hidden():
+    assert rs.extract_error(["KeyError: 'Gaza truce collapses'"]) == "KeyError"                 # 낱말 3개 (구현 리뷰 M1)
+    assert rs.scrub("x 9자짜리제목입니다 y", [], ["9자짜리제목입니다"]) == "(기사 글이 들어 있어 생략)"  # 10자 이하 표본은 통째로
+
+
+def test_verify_site_status_json_only_warns(tmp_path):
+    import sys
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    ed = tmp_path / "e.json"
+    ed.write_text(json.dumps({"sections": {"x": [{"title": "Gaza truce collapses again"}]}}), encoding="utf-8")
+    (docs / "status.json").write_text('{"message": "Gaza truce collapses again"}', encoding="utf-8")
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "verify_site.py"), str(docs), str(ed)], capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0 and "::warning::" in r.stdout, r.stdout
+    (docs / "other.txt").write_text("Gaza truce collapses again", encoding="utf-8")
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "verify_site.py"), str(docs), str(ed)], capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 1
