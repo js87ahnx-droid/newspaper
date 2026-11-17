@@ -516,6 +516,38 @@
     if (!lis.length) ml.remove();
     return out;
   }
+  // 큐레이션 면 끝 쪽에 기사가 1건 이하·절반도 안 차면(S51 ⑤ — 11/17 정치면 둘째 쪽 30%) 끝 쪽의 기사·목록 칸을 앞 쪽으로 옮기고
+  // 아래 기사부터 줄여(compact → tight) 맞춘다. 그래도 넘치면 목록 줄을 아래부터 빼 보고(뺀 기사는 단신 후보), 안 되면 되돌린다
+  function mergeTail(res) {
+    var pages = res.pages, out = [];
+    if (pages.length < 2) return out;
+    var li = pages[pages.length - 1].firstChild, pi = pages[pages.length - 2].firstChild;
+    if (li.querySelectorAll(":scope > article.item").length > 1 || usedRatio(li) >= 0.5) return out;
+    var moving = Array.prototype.filter.call(li.children, function (c) { return c.matches("article.item, .more-list"); });
+    if (!moving.length) return out;
+    moving.forEach(function (n) { pi.appendChild(n); });
+    var added = [], cut = [];
+    var items = Array.prototype.slice.call(pi.querySelectorAll(":scope > article.item")).reverse();
+    ["compact", "tight"].forEach(function (cls) {
+      items.forEach(function (it) {
+        if (!overflows(pi) || it.classList.contains(cls)) return;
+        it.classList.add(cls); added.push([it, cls]);
+      });
+    });
+    var ml = pi.querySelector(":scope > .more-list");
+    var lis = ml ? Array.prototype.slice.call(ml.querySelectorAll("li")) : [];
+    while (overflows(pi) && lis.length) { var l = lis.pop(); cut.push(l); l.remove(); }
+    if (overflows(pi)) {   // 못 합침 — 그대로
+      cut.reverse().forEach(function (l) { ml.querySelector("ul").appendChild(l); });
+      added.forEach(function (x) { x[0].classList.remove(x[1]); });
+      moving.forEach(function (n) { li.appendChild(n); });
+      return out;
+    }
+    cut.forEach(function (l) { out = out.concat(listSources(l)); });
+    if (ml && !ml.querySelector("li")) ml.remove();
+    pages.pop().remove();
+    return out;
+  }
   function fixMoreList(res) {
     var out = [];
     res.rest = res.rest.filter(function (r) {
@@ -567,6 +599,7 @@
       var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "jonghap" || cur ? { keepOrder: true } : null);
       built[id] = res.pages;
       var fromList = cur ? fixMoreList(res) : [];
+      if (cur) fromList = fromList.concat(mergeTail(res));   // S51 ⑤
       if (["opinion", "guide", "analysis", "china", "jonghap"].indexOf(id) < 0 && !cur) {   // 종합면(S47)은 두 쪽 그대로 — 끝 쪽 기사를 단신으로 내리지 않는다
         mergeOrphan(res.pages).forEach(function (iss) {
           var el = byId[id].querySelector(':scope > [data-issue="' + iss + '"]');

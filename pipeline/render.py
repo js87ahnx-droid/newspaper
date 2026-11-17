@@ -382,15 +382,20 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
     picked: list[tuple[dict, str | None, int]] = []   # (후보, 각도, 묶음 번호)
     if planned:
         used: set[str] = set()
-        main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, JONGHAP_MIN, JONGHAP_MAIN_MAX)
-        if len(main) < JONGHAP_MIN:
+        lo = 1 if fold else JONGHAP_MIN   # 창으로 접을 땐 쪽을 채울 필요가 없어 한 건이라도 (S51 — 11/17 메인 후보 대부분이 리드 없음)
+        main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, lo, JONGHAP_MAIN_MAX)
+        if len(main) < lo and not fold:   # 접을 땐 메인이 비어도 둘째 이슈 각도는 붙인다
             return
         used |= {a["issue_id"] for a, _ in main}
         picked += [(a, ang, 0) for a, ang in main]
         if len(hosts) > 1:
             sec = _pick_planned(second, groups[second["issue_id"]]["angles"], shown | {lead["issue_id"]}, used,
-                                JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX)
-            if len(sec) >= JONGHAP_SECOND_MIN:
+                                1 if fold else JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX)
+            if fold and sec:   # 둘째 묶음이 기존 판에 실릴 만하면(2건↑) 메인은 기존 판처럼 4건 — 두 판의 건수를 같게
+                if len(sec) >= JONGHAP_SECOND_MIN:
+                    picked = picked[:JONGHAP_MAIN_WITH_SECOND]
+                picked += [(a, ang, 1) for a, ang in sec[: max(len(sec), 0) if len(sec) < JONGHAP_SECOND_MIN else JONGHAP_TOTAL - len(picked)]]
+            elif len(sec) >= JONGHAP_SECOND_MIN:
                 # 둘째 묶음이 있으면 메인 묶음은 4건까지 (종합면 두 쪽에 둘째 묶음이 실리게 — S49 견본 패드에서 5+3 이면 둘째가 1건만 남음)
                 picked = picked[:JONGHAP_MAIN_WITH_SECOND]
                 picked += [(a, ang, 1) for a, ang in sec[: JONGHAP_TOTAL - len(picked)]]
@@ -404,7 +409,7 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
             picked.append((a, None, 0))
             srcs.add(a.get("source"))
             titles.append(a["title"])
-        if len(picked) < JONGHAP_MIN:
+        if len(picked) < (1 if fold else JONGHAP_MIN):
             return
     ids = {a["issue_id"] for a, _, _ in picked}
     for s in sections:
@@ -416,7 +421,7 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
             for a, ang, g in picked:
                 if g != grp:
                     continue
-                v = row(a)["view"]
+                v = row(a).get("view") or {"title": a.get("title"), "lead": a.get("lead")}
                 ang_rows.append({"issue_id": a["issue_id"], "angle": ang or "관련", "title": v["title"], "source": a.get("source"),
                                  "url": a.get("url"), "lang": v.get("lang"), "summary": v.get("lead") if has_content(a) else ""})
             for h in hosts_by[grp]:

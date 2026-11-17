@@ -170,3 +170,15 @@ def test_curate_rank_call_cache_and_bad_answer():
     bad = {}
     assert curate_rank({"sections": ed["sections"]}, bad, lambda p, **k: ({"x": 1}, "ok"), Cfg, {"international": 3}) == "응답 이상"
     assert "curate_rank" not in bad
+
+
+def test_fold_keeps_single_and_second_without_main():
+    """접을 땐 3건 기준이 없다: 메인 1건이라도, 메인이 비어도 둘째 이슈 각도는 붙는다."""
+    main = [{**_a("a", "a", "M"), "lead": "내용."}, {**_a("b", "b", "M"), "lead": ""}]
+    sec_angles = [{**_a("x", "x", "N"), "lead": "내용."}]
+    plan = _plan("L", [("L", "x", [("a", "현장", None), ("b", "기타", None)]), ("S", "둘째", [("x", "배경", None)])])
+    secs = _secs(main, sec_angles)
+    second = secs[0]["items"][0]
+    jonghap(secs, "종합", ROW, plan, second, fold=True)
+    assert not any(s["id"] == "jonghap" for s in secs)
+    assert [r["issue_id"] for r in secs[0]["lead"]["angle_rows"]] == ["a"] and second["angle_rows"][0]["angle"] == "배경"

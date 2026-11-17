@@ -72,7 +72,7 @@ def test_curated_layout(browser, tmp_path, w, h):
     assert st["dropped"] <= st_a["dropped"], (st["dropped"], st_a["dropped"])
     assert all(m["counts"][k] <= KEEP[k] for k in KEEP), m["counts"]
     assert all(m["listLast"].values()) and not m["listOnly"], m
-    assert m["lists"] >= 3 and m["pulled"] == 0 and m["moreReserve"] == 0, m
+    assert m["lists"] >= 2 and m["pulled"] == 0 and m["moreReserve"] == 0, m   # S51: 끝 쪽 합치기가 목록 줄을 뺄 수 있다
     assert m["nonHead"] > 5 and not m["shown"], m["shown"][:10]
     assert m["clamps"] and set(m["clamps"]) == {"2"}, m["clamps"]
     assert m["tbVar"] == "기존 판"
