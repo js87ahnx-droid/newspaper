@@ -62,7 +62,6 @@
   {# 호 이동 (2026-11-03 사용자 요청, 시안 A): 다른 단추와 같은 상자. "목록" = 지난 호 목록, "오늘" = 맨 앞 오늘 호 — 오늘 호에서는 눌린 모양 #}
   <a class="tb-link tb-btn" href="{{ base }}archive/" aria-label="지난 호 목록">목록</a>
   <a class="tb-link tb-btn{% if is_today %} on{% endif %}" href="{{ today_href }}" aria-label="오늘 호"{% if is_today %} aria-current="page"{% endif %}>오늘</a>
-  {% if alt_href %}<a class="tb-btn tb-var" href="{{ alt_href }}" aria-label="{{ '기존 판으로 보기' if curated else '큐레이션 판으로 보기' }}">{{ '기존 판' if curated else '큐레이션 판' }}</a>{% endif %}{# S50: 같은 호 두 판 바꾸기 — .tb-link 가 아님(끝 쪽 "지난 호 보기"가 첫 .tb-link 를 씀) #}
   <button type="button" data-act="front" aria-label="1면으로 돌아가기">1면</button>
   <button type="button" data-act="prev" aria-label="이전 쪽">‹</button>
   <button type="button" data-act="next" aria-label="다음 쪽">›</button>

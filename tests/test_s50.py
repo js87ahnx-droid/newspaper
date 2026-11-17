@@ -141,38 +141,54 @@ def test_curate_off_or_no_variant_changes_nothing():
 def test_render_b_client_config_and_review():
     ed = _edition()
     cfg = load_config()
-    html = render_html(copy.deepcopy(ed), cfg, load_interests(), load_sources(), base="../", variant="b", alt_href="../")
+    html = render_html(copy.deepcopy(ed), cfg, load_interests(), load_sources(), base="", variant="b")
     import json
     import re
     client = json.loads(re.search(r'window.EDITION = (.*?);</script>', html, re.S).group(1))
     assert client["curated"] is True and client["sectionPages"]["politics"] == 2 and client["sectionCaps"]["interest"] == 5
     base_client = json.loads(re.search(r'window.EDITION = (.*?);</script>', render_html(copy.deepcopy(ed), cfg, load_interests(), load_sources()), re.S).group(1))
-    assert client["review"] == base_client["review"]                       # 리뷰 목록은 기존 판 것
+    assert client["review"] == base_client["review"]                       # 리뷰 목록은 기존 판 순서 (S53 결정 5)
     assert 'class="ed-curated"' in html and 'class="more-list"' in html and 'class="curated-src" hidden' in html
-    assert 'href="../b/"' in html and 'aria-current="page"' in html          # b 오늘 판의 "오늘"
-    assert '<a class="tb-btn tb-var" href="../"' in html
+    assert 'href="./" aria-label="오늘 호" aria-current="page"' in html     # S53: 오늘 = 루트
+    assert "tb-var" not in html
 
 
 # ---------- S50e 두 판 발행 ----------
-def test_publish_two_editions(tmp_path):
+def test_publish_curated_only(tmp_path):
+    """S53: 큐레이션 판 하나만, 기존 주소로. b/ 는 지우되 지난 날짜 보관본의 b/ 는 남긴다."""
     from pipeline.publish import publish
     ed = _edition()
     cfg = load_config()
     site = tmp_path / "docs"
+    (site / "b").mkdir(parents=True)
+    (site / "b" / "index.html").write_text("old", encoding="utf-8")
+    (site / "archive/2026-10-16/b").mkdir(parents=True)
+    (site / "archive/2026-10-16/b/index.html").write_text("old", encoding="utf-8")
+    (site / "archive/2026-10-15/b").mkdir(parents=True)
+    (site / "archive/2026-10-15/b/index.html").write_text("old", encoding="utf-8")
     files = publish(copy.deepcopy(ed), cfg, load_interests(), load_sources(), site)
-    rel = sorted(f.relative_to(site).as_posix() for f in files)
-    assert rel == ["archive/2026-10-16/b/index.html", "archive/2026-10-16/index.html", "archive/index.html", "b/index.html", "index.html"]
-    a, b = (site / "index.html").read_text(encoding="utf-8"), (site / "b/index.html").read_text(encoding="utf-8")
-    aa, ab = (site / "archive/2026-10-16/index.html").read_text(encoding="utf-8"), (site / "archive/2026-10-16/b/index.html").read_text(encoding="utf-8")
-    assert 'class="tb-btn tb-var" href="b/"' in a and 'class="tb-btn tb-var" href="b/"' in aa
-    assert 'class="tb-btn tb-var" href="../"' in b and 'class="tb-btn tb-var" href="../"' in ab
-    assert 'href="../static/app.css' in b and 'href="../../../static/app.css' in ab
-    assert 'href="../b/" aria-label="오늘 호" aria-current="page"' in b                     # b 오늘 판 "오늘" = b 오늘
-    assert 'href="../../../b/" aria-label="오늘 호"' in ab and 'aria-current' not in ab.split('aria-label="오늘 호"')[1][:30]
+    rel = [f.relative_to(site).as_posix() for f in files]
+    assert rel == ["index.html", "archive/2026-10-16/index.html", "archive/index.html", "b/index.html", "archive/2026-10-16/b/index.html"]
+    import json
+    import re
+    from pipeline.publish import REDIRECT
+    from pipeline.render import build_context, review_list
+    for f, base in (("index.html", ""), ("archive/2026-10-16/index.html", "../../")):
+        c = json.loads(re.search(r'window.EDITION = (.*?);</script>', (site / f).read_text(encoding="utf-8"), re.S).group(1))
+        assert c["curated"] is True and c["base"] == base and c["sectionPages"]["jonghap"] == 0
+        assert c["sectionPages"] == {**c["sectionPages"], **cfg.curated.pages} and c["sectionCaps"]["politics"] == cfg.curated.keep["politics"]
+        assert c["review"] == review_list(build_context(copy.deepcopy(ed), cfg, load_interests(), load_sources())["sections"])   # 결정 5
+    a, aa = (site / "index.html").read_text(encoding="utf-8"), (site / "archive/2026-10-16/index.html").read_text(encoding="utf-8")
+    assert "ed-curated" in a and "ed-curated" in aa and "tb-var" not in a and "tb-var" not in aa
+    assert 'href="static/app.css' in a and 'href="../../static/app.css' in aa
     assert 'href="./" aria-label="오늘 호" aria-current="page"' in a
-    assert "ed-curated" in b and "ed-curated" in ab and "ed-curated" not in a
-    # 끄면 b 판을 지운다
+    assert 'href="../../" aria-label="오늘 호"' in aa and 'aria-current' not in aa.split('aria-label="오늘 호"')[1][:30]
+    assert (site / "b/index.html").read_text(encoding="utf-8") == REDIRECT == (site / "archive/2026-10-16/b/index.html").read_text(encoding="utf-8")
+    assert 'url=../"' in REDIRECT and "location.replace" in REDIRECT                  # 옛 b/ 주소 → 지면 (계획 리뷰 M1)
+    assert (site / "archive/2026-10-15/b/index.html").exists()             # 지난 날짜 b 는 남김
+    # 끄면 기존 판 하나
     off = cfg.model_copy(update={"curated": cfg.curated.model_copy(update={"enabled": False})})
     files = publish(copy.deepcopy(ed), off, load_interests(), load_sources(), site)
-    assert len(files) == 3 and not (site / "b").exists() and not (site / "archive/2026-10-16/b").exists()
-    assert "tb-var" not in (site / "index.html").read_text(encoding="utf-8")
+    assert len(files) == 5 and "ed-curated" not in (site / "index.html").read_text(encoding="utf-8")
+    fresh = tmp_path / "fresh"                                                           # b/ 가 없던 곳엔 만들지 않는다
+    assert len(publish(copy.deepcopy(ed), cfg, load_interests(), load_sources(), fresh)) == 3 and not (fresh / "b").exists()

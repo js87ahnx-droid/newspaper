@@ -887,6 +887,34 @@ S11(공식 API 본문 열람)은 D14로 대체한다. S12(7일 시범 운영)는
     - **기준**: [x] 단신 1쪽, 탭 누르면 그 분야 위 10건 [x] "모두 보기" 창에 전체(건수 맞음) [x] 다른 면에서 내려온 기사가 전체 탭 위에 [x] 남는 쪽에 더 읽을 기사, 예비가 모자라면 끝 안내 쪽 [x] 총 쪽 수 30 고정, 아무 기사도 없는 중간 빈 쪽 없음 [x] 휴대폰 너비·밝기 [x] 브라우저 테스트
   - S47e 정리·평가 — [x] 전체 pytest(522건)·Worker 테스트(32건) [x] 구현 금붕어 리뷰(Blocker 0 · Major 6 고침) [x] 배포(푸시) [ ] 다음 발행 로그에서 "지면 비중 n건"(0 보다 큼)과 "종합면 n건 또는 없음 이유" 확인
 
+## S53. 큐레이션 판 하나만 발행 (35차 요청, 2026-11-18)
+
+요청: "이제 일자별 하나만 만들면 돼. 큐레이션판을 기본으로 만들고, 기본판은 이제 안 만들어도 돼."
+
+### 결정 (뒤집기 비싼 것부터)
+1. **주소**: `curated.enabled: true` 이면 큐레이션 판이 그날의 유일한 지면이다. 오늘 호 `docs/index.html`, 보관본 `docs/archive/<날짜>/index.html` (S50 이전과 같은 주소 — 북마크·홈 화면 앱·서비스 워커 범위 그대로). `b/` 는 더 쓰지 않는다.
+2. **옛 b/ 주소**(계획 리뷰 M1): `docs/b/index.html` 과 이 호의 `archive/<날짜>/b/index.html` 이 있으면 한 단계 위(같은 호 지면)로 넘기는 짧은 페이지로 바꾼다(문구만, 함께 암호화). b/ 북마크와 11/17 큐레이션 판 보관본의 "오늘" 단추(`docs/b/`)가 404 가 되지 않게. 없던 곳엔 만들지 않는다. 지난 날짜(11/17)의 `archive/<날짜>/b/` 는 그대로 — 보관 기간(14일)이 지나면 날짜 폴더째 지워진다.
+3. **화면**: 판 바꾸기 단추(`.tb-var`)를 없앤다. "오늘" 단추는 `base or "./"` (S50 이전과 같음). 지면 모양은 S50·S51 큐레이션 판 그대로라 새 시안 없음.
+4. **되돌리기**: `curated.enabled: false` 면 S50 이전의 기존 판 하나만 발행한다 (설정 한 줄로 되돌림). 두 판을 나란히 내는 경로는 없앤다.
+5. **편집 리뷰 목록**(설정 창 "편집 리뷰")과 학습은 지금처럼 기존 판 순서로 둔다 — 편집 점수 학습이 AI 중요도 순서와 섞이지 않게 (S50 결정 유지). 지면에 안 보이는 기사(목록·단신으로 간 것)도 리뷰 목록엔 있다.
+6. AI 호출(curate_rank)·종합면 접기는 그대로 (큐레이션 판의 일부).
+
+### 계획 리뷰 1차 반영 (B1·M5·N5)
+- B1 스프린트 5개로(아래), 구현 리뷰는 S52d 와 한 번에 / M1 → 결정 2 (넘김 페이지) / M2 `pipeline render` 명령은 발행과 같은 판으로. 시험의 make_site(test_render_browser 등)는 기존 판 배치 회귀를 계속 보려고 기존 판 그대로 — 큐레이션 판 배치는 test_s50_browser·test_s51_browser 가 본다 (Deviations 에 기록) / M3·M4·M5 → 기준을 구체화 / N1 settings·config 설명 고침 / N2 HISTORY 는 S53e / N3 리뷰 탭 안내는 안 넣음(받아들임) / N4 enabled=false 로 만든 호를 다시 켜서 render_only 하면 AI 순위 없이 대체 순서 — 범위 밖 / N5 `.tb-var` 스타일 지움
+
+### 스프린트
+1. **S53a 발행 하나로** publish.py·render.py·edition.html.j2·app.css·settings·config 설명.
+   - 기준: enabled 이면 publish 결과 = index.html·archive/<날짜>/index.html·archive/index.html (+ 있던 b/ 넘김 페이지); 두 지면 모두 `ed-curated`, `tb-var` 없음; 오늘 "오늘" 링크 `./`+aria-current, 보관본 `../../`·aria-current 없음; 정적 파일 `static/…`·`../../static/…`; window.EDITION 은 curated=true, base ''·'../../', sectionPages = 기존값+curated.pages(종합 0), sectionCaps 정치 = keep, review = 기존 판 build_context 의 review_list; enabled=false 면 `ed-curated` 없음; render_html 에서 alt_href 인자 없앰.
+2. **S53b 옛 주소 넘김**: b/·이 호 archive/<날짜>/b/ 가 있으면 넘김 페이지(meta refresh + location.replace "../"), 없으면 안 만듦, 다른 날짜 b/ 그대로.
+3. **S53c 시험 정리**: test_s50 의 두 판 publish 시험 → `test_publish_curated_only`, b 클라이언트 시험의 주소 단언 → 루트, test_s50_browser 의 alt_href 인자·"기존 판" 단추 단언 → 단추 없음, test_publish 주석. 끝 조건: 전체 pytest 통과(푸시 스크립트 시험은 따로).
+4. **S53d 구현 금붕어 리뷰** = S52d (같은 범위로 한 번).
+5. **S53e 배포·기록**: S52e 의 11/18 render_only 로 — 오늘 호·11/18 보관본이 큐레이션 판, docs/b·archive/2026-11-18/b 는 넘김 페이지, 11/17/b 그대로, verify_site 통과, 목록 하이라이트 그대로. HISTORY·progress·notes.
+
+### 범위 밖
+- 지난 날짜 보관본(11/17)은 다시 그리지 않는다.
+
+---
+
 ## S52. 발행 진행 상황을 지난 호 목록에 (34차 요청, 2026-11-18)
 
 요청: 발행이 시작되면 지난 호 목록 맨 위에 오늘 호 줄을 넣고 "발행 중(진행 상황)"을 띄운다. 오류가 나면 오류 내용을 띄운다. 사용자는 시안 A(한 줄 요약 + 진행 막대)를 골랐다 (build/mockup-s52.html).

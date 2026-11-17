@@ -553,7 +553,6 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .bt-full .item.brief { margin: 0 0 6px; }
 
 /* ---------- S50 큐레이션 판 (시안 B): 뉴스 면 지면(.page-inner)에서만 덜어 보임 — 분석·논평·중국·단신·가이드는 그대로, 기사 창(#reader, 원본 복제)은 다 보임 ---------- */
-#toolbar .tb-var { color: var(--accent); border-color: var(--accent); font-size: 12.5px; }
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .orig,
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .flow,
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .rel-arts,
@@ -577,7 +576,6 @@ body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-internati
 .more-list li a:hover, .more-list li a:focus-visible { text-decoration: underline; }
 .more-list .src { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
 .curated-src { display: none; }
-#toolbar .tb-btn.tb-var { min-width: 0; padding: 0 6px; white-space: nowrap; }   /* 휴대폰 좁은 단추(min-width 29px)에서 글자가 넘치지 않게 (구현 리뷰 N1) */
 /* S51 큐레이션 판 "다른 각도" (시안 A): 1면 메인 자세히 창·둘째 이슈 기사 창에만 — 지면 쪽에선 숨김 */
 .page-inner .ang-rows { display: none; }
 .ang-rows h4 small { font-weight: 400; color: var(--muted); }

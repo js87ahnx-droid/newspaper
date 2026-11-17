@@ -743,16 +743,15 @@ def _env() -> Environment:
 
 
 def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sources, base: str = "",
-                variant: str | None = None, alt_href: str | None = None) -> str:
+                variant: str | None = None) -> str:
     """지면 HTML 한 장. base 는 정적 파일까지의 상대 경로 앞부분 (지난 호 페이지는 "../../").
-    variant="b" 는 큐레이션 판 (S50): base 는 오늘 "../", 보관 "../../../". alt_href 는 다른 판 주소(판 바꾸기 단추)."""
+    variant="b" 는 큐레이션 판 (S50) — S53 부터 이것 하나만 발행한다 (주소는 기존과 같음)."""
     curated = variant == "b" and cfg.curated.enabled
     ctx = build_context(edition, cfg, interests, sources, variant="b" if curated else None)
     ctx["base"] = base
-    ctx["curated"], ctx["alt_href"] = curated, alt_href
-    # "오늘" 단추: 같은 판의 오늘 호 (S50 — b 판은 b/)
-    ctx["today_href"] = base + "b/" if curated else (base or "./")
-    ctx["is_today"] = base == ("../" if curated else "")
+    ctx["curated"] = curated
+    ctx["today_href"] = base or "./"
+    ctx["is_today"] = base == ""
     client = _client_config(edition, cfg, interests, date.fromisoformat(edition["edition"]))
     client["base"] = base
     # 편집 리뷰는 기존 판 목록으로 (S50 — 같은 호 학습에 두 판의 순번이 섞이지 않게)
@@ -788,9 +787,11 @@ def write_assets(site: Path, masthead_name: str) -> None:
     write_atomic(site / "sw.js", sw, encoding="utf-8")
 
 
-def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path) -> Path:
+def render(edition: dict, cfg: Config, interests: Interests, sources: Sources, out_dir: Path, variant: str | None = None) -> Path:
+    """로컬 미리 보기 한 장. variant="b" 면 큐레이션 판 (pipeline render 명령은 발행과 같은 판으로, S53).
+    시험(make_site)은 기존 판 배치 회귀를 계속 보려고 기본값(기존 판)을 쓴다."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    write_atomic(out_dir / "index.html", render_html(edition, cfg, interests, sources), encoding="utf-8")
+    write_atomic(out_dir / "index.html", render_html(edition, cfg, interests, sources, variant=variant), encoding="utf-8")
     write_assets(out_dir, masthead(date.fromisoformat(edition["edition"])))
     return out_dir / "index.html"
 

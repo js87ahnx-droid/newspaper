@@ -26,7 +26,7 @@ def _b_site(tmp_path, mutate=None):
     cfg = load_config()
     site = tmp_path / "b"
     site.mkdir(parents=True, exist_ok=True)
-    (site / "index.html").write_text(render_html(ed, cfg, load_interests(), load_sources(), base="", variant="b", alt_href="../"), encoding="utf-8")
+    (site / "index.html").write_text(render_html(ed, cfg, load_interests(), load_sources(), base="", variant="b"), encoding="utf-8")
     write_assets(site, masthead(date.fromisoformat(ed["edition"])))
     return site / "index.html"
 
@@ -75,7 +75,7 @@ def test_curated_layout(browser, tmp_path, w, h):
     assert m["lists"] >= 2 and m["pulled"] == 0 and m["moreReserve"] == 0, m   # S51: 종합면이 창으로 접혀 종합면 목록 칸이 없어졌다(정치·경제·국제·사회·관심 중 견본에서 목록이 생기는 면은 2~4개)
     assert m["nonHead"] > 5 and not m["shown"], m["shown"][:10]
     assert m["clamps"] and set(m["clamps"]) == {"2"}, m["clamps"]
-    assert m["tbVar"] == "기존 판"
+    assert m["tbVar"] is None                                                  # S53: 판 바꾸기 단추 없음 (한 판만)
     ctx.close()
 
 

@@ -168,7 +168,7 @@ class Llm(Strict):
 
 class Curated(Strict):
     """큐레이션 판 (S50, 시안 B): 같은 호 데이터로 면마다 핵심 기사만 기사 꼴로, 나머지는 면 끝 "함께 볼 기사" 목록.
-    docs/b/ 에 기존 판과 나란히 발행. 꺼지면 b 판을 쓰지 않고 지운다."""
+    S53 부터 켜져 있으면 이것 하나만 docs/index.html·archive/<날짜>/ 에 발행 (꺼지면 기존 판 하나)."""
     enabled: bool = False
     keep: dict[SectionId, int] = Field(default_factory=dict)    # 면별 기사 꼴로 남길 수 (종합면은 둘째 묶음 포함 합)
     list_max: int = Field(default=6, ge=0, le=12)               # 면 끝 목록 상한 — 넘친 기사는 단신 후보

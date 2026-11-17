@@ -19,6 +19,14 @@ from .render import lead_record, masthead, render_archive_index, render_html, wr
 from .settings import Config, Interests, Sources
 
 
+#: 옛 b/ 주소 → 한 단계 위 (S53). 문구만 있고 기사 내용 없음
+REDIRECT = """<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="0; url=../"><title>일자 뉴스</title></head>
+<body><p>지면 주소가 바뀌었습니다. <a href="../">지면으로 가기</a></p>
+<script>location.replace("../" + location.hash);</script></body></html>
+"""
+
 #: 지난 호 보관 일수 (2026-10-30 사용자 "2주까지만") — 지면만. 연속성 기록(data/history)은 따로 두고 지우지 않는다
 ARCHIVE_KEEP_DAYS = 14
 
@@ -54,22 +62,20 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
     site.mkdir(parents=True, exist_ok=True)
     write_assets(site, masthead(d))
     write_atomic(site / ".nojekyll", "", encoding="utf-8")
-    two = cfg.curated.enabled   # S50: 큐레이션 판(b)을 나란히 — 판 바꾸기 단추가 서로를 가리킨다
+    # S53: 큐레이션 판이 켜져 있으면 그것 하나만 (S50 의 두 판 나란히 발행은 없앰). 꺼지면 기존 판 하나
+    variant = "b" if cfg.curated.enabled else None
     today = site / "index.html"
-    write_atomic(today, render_html(edition, cfg, interests, sources, base="", alt_href="b/" if two else None), encoding="utf-8")
+    write_atomic(today, render_html(edition, cfg, interests, sources, base="", variant=variant), encoding="utf-8")
     arch = site / "archive" / d.isoformat()
     arch.mkdir(parents=True, exist_ok=True)
-    write_atomic(arch / "index.html", render_html(edition, cfg, interests, sources, base="../../", alt_href="b/" if two else None), encoding="utf-8")
-    extra: list[Path] = []
-    if two:
-        for page, base in ((site / "b" / "index.html", "../"), (arch / "b" / "index.html", "../../../")):
-            page.parent.mkdir(parents=True, exist_ok=True)
-            write_atomic(page, render_html(edition, cfg, interests, sources, base=base, variant="b", alt_href="../"), encoding="utf-8")
-            extra.append(page)
-    else:   # 끄면 b 판을 남기지 않는다 (지난 날짜 보관본 b 는 날짜 폴더와 함께 기간이 지나면 지워짐)
-        for old in (site / "b", arch / "b"):
-            if old.is_dir():
-                shutil.rmtree(old)
+    write_atomic(arch / "index.html", render_html(edition, cfg, interests, sources, base="../../", variant=variant), encoding="utf-8")
+    # S50 때의 b 판 주소(오늘 b/·이 호 보관본 b/)는 같은 호 지면으로 넘기는 짧은 페이지로 바꾼다 — b/ 북마크·11/17 큐레이션 판의
+    # "오늘" 단추가 404 가 되지 않게 (S53 계획 리뷰 M1). HTML 이라 함께 암호화한다. 지난 날짜 보관본의 b/ 는 그대로 둔다
+    moved = []
+    for page in (site / "b" / "index.html", arch / "b" / "index.html"):
+        if page.parent.is_dir():
+            write_atomic(page, REDIRECT, encoding="utf-8")
+            moved.append(page)
     # 보관 기간이 지난 호 정리
     cutoff = d - timedelta(days=keep_days)
     dates = []
@@ -87,4 +93,4 @@ def publish(edition: dict, cfg: Config, interests: Interests, sources: Sources, 
     index = site / "archive" / "index.html"
     highlights = _archive_highlights(history_dir, d, lead_record(edition, cfg, interests, sources), dates)
     write_atomic(index, render_archive_index(sorted(dates, reverse=True), highlights=highlights), encoding="utf-8")
-    return [today, arch / "index.html", index, *extra]
+    return [today, arch / "index.html", index, *moved]

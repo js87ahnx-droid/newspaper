@@ -552,7 +552,7 @@ def cmd_render(args: argparse.Namespace) -> int:
     root = Path(args.root)
     cfg, interests, sources = load_config(root), load_interests(root), load_sources(root)
     edition = json.loads((_raw_dir(args) / f"{args.date}.edition.json").read_text(encoding="utf-8"))
-    out = render(edition, cfg, interests, sources, Path(args.out))
+    out = render(edition, cfg, interests, sources, Path(args.out), variant="b" if cfg.curated.enabled else None)   # S53: 발행과 같은 판
     print(f"{args.date} 호 지면: {out}")
     return 0
 
