@@ -302,7 +302,7 @@ def kana_to_hangul(s: str) -> str:
             continue
         if ch == "ン":
             c = ord(out[-1]) - 0xAC00 if out else -1
-            if 0 <= c < 11172 and c % 28 == 0:
+            if 0 <= c < 11172 and c % 28 == 0 and (len(out) - 1) in from_kana:   # 원래 한글에는 받침을 붙이지 않음 (재리뷰 N4)
                 out[-1] = chr(0xAC00 + c + 4)   # 받침 ㄴ
             else:
                 out.append("은")

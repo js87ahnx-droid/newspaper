@@ -524,7 +524,7 @@
     var li = pages[pages.length - 1].firstChild, pi = pages[pages.length - 2].firstChild;
     if (li.querySelectorAll(":scope > article.item").length > 1 || usedRatio(li) >= 0.5) return out;
     var moving = Array.prototype.filter.call(li.children, function (c) { return c.matches("article.item, .more-list"); });
-    if (!moving.length) return out;
+    if (!moving.length || moving.length !== li.children.length - (li.querySelector(".sec-title") ? 1 : 0)) return out;   // 다른 칸이 있으면 손대지 않음 (재리뷰 N1)
     moving.forEach(function (n) { pi.appendChild(n); });
     var added = [], cut = [];
     var items = Array.prototype.slice.call(pi.querySelectorAll(":scope > article.item")).reverse();
@@ -608,7 +608,7 @@
       }
       if (!res.rest.length && !CURATED) pullReserves(id, res.pages, reserveEls, pulled);   // 큐레이션 판은 예비 기사를 면에 끌어오지 않는다 (S50)   // 넘쳐 내린 기사가 없는 면만 (끝 쪽이 남은 것)
       if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) balance(res.pages);
-      if (cur) fromList = fromList.concat(fixMoreList(res));   // 쪽 고르기 뒤 목록 칸만 남은 끝 쪽도 (S50)
+      if (cur) fromList = fromList.concat(mergeTail(res), fixMoreList(res));   // 쪽 고르기(balance)가 끝 쪽을 다시 1건으로 만들 수 있어 한 번 더 (재리뷰 M2), 목록 칸만 남은 끝 쪽도 (S50)
       if (id === "jonghap") fixJonghap(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }

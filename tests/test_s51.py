@@ -47,6 +47,7 @@ def test_kana_to_hangul():
     assert kana_to_hangul("トランプ大統領、北朝鮮") == "トランプ大統領、北朝鮮"        # 한글 없는 원문은 그대로
     assert kana_to_hangul("東京・大阪 회담") == "東京・大阪 회담"                    # 가운뎃점은 그대로
     assert kana_to_hangul("チャ지ュ キョ ンン") == "차지유 쿄 은은"                # 원래 한글(지)에는 ュ 를 붙이지 않음
+    assert kana_to_hangul("라ン 회의") == "라은 회의" and kana_to_hangul("ラン 회의") == "란 회의"   # 원래 한글엔 받침을 안 붙임
     assert kana_to_hangul("ヰヱヵヶ 회의") == "이에카케 회의"
 
 
@@ -226,3 +227,13 @@ def test_enrich_calls_curate_once_only_when_curated(tmp_path):
     calls.clear()
     ed = enrich(edition(), cfg, disp, tmp_path / "b.json", Budget(tmp_path / "u2.json", date(2026, 11, 17), 50), runner=runner)
     assert sum("편집장" in c for c in calls) == 0 and "curate_rank" not in ed
+
+
+def test_fold_counts_match_base_when_base_has_group():
+    """같은 각도가 많을 때도 기존 판(3건 채움)과 접기 건수가 같다 (재리뷰 M1)."""
+    main = [{**_a(k, k, "M"), "lead": "내용."} for k in "abcd"]
+    plan = _plan("L", [("L", "x", [("a", "현장", None), ("b", "현장", None), ("c", "현장", None), ("d", "배경", None)])])
+    base, cur = _secs(main), _secs([dict(x) for x in main])
+    jonghap(base, "종합", ROW, plan, None)
+    jonghap(cur, "종합", ROW, plan, None, fold=True)
+    assert len(base[1]["items"]) == len(cur[0]["lead"]["angle_rows"]) == 3

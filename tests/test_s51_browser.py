@@ -25,7 +25,10 @@ CHECK = """() => {
     const arts = last.querySelectorAll(':scope > article.item');
     if (arts.length > 1 || used(last) >= 0.5) return;
     const mv = [...last.children].filter(c => c.matches('article.item, .more-list')); mv.forEach(n => prev.appendChild(n));
+    const shrink = [...prev.querySelectorAll(':scope > article.item')].reverse(), added = [];   // 앱처럼 줄여 본다 (재리뷰 M3)
+    ['compact', 'tight'].forEach(cls => shrink.forEach(it => { if (prev.scrollHeight > prev.clientHeight + 1 && !it.classList.contains(cls)) { it.classList.add(cls); added.push([it, cls]); } }));
     if (prev.scrollHeight <= prev.clientHeight + 1) mergeable.push(id);
+    added.forEach(([it, cls]) => it.classList.remove(cls));
     mv.forEach(n => last.appendChild(n)); });
   const angOnPage = [...document.querySelectorAll('#book .ang-rows')].filter(x => x.offsetHeight > 0).length;
   return { photos, mergeable, angOnPage }; }"""

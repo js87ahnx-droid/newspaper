@@ -383,14 +383,19 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
     if planned:
         used: set[str] = set()
         lo = 1 if fold else JONGHAP_MIN   # 창으로 접을 땐 쪽을 채울 필요가 없어 한 건이라도 (S51 — 11/17 메인 후보 대부분이 리드 없음)
-        main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, lo, JONGHAP_MAIN_MAX)
+        # 기존 판과 같은 기준(3건)으로 먼저 고르고, 모자랄 때만 접기용 1건 기준 — 묶음이 기존 판에 실릴 땐 건수가 같게 (재리뷰 M1)
+        main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, JONGHAP_MIN, JONGHAP_MAIN_MAX)
+        if fold and len(main) < JONGHAP_MIN:
+            main = _pick_planned(lead, groups[lead["issue_id"]]["angles"], shown, used, 1, JONGHAP_MAIN_MAX)
         if len(main) < lo and not fold:   # 접을 땐 메인이 비어도 둘째 이슈 각도는 붙인다
             return
         used |= {a["issue_id"] for a, _ in main}
         picked += [(a, ang, 0) for a, ang in main]
         if len(hosts) > 1:
             sec = _pick_planned(second, groups[second["issue_id"]]["angles"], shown | {lead["issue_id"]}, used,
-                                1 if fold else JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX)
+                                JONGHAP_SECOND_MIN, JONGHAP_SECOND_MAX)
+            if fold and len(sec) < JONGHAP_SECOND_MIN:
+                sec = _pick_planned(second, groups[second["issue_id"]]["angles"], shown | {lead["issue_id"]}, used, 1, JONGHAP_SECOND_MAX)
             if fold and sec:   # 둘째 묶음이 기존 판에 실릴 만하면(2건↑) 메인은 기존 판처럼 4건 — 두 판의 건수를 같게
                 if len(sec) >= JONGHAP_SECOND_MIN:
                     picked = picked[:JONGHAP_MAIN_WITH_SECOND]
@@ -605,7 +610,7 @@ def related_opinions(op: dict | None) -> dict[str, list[dict]]:
     seen: set = set()
     for o in sorted(op.get("editorials", []) + op.get("columns", []), key=lambda o: o.get("kind") != "editorial"):
         k = opinion_key(o.get("source"), o.get("title", ""))   # 같은 글이 다른 주소로 두 번 (S51 ⑧)
-        if not o.get("issue_id") or o["url"] in seen or k in seen:
+        if not o.get("issue_id") or o["url"] in seen or (k[1] and k in seen):   # 빈 제목은 같은 글로 보지 않음 (재리뷰 N3)
             continue
         seen |= {o["url"], k}
         out.setdefault(o["issue_id"], []).append({**o, "cls": LEAN_CLASS.get(o.get("lean"), "mid")})
