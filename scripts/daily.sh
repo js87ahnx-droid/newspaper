@@ -9,6 +9,9 @@
 # 암호화(NEWS_PASSWORD)가 없거나 실패하면 중간에 멈춘다 — 평문 지면이 커밋·공개되지 않게.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# S52: 발행 상태 토큰(contents: write)은 내보내지 않는 셸 변수로 옮긴다 — claude CLI 등 다른 자식 프로세스에 넘어가지 않게
+_STATUS_TOKEN="${STATUS_TOKEN:-}"
+unset STATUS_TOKEN
 PY="${PY:-python}"
 STATICRYPT="npx --yes staticrypt@3.5.4"
 
@@ -23,6 +26,9 @@ if [ "${SKIP_IF_PUBLISHED:-0}" = "1" ] && [ -f "docs/archive/$DATE/index.html" ]
   echo "이미 발행된 호입니다 — 건너뜀"
   exit 0
 fi
+# 발행 진행 상황 (S52): 지난 호 목록이 docs/status.json 을 읽어 띄운다. 실패해도 발행은 계속
+status() { STATUS_TOKEN="$_STATUS_TOKEN" $PY scripts/run_status.py set "$DATE" "$1" || true; }
+status 1   # 시작
 if [ -z "${NEWS_PASSWORD:-}" ]; then
   echo "::error::NEWS_PASSWORD 가 없습니다. 암호화 없이 공개할 수 없어 중단합니다."
   exit 1
@@ -54,20 +60,26 @@ if [ "${RENDER_ONLY:-0}" = "1" ]; then
     exit 1
   fi
   echo "지면만 다시 그리기: $DATE"
+  status 5   # 지면 만들기
   $PY -m pipeline publish --date "$DATE" --site docs
 else
+status 2   # 수집
 $PY -m pipeline learn --date "$DATE" || echo "::warning::관심 학습값을 반영하지 못했습니다 (지난 값으로 편집)"
 $PY -m pipeline collect || echo "::warning::마지막 수집에서 피드가 모두 실패했습니다 (누적분으로 발행)"
+status 3   # 편집
 $PY -m pipeline prepare --date "$DATE"
 $PY -m pipeline embed --date "$DATE"
 $PY -m pipeline cluster --date "$DATE"
 $PY -m pipeline headlines --date "$DATE" $LLM_FLAG || echo "::warning::매체 머리기사를 받지 못했습니다 (머리기사 가중 없이 편집)"
 $PY -m pipeline edit --date "$DATE" --write-history $LLM_FLAG   # 분야 분류도 LLM (S21b)
 
+status 4   # AI 요약·분석
 $PY -m pipeline enrich --date "$DATE" $LLM_FLAG
+status 5   # 지면 만들기
 $PY -m pipeline publish --date "$DATE" --site docs
 fi
 
+status 6   # 암호화·검사
 # 암호화: 오늘 호·이 호의 보관본·지난 호 목록
 while IFS= read -r f || [ -n "$f" ]; do   # 마지막 줄에 줄바꿈이 없어도 읽는다
   [ -z "$f" ] && continue
