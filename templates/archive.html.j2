@@ -21,6 +21,15 @@
   .archive .hi { flex: 1 1 auto; min-width: 0; font-weight: 400; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .archive .day { flex: none; font-weight: 400; color: var(--muted); font-size: 13px; }
   @media (max-width: 520px) { .archive .day { display: none; } }
+  /* S52 발행 진행 상황 (시안 A) */
+  .archive .st-badge { flex: none; font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 10px; border: 1px solid currentColor; color: var(--muted); }
+  .archive .st-row { display: flex; align-items: baseline; gap: 10px; padding: 12px 4px; font-weight: 700; }
+  .archive .st-sub { font-size: 13px; color: var(--muted); padding: 0 4px 10px; margin-top: -4px; }
+  .archive .st-bar { height: 4px; background: var(--rule); border-radius: 2px; margin: 0 4px 10px; overflow: hidden; }
+  .archive .st-bar > i { display: block; height: 100%; background: var(--ink); }
+  .archive .st-msg { font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 4px 10px; padding: 6px 8px; color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); border-radius: 4px; }
+  .archive .st-err .st-badge, .archive .st-err .st-sub { color: var(--accent); }
+  .archive .st-done .st-badge { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -29,9 +38,95 @@
   <p class="back"><a href="{{ base }}">오늘 호로 가기</a></p>
   <ul>
   {% for it in items %}
-    <li><a href="{{ it.date }}/"><span class="name">{{ it.name }}</span><span class="hi"{% if it.highlight %} title="{{ it.highlight }}"{% endif %}>{{ it.highlight or "" }}</span><span class="day">{{ it.day }}</span></a></li>
+    <li data-date="{{ it.date }}"><a href="{{ it.date }}/"><span class="name">{{ it.name }}</span><span class="hi"{% if it.highlight %} title="{{ it.highlight }}"{% endif %}>{{ it.highlight or "" }}</span><span class="day">{{ it.day }}</span></a></li>
   {% endfor %}
   </ul>
 </main>
+<script>
+/* 발행 진행 상황 (S52): docs/status.json 을 읽어 오늘 호 줄에 "발행 중 / 발행 실패"를 띄운다.
+   글은 모두 textContent 로 넣는다 — 오류 문장에 피드 글이 섞여도 스크립트로 돌지 않게 (이 도메인에 기억된 비밀번호가 있다) */
+(function () {
+  var SRC = "{{ base }}status.json", STALE = 125 * 60e3, RUN = 60e3, IDLE = 300e3;
+  var list = document.querySelector(".archive ul");
+  if (!list || !window.fetch) return;
+  var seen = null;
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function hm(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return "";
+    try { return d.toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }); }
+    catch (e) { return ""; }
+  }
+  function name(date) { var p = date.split("-"); return (+p[1]) + "월 " + (+p[2]) + "일 자"; }
+  function draw(s) {
+    document.querySelectorAll("[data-st]").forEach(function (n) { n.remove(); });
+    if (!s || !/^\d{4}-\d\d-\d\d$/.test(s.date || "")) return;
+    var rows = list.querySelectorAll("li[data-date]");
+    var top = rows.length ? rows[0].getAttribute("data-date") : "";
+    var host = list.querySelector('li[data-date="' + s.date + '"]');
+    var running = s.state === "running", error = s.state === "error", done = s.state === "done";
+    if (!running && !error && !done) return;
+    if (done && host) return;
+    if (!host && s.date <= top) return;              // 보관 기간이 지나 목록에서 빠진 옛 호
+    var step = Math.max(1, Math.min(+s.steps || 7, +s.step || 1)), steps = +s.steps || 7;
+    var stale = running && Date.now() - new Date(s.started).getTime() > STALE;
+    var badge = done ? "발행 완료" : error ? "발행 실패" : stale ? "멈춘 것 같음" : "발행 중";
+    var li = host;
+    if (!host) {
+      li = el("li", "st-new");
+      li.setAttribute("data-st", "1");
+      var row = done ? el("a", "st-row") : el("div", "st-row");
+      if (done) row.href = s.date + "/";
+      row.appendChild(el("span", "name", name(s.date)));
+      row.appendChild(el("span", "st-badge", badge));
+      row.appendChild(el("span", "hi", ""));
+      row.appendChild(el("span", "day", "월화수목금토일"[(new Date(s.date + "T00:00:00Z").getUTCDay() + 6) % 7] + "요일"));
+      li.appendChild(row);
+      list.insertBefore(li, list.firstChild);
+    } else {
+      var b = el("span", "st-badge", badge);
+      b.setAttribute("data-st", "1");
+      var a = host.querySelector("a");
+      a.insertBefore(b, a.querySelector(".hi"));
+    }
+    li.classList.toggle("st-run", running);
+    li.classList.toggle("st-err", error);
+    li.classList.toggle("st-done", done);
+    var label = String(s.label || "");
+    var sub = done ? "목록 반영 중 — 눌러서 열기"
+      : error ? step + "/" + steps + " " + label + "에서 멈춤 · " + hm(s.updated)
+      : stale ? step + "/" + steps + " " + label + " · 마지막 갱신 " + hm(s.updated)
+      : step + "/" + steps + " " + label + " 중 · " + hm(s.updated) + " 갱신 (" + hm(s.started) + " 시작)";
+    var subEl = el("div", "st-sub", sub);
+    subEl.setAttribute("data-st", "1");
+    li.appendChild(subEl);
+    if (running && !stale) {
+      var bar = el("div", "st-bar"), fill = el("i");
+      bar.setAttribute("data-st", "1");
+      fill.style.width = (step / steps * 100).toFixed(1) + "%";
+      bar.appendChild(fill);
+      li.appendChild(bar);
+    }
+    if (error && s.message) {
+      var msg = el("div", "st-msg", String(s.message));
+      msg.setAttribute("data-st", "1");
+      li.appendChild(msg);
+    }
+  }
+  function load() {
+    fetch(SRC + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (s) {
+        if (seen === "running" && s && s.state === "done") { location.reload(); return; }
+        seen = s && s.state;
+        try { draw(s); } catch (e) { /* 그리기 실패는 목록에 영향 없게 */ }
+        setTimeout(load, seen === "running" ? RUN : IDLE);
+      });
+  }
+  window.NEWS_STATUS = { draw: draw, load: load };
+  load();
+})();
+</script>
 </body>
 </html>
