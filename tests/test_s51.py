@@ -36,7 +36,8 @@ def test_organize_dedupes_same_piece():
             self.source, self.title, self.opinion = src, title, kind
     xs = [A("WSJ", "Opinion | X", "column"), A("WSJ", "X", "editorial"), A("WSJ", "Y", "column")]
     out = dedupe_opinions(xs)
-    assert [(o.title, o.opinion) for o in out] == [("X", "editorial"), ("Opinion | X", "column")][:1] + [("Y", "column")]
+    assert [(o.title, o.opinion) for o in out] == [("X", "editorial"), ("Y", "column")]   # 사설이 남고, 원래 순서
+    assert len(dedupe_opinions([A("WSJ", "", "column"), A("WSJ", "", "column")])) == 2       # 빈 제목은 같은 글로 보지 않음
 
 
 # ---------- S51b 가나 → 한글 (⑥) ----------
@@ -45,7 +46,8 @@ def test_kana_to_hangul():
     assert kana_to_hangul("방공 지원을 둘러싼 라ムシュ타인 회의 결과") == "방공 지원을 둘러싼 라무슈타인 회의 결과"
     assert kana_to_hangul("トランプ大統領、北朝鮮") == "トランプ大統領、北朝鮮"        # 한글 없는 원문은 그대로
     assert kana_to_hangul("東京・大阪 회담") == "東京・大阪 회담"                    # 가운뎃점은 그대로
-    assert kana_to_hangul("チャ지ュ キョ ンン") == "차주 쿄 은은"
+    assert kana_to_hangul("チャ지ュ キョ ンン") == "차지유 쿄 은은"                # 원래 한글(지)에는 ュ 를 붙이지 않음
+    assert kana_to_hangul("ヰヱヵヶ 회의") == "이에카케 회의"
 
 
 def test_fix_kana_tree_only_changed_copied():
@@ -182,3 +184,45 @@ def test_fold_keeps_single_and_second_without_main():
     jonghap(secs, "종합", ROW, plan, second, fold=True)
     assert not any(s["id"] == "jonghap" for s in secs)
     assert [r["issue_id"] for r in secs[0]["lead"]["angle_rows"]] == ["a"] and second["angle_rows"][0]["angle"] == "배경"
+
+
+
+def test_rank_missing_ids_follow_fallback_paper_first():
+    """AI 순위에 빠진 기사는 대체 규칙(국내 면: 신문 지면 신호 먼저) 순서로 (구현 리뷰 M6)."""
+    class K:
+        keep = {"politics": 3}
+        list_max = 6
+    paper = {**_x("p", .30), "headline_by": {"조선": [1, "naver_a1"]}, "topic": "politics"}
+    secs = [{"id": "politics", "items": [_x("h", .5), _x("a", .45), _x("b", .44), paper]}, {"id": "briefs", "items": []}]
+    curate(secs, K, {"politics": ["b"]})
+    assert [r["issue_id"] for r in secs[0]["items"]] == ["h", "b", "p"]
+
+
+def test_enrich_calls_curate_once_only_when_curated(tmp_path):
+    """enrich 연결: curated_keep 이 있을 때만 큐레이션 순위 호출 1회, 없으면 0회·지난 순위는 지움 (구현 리뷰 M5)."""
+    import json
+    from datetime import date
+    from pipeline.llm import Budget, enrich
+    from pipeline.settings import Llm, load_interests
+
+    def edition():
+        its = [{"issue_id": f"i{k}", "title": f"기사 {k}", "lead": "리드.", "topic": "international", "scores": {"final": .5 - k / 100},
+                "articles": [{"id": f"i{k}", "source": "S", "country": "US", "lean": "중도", "lang": "ko", "title": f"기사 {k}", "lead": "리드."}]}
+               for k in range(6)]
+        return {"sections": {"international": its}, "compare": [], "stats": {}, "curate_rank": {"old": ["x"]}}
+
+    calls = []
+
+    def runner(prompt):
+        calls.append(prompt)
+        body = {"sections": {"international": ["i5", "i4"]}} if "편집장" in prompt else {}
+        return json.dumps({"result": json.dumps(body, ensure_ascii=False), "is_error": False})
+
+    cfg = Llm(enabled=True, model="haiku", max_calls_per_day=50, timeout_sec=10, analysis_issues=0)
+    disp = load_interests().foreign_display
+    ed = enrich(edition(), cfg, disp, tmp_path / "a.json", Budget(tmp_path / "u.json", date(2026, 11, 17), 50), runner=runner,
+                curated_keep={"international": 3})
+    assert sum("편집장" in c for c in calls) == 1 and ed["curate_rank"] == {"international": ["i5", "i4"]}
+    calls.clear()
+    ed = enrich(edition(), cfg, disp, tmp_path / "b.json", Budget(tmp_path / "u2.json", date(2026, 11, 17), 50), runner=runner)
+    assert sum("편집장" in c for c in calls) == 0 and "curate_rank" not in ed

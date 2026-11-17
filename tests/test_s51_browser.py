@@ -31,15 +31,53 @@ CHECK = """() => {
   return { photos, mergeable, angOnPage }; }"""
 
 
+def _png(w=16, h=9):
+    import struct
+    import zlib
+    raw = b"".join(bytes(1) + bytes([120, 140, 160]) * w for _ in range(h))
+    chunk = lambda k, d: struct.pack(">I", len(d)) + k + d + struct.pack(">I", zlib.crc32(k + d) & 0xffffffff)
+    return bytes.fromhex("89504e470d0a1a0a") + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b"")
+
+
+PNG = _png()
+
+
+def _photos(tmp_path):
+    """견본 사진을 열리는 로컬 그림으로 (img.test 는 안 열려 app.js 가 사진 칸을 지운다 — 구현 리뷰 M4)."""
+    img = tmp_path / "p.png"
+    img.write_bytes(PNG)
+
+    def mutate(ed):
+        _site()(ed)
+        for ps in ed["sections"].values():
+            for it in ps:
+                if it.get("photo"):
+                    it["photo"] = img.as_uri()
+    return mutate
+
+
+def _sparse_politics(tmp_path):
+    """정치면을 2건으로, 면 머리는 분석(배경·요점 여럿)으로 길게 — 끝 쪽에 1건만 남는 11/17 꼴 (구현 리뷰 M3)."""
+    def mutate(ed):
+        _photos(tmp_path)(ed)
+        pol = [i for i in ed["sections"]["politics"] if not i.get("reserve")]
+        ed["sections"]["politics"] = pol[:2]
+        h = pol[0]
+        h.setdefault("llm", {})["analysis"] = {"headline": "면 머리 긴 분석", "summary": "요약 문장입니다. " * 25, "background": "배경 문장입니다. " * 20,
+                                               "points": ["요점 문장이 이어집니다. " * 4] * 5, "stances": [], "brief": "짧게"}
+    return mutate
+
+
 @pytest.mark.parametrize("w,h", SIZES)
 def test_curated_small_photos_and_merged_tail(browser, tmp_path, w, h):
-    index = _b_site(tmp_path, _site())
+    index = _b_site(tmp_path, _photos(tmp_path))
     ctx, page, errors = open_page(browser, index, w, h)
     st = page.evaluate("() => NEWS.state()")
     m = page.evaluate(CHECK)
     c = page.evaluate(M, KEEP)
     assert not errors and not st["overflow"] and st["clipped"] == 0, (errors, st)
-    assert all(x <= 0.3 + 1e-3 for x in m["photos"]), m["photos"]
+    assert m["photos"] and all(x <= 0.3 + 1e-3 for x in m["photos"]), m["photos"]          # 사진이 실제로 있어야
+    assert st["pages"] <= 22, st["pages"]                                                      # 종합면 2쪽만큼 줆 (기존 판 30쪽 고정)
     assert not m["mergeable"], m["mergeable"]
     assert m["angOnPage"] == 0
     assert all(c["counts"][k] <= KEEP[k] for k in KEEP) and not c["listOnly"], c
@@ -60,4 +98,20 @@ def test_curated_angle_rows_in_reader(browser, tmp_path):
         assert r and r["h"] > 0 and r["rows"] >= 1 and all(r["ang"]), (iid, r)
         page.evaluate("() => document.querySelector('[data-reader-close]').click()")
     assert not errors, errors
+    ctx.close()
+
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (1366, 1024)])
+def test_curated_sparse_section_tail_merged(browser, tmp_path, w, h):
+    """끝 쪽에 1건만 남을 정치면이 한 쪽으로 합쳐지고 넘침 없음 (⑤)."""
+    index = _b_site(tmp_path, _sparse_politics(tmp_path))
+    ctx, page, errors = open_page(browser, index, w, h)
+    st = page.evaluate("() => NEWS.state()")
+    r = page.evaluate("""() => { const ps = [...document.querySelectorAll('#book .leaf > .page.sec-politics')];
+      return { pages: ps.length, items: ps.reduce((n, p) => n + p.querySelectorAll('.page-inner > article.item').length, 0) }; }""")
+    m = page.evaluate(CHECK)
+    assert not errors and not st["overflow"] and st["clipped"] == 0, (errors, st)
+    assert r == {"pages": 1, "items": 2}, r
+    assert not m["mergeable"], m
     ctx.close()

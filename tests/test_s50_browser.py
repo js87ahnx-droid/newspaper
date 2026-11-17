@@ -72,7 +72,7 @@ def test_curated_layout(browser, tmp_path, w, h):
     assert st["dropped"] <= st_a["dropped"], (st["dropped"], st_a["dropped"])
     assert all(m["counts"][k] <= KEEP[k] for k in KEEP), m["counts"]
     assert all(m["listLast"].values()) and not m["listOnly"], m
-    assert m["lists"] >= 2 and m["pulled"] == 0 and m["moreReserve"] == 0, m   # S51: 끝 쪽 합치기가 목록 줄을 뺄 수 있다
+    assert m["lists"] >= 2 and m["pulled"] == 0 and m["moreReserve"] == 0, m   # S51: 종합면이 창으로 접혀 종합면 목록 칸이 없어졌다(정치·경제·국제·사회·관심 중 견본에서 목록이 생기는 면은 2~4개)
     assert m["nonHead"] > 5 and not m["shown"], m["shown"][:10]
     assert m["clamps"] and set(m["clamps"]) == {"2"}, m["clamps"]
     assert m["tbVar"] == "기존 판"

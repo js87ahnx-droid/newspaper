@@ -140,14 +140,14 @@ def dedupe_opinions(opinions: list[Article]) -> list[Article]:
     from .textutil import opinion_key
 
     seen: set[tuple[str, str]] = set()
-    out = []
+    keep: set[int] = set()
     for o in sorted(opinions, key=lambda o: o.opinion != "editorial"):
         k = opinion_key(o.source, o.title)
-        if k in seen:
+        if k[1] and k in seen:   # 제목이 빈 글은 같은 글로 보지 않음 (구현 리뷰 N11)
             continue
         seen.add(k)
-        out.append(o)
-    return out
+        keep.add(id(o))
+    return [o for o in opinions if id(o) in keep]   # 원래 순서 그대로
 
 
 def organize(opinions: list[Article], edition: dict, day_articles: list[Article] | None = None) -> dict:

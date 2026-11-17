@@ -272,7 +272,8 @@ def opinion_key(source: str | None, title: str) -> tuple[str, str]:
 # ---------- 가나 → 한글 (S51 ⑥): AI 한국어 글에 섞여 나온 가나("라ム슈타인")를 한글 소리로 ----------
 _K2H_ROWS = ("アイウエオ 아이우에오", "カキクケコ 카키쿠케코", "ガギグゲゴ 가기구게고", "サシスセソ 사시스세소", "ザジズゼゾ 자지즈제조",
               "タチツテト 타치쓰테토", "ダヂヅデド 다지즈데도", "ナニヌネノ 나니누네노", "ハヒフヘホ 하히후헤호", "バビブベボ 바비부베보",
-              "パピプペポ 파피푸페포", "マミムメモ 마미무메모", "ヤユヨ 야유요", "ラリルレロ 라리루레로", "ワヲ 와오", "ァィゥェォ 아이우에오", "ヴ 부")
+              "パピプペポ 파피푸페포", "マミムメモ 마미무메모", "ヤユヨ 야유요", "ラリルレロ 라리루레로", "ワヲ 와오", "ァィゥェォ 아이우에오", "ヴ 부",
+              "ヰヱヵヶヮ 이에카케와", "ヷヸヹヺ 바비베보", "ャュョ 야유요")   # 앞 글자와 못 붙는 작은 ャュョ 는 그대로 소리
 _K2H = {k: h for row in _K2H_ROWS for ks, hs in [row.split()] for k, h in zip(ks, hs)}
 _K2H_YO = {"ャ": "ㅑ", "ュ": "ㅠ", "ョ": "ㅛ"}
 _K2H_ANY = re.compile(r"[ぁ-ゖァ-ヺー]")
@@ -290,12 +291,13 @@ def kana_to_hangul(s: str) -> str:
     if not s or not _K2H_ANY.search(s) or not _HANGUL_RE.search(s):
         return s
     out: list[str] = []
+    from_kana: set[int] = set()   # 가나에서 온 글자 자리 — 원래 한글(지·시 등)에 ュ 가 붙어도 바꾸지 않게 (구현 리뷰 N9)
     for ch in s:
         if "ぁ" <= ch <= "ゖ":
             ch = chr(ord(ch) + 0x60)   # 히라가나 → 가타카나
         if ch == "ー":
             continue
-        if ch in _K2H_YO and out and out[-1] in _K2H.values():   # 시+ュ → 슈
+        if ch in _K2H_YO and out and (len(out) - 1) in from_kana:   # 시+ュ → 슈
             out[-1] = _with_vowel(out[-1], _YO_VOWEL[_K2H_YO[ch]]) if out[-1] not in "지치" else _with_vowel(out[-1], {"ㅑ": 0, "ㅠ": 13, "ㅛ": 8}[_K2H_YO[ch]])
             continue
         if ch == "ン":
@@ -307,6 +309,8 @@ def kana_to_hangul(s: str) -> str:
             continue
         if ch == "ッ":
             continue
+        if ch in _K2H:
+            from_kana.add(len(out))
         out.append(_K2H.get(ch, ch))
     return "".join(out)
 

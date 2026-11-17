@@ -423,7 +423,8 @@ def jonghap(sections: list[dict], title: str, row, plan: dict | None = None, sec
                     continue
                 v = row(a).get("view") or {"title": a.get("title"), "lead": a.get("lead")}
                 ang_rows.append({"issue_id": a["issue_id"], "angle": ang or "관련", "title": v["title"], "source": a.get("source"),
-                                 "url": a.get("url"), "lang": v.get("lang"), "summary": v.get("lead") if has_content(a) else ""})
+                                 "url": a.get("url"), "lang": v.get("lang"),
+                                 "summary": (v.get("lead") or ((a.get("llm") or {}).get("analysis") or {}).get("summary") or "") if has_content(a) else ""})
             for h in hosts_by[grp]:
                 if ang_rows:
                     h["angle_rows"] = ang_rows
@@ -463,16 +464,16 @@ def _curate_order(sid: str, rest: list[dict], rank: list[str] | None) -> list[di
     없으면 국내 면(정치·경제·사회)은 신문 지면 신호 먼저, 그다음 종합 점수 순. "보장 기사 먼저"는 쓰지 않는다
     (11/17 국제면: "다양성: 주목도 상위" 기사들이 종합 점수 2위 네타냐후를 목록으로 밀어냈다)."""
     by_score = sorted(rest, key=lambda r: -float((r.get("scores") or {}).get("final") or 0))
-    if rank:
-        pos = {iid: n for n, iid in enumerate(rank)}
-        return sorted(by_score, key=lambda r: pos.get(r["issue_id"], len(pos)))
-    if sid in DOMESTIC:
-        return sorted(by_score, key=lambda r: not _on_paper(r))
-    return by_score
+    fallback = sorted(by_score, key=lambda r: not _on_paper(r)) if sid in DOMESTIC else by_score
+    if rank:   # AI 순위 + 빠진 기사는 대체 규칙 순서로 (구현 리뷰 M6)
+        by_id = {r["issue_id"]: r for r in rest}
+        ranked = [by_id[i] for i in rank if i in by_id]
+        return ranked + [r for r in fallback if all(r is not x for x in ranked)]
+    return fallback
 
 
 def curate(sections: list[dict], ccfg, rank: dict[str, list[str]] | None = None) -> None:
-    """큐레이션 판 (S50 시안 B): 뉴스 면마다 면 머리 + 신문 지면 신호·보장 기사 먼저 정한 수만 기사 꼴로 남기고,
+    """큐레이션 판 (S50 시안 B): 뉴스 면마다 면 머리 + 중요도 순(_curate_order — AI 순위, 없으면 국내 면은 신문 지면 신호 먼저·점수 순)으로 정한 수만 기사 꼴로 남기고,
     나머지는 면 끝 "함께 볼 기사"(sec["more"], list_max 건까지) — 그 기사 창이 열리게 원본은 숨은 칸(curated_src)에.
     목록 상한을 넘긴 것은 단신 후보로. 어떤 기사도 사라지지 않는다. front_single·jonghap 뒤에 부른다(두 판의 1면·종합면 고르기가 같게)."""
     briefs = next((s for s in sections if s["id"] == "briefs"), None)
