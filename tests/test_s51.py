@@ -117,3 +117,56 @@ def test_curated_folds_jonghap_into_hosts():
         assert [r["issue_id"] for r in host["angle_rows"]] == g1
     shown = {r["issue_id"] for s in cur for r in s["items"] if s["id"] not in ("detail", "curated_src")}
     assert not (set(g0 + g1) & shown)                                       # 접힌 기사는 지면에 따로 안 실림
+
+
+# ---------- S51e 큐레이션 고르기 (⑦) ----------
+from pipeline.llm import curate_rank  # noqa: E402
+from pipeline.render import curate  # noqa: E402
+
+
+class _K:
+    keep = {"international": 3}
+    list_max = 6
+
+
+def _x(i, final, guaranteed=False):
+    return {"issue_id": i, "title": "t" + i, "view": {"title": "t" + i}, "source": "S", "topic": "international", "url": "u" + i,
+            "headline_by": {}, "pages_by": {}, "guaranteed": guaranteed, "scores": {"final": final}}
+
+
+def test_fallback_international_by_score_not_guarantee():
+    """11/17 국제면 꼴: 다양성 보장 기사(점수 낮음)가 종합 점수 높은 네타냐후를 밀어내지 않는다."""
+    secs = [{"id": "international", "items": [_x("pope", .46), _x("bibi", .461), _x("eu", .45, True), _x("fire", .449, True), _x("harry", .404, True)]},
+            {"id": "briefs", "items": []}]
+    curate(secs, _K)
+    assert [r["issue_id"] for r in secs[0]["items"]] == ["pope", "bibi", "eu"]
+    assert [m["issue_id"] for m in secs[0]["more"]] == ["fire", "harry"]
+
+
+def test_rank_order_used_and_shown_in_that_order():
+    secs = [{"id": "international", "items": [_x("pope", .46), _x("bibi", .461), _x("eu", .45), _x("fire", .449), _x("brexit", .38)]},
+            {"id": "briefs", "items": []}]
+    curate(secs, _K, {"international": ["brexit", "bibi", "nope"]})
+    assert [r["issue_id"] for r in secs[0]["items"]] == ["pope", "brexit", "bibi"]   # 머리 + AI 순서대로
+    assert [m["issue_id"] for m in secs[0]["more"]] == ["eu", "fire"]                 # 빠진 것은 점수 순
+
+
+def test_curate_rank_call_cache_and_bad_answer():
+    ed = {"sections": {"international": [_x(k, .4) for k in "abcd"], "politics": [_x("p", .5)]}}
+    calls = []
+
+    def g(prompt, **kw):
+        calls.append(prompt)
+        return {"sections": {"international": ["d", "x", "b", "d", 3]}}, "ok"
+
+    class Cfg:
+        analysis_model, analysis_timeout_sec = "m", 10
+    cache = {}
+    assert curate_rank(ed, cache, g, Cfg, {"international": 3, "politics": 4}) == "ok (1면)"
+    assert ed["curate_rank"] == {"international": ["d", "b"]} and len(calls) == 1
+    assert '"면머리": true' in calls[0] and '"politics"' not in calls[0]            # 남길 수 이하 면은 묻지 않음
+    ed2 = {"sections": ed["sections"]}
+    assert curate_rank(ed2, cache, g, Cfg, {"international": 3}) == "캐시" and len(calls) == 1
+    bad = {}
+    assert curate_rank({"sections": ed["sections"]}, bad, lambda p, **k: ({"x": 1}, "ok"), Cfg, {"international": 3}) == "응답 이상"
+    assert "curate_rank" not in bad

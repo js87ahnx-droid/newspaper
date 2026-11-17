@@ -109,14 +109,15 @@ def _r(i, paper=False, guaranteed=False, reserve=False):
 
 
 def test_curate_prefers_paper_signal_and_overflow_to_briefs():
+    """국내 면(정치): 머리 + 신문 지면 신호 먼저, 그다음 점수 순. 보장 기사(다양성 등)는 앞세우지 않는다 (S51 ⑦)."""
     secs = [{"id": "politics", "items": [_r("h"), _r("a"), _r("b", paper=True), _r("c"), _r("d", guaranteed=True), _r("z", reserve=True)]},
             {"id": "briefs", "items": [_r("x")]}]
     curate(secs, _C)
     pol = secs[0]
-    assert [r["issue_id"] for r in pol["items"]] == ["h", "b", "d", "z"]   # 머리 + 신호·보장 먼저, 원래 순서, 예비 그대로
-    assert [m["issue_id"] for m in pol["more"]] == ["a"]                    # 목록 상한 1
-    assert [r["issue_id"] for r in secs[1]["items"]] == ["x", "c"]          # 넘친 것은 단신 후보
-    assert [r["issue_id"] for r in secs[2]["items"]] == ["a"] and secs[2]["id"] == "curated_src"
+    assert [r["issue_id"] for r in pol["items"]] == ["h", "a", "b", "z"]   # 머리 + 신호(b)·다음(a), 원래 순서, 예비 그대로
+    assert [m["issue_id"] for m in pol["more"]] == ["c"]                    # 목록 상한 1 — 남김 다음 순서
+    assert [r["issue_id"] for r in secs[1]["items"]] == ["x", "d"]          # 넘친 것은 단신 후보
+    assert [r["issue_id"] for r in secs[2]["items"]] == ["c"] and secs[2]["id"] == "curated_src"
     assert pol["items"][0]["sec_head"] and not pol["items"][1].get("sec_head")
 
 

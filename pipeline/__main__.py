@@ -518,7 +518,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
             print(f"지난 경제 해설 참고: {len(past_econ)}건")
         sources = load_sources(root)   # 종합면 메인을 render 와 같게 고르려면 매체 국가가 필요하다 (S49c)
         edition = enrich(edition, cfg.llm, interests.foreign_display, raw / f"{args.date}.llm.json", budget, bodies=bodies, known=known,
-                         past_econ=past_econ, jonghap_ctx=([s.id for s in cfg.sections], {s.name: s.country for s in sources.sources}))
+                         past_econ=past_econ, jonghap_ctx=([s.id for s in cfg.sections], {s.name: s.country for s in sources.sources}),
+                         curated_keep=cfg.curated.keep if cfg.curated.enabled else None)   # S51 ⑦: 큐레이션 판 고르기 AI 한 번
         del bodies
         st = edition["stats"]["llm"]
         sp = st.get("spent_today") or {}

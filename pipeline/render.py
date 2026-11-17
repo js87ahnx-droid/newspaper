@@ -450,7 +450,23 @@ def _on_paper(r: dict) -> bool:
     return any(v[1] == "naver_a1" for v in (r.get("headline_by") or {}).values()) or bool(r.get("pages_by"))
 
 
-def curate(sections: list[dict], ccfg) -> None:
+DOMESTIC = ("politics", "economy", "society")
+
+
+def _curate_order(sid: str, rest: list[dict], rank: list[str] | None) -> list[dict]:
+    """면 머리를 뺀 후보의 중요도 순서 (S51 ⑦). AI 순위가 있으면 그 순서(빠진 id 는 뒤에 점수 순),
+    없으면 국내 면(정치·경제·사회)은 신문 지면 신호 먼저, 그다음 종합 점수 순. "보장 기사 먼저"는 쓰지 않는다
+    (11/17 국제면: "다양성: 주목도 상위" 기사들이 종합 점수 2위 네타냐후를 목록으로 밀어냈다)."""
+    by_score = sorted(rest, key=lambda r: -float((r.get("scores") or {}).get("final") or 0))
+    if rank:
+        pos = {iid: n for n, iid in enumerate(rank)}
+        return sorted(by_score, key=lambda r: pos.get(r["issue_id"], len(pos)))
+    if sid in DOMESTIC:
+        return sorted(by_score, key=lambda r: not _on_paper(r))
+    return by_score
+
+
+def curate(sections: list[dict], ccfg, rank: dict[str, list[str]] | None = None) -> None:
     """큐레이션 판 (S50 시안 B): 뉴스 면마다 면 머리 + 신문 지면 신호·보장 기사 먼저 정한 수만 기사 꼴로 남기고,
     나머지는 면 끝 "함께 볼 기사"(sec["more"], list_max 건까지) — 그 기사 창이 열리게 원본은 숨은 칸(curated_src)에.
     목록 상한을 넘긴 것은 단신 후보로. 어떤 기사도 사라지지 않는다. front_single·jonghap 뒤에 부른다(두 판의 1면·종합면 고르기가 같게)."""
@@ -464,11 +480,12 @@ def curate(sections: list[dict], ccfg) -> None:
         reserve = [r for r in s["items"] if r.get("reserve")]   # 면에 딸린 예비 기사는 쪽 나누기가 따로 다룬다 — 그대로
         if k and len(items) > k:
             head, rest = items[0], items[1:]
-            pri = sorted(range(len(rest)), key=lambda i: (0 if _on_paper(rest[i]) or rest[i].get("guaranteed") else 1, i))
-            pick = set(pri[: k - 1])
-            kept = [head] + [r for i, r in enumerate(rest) if i in pick]
+            order = _curate_order(s["id"], rest, (rank or {}).get(s["id"]))
+            kept = [head] + order[: k - 1]
+            if not (rank or {}).get(s["id"]):   # 대체 규칙: 고른 것은 원래 순서로 (AI 순위가 있으면 그 순서로 싣는다 — S51 결정 17)
+                kept = [head] + [r for r in rest if any(r is x for x in kept[1:])]
             ids = {id(r) for r in kept}
-            out = [r for r in items if id(r) not in ids]
+            out = [r for r in order if id(r) not in ids]   # 목록도 같은 순서 (S51 N8)
             for r in out:   # 종합면 묶음 표시는 목록·창·단신에선 뜻이 없다
                 for f in ("jh_angle", "jh_band", "jh_group"):
                     r.pop(f, None)
@@ -657,7 +674,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
             second = next((r for x in sections for r in x["items"] if r["issue_id"] == want), None)   # 지면에 없으면 둘째 묶음 없음
     jonghap(sections, titles.get("jonghap", "종합"), row, plan, second, fold=variant == "b" and cfg.curated.enabled)
     if variant == "b" and cfg.curated.enabled:
-        curate(sections, cfg.curated)   # S50: 큐레이션 판 — 1면·종합면을 고른 뒤
+        curate(sections, cfg.curated, edition.get("curate_rank"))   # S50: 큐레이션 판 — 1면·종합면을 고른 뒤. S51: AI 중요도 순위
     compare = []
     for it in edition.get("compare", []):
         st = it.get("stance", {})

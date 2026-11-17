@@ -497,7 +497,7 @@ def merge_duplicates(edition: dict, groups: dict[str, int] | None = None) -> lis
 
 def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, runner=None,
            bodies: dict | None = None, known: list[str] | None = None, past_econ: dict | None = None,
-           jonghap_ctx: tuple[list[str], dict[str, str]] | None = None) -> dict:
+           jonghap_ctx: tuple[list[str], dict[str, str]] | None = None, curated_keep: dict[str, int] | None = None) -> dict:
     """edition(dict)에 llm 결과를 붙여 돌려준다. 실패해도 edition 은 그대로 쓸 수 있다.
     bodies(기사 주소 → 본문)는 이슈 분석 프롬프트에만 쓰고 어디에도 저장하지 않는다."""
     cache = read_json(cache_path, {})
@@ -671,6 +671,10 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
     if jonghap_ctx is not None:   # 종합면 각도별 (S49c): 합치기가 끝난 지면에서 메인·둘째 이슈 → 각도 호출 → 후보 한국어
         jstats = plan_jonghap(edition, display, cache, guarded, cfg, *jonghap_ctx)
         status["jonghap"] = jstats["status"]
+        write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    edition.pop("curate_rank", None)
+    if curated_keep:   # 큐레이션 판 고르기 (S51 ⑦): 면마다 중요도 순위 — 합침·종합면 뒤 지면에서 한 번
+        status["curate"] = curate_rank(edition, cache, guarded, cfg, curated_keep)
         write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
     edition.setdefault("stats", {})["llm"] = {"status": status, "calls_today": budget.used, "spent_today": budget.spent, "analysis": astats,
                                               "econ": estats, "merged_duplicates": dups, "jonghap": jstats}
@@ -926,3 +930,55 @@ BATCH, MAX_BATCHES = 40, 3      # 요약·제목 번역 한 번에 40건, 3번�
 def _lang_of(item: dict) -> str:
     rep = next((a for a in item["articles"] if a["title"] == item["title"]), item["articles"][0])
     return rep["lang"]
+
+
+# ---------- 큐레이션 판 고르기 (S51 ⑦) ----------
+CURATE_PROMPT = """종합일간지 각 면의 편집장이다. 면마다 후보 기사들이 있다(첫째는 이미 정한 면 머리). 면 머리를 뺀 나머지를
+독자에게 중요한 순서로 늘어놓아라. 기준:
+- 한국·중국·일본·미국·유럽(영국·EU 포함) 등 주요국 소식을 먼저, 그다음 다른 나라
+- 다만 주요국의 가벼운 소식(왕실·연예·인물 미담·단순 사건사고)보다 다른 나라의 중요한 정치·경제·안보·외교 소식을 먼저
+- 같은 무게면 국내 신문 지면에 실린 기사(신문=true)를 먼저
+제목·요약에 있는 내용으로만 판단하라. 후보 id 를 빠짐없이 한 번씩.
+출력 형식: {{"sections": {{"<면>": ["<id>", "..."]}}}}
+{data}"""
+CURATE_SECTIONS_LLM = ("politics", "economy", "international", "society", "interest")
+
+
+def curate_rank(edition: dict, cache: dict, guarded, cfg: Llm, keep: dict[str, int]) -> str:
+    """면마다 면 머리를 뺀 후보의 중요도 순위를 AI 한 번으로 → edition["curate_rank"] = {면: [id…]} (render.curate 가 씀).
+    기사 수가 남길 수 이하인 면은 묻지 않는다. 캐시 키 = 면별 후보 id. 쓸 수 없는 응답은 남기지 않는다."""
+    from .render import _on_paper
+
+    secs = {}
+    for sid in CURATE_SECTIONS_LLM:
+        items = [it for it in edition["sections"].get(sid, []) if not it.get("reserve")]
+        if len(items) > keep.get(sid, len(items)):
+            secs[sid] = items
+    if not secs:
+        return "대상 없음"
+    key = "|".join(sid + ":" + ",".join(it["issue_id"] for it in its) for sid, its in sorted(secs.items()))
+    got = cache.get("curate_rank", {})
+    if got.get("key") == key:
+        edition["curate_rank"] = got["rank"]
+        return "캐시"
+    data = {sid: [{**_row_text(it), "신문": _on_paper(it), **({"면머리": True} if n == 0 else {})} for n, it in enumerate(its)]
+            for sid, its in secs.items()}
+    res, st = guarded(CURATE_PROMPT.format(data=_data_block([data])), model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
+    rank = {}
+    if isinstance(res, dict) and isinstance(res.get("sections"), dict):
+        for sid, its in secs.items():
+            ids = {it["issue_id"] for it in its[1:]}
+            got_ids = res["sections"].get(sid)
+            if isinstance(got_ids, list):
+                seen: list[str] = []
+                for x in got_ids:
+                    if isinstance(x, str) and x in ids and x not in seen:
+                        seen.append(x)
+                if seen:
+                    rank[sid] = seen
+    if not rank:
+        return st if st != "ok" else "응답 이상"
+    edition["curate_rank"] = rank
+    cache["curate_rank"] = {"key": key, "rank": rank}
+    return f"ok ({len(rank)}면)"
+
