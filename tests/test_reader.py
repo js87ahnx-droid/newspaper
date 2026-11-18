@@ -174,7 +174,10 @@ def test_title_opens_ai_detail_and_link_is_plain(browser, tmp_path, monkeypatch)
     link = page.evaluate("""() => { const a = document.querySelector('#book .page .meta a.link-btn');
         return {href: a.href, target: a.target, art: a.hasAttribute('data-art'), detail: a.hasAttribute('data-detail')}; }""")
     assert link["target"] == "_blank" and link["href"].startswith("http") and not link["art"] and not link["detail"]
-    assert [s for s in seen if s["method"] != "OPTIONS"] == [] and errors == []
+    # S54 ④: 제목으로 연 자세히 창은 그 기사의 전문을 받아 붙인다 — 그 기사 "원문" 주소 하나만 (읽을 수 없는 매체면 0)
+    read = page.evaluate("(i) => document.querySelector(`#flow article.item[data-issue=\"${i}\"] > .meta .orig-btn`).getAttribute('data-read')", issue)
+    gets = [s for s in seen if s["method"] == "GET"]
+    assert len(gets) == (1 if read else 0) and errors == []
     ctx.close()
 
 

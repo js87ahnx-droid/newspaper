@@ -1243,6 +1243,7 @@
     readSeq++;
     reader.setAttribute("aria-label", "기사 자세히");
     showReader();
+    addFull(node);
   }
   // 창 열기·닫기 (S29d 점검): 열면 뒤 지면·도구 막대를 inert 로(탭·스크린리더가 가려진 지면으로 새지 않게), 닫으면 누른 자리로 포커스를 돌린다
   var lastFocus = null;
@@ -1287,11 +1288,113 @@
       if (opts && opts.body) { o.method = "POST"; o.body = opts.body; o.headers["Content-Type"] = "application/json"; }
       return fetch(RD.url + path, o).then(function (r) {
         var isJson = /json/.test(r.headers.get("Content-Type") || "");
-        if (!isJson && r.status >= 500 && left > 0 && seq === readSeq) return load(left - 1);
+        if (!isJson && r.status >= 500 && left > 0 && (seq == null || seq === readSeq)) return load(left - 1);   // seq 없음 = 공유 요청(S54)
         return r.json();
       });
     };
     return load(1);
+  }
+  // 전문 받기 (S54 ④): 주소별로 이 탭 메모리에만 — 성공한 결과(FULL)와 받는 중인 요청(INFLIGHT). localStorage·지면 HTML 에 안 남김(D16).
+  // 요청·20초 시간 초과·503 한 번 더는 여기서 스스로 — 창을 닫거나 돌아가도 요청은 끝까지 가고 결과가 남는다. 실패는 남기지 않아 다음에 다시 받음
+  var FULL = {}, INFLIGHT = {}, TR = {};
+  function fullText(url) {
+    if (FULL[url]) return Promise.resolve(FULL[url]);
+    if (INFLIGHT[url]) return INFLIGHT[url];
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var p = new Promise(function (res) {
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); res({ ok: false, timeout: true }); }, 20000);
+      relay("/?url=" + encodeURIComponent(url), null, null, ctrl ? ctrl.signal : undefined).then(function (j) { clearTimeout(timer); res(j || { ok: false }); },
+        function () { clearTimeout(timer); res({ ok: false, net: true }); });
+    }).then(function (j) {
+      delete INFLIGHT[url];
+      if (j && j.ok && j.paragraphs && j.paragraphs.length) FULL[url] = j;
+      return j;
+    });
+    INFLIGHT[url] = p;
+    return p;
+  }
+  function failWhy(j) {
+    return j && j.timeout ? "원문 사이트가 응답하지 않습니다" : j && j.net ? "연결하지 못했습니다"
+      : "원문을 가져오지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : "");
+  }
+  // 자세히 창 안의 전문 칸 (S54 시안 C): 뉴스 기사의 메타 줄 첫 "원문" 단추가 읽을 수 있으면 AI 정리 아래에 본문, 못 읽으면 같은 사건 전문 기사 목록
+  function addFull(node) {
+    if (!RD || !node.matches("article.item")) return;
+    var sec = node.getAttribute("data-section");
+    if (sec === "china" || sec === "opinion" || sec === "analysis") return;
+    var btn = node.querySelector(":scope > .meta .orig-btn");
+    if (!btn) return;
+    var alt = node.querySelector(":scope > .ft-alt");
+    var url = btn.getAttribute("data-read");
+    if (!url) { if (alt) alt.hidden = false; return; }
+    if (alt) alt.remove();
+    var box = mk("section", "ft");
+    var src = btn.getAttribute("data-src") || "";
+    box.appendChild(mk("h4", "ft-h", "전문 — " + src));
+    if (btn.getAttribute("data-paywall") === "1") box.appendChild(mk("p", "ft-pay", "유료 매체 — 앞부분만 보일 수 있음"));
+    var status = mk("p", "rv-status", "전문을 불러오는 중…");
+    status.setAttribute("role", "status");
+    box.appendChild(status);
+    var main = mk("div", "ft-body");
+    box.appendChild(main);
+    node.appendChild(box);
+    var href = btn.getAttribute("data-href") || "", lang = btn.getAttribute("data-lang") || "ko";
+    fullText(url).then(function (j) {
+      if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) {
+        status.textContent = failWhy(j) + ".";
+        status.className = "rv-status rv-fail";
+        main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
+        return;
+      }
+      status.textContent = j.site || src;
+      var imgs = (j.images || []).slice(), ps = [];
+      if (imgs.length) main.appendChild(figure(imgs.shift()));
+      j.paragraphs.forEach(function (p, i) {
+        var n = mk("p", "rv-p", p);   // textContent 로만 (원문 HTML 은 쓰지 않음)
+        ps.push(n);
+        main.appendChild(n);
+        if (imgs.length && i % 4 === 3) main.appendChild(figure(imgs.shift()));
+      });
+      var foot = mk("p", "rv-foot", "원문을 그 자리에서 받아 사진과 글만 다시 보여 준 화면입니다(저장하지 않음). 저작권은 " + (j.site || src || "해당 매체") + "에 있습니다. ");
+      foot.appendChild(linkBtn(j.url || href, "원래 기사 열기 ↗"));
+      main.appendChild(foot);
+      if (lang !== "ko") translateButton(box, main, ps, lang, url);
+    });
+  }
+  // 전문 칸 번역은 단추를 눌렀을 때만 (무료 할당량 — 제목을 누를 때마다 자동 번역하지 않는다). 결과는 주소별로 TR 에
+  function translateButton(box, before, nodes, lang, url) {
+    var bar = mk("div", "rv-lang");
+    var go = mk("button", "rv-tab", "한국어로 번역");
+    go.type = "button";
+    bar.appendChild(go);
+    box.insertBefore(bar, before);
+    var texts = nodes.map(function (n) { return n.textContent; });
+    var key = url + "|p";
+    var show = function (ko) {
+      nodes.forEach(function (n, i) { n.setAttribute("data-orig", texts[i]); n.setAttribute("data-ko", ko[i] || texts[i]); n.textContent = ko[i] || texts[i]; });
+      bar.innerHTML = "";
+      ["한국어", "원문"].forEach(function (label, k) {
+        var b = mk("button", "rv-tab" + (k === 0 ? " on" : ""), label);
+        b.type = "button";
+        b.setAttribute("aria-pressed", k === 0 ? "true" : "false");
+        b.addEventListener("click", function () {
+          nodes.forEach(function (n) { n.textContent = n.getAttribute(k === 0 ? "data-ko" : "data-orig"); });
+          Array.prototype.forEach.call(bar.querySelectorAll(".rv-tab"), function (x, m) { x.classList.toggle("on", m === k); x.setAttribute("aria-pressed", m === k ? "true" : "false"); });
+        });
+        bar.appendChild(b);
+      });
+      bar.appendChild(mk("span", "rv-lang-note", "AI 번역"));
+    };
+    go.addEventListener("click", function () {
+      if (TR[key]) { show(TR[key]); return; }
+      go.disabled = true;
+      go.textContent = "한국어로 옮기는 중…";
+      relay("/translate", { body: JSON.stringify({ lang: lang, texts: texts }) }, null).then(function (j) {
+        if (!j || !j.ok || !j.texts || j.texts.length !== texts.length) { go.disabled = false; go.textContent = "번역하지 못했습니다 — 다시"; return; }
+        TR[key] = j.texts;
+        show(j.texts);
+      }, function () { go.disabled = false; go.textContent = "번역하지 못했습니다 — 다시"; });
+    });
   }
   // 번역: 문단 요소들(원문 글)을 한국어로 바꿔 보이고, 한국어/원문 전환 단추를 단다
   function translateInto(view, nodes, lang, seq) {
@@ -1366,6 +1469,8 @@
         if (!note) nodes.push(lp);   // AI 정리·요약은 이미 한국어
       }
       main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
+      var alt = art && art.querySelector(":scope > .ft-alt");   // 같은 사건 전문 기사 (S54 ④)
+      if (alt && !url) { var ac = alt.cloneNode(true); ac.hidden = false; main.appendChild(ac); }
       translateInto(view, nodes, lang, seq);
     };
     if (!url || !RD) {
@@ -1373,13 +1478,10 @@
                                  : "본문을 불러올 수 없어 피드에 실린 내용만 보여 드립니다.");
       return;
     }
-    var ctrl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); fallback("원문 사이트가 응답하지 않습니다. 피드에 실린 내용만 보여 드립니다."); }, 20000);
-    relay("/?url=" + encodeURIComponent(url), null, seq, ctrl ? ctrl.signal : undefined).then(function (j) {
-      clearTimeout(timer);
+    fullText(url).then(function (j) {   // 자세히 창 전문과 같은 요청·결과를 같이 쓴다 (S54)
       if (seq !== readSeq) return;
       if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) {
-        fallback("원문을 가져오지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : "") + ". 피드에 실린 내용만 보여 드립니다.");
+        fallback(failWhy(j) + ". 피드에 실린 내용만 보여 드립니다.");
         return;
       }
       if (j.title) h.textContent = j.title;
@@ -1397,7 +1499,7 @@
       foot.appendChild(linkBtn(j.url || href, "원래 기사 열기 ↗"));
       main.appendChild(foot);
       translateInto(view, [h].concat(ps), lang, seq);
-    }, function () { clearTimeout(timer); fallback("연결하지 못했습니다. 피드에 실린 내용만 보여 드립니다."); });
+    });
   }
 
   // ---------- 경제 해설 창 (S31c·d, 14차 요청) ----------

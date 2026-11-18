@@ -161,3 +161,42 @@ def test_economy_cap_in_fill_and_reserves():
 def test_editing_panel_lists_all_topic_caps():
     js = open("static/editing.js", encoding="utf-8").read()
     assert "Object.keys(r.topicMax" in js and "분야별로" in js
+
+
+# ---------- S54c ④ 막힌 기사의 대체 후보 (발행 쪽) ----------
+def _alt_edition():
+    blocked = {"issue_id": "i1", "source": "New York Times", "url": "https://www.nytimes.com/a", "articles": [
+        {"source": "New York Times", "url": "https://www.nytimes.com/a"},
+        {"source": "Reuters", "url": "https://www.reuters.com/b"},                       # 막힌 매체
+        {"source": "조선일보", "url": "https://news.google.com/rss/articles/g1"},          # Google 경유 — 풀어야 함
+        {"source": "조선일보", "url": "https://www.chosun.com/dup"},                       # 같은 매체 둘째
+        {"source": "BBC", "url": "https://www.bbc.com/c"}, {"source": "CNN", "url": "https://edition.cnn.com/d"},
+        {"source": "연합뉴스", "url": "https://www.yna.co.kr/e"}]}
+    readable = {"issue_id": "i2", "source": "조선일보", "url": "https://www.chosun.com/z", "articles": []}
+    opinion = {"issue_id": "i3", "source": "New York Times", "url": "https://www.nytimes.com/o", "articles": [{"source": "BBC", "url": "https://www.bbc.com/o"}]}
+    return {"sections": {"international": [blocked, readable], "opinion": [opinion]}}
+
+
+def test_alt_candidates_and_resolve(monkeypatch):
+    from pipeline import reader
+    from pipeline.settings import load_sources
+    src = load_sources()
+    ed = _alt_edition()
+    c = reader.alt_candidates(ed, src)
+    assert list(c) == ["i1"] and [x["source"] for x in c["i1"]] == ["조선일보", "BBC", "CNN"]   # 막힌 매체·같은 매체 둘째 빼고 3건, 논평 면 아님
+
+    async def fake_decode(urls, timeout):
+        return {u: "https://www.chosun.com/resolved" for u in urls}
+    monkeypatch.setattr(reader, "_decode_google", fake_decode)
+    st = reader.resolve_alt(ed, src)
+    assert st == {"issues": 1, "google": 1, "resolved": 1}
+    assert ed["read_urls"]["https://news.google.com/rss/articles/g1"] == "https://www.chosun.com/resolved"
+    assert ed["read_alt"]["i1"][0] == "https://news.google.com/rss/articles/g1"
+
+
+def test_publish_resolves_alt_when_key_missing():
+    import inspect
+
+    from pipeline import __main__ as m
+    src = inspect.getsource(m.cmd_publish)
+    assert '"read_alt" not in edition' in src and "resolve_alt" in src

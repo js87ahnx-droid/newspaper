@@ -61,3 +61,47 @@ def read_url_fn(edition: dict, sources: Sources):
         return url
 
     return read_url
+
+
+ALT_MAX = 3   # 막힌 기사에 안내할 같은 사건 전문 기사 수 (S54 ④)
+
+
+def _news_items(edition: dict) -> list[dict]:
+    skip = {"opinion", "analysis", "china", "guide"}
+    return [it for sid, ps in edition["sections"].items() if sid not in skip for it in ps]
+
+
+def alt_candidates(edition: dict, sources: Sources) -> dict[str, list[dict]]:
+    """대표 기사를 중계 서버로 못 읽는 이슈(막힌 매체·Google 주소 못 풂) → 같은 이슈의 전문 가능 기사 최대 ALT_MAX 건.
+    reader 가능 매체만(= Worker 허용목록 안), 매체당 한 건, 대표 기사와 다른 매체. Google 주소는 아직 안 풀렸을 수 있다."""
+    skip = {s.name for s in sources.sources if not s.reader}
+    known = {s.name for s in sources.sources}
+    read_url = read_url_fn(edition, sources)
+    out: dict[str, list[dict]] = {}
+    for it in _news_items(edition):
+        if read_url(it["url"], it["source"]):
+            continue
+        seen = {it["source"]}
+        cands = []
+        for a in it.get("articles", []):
+            if a["source"] in seen or a["source"] in skip or a["source"] not in known or a["url"] == it["url"]:
+                continue
+            seen.add(a["source"])
+            cands.append({"url": a["url"], "source": a["source"], "title": a.get("title", ""), "lang": a.get("lang", "ko"),
+                          "paywall": bool(a.get("paywall"))})
+            if len(cands) >= ALT_MAX:
+                break
+        if cands:
+            out[it["issue_id"]] = cands
+    return out
+
+
+def resolve_alt(edition: dict, sources: Sources, timeout: float = 20.0) -> dict:
+    """막힌 이슈의 대체 후보 Google 뉴스 주소를 한 번 더 풀고(주소만), edition["read_alt"] 에 이슈 → 후보 주소 목록을 둔다."""
+    cands = alt_candidates(edition, sources)
+    mapped = edition.setdefault("read_urls", {})
+    g = [c["url"] for cs in cands.values() for c in cs if is_google(c["url"]) and c["url"] not in mapped]
+    dec = asyncio.run(_decode_google(g, timeout)) if g else {}
+    mapped.update({u: r for u, r in dec.items() if r})
+    edition["read_alt"] = {iid: [c["url"] for c in cs] for iid, cs in cands.items()}
+    return {"issues": len(cands), "google": len(g), "resolved": sum(1 for r in dec.values() if r)}

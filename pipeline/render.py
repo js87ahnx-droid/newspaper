@@ -765,6 +765,15 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
     rc = reader_mod.config()
     client["reader"] = rc
     ctx["read_url"] = reader_mod.read_url_fn(edition, sources) if rc else (lambda url, source=None: "")
+    # S54 ④: 유료 매체(전문 칸 안내)와 막힌 기사의 대체 후보(같은 사건 전문 가능 기사 — 주소가 풀린 것만)
+    ctx["paywall_src"] = {x.name for x in sources.sources if x.paywall}
+    alts = {}
+    if rc:
+        for iid, cs in reader_mod.alt_candidates(edition, sources).items():
+            ok = [c for c in cs if ctx["read_url"](c["url"], c["source"])]
+            if ok:
+                alts[iid] = ok
+    ctx["alts"] = alts
     real = edition.get("read_urls", {})   # Google 뉴스 경유 주소 → 발행 때 푼 실제 기사 주소 ("링크"가 바로 가게)
     ctx["real_url"] = lambda url: real.get(url, url)
     ctx["edition_json"] = json.dumps(client, ensure_ascii=False).replace("</", "<\\/")  # 스크립트 안 "</script>" 방지

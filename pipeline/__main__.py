@@ -598,6 +598,11 @@ def cmd_publish(args: argparse.Namespace) -> int:
         st = reader.resolve_google(edition)
         write_atomic(ed_path, json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
         print(f"원문 보기: Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
+    if reader.config() and "read_alt" not in edition:
+        # S54 ④: 대표 기사를 못 읽는 이슈의 대체 후보(같은 사건 전문 가능 기사) 주소도 풀어 둔다 — 다시 발행할 때도 키가 없으면
+        st = reader.resolve_alt(edition, sources)
+        write_atomic(ed_path, json.dumps(edition, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"원문 보기 대체 후보: 이슈 {st['issues']}건, Google 뉴스 주소 {st['resolved']}/{st['google']}건 풀림")
     day_path = _raw_dir(args) / f"{args.date}.json"
     if day_path.exists():
         # 1면 메인 기사 사진 (S26g): 사진 자리가 아닌 기사가 메인으로 올라오면 그 이슈 기사들의 RSS 대표 이미지로
