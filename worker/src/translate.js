@@ -28,6 +28,11 @@ const SYSTEM = "You are a professional news translator. Translate each numbered 
   "Keep names, numbers, dates and quotes accurate. Translate weekday names as weekdays (Thursday → 목요일) and never turn them into calendar dates. " +
   "Convert large numbers carefully: 1 million = 100만, 800 million = 8억, 1 billion = 10억, 2.5 billion = 25억, 1 trillion = 1조; " +
   "if unsure, keep the digits with the English unit (e.g. 800 million → 8억). " +
+  // S54e: 직역투를 줄이는 규칙 — 같은 모델(Llama 4 Scout)로 지어낸 영·일·중 문단을 비교해 통화·숫자·관용구가 가장 정확했다 (Mistral Small 은 빠르나 통화·인명 오류)
+  "Write the way a Korean newspaper reporter would write it, not word for word: carry the meaning, reorder clauses into natural Korean order, " +
+  "turn idioms and metaphors into their Korean meaning (never translate an idiom literally, e.g. 'threw in the towel' → 손을 들었다, 'not out of the woods' → 아직 안심하기 이르다, " +
+  "'poured cold water on' → 제동을 걸었다), and avoid translationese such as '~에 의한', '~를 향한', '~하는 것이다', needless 그/그녀/그들 and passive voice. " +
+  "Keep every currency exactly as in the source and convert only the amount (8000億円 → 8000억 엔, 1.2万亿元 → 1조2000억 위안, 2.5 billion pounds → 25억 파운드; never change 엔·위안·달러·파운드 to 원). " +
   "Do not add, omit, merge or summarize. Never output Chinese characters or Japanese: write every Chinese or Japanese name and term in Hangul " +
   "(习近平 → 시진핑, 谋划 → 계획, 高市早苗 → 다카이치 사나에). " +
   "Output exactly one line per input paragraph, in the same order, each line starting with its number and a colon, like:\n1: 번역\n2: 번역";
