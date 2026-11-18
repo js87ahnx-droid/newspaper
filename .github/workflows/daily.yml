@@ -164,13 +164,15 @@ jobs:
         env:
           STATUS_TOKEN: ${{ github.token }}
           EDITION_DATE: ${{ steps.publish.outputs.date || inputs.date }}
-          IS_CANCELLED: ${{ cancelled() && '--cancelled' || '' }}
+          JOB_STATUS: ${{ job.status }}   # 상태 함수(cancelled() 등)는 if: 에서만 쓸 수 있다 — env 에 쓰면 워크플로 파일 전체가 무효 (11/18 S52 배포 뒤 실측)
           # 오류 문장에서 이 값들을 지운다 (Actions 로그는 *** 로 가리지만 status.json 은 그렇지 않다)
           NEWS_PASSWORD: ${{ secrets.NEWS_PASSWORD }}
           READER_URL: ${{ secrets.READER_URL }}
           READER_KEY: ${{ secrets.READER_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: python3 scripts/run_status.py fail $IS_CANCELLED || true
+        run: |
+          flag=""; [ "$JOB_STATUS" = "cancelled" ] && flag="--cancelled"
+          python3 scripts/run_status.py fail $flag || true
       - name: 누적분 저장
         # 푸시 뒤에: 같은 호를 건너뛰면 그 실행의 edition.json 등이 발행본을 덮지 않게 저장하지 않는다 (S39).
         # 발행·푸시가 실패하면 지금처럼 저장한다 — 다시 만들 때 AI 결과를 재사용 (S35a 조건은 그대로)

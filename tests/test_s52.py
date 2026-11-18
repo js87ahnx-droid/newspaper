@@ -217,7 +217,7 @@ def test_workflow_pipefail_and_status_steps():
     for k in ("NEWS_PASSWORD", "READER_URL", "READER_KEY", "CLAUDE_CODE_OAUTH_TOKEN"):
         assert f"{k}: ${{{{ secrets.{k} }}}}" in fail
     done = WF.split("- name: 발행 상태 — 끝", 1)[1].split("- name:", 1)[0]
-    assert "run_status.py done \"$EDITION\" || true" in done and "pushed" in done and "run_status.py fail $IS_CANCELLED || true" in fail
+    assert "run_status.py done \"$EDITION\" || true" in done and "pushed" in done and "run_status.py fail $flag || true" in fail
 
 
 def test_tee_pipe_keeps_exit_code(tmp_path):
@@ -293,3 +293,11 @@ def test_verify_site_status_json_only_warns(tmp_path):
     (docs / "other.txt").write_text("Gaza truce collapses again", encoding="utf-8")
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "verify_site.py"), str(docs), str(ed)], capture_output=True, text=True, encoding="utf-8")
     assert r.returncode == 1
+
+
+def test_status_functions_only_in_if():
+    """상태 함수(success/failure/cancelled/always)는 if: 에서만 — env·with 등에 쓰면 GitHub 가 워크플로 파일 전체를 거부 (11/18)."""
+    import re
+    for n, line in enumerate(WF.splitlines(), 1):
+        if re.search(r"\$\{\{[^}]*(success|failure|cancelled|always)\(\)", line):
+            assert re.match(r"\s*if:", line), (n, line)
