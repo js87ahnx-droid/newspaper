@@ -165,7 +165,7 @@
     var ti = Object.keys(g.ti).sort(function (a, b) { return g.ti[b] - g.ti[a]; }).map(function (t) {
       return '<span class="rlt">' + esc(topics[t] || t) + " " + val(g.ti[t], g.bti[t]) + "</span>";
     }).join("");
-    var intl = (r.topicMax || {}).international;
+    var caps = Object.keys(r.topicMax || {}).map(function (t) { return (topics[t] || t) + " " + pct(r.topicMax[t]); }).join(", ");   // S54: 분야 상한 모두
     var auto;
     if (L && L.week) {
       auto = "<p>마지막 조정 <b>" + esc(L.week) + "</b> (" + weekDay(L.edition) + ", 리뷰 " + (L.reviews || 0) + "건)</p>" +
@@ -192,7 +192,7 @@
       "<li>다양성: 지면의 " + pct(r.diversity) + "는 관심도와 상관없이 주목도 상위</li>" +
       "<li>연속: " + r.contDays + "일 이상 이어진 이슈를 지면의 " + pct(r.contMax) + "까지</li>" +
       "<li>나머지는 종합 점수 순. 관심도 덕분에 들어온 기사는 " + pct(r.interestCap) + "까지" +
-      (intl ? ", 국제는 " + pct(intl) + "까지" : "") + "</li></ol>" +
+      (caps ? ", 분야별로 " + caps + "까지(예비 포함)" : "") + "</li></ol>" +
       "<h3>자동 조정</h3>" + auto + hist +
       '<p class="hint">편집 리뷰를 주마다 모아 주목도·중요도·머리기사·연속성 가중치(기본값의 0.7~1.3배)와 분야 중요도(0.6~1.4배)를 조금씩 바꿉니다. 관심도 가중치는 바꾸지 않습니다.</p>' +
       (RD ? '<div class="actions"><button type="button" data-rl="reset">자동 조정 되돌리기</button></div><p class="rlstat" aria-live="polite"></p>' : "") +

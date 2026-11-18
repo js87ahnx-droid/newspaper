@@ -146,11 +146,17 @@ def choose(scored: list[ScoredIssue], cfg: Config, interests: Interests) -> tupl
     # 관심 상한은 적용하지 않는다 (S21c — 관심 분야가 넓어 상한에 걸리면 예비가 16건뿐이었음)
     reserves: list[Placed] = []
     taken = set(placed) | set(merged_into)
+    # 예비에도 분야 상한 (S54 ⑤ — 11/18 단신 91건 중 경제·증시 62건: 넘친 경제 기사가 예비로 단신에 쌓였다)
+    reserve_cap = {t: math.floor(r * ed.reserve) for t, r in ed.topic_max_ratio.items()}
+    reserve_count: Counter = Counter()
     for s in sorted(scored, key=lambda s: (-s.final, s.issue.id)):
         if len(reserves) >= ed.reserve:
             break
         if s.issue.id in taken or set(s.issue.extra.get("near", [])) & taken:
             continue
+        if s.topic in reserve_cap and reserve_count[s.topic] >= reserve_cap[s.topic]:
+            continue
+        reserve_count[s.topic] += 1
         reserves.append(Placed(s, ["예비: 쪽이 남으면 단신"], reserve=True))
         taken.add(s.issue.id)
     # 면 최소 후보 (S23a): 면마다 그 면에 갈 다음 순위 기사를 몇 건씩 (예비에 없을 때 arrange 가 쓴다)
