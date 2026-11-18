@@ -158,3 +158,33 @@ def test_horizontal_scroll_none_phone(browser, tmp_path, monkeypatch):
     m = page.evaluate("() => ({ sw: document.scrollingElement.scrollWidth, iw: innerWidth, pw: document.querySelector('#reader .reader-panel').scrollWidth, pc: document.querySelector('#reader .reader-panel').clientWidth })")
     assert m["sw"] <= m["iw"] and m["pw"] <= m["pc"] + 1 and not errors, m
     ctx.close()
+
+
+import pytest  # noqa: E402
+
+from tests.test_render_browser import make_site, open_page  # noqa: E402
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (1366, 1024), (390, 844)])
+def test_opinion_titles_fit_no_drop(browser, tmp_path, w, h):
+    """논평면 외국어 글에 한국어 줄이 늘어도 지면에서 빠지는 글 0, 넘침 0 (S54g)."""
+    from tests.test_s54 import _op_edition
+
+    def mutate(ed):
+        _op_edition(ed)
+        for k in range(12):   # 사설·칼럼을 넉넉히 — 쪽 나누기가 실제로 일어나게
+            for kind in ("editorials", "columns"):
+                row = dict(ed["opinion"][kind][-1])
+                row["id"] = f"x{kind}{k}"
+                row["title"] = row["title"] + f" {k}"
+                ed["opinion"][kind].append(row)
+    index = make_site(tmp_path, mutate=mutate)
+    ctx, page, errors = open_page(browser, index, w, h)
+    st = page.evaluate("() => NEWS.state()")
+    m = page.evaluate("""() => { const want = [...document.querySelectorAll('#flow section[data-section=opinion] a[data-art]')].map(a => a.textContent);
+      const got = new Set([...document.querySelectorAll('#book .page.sec-opinion a[data-art]')].map(a => a.textContent));
+      return { want: want.length, missing: want.filter(t => !got.has(t)).length,
+               ko: document.querySelectorAll('#book .page.sec-opinion .ko-sub').length }; }""")
+    assert not errors and not st["overflow"], (errors, st["overflow"])
+    assert m["ko"] > 0 and m["missing"] == 0, m
+    ctx.close()

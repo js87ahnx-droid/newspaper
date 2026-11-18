@@ -213,3 +213,42 @@ def test_op_title_model_prompt_and_cache_version():
     for rule in ("뜻을 옮긴", "번역투", "[천성인어]", "한자·가나"):
         assert rule in L.OP_TITLE_PROMPT
     L.OP_TITLE_PROMPT.format(data="x")                                             # 중괄호 이스케이프 확인
+
+
+# ---------- S54g ③ 논평·사설 면 원어 제목 + 한국어 부제 ----------
+def _op_edition(ed=None):
+    eds = [art(1, "조선일보", "보수", "[사설] 지어낸 한국어 사설", "리드", opinion=ED),
+           art(2, "Guardian", "진보", "The Guardian view on a made-up topic", "lead", opinion=ED, lang="en", country="UK"),
+           art(3, "아사히신문", "진보", "（社説）作り話の題名", "リード", opinion=ED, lang="ja", country="JP"),
+           art(4, "New York Times", "진보", "An invented opinion headline", "lead", opinion="column", lang="en", country="US")]
+    op = organize(eds, {"sections": {"front": []}})
+    ko = {"a2": "가디언 사설: 지어낸 주제", "a3": "지어낸 제목", "a4": "지어낸 칼럼 제목"}
+    for r in op["editorials"] + op["columns"]:
+        if r["id"] in ko:
+            r["ko_title"] = ko[r["id"]]
+    ed = ed or {"edition": "2026-10-16", "sections": {"front": []}, "compare": [], "stats": {}}
+    ed["opinion"] = op
+    return ed
+
+
+def test_opinion_foreign_title_first_korean_sub(tmp_path):
+    import re
+
+    from pipeline.render import render_html
+    from pipeline.settings import load_interests, load_sources
+    html = render_html(_op_edition(), load_config(), load_interests(), load_sources())
+    sec = html[html.index('data-section="opinion"'):]
+    assert re.search(r'lang="en"[^>]*>The Guardian view on a made-up topic</a><small class="ko-sub" lang="ko">가디언 사설: 지어낸 주제</small>', sec)
+    assert re.search(r'lang="ja"[^>]*>（社説）作り話の題名</a><small class="ko-sub" lang="ko">지어낸 제목</small>', sec)
+    assert re.search(r'lang="en"[^>]*>An invented opinion headline</a><small class="ko-sub" lang="ko">지어낸 칼럼 제목</small>', sec)
+    assert re.search(r'lang="ko"[^>]*>\[사설\] 지어낸 한국어 사설</a>(?!<small class="ko-sub")', sec)    # 한국어 글은 그대로
+    assert 'class="orig" lang="en">The Guardian' not in sec
+
+
+def test_news_pages_unchanged_title_order(tmp_path):
+    from pipeline.render import render_html
+    from pipeline.settings import load_interests, load_sources
+    from tests.test_s50 import _edition
+    html = render_html(_edition(), load_config(), load_interests(), load_sources())
+    news = html[:html.index('data-section="opinion"')] if 'data-section="opinion"' in html else html
+    assert 'class="ko-sub"' not in news
