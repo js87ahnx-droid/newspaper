@@ -16,10 +16,11 @@ export const BODY_SELECTORS = [
   "[data-component=text-block]", "[data-testid=article-body]", "[class*=article-body__content]",
   "section[name=articleBody]", ".StoryBodyCompanionColumn", ".paywall", ".article_right",
   "#detailContent", "#ozoom",   // 신화통신·인민일보 종이판 (S20d — 짧은 전문도 120자부터)
+  ".story-news", ".news_detail_wrap",   // 연합뉴스·매경 증권(stock.mk) 본문 칸 (S54d 실측 — 연합은 문단 모음으로만, stock.mk 는 못 찾았음)
 ];
 
 // 이 안의 글은 본문이 아니다
-const SKIP = "script, style, noscript, nav, footer, aside, form, button, iframe, svg, select, figcaption, [aria-hidden=true], [class*=related], [class*=recommend], [class*=share], [class*=byline], [id*=related], [class*=advert], [class*=ad-], [class*=copyright], [class*=reporter]";
+const SKIP = "script, style, noscript, nav, footer, aside, form, button, iframe, svg, select, figcaption, [aria-hidden=true], [class*=related], [class*=recommend], [class*=share], [class*=byline], [id*=related], [class*=advert], [class*=ad-], [class*=copyright], [class*=reporter], [class*=writer-zone]";
 const BLOCK = "p, div, br, li, h1, h2, h3, h4, h5, h6, section, blockquote, tr, figure, ul, ol, table, dd, dt";
 const VOID = new Set(["br", "img", "hr", "meta", "link", "input", "source", "wbr", "col", "embed", "area", "base", "param", "track"]);
 
