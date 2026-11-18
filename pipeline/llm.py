@@ -982,3 +982,54 @@ def curate_rank(edition: dict, cache: dict, guarded, cfg: Llm, keep: dict[str, i
     cache["curate_rank"] = {"key": key, "rank": rank}
     return f"ok ({len(rank)}면)"
 
+
+
+# ---------- 사설 같은 주제 묶기 (S54 ⑥) ----------
+EDTOPIC_PROMPT = """아래는 오늘 여러 신문의 사설이다. 같은 사안·사건을 다룬 사설끼리 같은 번호를 매겨라.
+- 같은 주제 = 같은 사안·사건 (같은 분야가 아님). 예: "AI 커닝 대책"과 "AI 규제"는 다른 주제, "수능 AI 부정행위 대책"과 "수험생끼리 감시하라는 교육부"는 같은 주제
+- 모든 id 에 번호를 매긴다. 다른 사설과 겹치지 않는 사설은 혼자 자기 번호
+- 제목 낱말이 달라도 다루는 사안이 같으면 같은 번호. 사안이 다르면 낱말이 비슷해도 다른 번호
+출력 형식: {{"topics": {{"<id>": 1}}}}
+{data}"""
+
+
+def edtopic_key(ids: list[str]) -> str:
+    import hashlib
+    return hashlib.sha1("|".join(sorted(ids)).encode("utf-8")).hexdigest()[:16]
+
+
+def parse_edtopics(res, ids: list[str]) -> dict[str, int] | None:
+    """AI 응답 → {사설 id: 주제 번호}. 모르는 id 는 버리고, 알려진 id 가 하나도 없으면 None (응답 이상)."""
+    if not isinstance(res, dict) or not isinstance(res.get("topics"), dict):
+        return None
+    known = set(ids)
+    out: dict[str, int] = {}
+    for k, v in res["topics"].items():
+        if k not in known or k in out:   # 같은 id 가 두 번이면 처음 것
+            continue
+        try:
+            out[k] = int(v)
+        except (TypeError, ValueError):
+            continue
+    return out or None
+
+
+def editorial_topics(rows: list[dict], cfg: Llm, budget: Budget, cache_path: Path, runner=None) -> tuple[dict[str, int] | None, str]:
+    """사설 [{id, 매체, 제목, 리드}] → ({id: 주제 번호} 또는 None, 상태). 결과는 <호>.llm.json 의 ed_topics 에 (응답 이상은 안 씀)."""
+    ids = [r["id"] for r in rows]
+    if len(ids) < 2:
+        return None, "대상 없음"
+    cache = read_json(cache_path, {})
+    key = edtopic_key(ids)
+    got = (cache.get("ed_topics") or {}).get(key)
+    if isinstance(got, dict) and got:
+        return {k: int(v) for k, v in got.items()}, "캐시"
+    res, st = call(EDTOPIC_PROMPT.format(data=_data_block(rows)), cfg, budget, runner,
+                   model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
+    hint = parse_edtopics(res, ids)
+    if hint is None:
+        return None, st if res is None else "응답 이상"
+    cache = read_json(cache_path, {})
+    cache.setdefault("ed_topics", {})[key] = hint
+    write_atomic(cache_path, json.dumps(cache, ensure_ascii=False, indent=1), encoding="utf-8")
+    return hint, f"ok ({len(set(hint.values()))}개 주제)"

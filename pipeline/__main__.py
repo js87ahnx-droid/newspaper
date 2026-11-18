@@ -451,13 +451,29 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     items = [it for ps in edition["sections"].values() for it in ps] + edition["compare"]
     for it in items:
         it["stance"] = stance([by_id[a["id"]] for a in it["articles"]], prior)
+    # AI 사용 여부·하루 호출 상한은 여기서 한 번 — 사설 묶기(S54 ⑥)와 enrich 가 같이 쓴다
+    use_llm = cfg.llm.enabled and not args.no_llm
+    budget = None
+    if use_llm:
+        from .llm import Budget
+
+        budget = Budget(raw / "llm-usage.json", date.fromisoformat(args.date), cfg.llm.max_calls_per_day)  # 호 단위 (S21a — UTC 오늘이면 전날 재발행 호출까지 합쳐짐)
     # 논평·사설면 (뉴스와 따로 모은 의견 기사를 지면 이슈와 연결)
     op_path = raw / f"{args.date}.opinion.json"
+    ed_topic_note = ""
     if op_path.exists():
-        from .opinion import organize
+        from .opinion import dedupe_opinions, organize
 
         opinions = [Article.from_dict(d) for d in json.loads(op_path.read_text(encoding="utf-8"))]
-        edition["opinion"] = organize(opinions, edition, day_articles)
+        hint = None
+        if use_llm:
+            from .llm import available, editorial_topics
+
+            eds = [o for o in dedupe_opinions(opinions) if o.opinion == "editorial"]
+            if available()[0]:
+                rows = [{"id": e.id, "매체": e.source, "제목": e.title, "리드": (e.lead or "")[:200]} for e in eds]
+                hint, ed_topic_note = editorial_topics(rows, cfg.llm, budget, raw / f"{args.date}.llm.json")
+        edition["opinion"] = organize(opinions, edition, day_articles, topic_hint=hint)
     # 분석·해설 (S22c) / 지정 칼럼 (S22d)
     from .opinion import organize_analysis, recent_picks
 
@@ -474,14 +490,9 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     if picks_path.exists():
         edition["picks"] = recent_picks(json.loads(picks_path.read_text(encoding="utf-8")), date.fromisoformat(args.date))
     llm_note = "꺼짐"
-    if cfg.llm.enabled and not args.no_llm:
-        from datetime import date as _date
+    if use_llm:
+        from .llm import available, enrich  # 켜져 있을 때만 불러온다
 
-        from .llm import Budget, enrich  # 켜져 있을 때만 불러온다
-
-        from .llm import available
-
-        budget = Budget(raw / "llm-usage.json", _date.fromisoformat(args.date), cfg.llm.max_calls_per_day)  # 호 단위 (S21a — UTC 오늘이면 전날 재발행 호출까지 합쳐짐)
         bodies: dict[str, str | None] = {}
         if cfg.llm.analysis_issues > 0 and available()[0]:
             # 본문은 이 변수(메모리)에만 있다 — 파일·캐시로 쓰지 않는다 (D16)
@@ -522,6 +533,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
                          curated_keep=cfg.curated.keep if cfg.curated.enabled else None)   # S51 ⑦: 큐레이션 판 고르기 AI 한 번
         del bodies
         st = edition["stats"]["llm"]
+        if ed_topic_note:
+            st.setdefault("status", {})["ed_topics"] = ed_topic_note   # S54 ⑥ 사설 같은 주제 묶기
         sp = st.get("spent_today") or {}
         models = ", ".join(f"{k} {v['calls']}회 ${v['usd']:.2f}" for k, v in sorted((sp.get("by_model") or {}).items()))
         llm_note = (f"{st['status']} (오늘 {st['calls_today']}회, API 요금 환산 ${sp.get('usd', 0):.2f} — "
