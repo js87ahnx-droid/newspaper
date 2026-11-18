@@ -35,7 +35,7 @@ editing:
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
-# pages: 고정 쪽 수 (S15). 합 30쪽(펼침 15면 — S47 종합면 2쪽 추가) — 짝수여야 펼침면이 맞는다.
+# pages: 고정 쪽 수 (S15). 합 29쪽(S47 종합면 2쪽 추가, S54 중국은 지금 1쪽) — 홀수 쪽이면 앱이 끝에 빈 쪽을 채워 펼침면을 맞춘다.
 # S21c(10/18호 "단신이 너무 많다"): 사회·과학 면을 새로, 관심면 확대, 단신 5 → 3쪽. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 논평·단신이 쓴다
 sections:
   - {id: front, title: "1면", max_articles: 5, pages: 2}
@@ -43,7 +43,7 @@ sections:
   - {id: politics, title: "정치·안보", max_articles: 9, pages: 3}
   - {id: economy, title: "경제·산업", max_articles: 9, pages: 3}
   - {id: international, title: "국제", max_articles: 12, pages: 4}
-  - {id: china, title: "중국은 지금", max_articles: 0, pages: 2}  # 인민일보로 읽는 중국의 시선 (S37) — AI 가 실을 만하다고 본 날만 쪽이 생김
+  - {id: china, title: "중국은 지금", max_articles: 0, pages: 1}  # 인민일보로 읽는 중국의 시선 (S37) — AI 가 실을 만하다고 본 날만 쪽이 생김
   - {id: society, title: "사회·과학", max_articles: 7, pages: 2}
   - {id: interest, title: "관심", max_articles: 14, pages: 3}
   - {id: analysis, title: "분석·해설", max_articles: 0, pages: 2}  # 매체가 쓴 분석·해설 기사 (S22c — AI 글 아님). 뉴스 기사 수에는 안 셈

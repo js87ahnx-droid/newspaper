@@ -513,7 +513,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .cn-ev .orig-btn { display: block; text-align: left; margin-top: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cn-note { font-size: calc(11px * var(--fs)); color: var(--muted); margin-bottom: 0; }
 .cn-ev .orig-btn { font: inherit; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
-.item.tight.cn-view .cn-words, .item.tight.cn-more .cn-agenda { display: none; }
+.item.tight.cn-view .cn-words { display: none; }
 
 /* 종합면 (S47, 시안 A): 1면 메인 이슈를 다른 매체 기사로 펼침 — 이슈 제목 띠 */
 .jh-theme { margin: 0 0 8px; padding: 4px 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-weight: 700; font-size: calc(15px * var(--fs)); }
@@ -608,3 +608,9 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .page-inner .ft-alt, .page-inner .ft { display: none; }
 /* S54 ③ 논평·사설 면 외국어 글: 원어 제목(링크) 아래 한국어 번역 제목 한 줄 */
 .ko-sub { display: block; font-size: 0.86em; font-weight: 400; color: var(--muted); margin: 1px 0 2px; line-height: 1.4; }
+/* S54 ② 중국은 지금 한 쪽: 지면 쪽에서 숨긴 칸(창·#flow 원본엔 그대로), 해석 4줄, 제목 링크 */
+.page-inner [data-cn-hide] { display: none !important; }
+.page-inner .cn-view.cn-lead4 .cn-lead { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.cn-title a { color: inherit; text-decoration: none; }
+.cn-title a:hover, .cn-title a:focus-visible { text-decoration: underline; }
+.cn-row + .cn-row dt { margin-top: 6px; }

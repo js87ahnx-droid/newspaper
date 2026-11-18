@@ -458,25 +458,41 @@
     return { pages: out, rest: rest };
   }
 
-  // 펼침 보기는 1-2, 3-4쪽이 좌우로 묶인다. 두 쪽짜리 "중국은 지금"이 짝수 쪽에서 시작하면 넘겨 가며 봐야 하므로
-  // (2026-11-06 사용자, 앞 면이 줄어든 날) 홀수 쪽에서 시작하는 가장 가까운 면 사이로 옮긴다. 뒤쪽을 먼저 찾아 1면·주요 뉴스 순서를 지킨다.
-  // 단신·논평·가이드 뒤로는 보내지 않고, 자리가 없으면 그대로 둔다.
-  function chinaOnSpread(order, built) {
-    if (!spread || mode === "scroll" || (built.china || []).length !== 2) return order;
-    var from = order.indexOf("china");
-    var rest = order.filter(function (id) { return id !== "china"; });
-    var isOdd = function (at) {
-      return rest.slice(0, at).reduce(function (n, id) { return n + (built[id] || []).length; }, 0) % 2 === 1;
+  // 중국은 지금 한 쪽 (S54 ②): 지면 쪽엔 앞부분 + 들어가는 만큼의 "다른 나라 매체" 줄. 넘치면 핵심어 → 강조·말하지 않은 것 3개
+  // → 해석 4줄 → 강조·말하지 않은 것 2개 순으로 줄이고, 그래도 넘치면(글자를 키운 경우) 지금처럼 fit. 숨긴 것은 #flow 원본엔 있어 창에선 모두 보인다
+  function fitChina(pages) {
+    var page = pages[0];
+    if (!page) return;
+    var inner = page.firstChild, node = inner.querySelector("article.cn-view");
+    if (!node) return;
+    node.classList.remove("compact", "tight", "clip");
+    node.style.maxHeight = "";
+    var hide = function (el) { if (el) el.setAttribute("data-cn-hide", ""); };
+    var show = function (el) { if (el) el.removeAttribute("data-cn-hide"); };
+    var keep = function (n) {
+      Array.prototype.forEach.call(node.querySelectorAll(".cn-own ul"), function (ul) {
+        Array.prototype.forEach.call(ul.children, function (li, i) { if (i >= n) hide(li); });
+      });
     };
-    if (!isOdd(from)) return order;
-    var end = rest.length;
-    ["more", "briefs", "opinion", "guide"].forEach(function (id) { var i = rest.indexOf(id); if (i >= 0) end = Math.min(end, i); });
-    var to = -1, at;
-    for (at = from + 1; at <= end && to < 0; at++) if (!isOdd(at)) to = at;
-    for (at = from - 1; at >= 1 && to < 0; at--) if (!isOdd(at)) to = at;
-    if (to < 0) return order;
-    rest.splice(to, 0, "china");
-    return rest;
+    Array.prototype.forEach.call(node.querySelectorAll(".cn-agenda, .cn-ev, .cn-cmpbox, .cn-row"), hide);
+    var steps = [
+      function () { hide(node.querySelector(".cn-words")); },
+      function () { keep(3); },
+      function () { node.classList.add("cn-lead4"); },
+      function () { keep(2); },
+    ];
+    for (var i = 0; i < steps.length && overflows(inner); i++) steps[i]();
+    if (overflows(inner)) { fit(inner, node); return; }
+    var box = node.querySelector(".cn-cmpbox");
+    if (!box) return;
+    show(box);
+    var rows = node.querySelectorAll(".cn-row"), shown = 0;
+    for (var k = 0; k < rows.length; k++) {
+      show(rows[k]);
+      if (overflows(inner)) { hide(rows[k]); break; }
+      shown++;
+    }
+    if (!shown) hide(box);
   }
 
   // 종합면 묶음 정리 (S49): 둘째 묶음의 띠 기사가 쪽에 못 실렸으면 그 묶음 나머지도 빼고(띠 없이 메인 묶음처럼 보이지 않게),
@@ -610,6 +626,7 @@
       if (["opinion", "guide", "analysis", "china"].indexOf(id) < 0) balance(res.pages);
       if (cur) fromList = fromList.concat(mergeTail(res), fixMoreList(res));   // 쪽 고르기(balance)가 끝 쪽을 다시 1건으로 만들 수 있어 한 번 더 (재리뷰 M2), 목록 칸만 남은 끝 쪽도 (S50)
       if (id === "jonghap") fixJonghap(res.pages);
+      if (id === "china") fitChina(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       listOver = listOver.concat(fromList);   // 제목 한 줄이던 목록 기사를 기사 꼴로 키우지 않게 단신으로만 (S50 계획 리뷰 4차 M2)
@@ -667,7 +684,7 @@
     var total = 0;
     Object.keys(budgets).forEach(function (k) { total += budgets[k] || 0; });
     var out = [];
-    chinaOnSpread(order, built).forEach(function (id) { out = out.concat(built[id] || []); });
+    order.forEach(function (id) { out = out.concat(built[id] || []); });
     // 쪽수 고정: 기사가 모자라 쪽이 남으면 끝 쪽으로 채운다 (같은 화면 크기면 호가 바뀌어도 쪽수가 같다)
     while (total && !CURATED && out.length < total) {   // 큐레이션 판은 줄인 만큼 쪽도 준다 (S50)
       var end = newPage(g, "end", null, false);

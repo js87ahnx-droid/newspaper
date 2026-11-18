@@ -1,6 +1,6 @@
 """S37c 중국은 지금 쪽 — 실제 브라우저로.
 
-- AI 결과가 있으면 국제 뒤에 "중국은 지금" 쪽(두 덩어리), 없으면 쪽 없음
+- AI 결과가 있으면 국제 뒤에 "중국은 지금" 한 쪽(S54 ② — 지면엔 앞부분 + 들어가는 만큼의 다른 나라 매체, 제목 → 창에 전부), 없으면 쪽 없음
 - 휴대폰(390)·패드(1180)에서 넘치거나 잘리지 않고, 가로로 밀리지 않음
 - 근거 기사 단추는 원문 창으로
 """
@@ -28,7 +28,7 @@ def add_china(out):
     }
 
 
-@pytest.mark.parametrize("w,h", [(390, 844), (1180, 820), (820, 1180)])
+@pytest.mark.parametrize("w,h", [(390, 844), (1180, 820), (820, 1180), (1366, 1024)])
 def test_china_page_fits(browser, tmp_path, w, h):  # noqa: F811
     index = make_site(tmp_path, mutate=add_china)
     ctx, page, errors = open_page(browser, index, w, h)
@@ -41,13 +41,20 @@ def test_china_page_fits(browser, tmp_path, w, h):  # noqa: F811
                 clipped: NEWS.state().clipped, overflow: NEWS.state().overflow.length,
                 sw: document.scrollingElement.scrollWidth - innerWidth,
                 brief: document.querySelectorAll('#book .item.brief[data-section="china"]').length,
-                ev: document.querySelectorAll('#book .cn-ev .orig-btn[data-art]').length}; }""")
+                note: [...document.querySelectorAll('#book .cn-view .cn-note')].filter(x => x.offsetHeight > 0).length,
+                rows: [...document.querySelectorAll('#book .cn-view .cn-row')].filter(x => x.offsetHeight > 0).length,
+                hiddenRows: [...document.querySelectorAll('#book .cn-view .cn-row')].filter(x => x.offsetHeight === 0).length,
+                used: (() => { const p = [...document.querySelectorAll('#book .page')].find(p => p.querySelector('.cn-view'));
+                  const inn = p.querySelector('.page-inner'), r = inn.getBoundingClientRect(); let b = r.top;
+                  [...inn.children].forEach(c => { const q = c.getBoundingClientRect(); if (q.height > 0) b = Math.max(b, q.bottom); });
+                  return (b - r.top) / r.height; })()}; }""")
     ctx.close()
     assert not errors, errors
-    assert m["parts"] == 2 and 1 <= m["cn"] <= 2, m
-    assert m["after"] == 1 or w > h, m           # 국제 바로 뒤 (펼침 보기는 좌우에 함께 보이게 옮길 수 있다 — 아래 시험)
+    assert m["parts"] == 1 and m["cn"] == 1, m   # S54 ②: 한 쪽
+    assert m["after"] == 1, m                     # 국제 바로 뒤
     assert m["clipped"] == 0 and m["overflow"] == 0 and m["sw"] <= 1 and m["brief"] == 0, m
-    assert m["ev"] == 2                           # 근거 기사 → 원문 창
+    assert m["note"] == 1, m                      # "AI 해석" 안내는 늘 보임
+    assert m["hiddenRows"] == 0 or m["used"] >= 0.85, m   # 다른 매체 줄이 남아 있으면 아래 여백 < 15%
 
 
 def _short_economy(out):
@@ -64,18 +71,33 @@ CHINA_PAGES = """() => {
             total: pages.length, folio: cn.map(p => p.querySelector('.folio').textContent)}; }"""
 
 
-def test_china_two_pages_stay_on_one_spread(browser, tmp_path):  # noqa: F811
-    """펼침 보기: 짝수 쪽에서 시작할 날은 뒤쪽 면 사이로 옮겨 좌우에 함께 보인다 (2026-11-06)."""
+def test_china_one_page_on_spread(browser, tmp_path):  # noqa: F811
+    """S54 ②: 한 쪽이라 펼침 보기에서도 옮기지 않고 국제 바로 뒤 (chinaOnSpread 없앰)."""
     index = make_site(tmp_path, mutate=_short_economy)
     ctx, page, errors = open_page(browser, index, 1180, 820)
     m = page.evaluate(CHINA_PAGES)
     ctx.close()
     assert not errors, errors
-    assert len(m["at"]) == 2 and m["at"][0] % 2 == 0 and m["at"][1] == m["at"][0] + 1, m
-    assert m["left"] == [True, False], m
-    assert m["folio"][0].startswith(f"{m['at'][0] + 1} /") and m["total"] % 2 == 0, m
-    assert m["order"][0] == "front", m
-    assert m["order"].index("china") < m["order"].index("briefs"), m   # 단신·논평 뒤로 가지 않는다
+    assert len(m["at"]) == 1 and m["order"].index("china") - m["order"].index("international") == 1, m
+    assert m["total"] % 2 == 0, m
+
+
+def test_china_title_opens_window_with_everything(browser, tmp_path):  # noqa: F811
+    index = make_site(tmp_path, mutate=add_china)
+    ctx, page, errors = open_page(browser, index, 390, 844)
+    page.evaluate("() => { const a = document.querySelector('#book .cn-title a[data-detail]'); a.scrollIntoView(); a.click(); }")
+    page.wait_for_selector("#reader:not([hidden]) .cn-view")
+    r = page.evaluate("""() => { const v = document.querySelector('#reader .cn-view'), vis = s => [...v.querySelectorAll(s)].filter(x => x.offsetHeight > 0).length;
+        return { rows: vis('.cn-row'), agenda: vis('.cn-agenda'), ev: vis('.cn-ev .orig-btn'), words: vis('.cn-words'), emph: vis('.cn-emph li'), ft: !!v.querySelector('.ft') }; }""")
+    assert r == {"rows": 4, "agenda": 1, "ev": 2, "words": 1, "emph": 4, "ft": False}, r
+    page.keyboard.press("Escape")
+    page.evaluate("() => NEWS.goTo(+document.querySelector('#book .cn-title a').closest('.page').getAttribute('data-page'))")
+    page.wait_for_timeout(700)
+    page.evaluate("() => document.querySelector('#book .cn-title a').focus()")
+    page.keyboard.press("Enter")
+    page.wait_for_selector("#reader:not([hidden]) .cn-view")
+    assert not errors, errors
+    ctx.close()
 
 
 def test_china_keeps_place_on_portrait(browser, tmp_path):  # noqa: F811
@@ -96,7 +118,7 @@ def test_china_title_breaks_between_words(browser, tmp_path):  # noqa: F811
     index = make_site(tmp_path, mutate=mutate)
     ctx, page, errors = open_page(browser, index, 390, 844)
     m = page.evaluate("""() => {
-        const el = document.querySelector('#book .cn-title'), t = el.firstChild, s = t.data, r = document.createRange();
+        const el = document.querySelector('#book .cn-title a'), t = el.firstChild, s = t.data, r = document.createRange();   // S54: 제목은 링크 안
         const top = i => { r.setStart(t, i); r.setEnd(t, i + 1); return r.getBoundingClientRect().top; };
         const bad = []; let lines = 1, last = top(0);
         for (let i = 1; i < s.length; i++) {
