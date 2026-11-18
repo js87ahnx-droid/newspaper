@@ -200,3 +200,16 @@ def test_publish_resolves_alt_when_key_missing():
     from pipeline import __main__ as m
     src = inspect.getsource(m.cmd_publish)
     assert '"read_alt" not in edition' in src and "resolve_alt" in src
+
+
+# ---------- S54f ① 칼럼·사설 제목 번역 ----------
+def test_op_title_model_prompt_and_cache_version():
+    import inspect
+
+    import pipeline.llm as L
+    assert L.BATCH_OP == 20 and L.OP_TITLE_KEY != "op_title"                       # 판이 바뀌어 다시 번역
+    src = inspect.getsource(L.enrich)
+    assert "OP_TITLE_PROMPT.format" in src and "model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec" in src
+    for rule in ("뜻을 옮긴", "번역투", "[천성인어]", "한자·가나"):
+        assert rule in L.OP_TITLE_PROMPT
+    L.OP_TITLE_PROMPT.format(data="x")                                             # 중괄호 이스케이프 확인

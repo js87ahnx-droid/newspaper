@@ -597,18 +597,17 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
               if o.get("lang") not in ("ko", None) and (o.get("lang") != "en" or want_title("en", display))]
     op_all += [o for o in edition.get("picks", []) if o.get("lang") not in ("ko", None)]   # 지정 칼럼은 영어도 (S23b — 칼럼 칸 맨 앞)
     want_ids = sorted({o["id"] for o in op_all})
-    todo_ids = [i for i in want_ids if i not in cache.get("op_title", {})]
+    # S54 ①: 직역투("국가에 의한 낚아채기의 귀환")라 analysis 모델·규칙으로 다시 — 캐시 판을 바꿔(op_title2) 지난 번역을 쓰지 않는다
+    todo_ids = [i for i in want_ids if i not in cache.get(OP_TITLE_KEY, {})]
     for k0 in range(0, len(todo_ids), BATCH_OP):   # S49: 영어까지 늘어 나눠 보낸다
         rows = [{"id": i, "제목": next(o["title"] for o in op_all if o["id"] == i)} for i in todo_ids[k0:k0 + BATCH_OP]]
-        prompt = ("각 사설·칼럼 제목을 자연스러운 한국어 신문 제목으로 번역하라. '社説' 같은 머리말은 빼라.\n"
-                  '출력 형식: {"titles": {"<id>": "한국어"}}\n' + _data_block(rows))
-        res, st = guarded(prompt)
+        res, st = guarded(OP_TITLE_PROMPT.format(data=_data_block(rows)), model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
         status["op_title"] = st if "op_title" not in status or status["op_title"] == st else status["op_title"] + " / " + st
         if res and isinstance(res.get("titles"), dict):
-            cache["op_title"] = {**cache.get("op_title", {}), **{k: str(v) for k, v in res["titles"].items()}}
+            cache[OP_TITLE_KEY] = {**cache.get(OP_TITLE_KEY, {}), **{k: str(v) for k, v in res["titles"].items()}}
     for o in op_all:
-        if o["id"] in cache.get("op_title", {}):
-            o["ko_title"] = cache["op_title"][o["id"]]
+        if o["id"] in cache.get(OP_TITLE_KEY, {}):
+            o["ko_title"] = cache[OP_TITLE_KEY][o["id"]]
 
     # 5. 분석·해설 한국어 요약 (S22c): 한국어가 아닌 분석 기사는 리드를 한두 문장 한국어로 (리드가 없으면 제목으로)
     #    같은 호출에서 스포츠·연예 분석을 가려낸다 (S22c 평가: Google 뉴스 경유 WaPo NFL 분석은 주소·제목 규칙으로 못 거름)
@@ -682,7 +681,16 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
 
 
 KOREAN_BATCH, KOREAN_MAX_BATCHES = 30, 8   # S49b: 제목·요약·부제를 한 번에 받아 출력이 늘었다 — 30건씩, 8번까지
-BATCH_OP = 40
+BATCH_OP = 20   # S54: sonnet 으로 바꾸며 40 → 20 (한 번에 시간 초과 나지 않게)
+OP_TITLE_KEY = "op_title2"   # S54 ① 프롬프트 판 — 바꾸면 다시 번역
+OP_TITLE_PROMPT = """각 사설·칼럼 제목을 한국어 신문 사설·칼럼 제목으로 옮겨라.
+- 낱말을 하나하나 옮기지 말고 뜻을 옮긴 자연스러운 한국어 제목체로. 관용구·비유는 우리말 뜻으로
+- '~에 의한', '~의 귀환' 같은 번역투를 피하고 짧게
+- '社説'·'Editorial'·'Opinion' 같은 머리말은 빼고, 고정 칼럼 이름은 대괄호로 앞에 (天声人語 → [천성인어], Charlemagne → [샤를마뉴])
+- 고유명사는 한글로, 한자·가나를 섞지 않는다
+- 나쁜 예 → 좋은 예: "The quiet comeback of the nanny state" → "슬그머니 돌아온 '보모 국가'" / "（天声人語）雪国の小さな駅" → "[천성인어] 눈 고장의 작은 역"
+출력 형식: {{"titles": {{"<id>": "한국어"}}}}
+{data}"""
 KOREAN_PROMPT = """아래 기사마다 "필요"에 적힌 칸만 한국어로 써라. 제목·리드(또는 정리)에 있는 내용만 쓰고 지어내지 마라.
 - 한국어 글에 일본어 가나·한자를 섞지 마라. 외국 고유명사도 한글로 적는다 (예: 람슈타인, 리비우)
 - title: 원제목을 자연스러운 한국어 신문 제목으로
