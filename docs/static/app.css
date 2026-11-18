@@ -302,24 +302,24 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .reader-body .item .photo img { max-height: 340px; }
 /* S17 원문 재배열 보기 */
 .readview { font-size: 1.02em; line-height: 1.75; }
-.readview .rv-back { font: inherit; font-size: 0.85em; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
-.readview .rv-title { font-size: 1.35em; line-height: 1.4; margin: 2px 0 6px; }
-.readview .rv-status { font-size: 0.85em; color: var(--muted, #6b6358); margin: 0 0 12px; }
-.readview .rv-fail { color: var(--ink); font-size: 0.95em; }
-.readview .rv-p { margin: 0 0 0.9em; word-break: keep-all; overflow-wrap: anywhere; }
-.readview .rv-photo { margin: 0 0 14px; }
-.readview .rv-photo img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: rgba(0, 0, 0, 0.04); border-radius: 4px; }
-.readview .rv-photo figcaption { font-size: 0.8em; color: var(--muted, #6b6358); margin-top: 4px; line-height: 1.5; }
-.readview .rv-foot { font-size: 0.8em; color: var(--muted, #6b6358); border-top: 1px solid var(--rule, #c9bfae); padding-top: 8px; margin-top: 16px; }
-.readview .rv-top { display: flex; align-items: center; gap: 12px; margin: 6px 84px 0 0; }   /* 오른쪽은 닫기 단추 자리 */
-.readview .rv-src { font-size: 0.85em; color: var(--muted, #6b6358); }
-.readview .rv-link { color: var(--accent); font-size: 0.85em; }
-.readview .rv-link-big { display: inline-block; margin-top: 4px; padding: 8px 16px; border: 1px solid var(--ink); border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 1em; }
-.readview .rv-note { font-size: 0.8em; color: var(--muted, #6b6358); margin: 0 0 2px; }
-.readview .rv-lang { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
-.readview .rv-lang-note { font-size: 0.8em; color: var(--muted, #6b6358); }
-.readview .rv-tab { font: inherit; font-size: 0.85em; padding: 2px 12px; border: 1px solid var(--rule, #c9bfae); border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; }
-.readview .rv-tab.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+:is(.readview, .ft) .rv-back { font: inherit; font-size: 0.85em; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+:is(.readview, .ft) .rv-title { font-size: 1.35em; line-height: 1.4; margin: 2px 0 6px; }
+:is(.readview, .ft) .rv-status { font-size: 0.85em; color: var(--muted, #6b6358); margin: 0 0 12px; }
+:is(.readview, .ft) .rv-fail { color: var(--ink); font-size: 0.95em; }
+:is(.readview, .ft) .rv-p { margin: 0 0 0.9em; word-break: keep-all; overflow-wrap: anywhere; }
+:is(.readview, .ft) .rv-photo { margin: 0 0 14px; }
+:is(.readview, .ft) .rv-photo img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: rgba(0, 0, 0, 0.04); border-radius: 4px; }
+:is(.readview, .ft) .rv-photo figcaption { font-size: 0.8em; color: var(--muted, #6b6358); margin-top: 4px; line-height: 1.5; }
+:is(.readview, .ft) .rv-foot { font-size: 0.8em; color: var(--muted, #6b6358); border-top: 1px solid var(--rule, #c9bfae); padding-top: 8px; margin-top: 16px; }
+:is(.readview, .ft) .rv-top { display: flex; align-items: center; gap: 12px; margin: 6px 84px 0 0; }   /* 오른쪽은 닫기 단추 자리 */
+:is(.readview, .ft) .rv-src { font-size: 0.85em; color: var(--muted, #6b6358); }
+:is(.readview, .ft) .rv-link { color: var(--accent); font-size: 0.85em; }
+:is(.readview, .ft) .rv-link-big { display: inline-block; margin-top: 4px; padding: 8px 16px; border: 1px solid var(--ink); border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 1em; }
+:is(.readview, .ft) .rv-note { font-size: 0.8em; color: var(--muted, #6b6358); margin: 0 0 2px; }
+:is(.readview, .ft) .rv-lang { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 12px; }
+:is(.readview, .ft) .rv-lang-note { font-size: 0.8em; color: var(--muted, #6b6358); }
+:is(.readview, .ft) .rv-tab { font: inherit; font-size: 0.85em; padding: 2px 12px; border: 1px solid var(--rule, #c9bfae); border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; }
+:is(.readview, .ft) .rv-tab.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 /* S16 — 한 면 보기 (세로 스크롤·줌), 전체화면 */
 #book.scroll { margin: 0; }
 #book.scroll .scroller { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
@@ -513,7 +513,7 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .cn-ev .orig-btn { display: block; text-align: left; margin-top: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cn-note { font-size: calc(11px * var(--fs)); color: var(--muted); margin-bottom: 0; }
 .cn-ev .orig-btn { font: inherit; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
-.item.tight.cn-view .cn-words, .item.tight.cn-more .cn-agenda { display: none; }
+.item.tight.cn-view .cn-words { display: none; }
 
 /* 종합면 (S47, 시안 A): 1면 메인 이슈를 다른 매체 기사로 펼침 — 이슈 제목 띠 */
 .jh-theme { margin: 0 0 8px; padding: 4px 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-weight: 700; font-size: calc(15px * var(--fs)); }
@@ -553,7 +553,6 @@ body.narrow-page .fz-lead .photo img { max-height: 220px; }
 .bt-full .item.brief { margin: 0 0 6px; }
 
 /* ---------- S50 큐레이션 판 (시안 B): 뉴스 면 지면(.page-inner)에서만 덜어 보임 — 분석·논평·중국·단신·가이드는 그대로, 기사 창(#reader, 원본 복제)은 다 보임 ---------- */
-#toolbar .tb-var { color: var(--accent); border-color: var(--accent); font-size: 12.5px; }
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .orig,
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .flow,
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top) .rel-arts,
@@ -577,7 +576,6 @@ body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-internati
 .more-list li a:hover, .more-list li a:focus-visible { text-decoration: underline; }
 .more-list .src { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
 .curated-src { display: none; }
-#toolbar .tb-btn.tb-var { min-width: 0; padding: 0 6px; white-space: nowrap; }   /* 휴대폰 좁은 단추(min-width 29px)에서 글자가 넘치지 않게 (구현 리뷰 N1) */
 /* S51 큐레이션 판 "다른 각도" (시안 A): 1면 메인 자세히 창·둘째 이슈 기사 창에만 — 지면 쪽에선 숨김 */
 .page-inner .ang-rows { display: none; }
 .ang-rows h4 small { font-weight: 400; color: var(--muted); }
@@ -597,3 +595,23 @@ body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-internati
   aspect-ratio: 4 / 3; max-height: 96px !important; }
 body.ed-curated .page:is(.sec-front, .sec-politics, .sec-economy, .sec-international, .sec-society, .sec-interest, .sec-more) .page-inner .item:not(.fz):not(.top):not(.sec-head) .photo figcaption { display: none; }
 body.ed-curated .page-inner .item::after { content: ""; display: block; clear: both; }
+
+/* S54 ④ 자세히 창 안의 전문 칸 (시안 C)과 막힌 기사의 같은 사건 전문 기사 목록 */
+.ft { margin-top: 14px; padding-top: 10px; border-top: 2px solid var(--ink); }
+.ft-h { margin: 0 0 4px; font-size: 14px; }
+.ft-pay { margin: 0 0 6px; font-size: 12px; color: var(--accent); }
+.ft-body .rv-p { margin: 0 0 10px; }
+.ft .rv-lang { margin: 4px 0 8px; }
+.ft-alt { margin-top: 10px; padding: 8px 10px; border-left: 3px solid var(--accent); }
+.ft-alt-h { margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+.ft-why { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+.ft-alt-b { display: block; width: 100%; text-align: left; margin: 0 0 6px; white-space: normal; }
+.page-inner .ft-alt, .page-inner .ft { display: none; }
+/* S54 ③ 논평·사설 면 외국어 글: 원어 제목(링크) 아래 한국어 번역 제목 한 줄 */
+.ko-sub { display: block; font-size: 0.86em; font-weight: 400; color: var(--muted); margin: 1px 0 2px; line-height: 1.4; }
+/* S54 ② 중국은 지금 한 쪽: 지면 쪽에서 숨긴 칸(창·#flow 원본엔 그대로), 해석 4줄, 제목 링크 */
+.page-inner [data-cn-hide] { display: none !important; }
+.page-inner .cn-view.cn-lead4 .cn-lead { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.cn-title a { color: inherit; text-decoration: none; }
+.cn-title a:hover, .cn-title a:focus-visible { text-decoration: underline; }
+.cn-row + .cn-row dt { margin-top: 6px; }
