@@ -1,11 +1,11 @@
 {
  "date": "2026-11-19",
- "state": "running",
- "step": 5,
+ "state": "done",
+ "step": 7,
  "steps": 7,
- "label": "지면 만들기",
+ "label": "올리기",
  "message": "",
  "started": "2026-11-18T21:34:31Z",
- "updated": "2026-11-18T21:59:30Z",
+ "updated": "2026-11-18T21:59:42Z",
  "run": "https://github.com/js87ahnx-droid/newspaper/actions/runs/44402692751"
 }
