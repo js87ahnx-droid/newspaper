@@ -464,7 +464,7 @@
     var page = pages[0];
     if (!page) return;
     var inner = page.firstChild, node = inner.querySelector("article.cn-view");
-    if (!node) return;
+    if (!node || mode === "scroll") return;   // 스크롤 보기는 쪽 높이가 없으니 전부 (구현 리뷰 B1)
     node.classList.remove("compact", "tight", "clip");
     node.style.maxHeight = "";
     var hide = function (el) { if (el) el.setAttribute("data-cn-hide", ""); };
@@ -1343,7 +1343,13 @@
     if (!btn) return;
     var alt = node.querySelector(":scope > .ft-alt");
     var url = btn.getAttribute("data-read");
-    if (!url) { if (alt) alt.hidden = false; return; }
+    if (!url) {
+      if (alt) {
+        alt.hidden = false;
+        alt.insertBefore(mk("p", "ft-why", btn.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다." : "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다."), alt.firstChild);
+      }
+      return;
+    }
     if (alt) alt.remove();
     var box = mk("section", "ft");
     var src = btn.getAttribute("data-src") || "";
@@ -1414,14 +1420,17 @@
     });
   }
   // 번역: 문단 요소들(원문 글)을 한국어로 바꿔 보이고, 한국어/원문 전환 단추를 단다
-  function translateInto(view, nodes, lang, seq) {
+  function translateInto(view, nodes, lang, seq, key) {
     if (!RD || !lang || lang === "ko" || !nodes.length) return;
     var bar = mk("div", "rv-lang");
     var note = mk("span", "rv-lang-note", "한국어로 옮기는 중…");
     bar.appendChild(note);
     view.insertBefore(bar, view.querySelector(".rv-body"));
     var texts = nodes.map(function (n) { return n.textContent; });
-    relay("/translate", { body: JSON.stringify({ lang: lang, texts: texts }) }, seq).then(function (j) {
+    var got = key && TR[key] && TR[key].length === texts.length ? Promise.resolve({ ok: true, texts: TR[key] })   // 같은 주소는 이 탭에서 한 번만 번역 (S54)
+      : relay("/translate", { body: JSON.stringify({ lang: lang, texts: texts }) }, seq);
+    got.then(function (j) {
+      if (j && j.ok && j.texts && j.texts.length === texts.length && key) TR[key] = j.texts;
       if (seq !== readSeq) return;
       if (!j || !j.ok || !j.texts || j.texts.length !== texts.length) { note.textContent = "번역하지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : ""); return; }
       nodes.forEach(function (n, i) { n.setAttribute("data-orig", texts[i]); n.setAttribute("data-ko", j.texts[i] || texts[i]); n.textContent = j.texts[i] || texts[i]; });
@@ -1446,8 +1455,8 @@
     var url = el.getAttribute("data-read"), href = el.getAttribute("data-href") || el.getAttribute("href");
     var lang = el.getAttribute("data-lang") || "ko", srcName = el.getAttribute("data-src") || "";
     var art = el.closest("article.item, article.fz-art");   // 1면 메인 기사(S26)도
-    var isBtn = el.tagName !== "A";   // 메타 줄 "원문" 단추면 그 기사의 (원)제목·리드를 쓴다
-    var titleText = isBtn && art ? ((art.querySelector(".orig") || art.querySelector(".hl a") || el).textContent) : el.textContent;
+    var isBtn = el.tagName !== "A" && !el.hasAttribute("data-title");   // 메타 줄 "원문" 단추면 그 기사의 (원)제목·리드를 쓴다 — 대체 기사 단추(S54)는 제 제목
+    var titleText = el.getAttribute("data-title") || (isBtn && art ? ((art.querySelector(".orig") || art.querySelector(".hl a") || el).textContent) : el.textContent);
     var leadEl = isBtn && art ? art.querySelector(".lead") : null;
     var view = mk("article", "readview");
     if (back) {
@@ -1488,10 +1497,11 @@
       main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
       var alt = art && art.querySelector(":scope > .ft-alt");   // 같은 사건 전문 기사 (S54 ④)
       if (alt && !url) { var ac = alt.cloneNode(true); ac.hidden = false; main.appendChild(ac); }
-      translateInto(view, nodes, lang, seq);
+      translateInto(view, nodes, lang, seq, (url || href) + "|feed");
     };
     if (!url || !RD) {
-      fallback(RD && url === "" ? "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다(유료 구독·봇 차단). 피드에 실린 내용만 보여 드립니다."
+      fallback(RD && url === "" ? (el.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다. 피드에 실린 내용만 보여 드립니다."
+                                   : "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다(유료 구독·봇 차단). 피드에 실린 내용만 보여 드립니다.")
                                  : "본문을 불러올 수 없어 피드에 실린 내용만 보여 드립니다.");
       return;
     }
@@ -1515,7 +1525,7 @@
       var foot = mk("p", "rv-foot", "원문을 그 자리에서 받아 사진과 글만 다시 보여 준 화면입니다(저장하지 않음). 저작권은 " + (j.site || srcName || "해당 매체") + "에 있습니다. ");
       foot.appendChild(linkBtn(j.url || href, "원래 기사 열기 ↗"));
       main.appendChild(foot);
-      translateInto(view, [h].concat(ps), lang, seq);
+      translateInto(view, [h].concat(ps), lang, seq, url + "|tp");
     });
   }
 

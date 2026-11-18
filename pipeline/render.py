@@ -767,6 +767,7 @@ def render_html(edition: dict, cfg: Config, interests: Interests, sources: Sourc
     ctx["read_url"] = reader_mod.read_url_fn(edition, sources) if rc else (lambda url, source=None: "")
     # S54 ④: 유료 매체(전문 칸 안내)와 막힌 기사의 대체 후보(같은 사건 전문 가능 기사 — 주소가 풀린 것만)
     ctx["paywall_src"] = {x.name for x in sources.sources if x.paywall}
+    ctx["blocked_src"] = {x.name for x in sources.sources if not x.reader}   # 원문 창 안내: 막힌 매체 / 주소를 못 푼 기사(data-noread)
     alts = {}
     if rc:
         for iid, cs in reader_mod.alt_candidates(edition, sources).items():

@@ -252,3 +252,13 @@ def test_news_pages_unchanged_title_order(tmp_path):
     html = render_html(_edition(), load_config(), load_interests(), load_sources())
     news = html[:html.index('data-section="opinion"')] if 'data-section="opinion"' in html else html
     assert 'class="ko-sub"' not in news
+
+
+def test_parse_edtopics_sanity_rejects_overmerge():
+    ids = [f"e{i}" for i in range(20)]
+    assert parse_edtopics({"topics": {i: 1 for i in ids}}, ids) is None                       # 전부 한 묶음
+    ok = {i: (1 if n < 6 else 100 + n) for n, i in enumerate(ids)}
+    assert parse_edtopics({"topics": ok}, ids) == ok                                          # 6편 묶음은 괜찮음
+    src = {i: ("조선일보" if n < 3 else f"m{n}") for n, i in enumerate(ids)}
+    three = {i: (1 if n < 4 else 100 + n) for n, i in enumerate(ids)}
+    assert parse_edtopics({"topics": three}, ids, src) is None                                # 한 매체 세 편이 한 묶음

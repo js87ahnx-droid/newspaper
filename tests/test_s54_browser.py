@@ -188,3 +188,53 @@ def test_opinion_titles_fit_no_drop(browser, tmp_path, w, h):
     assert not errors and not st["overflow"], (errors, st["overflow"])
     assert m["ko"] > 0 and m["missing"] == 0, m
     ctx.close()
+
+
+def test_alt_button_uses_its_own_title_and_noread_message(browser, tmp_path, monkeypatch):
+    def mutate(ed):
+        _blocked_and_paywall(ed)
+        intl = [i for i in ed["sections"]["international"] if not i.get("reserve")]
+        c = intl[2]   # reader 가능 매체인데 Google 주소를 못 푼 기사
+        c["source"], c["url"] = "조선일보", "https://news.google.com/rss/articles/unresolved-x"
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (502, {"ok": False, "reason": "원문 http 403"}), mutate=mutate)
+    _open_title(page, '[data-href*="world/x.html"]')
+    assert "막아 두었습니다" in page.evaluate("() => document.querySelector('#reader .ft-alt .ft-why').textContent")
+    page.evaluate("() => document.querySelector('#reader .ft-alt button').click()")       # 대체 기사도 실패
+    page.wait_for_selector(".readview .rv-link-big")
+    t = page.evaluate("() => document.querySelector('.readview .rv-title').textContent")
+    assert t == "대체 기사 하나", t                                                         # 막힌 원래 기사 제목이 아님
+    _close(page)
+    _open_title(page, '[data-href*="unresolved-x"]')
+    page.evaluate("() => document.querySelector('#reader .reader-body .meta .orig-btn').click()")
+    page.wait_for_selector(".readview .rv-link-big")
+    assert "원문 주소를 찾지 못했습니다" in page.evaluate("() => document.querySelector('.readview .rv-status').textContent")
+    assert not errors, errors
+    ctx.close()
+
+
+def test_reader_window_translation_cached(browser, tmp_path, monkeypatch):
+    def handler(u, body=None):
+        if u.endswith("/translate"):
+            return 200, {"ok": True, "texts": ["번역됨"] * len(body["texts"])}
+        return 200, ARTICLE
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler, mutate=_blocked_and_paywall)
+    for _ in range(2):
+        page.evaluate("() => document.querySelector('#flow article.item > .meta .orig-btn[data-href*=\"spiegel.de/ausland/x\"]').click()")
+        page.wait_for_selector(".readview .rv-tab")
+        _close(page)
+    assert len([s for s in seen if s["url"].endswith("/translate")]) == 1 and not errors
+    ctx.close()
+
+
+def test_no_full_section_for_china_and_wide_no_scroll(browser, tmp_path, monkeypatch):
+    from tests.test_china_browser import add_china
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), mutate=add_china)
+    page.evaluate("() => NEWS.openReader(document.querySelector('#flow article.cn-view').getAttribute('data-issue'))")
+    page.wait_for_selector("#reader:not([hidden]) .cn-view")
+    assert not page.evaluate("() => !!document.querySelector('#reader .ft, #reader .ft-alt:not([hidden])')")
+    _close(page)
+    _open_title(page, '[data-lang="ko"]:not([data-read=""])')
+    page.wait_for_selector("#reader .ft .rv-p")
+    m = page.evaluate("() => ({ sw: document.scrollingElement.scrollWidth, iw: innerWidth })")
+    assert m["sw"] <= m["iw"] and not errors, m
+    ctx.close()

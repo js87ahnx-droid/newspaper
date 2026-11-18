@@ -1006,7 +1006,7 @@ def edtopic_key(ids: list[str]) -> str:
     return hashlib.sha1("|".join(sorted(ids)).encode("utf-8")).hexdigest()[:16]
 
 
-def parse_edtopics(res, ids: list[str]) -> dict[str, int] | None:
+def parse_edtopics(res, ids: list[str], sources: dict[str, str] | None = None) -> dict[str, int] | None:
     """AI 응답 → {사설 id: 주제 번호}. 모르는 id 는 버리고, 알려진 id 가 하나도 없으면 None (응답 이상)."""
     if not isinstance(res, dict) or not isinstance(res.get("topics"), dict):
         return None
@@ -1019,7 +1019,18 @@ def parse_edtopics(res, ids: list[str]) -> dict[str, int] | None:
             out[k] = int(v)
         except (TypeError, ValueError):
             continue
-    return out or None
+    if not out:
+        return None
+    # 상식 검사 (구현 리뷰 M5): 한 묶음이 사설의 40%(최소 6편)를 넘거나 한 매체가 한 묶음에 세 편 이상이면 잘못 묶은 것으로 본다
+    from collections import Counter
+    sizes = Counter(out.values())
+    if max(sizes.values()) > max(6, int(len(ids) * 0.4)):
+        return None
+    if sources:
+        per = Counter((n, sources.get(k)) for k, n in out.items())
+        if per and max(per.values()) >= 3:
+            return None
+    return out
 
 
 def editorial_topics(rows: list[dict], cfg: Llm, budget: Budget, cache_path: Path, runner=None) -> tuple[dict[str, int] | None, str]:
@@ -1034,7 +1045,7 @@ def editorial_topics(rows: list[dict], cfg: Llm, budget: Budget, cache_path: Pat
         return {k: int(v) for k, v in got.items()}, "캐시"
     res, st = call(EDTOPIC_PROMPT.format(data=_data_block(rows)), cfg, budget, runner,
                    model=cfg.analysis_model, timeout=cfg.analysis_timeout_sec)
-    hint = parse_edtopics(res, ids)
+    hint = parse_edtopics(res, ids, {r["id"]: r.get("매체", "") for r in rows})
     if hint is None:
         return None, st if res is None else "응답 이상"
     cache = read_json(cache_path, {})

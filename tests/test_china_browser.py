@@ -153,3 +153,15 @@ def test_china_screenshot(browser, tmp_path):  # noqa: F811
         page.screenshot(path=str(out / f"s37-china-{name}.png"))
         ctx.close()
     assert (out / "s37-china-pad.png").stat().st_size > 0
+
+
+def test_china_scroll_view_shows_everything(browser, tmp_path):  # noqa: F811
+    """한 면(스크롤) 보기는 쪽 높이가 없으니 다른 매체·의제·근거 모두 (S54 구현 리뷰 B1)."""
+    index = make_site(tmp_path, mutate=add_china)
+    ctx, page, errors = open_page(browser, index, 390, 844)
+    page.evaluate("() => NEWS.setView('scroll')")
+    page.wait_for_timeout(800)
+    r = page.evaluate("""() => { const v = document.querySelector('#book .cn-view'), vis = s => [...v.querySelectorAll(s)].filter(x => x.offsetHeight > 0).length;
+        return { rows: vis('.cn-row'), agenda: vis('.cn-agenda'), ev: vis('.cn-ev .orig-btn') }; }""")
+    ctx.close()
+    assert r == {"rows": 4, "agenda": 1, "ev": 2} and not errors, (r, errors)

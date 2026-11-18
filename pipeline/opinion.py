@@ -189,9 +189,7 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
             key = best
         else:
             key = f"ai:{n}"
-            sort_key[key] = order.get(best, 999) if best else 999
-            if best:
-                ai_ref[key] = best
+            sort_key[key] = order.get(best, 999) if best else 999   # 이름은 제 사설로(_topic_label) — 같은 이슈 이름이 두 줄 나오지 않게 (구현 리뷰 N3)
         by_issue[key] = list(g)
         ai_keys.add(key)
     for g in groups:  # 묶음 안 사설이 가장 많이 이은 이슈(같으면 더 닮은 쪽)의 이름을 쓴다
