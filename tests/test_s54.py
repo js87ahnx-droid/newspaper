@@ -262,3 +262,16 @@ def test_parse_edtopics_sanity_rejects_overmerge():
     src = {i: ("조선일보" if n < 3 else f"m{n}") for n, i in enumerate(ids)}
     three = {i: (1 if n < 4 else 100 + n) for n, i in enumerate(ids)}
     assert parse_edtopics({"topics": three}, ids, src) is None                                # 한 매체 세 편이 한 묶음
+
+
+def test_ai_group_keeps_page_issue_key_over_unnumbered_single():
+    """AI 가 번호를 빼먹은 단독 사설이 같은 지면 이슈에 이어져도, AI 묶음이 그 이슈 이름·자리를 가진다 (재리뷰 M1)."""
+    t = "반도체 보조금 확대 서둘러야 국회 예산 논란"
+    edition = {"sections": {"front": [{"issue_id": "i1", "title": t, "articles": [{"title": t, "lead": t, "lang": "ko"}]}]}}
+    eds = [art(1, "조선일보", "보수", "[사설] 반도체 보조금 확대 서둘러야", opinion=ED),
+           art(2, "한겨레", "진보", "[사설] 반도체 보조금 국회 예산 논란", opinion=ED),
+           art(3, "경향신문", "진보", "[사설] 보조금 확대 예산 서둘러야 논란", opinion=ED),
+           art(4, "동아일보", "보수", "[사설] 반도체 보조금 국회 확대 예산", opinion=ED)]
+    op = organize(eds, edition, None, topic_hint={"a1": 1, "a2": 1, "a3": 1})
+    grp = next(c for c in op["compare"] if "a1" in [e["id"] for g in c["groups"] for e in g["editorials"]])
+    assert grp["on_page"] and grp["issue_id"] == "i1" and grp["issue_title"] == t, grp

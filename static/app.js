@@ -1496,8 +1496,8 @@
       }
       main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
       var alt = art && art.querySelector(":scope > .ft-alt");   // 같은 사건 전문 기사 (S54 ④)
-      if (alt && !url) { var ac = alt.cloneNode(true); ac.hidden = false; main.appendChild(ac); }
-      translateInto(view, nodes, lang, seq, (url || href) + "|feed");
+      if (alt && !url) { var ac = alt.cloneNode(true); ac.hidden = false; var why = ac.querySelector(".ft-why"); if (why) why.remove(); main.appendChild(ac); }
+      translateInto(view, nodes, lang, seq, (url || href) + "|feed|" + nodes.map(function (n) { return n.textContent; }).join("").length);
     };
     if (!url || !RD) {
       fallback(RD && url === "" ? (el.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다. 피드에 실린 내용만 보여 드립니다."

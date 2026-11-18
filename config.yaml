@@ -35,7 +35,7 @@ editing:
   interest_cap_mode: driven  # driven: 관심도 덕분에 들어온 기사만 상한에 셈 / topic: 관심 분야 기사 전체
 
 # 지면 순서와 지면별 최대 기사 수
-# pages: 고정 쪽 수 (S15). 합 29쪽(S47 종합면 2쪽 추가, S54 중국은 지금 1쪽) — 홀수 쪽이면 앱이 끝에 빈 쪽을 채워 펼침면을 맞춘다.
+# pages: 고정 쪽 수 (S15). 합 30쪽(펼침 15면 — S47 종합면 2쪽 추가, S54 중국은 지금 2 → 1쪽·논평 3 → 4쪽: 외국어 글에 한국어 부제 줄이 늘어서) — 짝수여야 펼침면이 맞는다.
 # S21c(10/18호 "단신이 너무 많다"): 사회·과학 면을 새로, 관심면 확대, 단신 5 → 3쪽. 쪽에 다 못 들어간 기사는 단신으로, 남긴 쪽은 논평·단신이 쓴다
 sections:
   - {id: front, title: "1면", max_articles: 5, pages: 2}
@@ -49,7 +49,7 @@ sections:
   - {id: analysis, title: "분석·해설", max_articles: 0, pages: 2}  # 매체가 쓴 분석·해설 기사 (S22c — AI 글 아님). 뉴스 기사 수에는 안 셈
   - {id: compare, title: "입장 비교", max_articles: 4}  # 따로 쪽 없음 — 해당 기사 아래에 입장 차이를 붙인다
   - {id: briefs, title: "단신", max_articles: 30, pages: 3}  # 다른 섹션에서 넘친 기사·예비 기사를 받음 (가로 한 줄 — S17e, 분야별 묶음 — S19c)
-  - {id: opinion, title: "논평·사설", max_articles: 0, pages: 3}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
+  - {id: opinion, title: "논평·사설", max_articles: 0, pages: 4}  # 뉴스 기사 수에는 안 셈 (사설은 모두, 칼럼은 10편까지)
   - {id: guide, title: "매체 성향 가이드·출처", max_articles: 0, pages: 1}
 
 # 큐레이션 판 (S50, 2026-11-16 시안 B): 같은 호를 면마다 핵심 기사만 기사 꼴로 + 면 끝 "함께 볼 기사" 목록으로.

@@ -159,7 +159,7 @@ def test_many_pick_series_split_and_labelled(browser, tmp_path):  # noqa: F811
       const picks = ps.flatMap(p => [...p.querySelectorAll('.oppick .pick')]);
       return {blocks: document.querySelectorAll('#flow .oppick').length, n: picks.length,
               series: picks.map(p => (p.querySelector('.series') || {}).textContent || ''),
-              ko: picks.every(p => p.querySelector('.pick-t a').textContent.startsWith('세계 경제') && p.querySelector('.orig')),
+              ko: picks.every(p => p.querySelector('.pick-t .ko-sub').textContent.startsWith('세계 경제') && p.querySelector('.pick-t a').lang !== 'ko'),   // S54 ③: 원어 제목 + 한국어 부제
               state: NEWS.state()}; }""")
     ctx.close()
     assert not errors and m["state"]["overflow"] == []

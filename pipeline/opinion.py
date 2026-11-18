@@ -171,10 +171,6 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
     grouped = {e.id for g in groups for e in g} | {e.id for e in ai_eds}
     by_issue: dict[str, list[Article]] = {}
     sort_key: dict[str, int] = {}   # AI 묶음이 지면 이슈 키를 못 쓸 때의 정렬 순서
-    ai_ref: dict[str, str] = {}     # ai:<n> 키 → 그 묶음이 가장 많이 이은 지면 이슈
-    for e in rest_eds:
-        if e.id in links and e.id not in grouped:
-            by_issue.setdefault(links[e.id][0], []).append(e)
     ai_groups: dict[int, list[Article]] = {}
     for e in ai_eds:
         ai_groups.setdefault(hint[e.id], []).append(e)
@@ -185,13 +181,16 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
             if e.id in links:
                 votes[links[e.id][0]] = votes.get(links[e.id][0], 0) + 1 + links[e.id][1]
         best = max(votes, key=votes.get) if votes else None
-        if best and best not in by_issue:
+        if best and best not in ai_keys:
             key = best
         else:
             key = f"ai:{n}"
             sort_key[key] = order.get(best, 999) if best else 999   # 이름은 제 사설로(_topic_label) — 같은 이슈 이름이 두 줄 나오지 않게 (구현 리뷰 N3)
         by_issue[key] = list(g)
         ai_keys.add(key)
+    for e in rest_eds:   # AI 묶음 다음에 — 번호 없는 단독 사설이 AI 묶음의 지면 이슈 키를 먼저 차지하지 않게 (재리뷰 M1)
+        if e.id in links and e.id not in grouped and links[e.id][0] not in ai_keys:
+            by_issue.setdefault(links[e.id][0], []).append(e)
     for g in groups:  # 묶음 안 사설이 가장 많이 이은 이슈(같으면 더 닮은 쪽)의 이름을 쓴다
         votes: dict[str, float] = {}
         for e in g:
@@ -216,10 +215,9 @@ def organize(opinions: list[Article], edition: dict, day_articles: list[Article]
             continue
         lean_groups = [{"lean": ln, "editorials": [_row(e, links.get(e.id), titles) for e in eds if e.lean == ln]}
                        for ln in LEAN_ORDER if ln in leans]
-        ref = ai_ref.get(key, key)
-        on_page = ref in titles
-        compare.append({"issue_id": ref if on_page else None,
-                        "issue_title": titles[ref] if on_page else _topic_label(eds),
+        on_page = key in titles
+        compare.append({"issue_id": key if on_page else None,
+                        "issue_title": titles[key] if on_page else _topic_label(eds),
                         "on_page": on_page, "groups": lean_groups})
         used.update(e.id for e in eds)
 

@@ -1,7 +1,7 @@
 {# 원문 창으로 여는 기사 (S17b): 중계 서버로 읽을 주소(못 읽는 매체면 빈 값)·매체·언어 #}
-{% macro art(url, source, lang) %} data-art data-read="{{ read_url(url, source) }}" data-src="{{ source }}" data-lang="{{ lang }}"{% if source in paywall_src %} data-paywall="1"{% endif %}{% if not read_url(url, source) and source not in blocked_src %} data-noread="addr"{% endif %}{% endmacro %}
+{% macro art(url, source, lang) %} data-art data-read="{{ read_url(url, source) }}" data-src="{{ source }}" data-lang="{{ lang }}"{% if source in paywall_src %} data-paywall="1"{% endif %}{% if reader_on and not read_url(url, source) and source not in blocked_src %} data-noread="addr"{% endif %}{% endmacro %}
 {# 막힌 기사의 같은 사건 전문 가능 기사 (S54 ④): 지면에선 숨기고, 자세히 창·원문 창이 보여 준다 #}
-{% macro alt_list(it) %}{% set al = alts.get(it.issue_id) %}{% if al %}<div class="ft-alt" hidden><p class="ft-alt-h">같은 사건, 전문을 볼 수 있는 기사</p>{% for c in al %}<button type="button" class="orig-btn ft-alt-b" data-href="{{ real_url(c.url) }}" data-title="{{ c.title }}"{{ art(c.url, c.source, c.lang) }}>{{ c.source }} · {{ c.title }}{% if c.paywall %} (유료){% endif %}</button>{% endfor %}</div>{% endif %}{% endmacro %}
+{% macro alt_list(it) %}{% set al = alts.get(it.issue_id) %}{% if al %}<div class="ft-alt" hidden><p class="ft-alt-h">같은 사건, 전문을 볼 수 있는 기사</p>{% for c in al %}<button type="button" class="orig-btn ft-alt-b" data-href="{{ real_url(c.url) }}" data-title="{{ c.title }}" lang="{{ c.lang }}"{{ art(c.url, c.source, c.lang) }}>{{ c.source }} · {{ c.title }}{% if c.paywall %} (유료){% endif %}</button>{% endfor %}</div>{% endif %}{% endmacro %}
 {# 경제 심화 해설 (S31c): 누르면 창으로. 원본은 단추 옆 template — 쪽 나누기에 안 잡히고 단신에도 따라감 #}
 {% macro econ_btn(it, v) %}        {% set ec = it.llm.econ if it.llm else None %}{% if ec %}
         <button type="button" class="econ-btn" data-econ>경제 해설</button>
