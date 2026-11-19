@@ -615,3 +615,22 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .cn-title a { color: inherit; text-decoration: none; }
 .cn-title a:hover, .cn-title a:focus-visible { text-decoration: underline; }
 .cn-row + .cn-row dt { margin-top: 6px; }
+/* S55 ① 자세히 창 두 장 넘기기 (시안 A) */
+.sw-tabs { position: sticky; top: -14px; z-index: 2; display: flex; gap: 4px; margin: 0 92px 8px 0; padding-top: 4px; background: var(--paper); border-bottom: 1px solid var(--rule); }   /* 오른쪽은 닫기 단추 자리 */
+.sw-tab { flex: 1; font: inherit; font-size: 14px; padding: 8px 0 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
+.sw-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
+.sw-track { display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.sw-track::-webkit-scrollbar { display: none; }
+.sw-pane { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.ft { margin: 0; padding: 0; border: 0; }
+.ft-title { font-family: var(--serif); font-size: 1.25em; line-height: 1.4; margin: 2px 0 4px; }
+.ft-meta { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 0.85em; color: var(--muted); }
+.ft-src { font-weight: 700; color: var(--ink); }
+/* S55 ②③ 논평면 1편 덩어리: 같은 묶음(data-group)의 이어지는 덩어리만 위 테두리·여백 없이 붙여 한 목록처럼. 다른 묶음이 끼면 "(계속)" 소제목(app.js) */
+.oplist[data-group="ed"]:has(+ .op-cont[data-group="ed"]), .oplist[data-group="col"]:has(+ .op-cont[data-group="col"]) { border-bottom: 0; padding-bottom: 0; }
+.oplist[data-group="ed"]:has(+ .op-cont[data-group="ed"]) li:last-child, .oplist[data-group="col"]:has(+ .op-cont[data-group="col"]) li:last-child { border-bottom: 1px dotted var(--rule); }
+.oplist.op-cont:not(.op-restart) { padding-top: 0; }
+.item.oppick:has(+ .oppick.op-cont) { border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; padding-bottom: 0; }
+.item.oppick.op-cont:not(.op-restart) { border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 0; }
+.page-inner > .item.oppick.op-cont:first-child, .page-inner > .sec-title + .item.oppick.op-cont { border-top: 1px solid var(--rule, #c9bfae); border-radius: 6px 6px 0 0; padding-top: 8px; }
+.oplist.op-cont.op-gap { padding-top: 6px; }   /* 다른 묶음 뒤인데 소제목을 못 단 경우 */
