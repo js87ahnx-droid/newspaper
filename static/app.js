@@ -385,7 +385,7 @@
     showReader();
   }
 
-  // 논평면 (S55): 2편 덩어리 순서를 지키되, 큰 비교 덩어리가 안 들어가 쪽 아래가 비면 다음 묶음의 첫 덩어리부터 당겨 채운다
+  // 논평면 (S55): 1편 덩어리 순서를 지키되, 큰 비교 덩어리가 안 들어가 쪽 아래가 비면 다음 묶음의 첫 덩어리부터 당겨 채운다
   var OP_ORDER = { keepOrder: true, groupKey: function (n) { return (n.getAttribute("data-issue") || "").replace(/-\d+$/, "").replace(/^(op-cmp|op-ed|op-col|op-pick).*/, "$1"); } };
   // 섹션 하나를 최대 budget 쪽에 배치 (budget 0 = 제한 없음). 못 들어간 원본 요소는 rest 로 돌려준다
   // opts.grouped: 단신 분야 묶음 — 뒤 기사로 빈자리 채우기를 하지 않고(분야 순서 유지), 새 쪽엔 소제목을 다시 단다
@@ -446,9 +446,9 @@
       for (var j = k + 1; j < nodes.length && (!keepOrder || gk); j++) {
         if (used[j]) continue;
         if (gk) {
-          var key = gk(nodes[j].node), first = true;
-          for (var q = k; q < j && first; q++) if (!used[q] && gk(nodes[q].node) === key) first = false;
-          if (!first) continue;
+          var gkey = gk(nodes[j].node), headOfGroup = true;
+          for (var q = k; q < j && headOfGroup; q++) if (!used[q] && gk(nodes[q].node) === gkey) headOfGroup = false;
+          if (!headOfGroup) continue;
         }
         inner.appendChild(nodes[j].node);
         if (overflows(inner)) inner.removeChild(nodes[j].node); else { used[j] = true; placedOnPage++; }
@@ -467,6 +467,19 @@
     return { pages: out, rest: rest };
   }
 
+  // 논평면 이어지는 덩어리 (S55 리뷰 M1): 앞이 같은 묶음이 아니면(다른 묶음이 끼어듦·쪽 첫머리) "○○ (계속)" 소제목을 단다
+  function opinionHeads(pages) {
+    pages.forEach(function (page) {
+      Array.prototype.forEach.call(page.querySelectorAll(".page-inner > article.op-cont"), function (a) {
+        var g = a.getAttribute("data-group"), prev = a.previousElementSibling;
+        if (prev && prev.getAttribute("data-group") === g) return;
+        var h = mk("h3", "hl op-conth", (a.getAttribute("data-group-title") || "") + " (계속)");
+        a.insertBefore(h, a.firstChild);
+        a.classList.add("op-restart");   // 위 테두리로 앞 묶음과 갈라 보이게
+        if (overflows(page.firstChild)) { h.remove(); a.classList.remove("op-restart"); }   // 소제목 때문에 넘치면 빼고 원래대로 (앞 묶음의 아래 실선이 갈라 줌)
+      });
+    });
+  }
   // 중국은 지금 한 쪽 (S54 ②): 지면 쪽엔 앞부분 + 들어가는 만큼의 "다른 나라 매체" 줄. 넘치면 핵심어 → 강조·말하지 않은 것 3개
   // → 해석 4줄 → 강조·말하지 않은 것 2개 순으로 줄이고, 그래도 넘치면(글자를 키운 경우) 지금처럼 fit. 숨긴 것은 #flow 원본엔 있어 창에선 모두 보인다
   function fitChina(pages) {
@@ -621,7 +634,7 @@
       if (id === "briefs") return;
       var b = budgets[id] || 0;
       var cur = CURATED && CURATE_IDS.indexOf(id) >= 0;
-      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "opinion" ? OP_ORDER : id === "jonghap" || cur ? { keepOrder: true } : null);   // S55: 논평면 2편 덩어리는 순서대로 (뒤 덩어리를 앞 빈자리로 당기면 목록이 흩어짐)
+      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "opinion" ? OP_ORDER : id === "jonghap" || cur ? { keepOrder: true } : null);   // S55: 논평면 1편 덩어리는 순서대로 (뒤 덩어리를 앞 빈자리로 당기면 목록이 흩어짐)
       built[id] = res.pages;
       var fromList = cur ? fixMoreList(res) : [];
       if (cur) fromList = fromList.concat(mergeTail(res));   // S51 ⑤
@@ -636,6 +649,7 @@
       if (cur) fromList = fromList.concat(mergeTail(res), fixMoreList(res));   // 쪽 고르기(balance)가 끝 쪽을 다시 1건으로 만들 수 있어 한 번 더 (재리뷰 M2), 목록 칸만 남은 끝 쪽도 (S50)
       if (id === "jonghap") fixJonghap(res.pages);
       if (id === "china") fitChina(res.pages);
+      if (id === "opinion") opinionHeads(res.pages);
       if (id !== "opinion" && id !== "guide" && id !== "analysis" && id !== "jonghap") demoted = demoted.concat(res.rest.map(function (r) { return r.el; }));
       else { dropped += res.rest.length; if (id === "opinion") opRest = res.rest.length; }
       listOver = listOver.concat(fromList);   // 제목 한 줄이던 목록 기사를 기사 꼴로 키우지 않게 단신으로만 (S50 계획 리뷰 4차 M2)
@@ -1351,7 +1365,7 @@
     var k = +(wrap.getAttribute("data-k") || 0), p = swPanes(wrap)[k], tr = wrap.querySelector(":scope > .sw-track");
     if (p && tr) tr.style.height = p.offsetHeight + "px";
   }
-  function swSelect(wrap, k, scroll) {
+  function swSelect(wrap, k, scroll, align) {   // scroll: 가로로 그 장까지 ("smooth"·true·false), align: 세로를 탭 줄 바로 아래로
     var tabs = wrap.querySelectorAll(":scope > .sw-tabs > .sw-tab"), panes = swPanes(wrap), tr = wrap.querySelector(":scope > .sw-track");
     wrap.setAttribute("data-k", k);
     Array.prototype.forEach.call(tabs, function (t, i) { t.setAttribute("aria-selected", i === k ? "true" : "false"); t.tabIndex = i === k ? 0 : -1; });
@@ -1362,12 +1376,13 @@
         else if (!el.hasAttribute("data-swti")) { el.setAttribute("data-swti", ""); el.tabIndex = -1; }
       });
     });
-    if (tr && scroll !== false) {
-      tr.scrollTo({ left: k * tr.clientWidth, behavior: scroll === "smooth" ? "smooth" : "auto" });
-      var panel = reader && reader.querySelector(".reader-panel");
-      if (panel && panel.scrollTop > wrap.offsetTop) panel.scrollTop = wrap.offsetTop;   // 장을 바꾸면 탭 바로 아래부터
-    }
+    if (tr && scroll !== false) tr.scrollTo({ left: k * tr.clientWidth, behavior: scroll === "smooth" ? "smooth" : "auto" });
     swSize(wrap);
+    var panel = align && reader && reader.querySelector(".reader-panel");
+    if (panel) {   // 장을 바꾸면 탭 바로 아래부터 (창 안에서의 위치로 — 리뷰 N9)
+      var top = wrap.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
+      if (panel.scrollTop > top) panel.scrollTop = top;
+    }
   }
   function swipeWrap(node, label2) {
     var id = "sw" + (++swSeq);
@@ -1380,15 +1395,15 @@
       t.id = id + "-t" + i;
       t.setAttribute("role", "tab");
       t.setAttribute("aria-controls", id + "-p" + i);
-      t.addEventListener("click", function () { swSelect(wrap, i, "smooth"); });
+      t.addEventListener("click", function () { swSelect(wrap, i, "smooth", true); });
       tabs.appendChild(t);
     });
     tabs.addEventListener("keydown", function (e) {   // 왼쪽·오른쪽 방향키로 탭 옮기기
-      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      if (["ArrowLeft", "ArrowRight", "Home", "End"].indexOf(e.key) < 0) return;
       e.preventDefault();
       e.stopPropagation();
-      var k = e.key === "ArrowRight" ? 1 : 0;
-      swSelect(wrap, k, "smooth");
+      var k = e.key === "ArrowRight" || e.key === "End" ? 1 : 0;
+      swSelect(wrap, k, "smooth", true);
       tabs.children[k].focus();
     });
     [p1, p2].forEach(function (p, i) { p.id = id + "-p" + i; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", id + "-t" + i); tr.appendChild(p); });
@@ -1401,7 +1416,7 @@
       clearTimeout(timer);
       timer = setTimeout(function () {
         var k = tr.clientWidth ? Math.round(tr.scrollLeft / tr.clientWidth) : 0;
-        if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, false);
+        if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, false, true);   // 손으로 밀어도 세로를 맞춘다 (리뷰 M2)
       }, 90);
     }, { passive: true });
     swSelect(wrap, 0, false);
@@ -1413,13 +1428,14 @@
   }
   window.addEventListener("resize", function () {
     if (!reader || reader.hidden) return;
-    Array.prototype.forEach.call(reader.querySelectorAll(".sw"), function (w) { swSelect(w, +(w.getAttribute("data-k") || 0)); });
+    Array.prototype.forEach.call(reader.querySelectorAll(".sw"), function (w) { swSelect(w, +(w.getAttribute("data-k") || 0)); });   // 가로 위치만 (세로는 그대로 — 리뷰 M3)
   });
   function cleanTitle(t, site) {   // og:title 끝의 " - 한국경제"·" | Reuters" 같은 매체 이름 꼬리 떼기
     t = String(t || "").trim();
     if (!site) return t;
-    var m = t.match(/^(.*\S)\s*[-|–—:]\s*([^-|–—:]{1,30})$/);
-    return m && site.indexOf(m[2].trim()) >= 0 || (m && m[2].trim().indexOf(site) >= 0) ? m[1] : t;
+    var m = t.match(/^(.*\S)\s+[-|–—]\s+([^-|–—]{1,30})$/);
+    var tail = m ? m[2].trim().toLowerCase() : "", name = String(site).trim().toLowerCase();
+    return m && tail && (tail === name || tail.replace(/\s/g, "") === name.replace(/\s/g, "")) ? m[1] : t;   // 꼬리가 매체 이름과 같을 때만 (리뷰 N4)
   }
   // 자세히 창 전문 (S54 시안 C → S55 시안 A 두 장): 뉴스 기사의 메타 줄 첫 "원문" 단추가 읽을 수 있으면 둘째 장에 본문, 못 읽으면 같은 사건 전문 기사 목록
   function addFull(node) {
@@ -1439,7 +1455,7 @@
       alt.insertBefore(mk("p", "ft-why", btn.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다." : "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다."), alt.firstChild);
       box0.appendChild(alt);
       w0.pane.appendChild(box0);
-      swSize(w0.wrap);
+      swSelect(w0.wrap, 0, false);   // 넣은 단추도 안 보이는 장이면 Tab 에서 뺀다 (리뷰 B1)
       return;
     }
     var w = swipeWrap(node, "전문");
@@ -1460,16 +1476,17 @@
     var main = mk("div", "ft-body");
     box.appendChild(main);
     w.pane.appendChild(box);
+    swSelect(w.wrap, 0, false);   // 받는 동안의 "원래 기사" 링크도 Tab 에서 빼기 (리뷰 B1)
     fullText(url).then(function (j) {
       if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) {
         status.textContent = failWhy(j) + ".";
         status.className = "rv-status rv-fail";
         main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
         if (alt) { alt.hidden = false; main.appendChild(alt); }   // 받기 실패면 같은 사건 전문 기사도 (리뷰 M6)
-        swSize(w.wrap);
+        swSelect(w.wrap, +(w.wrap.getAttribute("data-k") || 0), false);
         return;
       }
-      if (j.title) h.textContent = cleanTitle(j.title, j.site || src);
+      if (j.title) { h.textContent = cleanTitle(j.title, j.site || src); h.setAttribute("lang", lang); }
       var when = j.published ? new Date(j.published) : null;
       status.textContent = when && !isNaN(when) ? when.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) : "";
       var imgs = (j.images || []).slice(), ps = [];

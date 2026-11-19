@@ -49,6 +49,7 @@ def test_blocked_second_page_alternatives_and_back_resets(browser, tmp_path, mon
     _open_title(page, '[data-href*="world/x.html"]')
     s = page.evaluate(ST)
     assert s and s["tabs"] == ["AI 정리", "같은 사건 전문"], s
+    assert s["tabbable2"] == 0, s                                              # 안 보이는 장의 단추는 Tab 에서 빠짐 (리뷰 B1)
     page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")
     page.wait_for_timeout(500)
     page.evaluate("() => document.querySelector('#reader .ft-alt button').click()")   # 대체 기사 → 원문 창
@@ -113,9 +114,31 @@ def test_opinion_pages_fill_and_keep_group_order(browser, tmp_path, w, h):
       const flow = [...document.querySelectorAll('#flow section[data-section=opinion] > article')].map(a => a.getAttribute('data-issue'));
       const book = ps.flatMap(p => [...p.querySelectorAll('.page-inner > article')].map(a => a.getAttribute('data-issue')));
       const order = [...new Set(flow.map(grp))].every(g => { const f = flow.filter(x => grp(x) === g), b = book.filter(x => grp(x) === g); return JSON.stringify(f.slice(0, b.length)) === JSON.stringify(b); });
-      return { used: ps.map(p => used(p.querySelector('.page-inner'))), order, cont: document.querySelectorAll('#flow .oplist.op-cont').length }; }""")
+      const breaks = [...document.querySelectorAll('#book .page.sec-opinion .page-inner > article.op-cont')].filter(a => { const p = a.previousElementSibling; return !(p && p.getAttribute('data-group') === a.getAttribute('data-group')); });
+      const heads = !breaks.length || breaks.some(a => a.querySelector('.op-conth'));   // 다른 묶음 뒤 이어지는 덩어리엔 "(계속)" — 넘칠 때만 빠짐
+      return { used: ps.map(p => used(p.querySelector('.page-inner'))), order, heads, cont: document.querySelectorAll('#flow .oplist.op-cont').length }; }""")
     st = page.evaluate("() => NEWS.state()")
     assert not errors and not st["overflow"], (errors, st["overflow"])
-    assert m["order"] and m["cont"] > 0, m
+    assert m["order"] and m["cont"] > 0 and m["heads"], m                     # 다른 묶음 뒤 이어지는 덩어리엔 "(계속)" (리뷰 M1)
     assert all(u >= 0.8 for u in m["used"][:-1]), m["used"]
+    ctx.close()
+
+
+def test_swipe_by_hand_aligns_vertical(browser, tmp_path, monkeypatch):
+    art = dict(ARTICLE, paragraphs=["긴 문단입니다. " * 60] * 12)
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, art))
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.wait_for_timeout(400)
+    _open_title(page, '[data-lang="ko"]:not([data-read=""])')
+    page.wait_for_selector("#reader .ft .rv-p")
+    page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")
+    page.wait_for_timeout(600)
+    page.evaluate("() => { document.querySelector('#reader .reader-panel').scrollTop = 4000; }")
+    page.evaluate("() => { document.querySelector('#reader .sw-track').scrollLeft = 0; }")   # 손으로 AI 정리로
+    page.wait_for_function("() => document.querySelectorAll('#reader .sw-tab')[0].getAttribute('aria-selected') === 'true'")
+    page.wait_for_timeout(200)
+    r = page.evaluate("""() => { const p = document.querySelector('#reader .reader-panel'), w = document.querySelector('#reader .sw');
+        const top = w.getBoundingClientRect().top - p.getBoundingClientRect().top + p.scrollTop; return { st: p.scrollTop, top }; }""")
+    assert r["st"] <= r["top"] + 2, r
+    assert not errors, errors
     ctx.close()

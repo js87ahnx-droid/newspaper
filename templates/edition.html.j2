@@ -303,7 +303,7 @@
   <section class="sec sec-opinion" data-section="opinion" data-title="{{ opinion_title }}">
   {% if picks %}{# 지정 칼럼 (S22d·S23b): 사용자가 고른 연재마다 최근 1편 — 4편씩 끊어 쪽 나누기가 되게 #}
   {% for chunk in picks|batch(1) %}{# S55: 4 → 1편 — 이어지는 덩어리는 상자를 합친 모양(.op-cont) #}
-    <article class="item oppick{% if not loop.first %} op-cont{% endif %}" data-issue="op-pick{{ '' if loop.first else '-' ~ loop.index }}">
+    <article class="item oppick{% if not loop.first %} op-cont{% endif %}" data-group="pick" data-group-title="지정 칼럼" data-issue="op-pick{{ '' if loop.first else '-' ~ loop.index }}">
       {% if loop.first %}<h3 class="hl">지정 칼럼</h3>{% endif %}
       {% for p in chunk %}
       <div class="pick"><p>{% if p.series and p.series not in p.title %}<span class="series">{{ p.series }}</span> {% endif %}<span class="src">{{ p.source }}</span> {% if p.time %}<time class="tm">{{ p.time }}</time>{% endif %}{% if p.paywall %} <small>(유료)</small>{% endif %}</p>
@@ -331,7 +331,7 @@
     </article>
   {% endfor %}
   {% for chunk in opinion.editorial_chunks %}
-    <article class="item oplist{% if not loop.first %} op-cont{% endif %}" data-issue="op-ed-{{ loop.index }}">
+    <article class="item oplist{% if not loop.first %} op-cont{% endif %}" data-group="ed" data-group-title="오늘의 사설" data-issue="op-ed-{{ loop.index }}">
       {% if loop.first %}<h3 class="hl">오늘의 사설</h3>{% endif %}
       <ul>
       {% for e in chunk %}
@@ -343,7 +343,7 @@
     </article>
   {% endfor %}
   {% for chunk in opinion.column_chunks %}
-    <article class="item oplist{% if not loop.first %} op-cont{% endif %}" data-issue="op-col{{ '' if loop.first else '-' ~ loop.index }}">
+    <article class="item oplist{% if not loop.first %} op-cont{% endif %}" data-group="col" data-group-title="주요 칼럼·논평" data-issue="op-col{{ '' if loop.first else '-' ~ loop.index }}">
       {% if loop.first %}<h3 class="hl">주요 칼럼·논평</h3>{% endif %}
       <ul>
       {% for c in chunk %}
