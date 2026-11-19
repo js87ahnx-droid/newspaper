@@ -560,15 +560,19 @@ def editing_view(cfg: Config) -> dict:
 
 
 def _opinion_view(op: dict | None) -> dict | None:
-    """논평·사설면: 사설·칼럼 목록은 6편·5편씩 끊어 쪽 나누기가 자연스럽게 되도록 (칼럼 한 덩어리가 통째로 다음 쪽으로 넘어가 앞 쪽이 비던 것 — S18)."""
+    """논평·사설면: 사설·칼럼 목록은 OP_CHUNK 편씩 끊어 쪽 나누기가 자연스럽게 되도록 (칼럼 한 덩어리가 통째로 다음 쪽으로 넘어가 앞 쪽이 비던 것 — S18).
+    S55: 6·5편 → 1편 — 덩어리가 커서 쪽 아래가 비고, 6편째에서 끊겨 성향 묶음이 쪽 사이에서 갈렸다(11/19). 이어지는 덩어리는 한 목록처럼 붙여 그린다(CSS .op-cont)"""
     if not op or not (op["compare"] or op["editorials"] or op["columns"]):
         return None
     for g in (g for c in op["compare"] for g in c["groups"]):
         g["cls"] = LEAN_CLASS.get(g["lean"], "mid")
     eds = [{**e, "cls": LEAN_CLASS.get(e["lean"], "mid")} for e in op["editorials"]]
     cols = [{**c, "cls": LEAN_CLASS.get(c["lean"], "mid")} for c in op["columns"]]
-    return {"compare": op["compare"], "editorial_chunks": [eds[i:i + 6] for i in range(0, len(eds), 6)],
-            "columns": cols, "column_chunks": [cols[i:i + 5] for i in range(0, len(cols), 5)]}
+    return {"compare": op["compare"], "editorial_chunks": [eds[i:i + OP_CHUNK] for i in range(0, len(eds), OP_CHUNK)],
+            "columns": cols, "column_chunks": [cols[i:i + OP_CHUNK] for i in range(0, len(cols), OP_CHUNK)]}
+
+
+OP_CHUNK = 1   # 논평면 목록 덩어리 크기 (S55 — 11/19 데이터로 2편과 견줘 쪽 채움이 더 고름: 마지막 쪽 빼고 91% 넘게)
 
 
 def time_label(published: str | None, tz: str) -> str | None:

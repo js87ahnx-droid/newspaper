@@ -205,7 +205,7 @@ def test_column_list_splits_across_pages(browser, tmp_path):  # noqa: F811
     st = page.evaluate(STATE)
     ctx.close()
     assert not errors and st["overflow"] == []
-    assert m["chunks"] == 2 and m["total"] == 10 and m["first"] >= 5, m
+    assert m["chunks"] == 10 and m["total"] == 10 and m["first"] >= 5, m   # S55: 1편씩
 
 
 def test_brief_click_shows_summary_not_just_title(browser, tmp_path):  # noqa: F811

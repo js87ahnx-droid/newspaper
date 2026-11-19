@@ -137,7 +137,7 @@ def test_detect_analysis_skips_breaking_roundups_and_sports():
 
 
 def test_many_pick_series_split_and_labelled(browser, tmp_path):  # noqa: F811
-    """S23b: 연재 13개가 4편씩 끊겨 논평면에 넘침 없이, 연재명(제목에 없을 때)·한국어 제목(원 제목 작게)."""
+    """S23b·S55: 연재 13개가 1편씩 끊겨 논평면에 넘침 없이, 연재명(제목에 없을 때)·한국어 제목(원 제목 작게)."""
     names = ["Lexington (미국)", "Bagehot (영국)", "Charlemagne (유럽)", "Chaguan (중국)", "Banyan (아시아)", "Free exchange (경제)",
              "Martin Wolf", "Gideon Rachman", "Money Stuff (Matt Levine)", "만물상", "천자칼럼", "天声人語", "김지수의 인터스텔라"]
 
@@ -164,4 +164,4 @@ def test_many_pick_series_split_and_labelled(browser, tmp_path):  # noqa: F811
     ctx.close()
     assert not errors and m["state"]["overflow"] == []
     # 순서는 쪽 나누기가 빈자리를 뒤 묶음으로 채우며 바뀔 수 있다 (기존 동작)
-    assert m["blocks"] == 4 and m["n"] == len(names) and sorted(m["series"]) == sorted(names) and m["ko"], m
+    assert m["blocks"] == len(names) and m["n"] == len(names) and sorted(m["series"]) == sorted(names) and m["ko"], m   # S55: 1편씩

@@ -90,3 +90,32 @@ def test_clean_title_strips_site_suffix(browser, tmp_path, monkeypatch):
     page.wait_for_selector("#reader .ft .rv-p")
     assert page.evaluate("() => document.querySelector('#reader .ft-title').textContent") == "재배열된 제목"
     ctx.close()
+
+
+@pytest.mark.parametrize("w,h", [(1180, 820), (1366, 1024), (390, 844)])
+def test_opinion_pages_fill_and_keep_group_order(browser, tmp_path, w, h):
+    """S55c: 논평면 1편 덩어리 — 마지막 쪽 빼고 아래 여백 < 20%, 묶음마다 순서 그대로, 빠진 글 0(넉넉한 쪽), 넘침 0."""
+    from tests.test_render_browser import make_site, open_page
+    from tests.test_s54 import _op_edition
+
+    def mutate(ed):
+        _op_edition(ed)
+        for k in range(9):
+            for kind in ("editorials", "columns"):
+                row = dict(ed["opinion"][kind][k % len(ed["opinion"][kind])])
+                row["id"], row["title"] = f"x{kind}{k}", row["title"] + f" {k}"
+                ed["opinion"][kind].append(row)
+    index = make_site(tmp_path, mutate=mutate)
+    ctx, page, errors = open_page(browser, index, w, h)
+    m = page.evaluate("""() => { const used = inn => { const r = inn.getBoundingClientRect(); let b = r.top; [...inn.children].forEach(c => { const q = c.getBoundingClientRect(); if (q.height > 0) b = Math.max(b, q.bottom); }); return (b - r.top) / r.height; };
+      const ps = [...document.querySelectorAll('#book .page.sec-opinion')];
+      const grp = id => id.replace(/-\d+$/, '');
+      const flow = [...document.querySelectorAll('#flow section[data-section=opinion] > article')].map(a => a.getAttribute('data-issue'));
+      const book = ps.flatMap(p => [...p.querySelectorAll('.page-inner > article')].map(a => a.getAttribute('data-issue')));
+      const order = [...new Set(flow.map(grp))].every(g => { const f = flow.filter(x => grp(x) === g), b = book.filter(x => grp(x) === g); return JSON.stringify(f.slice(0, b.length)) === JSON.stringify(b); });
+      return { used: ps.map(p => used(p.querySelector('.page-inner'))), order, cont: document.querySelectorAll('#flow .oplist.op-cont').length }; }""")
+    st = page.evaluate("() => NEWS.state()")
+    assert not errors and not st["overflow"], (errors, st["overflow"])
+    assert m["order"] and m["cont"] > 0, m
+    assert all(u >= 0.8 for u in m["used"][:-1]), m["used"]
+    ctx.close()

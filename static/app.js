@@ -385,6 +385,8 @@
     showReader();
   }
 
+  // 논평면 (S55): 2편 덩어리 순서를 지키되, 큰 비교 덩어리가 안 들어가 쪽 아래가 비면 다음 묶음의 첫 덩어리부터 당겨 채운다
+  var OP_ORDER = { keepOrder: true, groupKey: function (n) { return (n.getAttribute("data-issue") || "").replace(/-\d+$/, "").replace(/^(op-cmp|op-ed|op-col|op-pick).*/, "$1"); } };
   // 섹션 하나를 최대 budget 쪽에 배치 (budget 0 = 제한 없음). 못 들어간 원본 요소는 rest 로 돌려준다
   // opts.grouped: 단신 분야 묶음 — 뒤 기사로 빈자리 채우기를 하지 않고(분야 순서 유지), 새 쪽엔 소제목을 다시 단다
   function placeSection(stage, g, sec, first, budget, nodes, mast, opts) {
@@ -439,8 +441,15 @@
         inner.removeChild(node);
       }
       // 새 쪽으로 넘기기 전에, 뒤 기사 중 남은 자리에 들어가는 것으로 빈자리를 채운다 (한 쪽 아래가 비지 않게)
-      for (var j = k + 1; j < nodes.length && !keepOrder; j++) {
+      // opts.groupKey(S55 논평면): 순서를 지키되 묶음(지정 칼럼·비교·사설 목록·칼럼 목록)마다 아직 안 실은 첫 덩어리는 당겨 올 수 있다
+      var gk = opts && opts.groupKey;
+      for (var j = k + 1; j < nodes.length && (!keepOrder || gk); j++) {
         if (used[j]) continue;
+        if (gk) {
+          var key = gk(nodes[j].node), first = true;
+          for (var q = k; q < j && first; q++) if (!used[q] && gk(nodes[q].node) === key) first = false;
+          if (!first) continue;
+        }
         inner.appendChild(nodes[j].node);
         if (overflows(inner)) inner.removeChild(nodes[j].node); else { used[j] = true; placedOnPage++; }
       }
@@ -612,7 +621,7 @@
       if (id === "briefs") return;
       var b = budgets[id] || 0;
       var cur = CURATED && CURATE_IDS.indexOf(id) >= 0;
-      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "jonghap" || cur ? { keepOrder: true } : null);
+      var res = placeSection(stage, g, byId[id], id === firstId, b, kids(byId[id]), mast, id === "opinion" ? OP_ORDER : id === "jonghap" || cur ? { keepOrder: true } : null);   // S55: 논평면 2편 덩어리는 순서대로 (뒤 덩어리를 앞 빈자리로 당기면 목록이 흩어짐)
       built[id] = res.pages;
       var fromList = cur ? fixMoreList(res) : [];
       if (cur) fromList = fromList.concat(mergeTail(res));   // S51 ⑤
@@ -651,7 +660,7 @@
     if (opRest && byId.opinion && spare > 0) {
       var had = built.opinion.length;
       built.opinion.forEach(function (p) { p.remove(); });
-      var more = placeSection(stage, g, byId.opinion, false, (budgets.opinion || 0) + spare, kids(byId.opinion), null);
+      var more = placeSection(stage, g, byId.opinion, false, (budgets.opinion || 0) + spare, kids(byId.opinion), null, OP_ORDER);   // S55: 순서대로
       built.opinion = more.pages;
       spare -= more.pages.length - had;
       dropped += more.rest.length - opRest;
