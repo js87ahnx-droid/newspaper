@@ -7,8 +7,8 @@ from tests.test_reader import ARTICLE, _open
 from tests.test_render_browser import browser  # noqa: F401  (픽스처)
 
 READ = """() => { const b = document.querySelector('#reader .reader-body');
-  const ft = b.querySelector('.ft'), alt = b.querySelector('.ft-alt');
-  return { ft: !!ft, h: ft ? ft.querySelector('.ft-h').textContent : null, ps: ft ? [...ft.querySelectorAll('.rv-p')].map(p => p.textContent) : [],
+  const ft = b.querySelector('.ft:not(.ft-alt-pane)'), alt = b.querySelector('.ft-alt');
+  return { ft: !!ft, h: [...b.querySelectorAll('.sw-tab')].map(t => t.textContent), ps: ft ? [...ft.querySelectorAll('.rv-p')].map(p => p.textContent) : [],
            status: ft ? ft.querySelector('.rv-status').textContent : null, fail: !!(ft && ft.querySelector('.rv-fail')),
            pay: !!(ft && ft.querySelector('.ft-pay')), tr: ft ? [...ft.querySelectorAll('.rv-tab')].map(x => x.textContent) : [],
            alt: alt && !alt.hidden ? [...alt.querySelectorAll('button')].map(x => x.getAttribute('data-src')) : null }; }"""
@@ -34,7 +34,7 @@ def test_title_shows_full_text_once_per_url(browser, tmp_path, monkeypatch):
     assert iid
     page.wait_for_selector("#reader .ft .rv-p")
     r = page.evaluate(READ)
-    assert r["ft"] and r["h"].startswith("전문 — ") and r["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and not r["fail"] and r["tr"] == []
+    assert r["ft"] and r["h"] == ["AI 정리", "전문"] and r["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and not r["fail"] and r["tr"] == []
     assert len(_gets(seen)) == 1
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)                       # 다시 열기 — 같은 주소는 다시 안 받음

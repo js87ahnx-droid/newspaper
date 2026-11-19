@@ -1252,7 +1252,7 @@
       var bb = mk("button", "rv-back", "← 단신 목록");
       bb.type = "button";
       var listLabel = reader.getAttribute("data-list-label") || "단신 모두 보기";
-      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", listLabel); });
+      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", listLabel); swReset(body); });
       node.insertBefore(bb, node.firstChild);
     }
     body.innerHTML = "";
@@ -1334,7 +1334,85 @@
     return j && j.timeout ? "원문 사이트가 응답하지 않습니다" : j && j.net ? "연결하지 못했습니다"
       : "원문을 가져오지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : "");
   }
-  // 자세히 창 안의 전문 칸 (S54 시안 C): 뉴스 기사의 메타 줄 첫 "원문" 단추가 읽을 수 있으면 AI 정리 아래에 본문, 못 읽으면 같은 사건 전문 기사 목록
+  // 자세히 창 두 장 넘기기 (S55 시안 A): "AI 정리 · 전문" 탭 + 가로로 두 장(scroll-snap). 옆으로 밀거나 탭을 누르면 바뀐다.
+  // 전문을 받을 수 있으면 둘째 장에 본문, 못 받는 기사는 "같은 사건 전문"(대체 기사 목록), 둘 다 없으면 한 장 그대로
+  var swSeq = 0;
+  function swPanes(wrap) { return Array.prototype.slice.call(wrap.querySelectorAll(":scope > .sw-track > .sw-pane")); }
+  function swSize(wrap) {   // 두 장 칸 높이 = 지금 장 높이 (긴 전문 때문에 AI 정리 아래가 비지 않게)
+    var k = +(wrap.getAttribute("data-k") || 0), p = swPanes(wrap)[k], tr = wrap.querySelector(":scope > .sw-track");
+    if (p && tr) tr.style.height = p.offsetHeight + "px";
+  }
+  function swSelect(wrap, k, scroll) {
+    var tabs = wrap.querySelectorAll(":scope > .sw-tabs > .sw-tab"), panes = swPanes(wrap), tr = wrap.querySelector(":scope > .sw-track");
+    wrap.setAttribute("data-k", k);
+    Array.prototype.forEach.call(tabs, function (t, i) { t.setAttribute("aria-selected", i === k ? "true" : "false"); t.tabIndex = i === k ? 0 : -1; });
+    panes.forEach(function (p, i) {
+      p.setAttribute("aria-hidden", i === k ? "false" : "true");   // 안 보이는 장은 화면 읽기·Tab 에서 뺀다 (inert 는 밀기를 막을 수 있어 쓰지 않음)
+      Array.prototype.forEach.call(p.querySelectorAll("a, button"), function (el) {
+        if (i === k) { if (el.hasAttribute("data-swti")) { el.removeAttribute("tabindex"); el.removeAttribute("data-swti"); } }
+        else if (!el.hasAttribute("data-swti")) { el.setAttribute("data-swti", ""); el.tabIndex = -1; }
+      });
+    });
+    if (tr && scroll !== false) {
+      tr.scrollTo({ left: k * tr.clientWidth, behavior: scroll === "smooth" ? "smooth" : "auto" });
+      var panel = reader && reader.querySelector(".reader-panel");
+      if (panel && panel.scrollTop > wrap.offsetTop) panel.scrollTop = wrap.offsetTop;   // 장을 바꾸면 탭 바로 아래부터
+    }
+    swSize(wrap);
+  }
+  function swipeWrap(node, label2) {
+    var id = "sw" + (++swSeq);
+    var wrap = mk("div", "sw"), tabs = mk("div", "sw-tabs"), tr = mk("div", "sw-track");
+    tabs.setAttribute("role", "tablist");
+    var p1 = mk("div", "sw-pane"), p2 = mk("div", "sw-pane");
+    ["AI 정리", label2].forEach(function (label, i) {
+      var t = mk("button", "sw-tab", label);
+      t.type = "button";
+      t.id = id + "-t" + i;
+      t.setAttribute("role", "tab");
+      t.setAttribute("aria-controls", id + "-p" + i);
+      t.addEventListener("click", function () { swSelect(wrap, i, "smooth"); });
+      tabs.appendChild(t);
+    });
+    tabs.addEventListener("keydown", function (e) {   // 왼쪽·오른쪽 방향키로 탭 옮기기
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      e.stopPropagation();
+      var k = e.key === "ArrowRight" ? 1 : 0;
+      swSelect(wrap, k, "smooth");
+      tabs.children[k].focus();
+    });
+    [p1, p2].forEach(function (p, i) { p.id = id + "-p" + i; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", id + "-t" + i); tr.appendChild(p); });
+    node.parentNode.replaceChild(wrap, node);
+    p1.appendChild(node);
+    wrap.appendChild(tabs);
+    wrap.appendChild(tr);
+    var timer = null;
+    tr.addEventListener("scroll", function () {   // 손으로 밀었을 때: 멈춘 자리의 장으로 탭을 맞춘다
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var k = tr.clientWidth ? Math.round(tr.scrollLeft / tr.clientWidth) : 0;
+        if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, false);
+      }, 90);
+    }, { passive: true });
+    swSelect(wrap, 0, false);
+    if (window.ResizeObserver) { var ro = new ResizeObserver(function () { swSize(wrap); }); ro.observe(p1); ro.observe(p2); }   // 전문·번역·사진이 늦게 채워져도 높이를 따라감
+    return { wrap: wrap, pane: p2 };
+  }
+  function swReset(root) {   // "← 돌아가기"로 다시 붙이면 첫 장·첫 탭으로 (다시 붙인 칸은 가로 위치가 0 이 되고 scroll 이 안 난다)
+    Array.prototype.forEach.call(root.querySelectorAll(".sw"), function (w) { swSelect(w, 0); });
+  }
+  window.addEventListener("resize", function () {
+    if (!reader || reader.hidden) return;
+    Array.prototype.forEach.call(reader.querySelectorAll(".sw"), function (w) { swSelect(w, +(w.getAttribute("data-k") || 0)); });
+  });
+  function cleanTitle(t, site) {   // og:title 끝의 " - 한국경제"·" | Reuters" 같은 매체 이름 꼬리 떼기
+    t = String(t || "").trim();
+    if (!site) return t;
+    var m = t.match(/^(.*\S)\s*[-|–—:]\s*([^-|–—:]{1,30})$/);
+    return m && site.indexOf(m[2].trim()) >= 0 || (m && m[2].trim().indexOf(site) >= 0) ? m[1] : t;
+  }
+  // 자세히 창 전문 (S54 시안 C → S55 시안 A 두 장): 뉴스 기사의 메타 줄 첫 "원문" 단추가 읽을 수 있으면 둘째 장에 본문, 못 읽으면 같은 사건 전문 기사 목록
   function addFull(node) {
     if (!RD || !node.matches("article.item")) return;
     var sec = node.getAttribute("data-section");
@@ -1343,33 +1421,48 @@
     if (!btn) return;
     var alt = node.querySelector(":scope > .ft-alt");
     var url = btn.getAttribute("data-read");
+    if (alt) alt.remove();
     if (!url) {
-      if (alt) {
-        alt.hidden = false;
-        alt.insertBefore(mk("p", "ft-why", btn.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다." : "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다."), alt.firstChild);
-      }
+      if (!alt) return;
+      var w0 = swipeWrap(node, "같은 사건 전문");
+      var box0 = mk("section", "ft ft-alt-pane");
+      alt.hidden = false;
+      alt.insertBefore(mk("p", "ft-why", btn.getAttribute("data-noread") === "addr" ? "원문 주소를 찾지 못했습니다." : "이 매체는 외부에서 본문을 읽지 못하게 막아 두었습니다."), alt.firstChild);
+      box0.appendChild(alt);
+      w0.pane.appendChild(box0);
+      swSize(w0.wrap);
       return;
     }
-    if (alt) alt.remove();
-    var box = mk("section", "ft");
+    var w = swipeWrap(node, "전문");
     var src = btn.getAttribute("data-src") || "";
-    box.appendChild(mk("h4", "ft-h", "전문 — " + src));
+    var box = mk("section", "ft");
+    var h = mk("h4", "ft-title", (node.querySelector(".hl a") || {}).textContent || "");
+    box.appendChild(h);
+    var meta = mk("p", "ft-meta");
+    var href = btn.getAttribute("data-href") || "", lang = btn.getAttribute("data-lang") || "ko";
+    var srcEl = mk("span", "ft-src", src);
+    meta.appendChild(srcEl);
+    meta.appendChild(linkBtn(href, "원래 기사 ↗"));
+    box.appendChild(meta);
     if (btn.getAttribute("data-paywall") === "1") box.appendChild(mk("p", "ft-pay", "유료 매체 — 앞부분만 보일 수 있음"));
     var status = mk("p", "rv-status", "전문을 불러오는 중…");
     status.setAttribute("role", "status");
     box.appendChild(status);
     var main = mk("div", "ft-body");
     box.appendChild(main);
-    node.appendChild(box);
-    var href = btn.getAttribute("data-href") || "", lang = btn.getAttribute("data-lang") || "ko";
+    w.pane.appendChild(box);
     fullText(url).then(function (j) {
       if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) {
         status.textContent = failWhy(j) + ".";
         status.className = "rv-status rv-fail";
         main.appendChild(linkBtn(href, "원래 기사 열기 ↗", true));
+        if (alt) { alt.hidden = false; main.appendChild(alt); }   // 받기 실패면 같은 사건 전문 기사도 (리뷰 M6)
+        swSize(w.wrap);
         return;
       }
-      status.textContent = j.site || src;
+      if (j.title) h.textContent = cleanTitle(j.title, j.site || src);
+      var when = j.published ? new Date(j.published) : null;
+      status.textContent = when && !isNaN(when) ? when.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) : "";
       var imgs = (j.images || []).slice(), ps = [];
       if (imgs.length) main.appendChild(figure(imgs.shift()));
       j.paragraphs.forEach(function (p, i) {
@@ -1382,6 +1475,9 @@
       foot.appendChild(linkBtn(j.url || href, "원래 기사 열기 ↗"));
       main.appendChild(foot);
       if (lang !== "ko") translateButton(box, main, ps, lang, url);
+      var k = +(w.wrap.getAttribute("data-k") || 0);
+      swSelect(w.wrap, k, false);   // 새로 넣은 단추도 안 보이는 장이면 Tab 에서 빼고, 높이 다시
+      Array.prototype.forEach.call(main.querySelectorAll("img"), function (im) { im.addEventListener("load", function () { swSize(w.wrap); }); });
     });
   }
   // 전문 칸 번역은 단추를 눌렀을 때만 (무료 할당량 — 제목을 누를 때마다 자동 번역하지 않는다). 결과는 주소별로 TR 에
@@ -1462,7 +1558,7 @@
     if (back) {
       var bb = mk("button", "rv-back", "← 돌아가기");
       bb.type = "button";
-      bb.addEventListener("click", function () { readSeq++; body.innerHTML = ""; back.forEach(function (n) { body.appendChild(n); }); });
+      bb.addEventListener("click", function () { readSeq++; body.innerHTML = ""; back.forEach(function (n) { body.appendChild(n); }); swReset(body); });
       view.appendChild(bb);
     }
     var top = mk("div", "rv-top");
