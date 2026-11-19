@@ -69,3 +69,10 @@ test("본문 사진이 없으면 보통 og 는 씀, 폴더 이름만 겹치는 �
   const r = await run(page("https://img.example.com/default/2026/11/19/photo.jpg?type=share", ""));
   assert.deepEqual(r.images.map((i) => i.src), ["https://img.example.com/default/2026/11/19/photo.jpg?type=share"]);
 });
+
+test("하이픈 꼴 기본 그림(og-default·no-image)도 뺌", async () => {
+  for (const og of ["https://x.example/img/og-default.png", "https://x.example/no-image.jpg"]) {
+    const r = await run(page(og, ""));
+    assert.equal(r.images.length, 0, og);
+  }
+});

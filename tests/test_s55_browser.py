@@ -114,7 +114,7 @@ def test_opinion_pages_fill_and_keep_group_order(browser, tmp_path, w, h):
       const flow = [...document.querySelectorAll('#flow section[data-section=opinion] > article')].map(a => a.getAttribute('data-issue'));
       const book = ps.flatMap(p => [...p.querySelectorAll('.page-inner > article')].map(a => a.getAttribute('data-issue')));
       const order = [...new Set(flow.map(grp))].every(g => { const f = flow.filter(x => grp(x) === g), b = book.filter(x => grp(x) === g); return JSON.stringify(f.slice(0, b.length)) === JSON.stringify(b); });
-      const breaks = [...document.querySelectorAll('#book .page.sec-opinion .page-inner > article.op-cont')].filter(a => { const p = a.previousElementSibling; return !(p && p.getAttribute('data-group') === a.getAttribute('data-group')); });
+      const breaks = [...document.querySelectorAll('#book .page.sec-opinion .page-inner > article.op-cont')].filter(a => { const p = a.previousElementSibling; return p && !p.classList.contains('sec-title') && p.getAttribute('data-group') !== a.getAttribute('data-group'); });   // 쪽 첫머리는 쪽 머리 "(계속)"으로
       const heads = !breaks.length || breaks.some(a => a.querySelector('.op-conth'));   // 다른 묶음 뒤 이어지는 덩어리엔 "(계속)" — 넘칠 때만 빠짐
       return { used: ps.map(p => used(p.querySelector('.page-inner'))), order, heads, cont: document.querySelectorAll('#flow .oplist.op-cont').length }; }""")
     st = page.evaluate("() => NEWS.state()")

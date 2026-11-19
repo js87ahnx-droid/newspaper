@@ -88,7 +88,7 @@ function absUrl(src, base) {
 }
 
 // 사이트 로고·공유용 기본 그림 — 주소의 경로만, 낱말 경계로 본다 (폴더 이름 /default/2026/ 같은 진짜 사진은 살림, S55)
-const PLACEHOLDER_IMG = /(^|[\/_.-])(logo|logos|noimage|no_image|placeholder|default_og|og_default|share_img|sns_share)([\/_.-]|$)/i;
+const PLACEHOLDER_IMG = /(^|[\/_.-])(logo|logos|noimage|no[_-]image|placeholder|default[_-]og|og[_-]default|share[_-]img|sns[_-]share)([\/_.-]|$)/i;
 export function isPlaceholderImage(src) {
   try { return PLACEHOLDER_IMG.test(new URL(src).pathname); } catch (e) { return false; }
 }

@@ -633,3 +633,4 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .item.oppick:has(+ .oppick.op-cont) { border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; padding-bottom: 0; }
 .item.oppick.op-cont:not(.op-restart) { border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 0; }
 .page-inner > .item.oppick.op-cont:first-child, .page-inner > .sec-title + .item.oppick.op-cont { border-top: 1px solid var(--rule, #c9bfae); border-radius: 6px 6px 0 0; padding-top: 8px; }
+.oplist.op-cont.op-gap { padding-top: 6px; }   /* 다른 묶음 뒤인데 소제목을 못 단 경우 */

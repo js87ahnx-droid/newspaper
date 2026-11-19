@@ -472,11 +472,11 @@
     pages.forEach(function (page) {
       Array.prototype.forEach.call(page.querySelectorAll(".page-inner > article.op-cont"), function (a) {
         var g = a.getAttribute("data-group"), prev = a.previousElementSibling;
-        if (prev && prev.getAttribute("data-group") === g) return;
+        if (prev && (prev.getAttribute("data-group") === g || prev.classList.contains("sec-title"))) return;   // 쪽 첫머리는 쪽 머리 "(계속)"으로 충분 (재리뷰 M2)
         var h = mk("h3", "hl op-conth", (a.getAttribute("data-group-title") || "") + " (계속)");
         a.insertBefore(h, a.firstChild);
         a.classList.add("op-restart");   // 위 테두리로 앞 묶음과 갈라 보이게
-        if (overflows(page.firstChild)) { h.remove(); a.classList.remove("op-restart"); }   // 소제목 때문에 넘치면 빼고 원래대로 (앞 묶음의 아래 실선이 갈라 줌)
+        if (overflows(page.firstChild)) { h.remove(); a.classList.remove("op-restart"); a.classList.add("op-gap"); }   // 소제목 때문에 넘치면 빼고 원래대로 (앞 묶음의 아래 실선이 갈라 줌)
       });
     });
   }
@@ -676,6 +676,7 @@
       built.opinion.forEach(function (p) { p.remove(); });
       var more = placeSection(stage, g, byId.opinion, false, (budgets.opinion || 0) + spare, kids(byId.opinion), null, OP_ORDER);   // S55: 순서대로
       built.opinion = more.pages;
+      opinionHeads(more.pages);   // 다시 놓은 쪽에도 "(계속)" (재리뷰 M1)
       spare -= more.pages.length - had;
       dropped += more.rest.length - opRest;
     }
@@ -1371,7 +1372,7 @@
     Array.prototype.forEach.call(tabs, function (t, i) { t.setAttribute("aria-selected", i === k ? "true" : "false"); t.tabIndex = i === k ? 0 : -1; });
     panes.forEach(function (p, i) {
       p.setAttribute("aria-hidden", i === k ? "false" : "true");   // 안 보이는 장은 화면 읽기·Tab 에서 뺀다 (inert 는 밀기를 막을 수 있어 쓰지 않음)
-      Array.prototype.forEach.call(p.querySelectorAll("a, button"), function (el) {
+      Array.prototype.forEach.call(p.querySelectorAll("a, button, summary, input, select, textarea, [tabindex]"), function (el) {   // summary 도 (재리뷰 M3)
         if (i === k) { if (el.hasAttribute("data-swti")) { el.removeAttribute("tabindex"); el.removeAttribute("data-swti"); } }
         else if (!el.hasAttribute("data-swti")) { el.setAttribute("data-swti", ""); el.tabIndex = -1; }
       });
@@ -1489,6 +1490,7 @@
       if (j.title) { h.textContent = cleanTitle(j.title, j.site || src); h.setAttribute("lang", lang); }
       var when = j.published ? new Date(j.published) : null;
       status.textContent = when && !isNaN(when) ? when.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" }) : "";
+      status.hidden = !status.textContent;   // 시각이 없으면 빈 줄 없이
       var imgs = (j.images || []).slice(), ps = [];
       if (imgs.length) main.appendChild(figure(imgs.shift()));
       j.paragraphs.forEach(function (p, i) {
