@@ -51,3 +51,21 @@ test("짧은 정상 기사(2문단 400자 안팎)는 그대로 통과", async ()
   assert.equal(r.ok, true);
   assert.equal(r.paragraphs.length, 2);
 });
+
+const page = (og, body) => `<html><head><meta property="og:title" content="지어낸 제목"><meta property="og:image" content="${og}"></head><body>
+  <div class="article_body">${body}${[1, 2, 3].map((n) => `<p>${line(n)}</p>`).join("")}</div></body></html>`;
+
+test("본문 사진이 있으면 대표 그림(og)은 안 씀", async () => {
+  const r = await run(page("https://static.example.com/img/a.jpg", `<img src="https://img.example.com/photo/1.jpg" width="600">`));
+  assert.deepEqual(r.images.map((i) => i.src), ["https://img.example.com/photo/1.jpg"]);
+});
+
+test("본문 사진이 없고 og 가 로고면 사진 0", async () => {
+  const r = await run(page("https://static.hankyung.example/img/logo/logo-news-sns.png?v=1", ""));
+  assert.equal(r.images.length, 0);
+});
+
+test("본문 사진이 없으면 보통 og 는 씀, 폴더 이름만 겹치는 진짜 사진도 살림", async () => {
+  const r = await run(page("https://img.example.com/default/2026/11/19/photo.jpg?type=share", ""));
+  assert.deepEqual(r.images.map((i) => i.src), ["https://img.example.com/default/2026/11/19/photo.jpg?type=share"]);
+});

@@ -87,6 +87,11 @@ function absUrl(src, base) {
   } catch (e) { return null; }
 }
 
+// 사이트 로고·공유용 기본 그림 — 주소의 경로만, 낱말 경계로 본다 (폴더 이름 /default/2026/ 같은 진짜 사진은 살림, S55)
+const PLACEHOLDER_IMG = /(^|[\/_.-])(logo|logos|noimage|no_image|placeholder|default_og|og_default|share_img|sns_share|sns)([\/_.-]|$)/i;
+export function isPlaceholderImage(src) {
+  try { return PLACEHOLDER_IMG.test(new URL(src).pathname); } catch (e) { return false; }
+}
 const BAD_IMG = /(logo|icon|sprite|blank|pixel|spacer|1x1|avatar|profile|btn_|button|banner|emoji|\.svg|\.gif)/i;
 
 function fromLdJson(blocks) {
@@ -228,7 +233,10 @@ export async function extract(response, url, debug) {
 
   const seen = new Set();
   const images = [];
-  const og = absUrl(st.meta["og:image"] || st.meta["twitter:image"], url);
+  // 대표 그림(og:image)은 본문 사진이 하나도 없을 때만, 사이트 로고·공유용 기본 그림이 아닐 때만 (S55 — 한국경제 og 는 로고 그림)
+  const bodyImgs = [...fusion.images, ...st.images.filter((i) => i.inBody)];
+  let og = absUrl(st.meta["og:image"] || st.meta["twitter:image"], url);
+  if (og && (bodyImgs.length || isPlaceholderImage(og))) og = "";
   for (const im of [...fusion.images, ...(og ? [{ src: og, caption: "" }] : []), ...st.images.filter((i) => i.inBody)]) {
     const key = im.src.split("?")[0];
     if (seen.has(key) || images.length >= MAX_IMAGES) continue;
