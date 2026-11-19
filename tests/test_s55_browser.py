@@ -142,3 +142,33 @@ def test_swipe_by_hand_aligns_vertical(browser, tmp_path, monkeypatch):
     assert r["st"] <= r["top"] + 2, r
     assert not errors, errors
     ctx.close()
+
+
+@pytest.mark.parametrize("w,h", [(390, 844), (1180, 820)])
+def test_panel_size_kept_when_swiping_to_full(browser, tmp_path, monkeypatch, w, h):
+    """요약 → 전문으로 넘겨도 자세히 창 크기는 요약 때 그대로 (긴 전문은 창 안에서 스크롤). 닫고 다시 열면 고정을 푼다."""
+    art = dict(ARTICLE, paragraphs=["긴 문단입니다. " * 60] * 12)
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, art))
+    page.set_viewport_size({"width": w, "height": h})
+    page.wait_for_timeout(400)
+    _open_title(page, '[data-lang="ko"]:not([data-read=""])')
+    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_timeout(300)
+    PH = "() => { const p = document.querySelector('#reader .reader-panel').getBoundingClientRect(); return [Math.round(p.width), Math.round(p.height)]; }"
+    before = page.evaluate(PH)
+    page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")   # 탭으로 전문
+    page.wait_for_timeout(600)
+    assert page.evaluate(PH) == before, (before, page.evaluate(PH))
+    assert page.evaluate("() => { const p = document.querySelector('#reader .reader-panel'); return p.scrollHeight > p.clientHeight; }")   # 전문은 창 안에서 스크롤
+    page.evaluate("() => { document.querySelector('#reader .sw-track').scrollLeft = 0; }")   # 손으로 AI 정리로
+    page.wait_for_function("() => document.querySelectorAll('#reader .sw-tab')[0].getAttribute('aria-selected') === 'true'")
+    page.wait_for_timeout(200)
+    assert page.evaluate(PH) == before
+    page.evaluate("() => { const t = document.querySelector('#reader .sw-track'); t.scrollLeft = t.clientWidth; }")   # 손으로 전문으로
+    page.wait_for_function("() => document.querySelectorAll('#reader .sw-tab')[1].getAttribute('aria-selected') === 'true'")
+    page.wait_for_timeout(200)
+    assert page.evaluate(PH) == before
+    _close(page)
+    assert page.evaluate("() => document.querySelector('#reader .reader-panel').style.height") == ""   # 다시 열 때는 고정 풂
+    assert not errors, errors
+    ctx.close()

@@ -1276,7 +1276,7 @@
       var bb = mk("button", "rv-back", "← 단신 목록");
       bb.type = "button";
       var listLabel = reader.getAttribute("data-list-label") || "단신 모두 보기";
-      bb.addEventListener("click", function () { body.innerHTML = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", listLabel); swReset(body); });
+      bb.addEventListener("click", function () { body.innerHTML = ""; reader.querySelector(".reader-panel").style.height = ""; list.forEach(function (n) { body.appendChild(n); }); reader.setAttribute("aria-label", listLabel); swReset(body); });
       node.insertBefore(bb, node.firstChild);
     }
     body.innerHTML = "";
@@ -1292,12 +1292,14 @@
     if (reader.hidden) lastFocus = document.activeElement;
     [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = true; });
     reader.hidden = false;
+    reader.querySelector(".reader-panel").style.height = "";   // 새 내용이면 창 높이 고정을 푼다
     reader.querySelector(".reader-panel").scrollTop = 0;
     reader.querySelector("[data-reader-close]").focus();
   }
   function closeReader() {
     if (!reader || reader.hidden) return;
     reader.hidden = true;
+    reader.querySelector(".reader-panel").style.height = "";
     readSeq++;
     [book, document.getElementById("toolbar")].forEach(function (el) { if (el) el.inert = false; });
     if (lastFocus && lastFocus.isConnected && lastFocus.focus) lastFocus.focus();
@@ -1377,6 +1379,8 @@
         else if (!el.hasAttribute("data-swti")) { el.setAttribute("data-swti", ""); el.tabIndex = -1; }
       });
     });
+    var box = k && wrap.closest(".reader-panel");
+    if (box && !box.style.height) box.style.height = box.offsetHeight + "px";   // 요약 → 전문으로 넘겨도 창 크기는 요약 때 그대로 (안은 창 안에서 스크롤)
     if (tr && scroll !== false) tr.scrollTo({ left: k * tr.clientWidth, behavior: scroll === "smooth" ? "smooth" : "auto" });
     swSize(wrap);
     var panel = align && reader && reader.querySelector(".reader-panel");
