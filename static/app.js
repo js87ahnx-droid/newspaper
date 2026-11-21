@@ -1358,31 +1358,38 @@
   }
   function failWhy(j) {
     return j && j.timeout ? "원문 사이트가 응답하지 않습니다" : j && j.net ? "연결하지 못했습니다"
+      : j && j.reason === "본문 없는 속보" ? "제목만 먼저 나온 속보라 본문이 아직 없습니다"   // S57 — 연합 [속보]
       : "원문을 가져오지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : "");
   }
-  // 자세히 창 두 장 넘기기 (S55 시안 A): "요약 · 전문" 탭 + 가로로 두 장(scroll-snap). 옆으로 밀거나 탭을 누르면 바뀐다.
+  // 자세히 창 두 장 (S55 시안 A → S57 시안 C): "요약 · 전문" 탭 + 두 장 중 한 장만 보인다. 옆으로 밀고 손을 떼거나 탭을 누르면
+  // 다른 장으로 바뀌며 살짝 옆에서 나타난다(넘기는 중간 모습 없음 — 두 장 글이 맞붙어 잘려 보이지 않게).
   // 전문을 받을 수 있으면 둘째 장에 본문, 못 받는 기사는 "같은 사건 전문"(대체 기사 목록), 둘 다 없으면 한 장 그대로
   var swSeq = 0;
+  var SW_MIN = 50;   // 이만큼(px) 옆으로 밀고, 세로보다 1.5배 넘게 가로로 밀어야 장을 바꾼다
   function swPanes(wrap) { return Array.prototype.slice.call(wrap.querySelectorAll(":scope > .sw-track > .sw-pane")); }
-  function swSize(wrap) {   // 두 장 칸 높이 = 지금 장 높이 (긴 전문 때문에 AI 정리 아래가 비지 않게)
-    var k = +(wrap.getAttribute("data-k") || 0), p = swPanes(wrap)[k], tr = wrap.querySelector(":scope > .sw-track");
-    if (p && tr) tr.style.height = p.offsetHeight + "px";
-  }
-  function swSelect(wrap, k, scroll, align) {   // scroll: 가로로 그 장까지 ("smooth"·true·false), align: 세로를 탭 줄 바로 아래로
-    var tabs = wrap.querySelectorAll(":scope > .sw-tabs > .sw-tab"), panes = swPanes(wrap), tr = wrap.querySelector(":scope > .sw-track");
+  function swSelect(wrap, k, anim, align) {   // anim: 바뀔 때 옆에서 나타나기 (false 면 그냥), align: 세로를 탭 줄 바로 아래로
+    var tabs = wrap.querySelectorAll(":scope > .sw-tabs > .sw-tab"), panes = swPanes(wrap);
+    var prev = +(wrap.getAttribute("data-k") || 0);
+    var box = k && wrap.closest(".reader-panel");
+    if (box && !box.style.height) box.style.height = box.offsetHeight + "px";   // 요약 → 전문으로 넘겨도 창 크기는 요약 때 그대로 (안은 창 안에서 스크롤)
     wrap.setAttribute("data-k", k);
     Array.prototype.forEach.call(tabs, function (t, i) { t.setAttribute("aria-selected", i === k ? "true" : "false"); t.tabIndex = i === k ? 0 : -1; });
     panes.forEach(function (p, i) {
-      p.setAttribute("aria-hidden", i === k ? "false" : "true");   // 안 보이는 장은 화면 읽기·Tab 에서 뺀다 (inert 는 밀기를 막을 수 있어 쓰지 않음)
+      p.hidden = i !== k;
+      p.setAttribute("aria-hidden", i === k ? "false" : "true");
       Array.prototype.forEach.call(p.querySelectorAll("a, button, summary, input, select, textarea, [tabindex]"), function (el) {   // summary 도 (재리뷰 M3)
         if (i === k) { if (el.hasAttribute("data-swti")) { el.removeAttribute("tabindex"); el.removeAttribute("data-swti"); } }
         else if (!el.hasAttribute("data-swti")) { el.setAttribute("data-swti", ""); el.tabIndex = -1; }
       });
     });
-    var box = k && wrap.closest(".reader-panel");
-    if (box && !box.style.height) box.style.height = box.offsetHeight + "px";   // 요약 → 전문으로 넘겨도 창 크기는 요약 때 그대로 (안은 창 안에서 스크롤)
-    if (tr && scroll !== false) tr.scrollTo({ left: k * tr.clientWidth, behavior: scroll === "smooth" ? "smooth" : "auto" });
-    swSize(wrap);
+    var cur = panes[k];
+    if (cur && anim !== false && k !== prev && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      cur.style.setProperty("--sw-dx", (k > prev ? 16 : -16) + "px");
+      cur.classList.remove("sw-in");
+      void cur.offsetWidth;   // 애니메이션 다시 시작
+      cur.classList.add("sw-in");
+    }
+    panes.forEach(function (p) { if (p !== cur || anim === false) p.classList.remove("sw-in"); });   // 숨었다 다시 보일 때 애니메이션이 또 돌지 않게 (리뷰 N6)
     var panel = align && reader && reader.querySelector(".reader-panel");
     if (panel) {   // 장을 바꾸면 탭 바로 아래부터 (창 안에서의 위치로 — 리뷰 N9)
       var top = wrap.getBoundingClientRect().top - panel.getBoundingClientRect().top + panel.scrollTop;
@@ -1400,7 +1407,7 @@
       t.id = id + "-t" + i;
       t.setAttribute("role", "tab");
       t.setAttribute("aria-controls", id + "-p" + i);
-      t.addEventListener("click", function () { swSelect(wrap, i, "smooth", true); });
+      t.addEventListener("click", function () { swSelect(wrap, i, true, true); });
       tabs.appendChild(t);
     });
     tabs.addEventListener("keydown", function (e) {   // 왼쪽·오른쪽 방향키로 탭 옮기기
@@ -1408,7 +1415,7 @@
       e.preventDefault();
       e.stopPropagation();
       var k = e.key === "ArrowRight" || e.key === "End" ? 1 : 0;
-      swSelect(wrap, k, "smooth", true);
+      swSelect(wrap, k, true, true);
       tabs.children[k].focus();
     });
     [p1, p2].forEach(function (p, i) { p.id = id + "-p" + i; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", id + "-t" + i); tr.appendChild(p); });
@@ -1416,25 +1423,40 @@
     p1.appendChild(node);
     wrap.appendChild(tabs);
     wrap.appendChild(tr);
-    var timer = null;
-    tr.addEventListener("scroll", function () {   // 손으로 밀었을 때: 멈춘 자리의 장으로 탭을 맞춘다
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        var k = tr.clientWidth ? Math.round(tr.scrollLeft / tr.clientWidth) : 0;
-        if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, false, true);   // 손으로 밀어도 세로를 맞춘다 (리뷰 M2)
-      }, 90);
-    }, { passive: true });
+    // 밀기: 손을 뗄 때 가로로 충분히 밀었으면 왼쪽으로 민 것 → 다음 장, 오른쪽 → 앞 장. 세로 스크롤은 그대로(touch-action: pan-y)
+    var x0 = null, y0 = 0;
+    function swipeEnd(x, y) {
+      if (x0 === null) return;
+      var dx = x - x0, dy = y - y0;
+      x0 = null;
+      if (window.getSelection && String(window.getSelection())) return;   // 글을 끌어 고르는 중이면 장을 바꾸지 않음 (리뷰 N8)
+      if (Math.abs(dx) < SW_MIN || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      var k = dx < 0 ? 1 : 0;
+      if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, true, true);
+    }
+    tr.addEventListener("touchstart", function (e) { if (e.touches.length === 1) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive: true });
+    tr.addEventListener("touchend", function (e) { var t = e.changedTouches[0]; if (t) swipeEnd(t.clientX, t.clientY); }, { passive: true });
+    tr.addEventListener("touchcancel", function () { x0 = null; }, { passive: true });
+    // 노트북 터치패드·Shift+휠 가로 밀기: 한 번의 밀기(이벤트 사이 250ms 안)로 모은 가로 양이 SW_MIN 을 넘으면 (리뷰 M3)
+    var wsum = 0, wy = 0, wlast = 0, wdone = false;
+    tr.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();   // 가로 밀기가 브라우저 '뒤로'로 새지 않게 (리뷰 M2) — 세로 스크롤은 그대로
+      var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, now = Date.now();
+      if (now - wlast > 250) { wsum = 0; wy = 0; wdone = false; }
+      wlast = now;
+      wsum += e.deltaX * unit;
+      wy += Math.abs(e.deltaY * unit);
+      if (wdone || Math.abs(wsum) < SW_MIN || Math.abs(wsum) < wy * 1.5) return;
+      wdone = true;   // 이 밀기에서는 한 번만
+      var k = wsum > 0 ? 1 : 0;
+      if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, true, true);
+    }, { passive: false });
     swSelect(wrap, 0, false);
-    if (window.ResizeObserver) { var ro = new ResizeObserver(function () { swSize(wrap); }); ro.observe(p1); ro.observe(p2); }   // 전문·번역·사진이 늦게 채워져도 높이를 따라감
     return { wrap: wrap, pane: p2 };
   }
-  function swReset(root) {   // "← 돌아가기"로 다시 붙이면 첫 장·첫 탭으로 (다시 붙인 칸은 가로 위치가 0 이 되고 scroll 이 안 난다)
-    Array.prototype.forEach.call(root.querySelectorAll(".sw"), function (w) { swSelect(w, 0); });
+  function swReset(root) {   // "← 돌아가기"로 다시 붙이면 첫 장·첫 탭으로
+    Array.prototype.forEach.call(root.querySelectorAll(".sw"), function (w) { swSelect(w, 0, false); });
   }
-  window.addEventListener("resize", function () {
-    if (!reader || reader.hidden) return;
-    Array.prototype.forEach.call(reader.querySelectorAll(".sw"), function (w) { swSelect(w, +(w.getAttribute("data-k") || 0)); });   // 가로 위치만 (세로는 그대로 — 리뷰 M3)
-  });
   function cleanTitle(t, site) {   // og:title 끝의 " - 한국경제"·" | Reuters" 같은 매체 이름 꼬리 떼기
     t = String(t || "").trim();
     if (!site) return t;
@@ -1483,6 +1505,8 @@
     w.pane.appendChild(box);
     swSelect(w.wrap, 0, false);   // 받는 동안의 "원래 기사" 링크도 Tab 에서 빼기 (리뷰 B1)
     fullText(url).then(function (j) {
+      if (j && j.ok && btn.getAttribute("data-paywall") === "1" && (j.paragraphs || []).join("").length < 120)
+        j = { ok: false, reason: "유료 기사 앞부분만 받음" };   // 짧은 속보 받기(S57)가 유료 매체 맛보기를 전문으로 보이지 않게 — 같은 사건 전문으로
       if (!j || !j.ok || !j.paragraphs || !j.paragraphs.length) {
         status.textContent = failWhy(j) + ".";
         status.className = "rv-status rv-fail";
@@ -1508,8 +1532,7 @@
       main.appendChild(foot);
       if (lang !== "ko") translateButton(box, main, ps, lang, url);
       var k = +(w.wrap.getAttribute("data-k") || 0);
-      swSelect(w.wrap, k, false);   // 새로 넣은 단추도 안 보이는 장이면 Tab 에서 빼고, 높이 다시
-      Array.prototype.forEach.call(main.querySelectorAll("img"), function (im) { im.addEventListener("load", function () { swSize(w.wrap); }); });
+      swSelect(w.wrap, k, false);   // 새로 넣은 단추도 안 보이는 장이면 Tab 에서 빼기
     });
   }
   // 전문 칸 번역은 단추를 눌렀을 때만 (무료 할당량 — 제목을 누를 때마다 자동 번역하지 않는다). 결과는 주소별로 TR 에

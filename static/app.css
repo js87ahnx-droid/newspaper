@@ -625,9 +625,12 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .sw-tabs { position: sticky; top: -14px; z-index: 2; display: flex; gap: 4px; margin: 0 0 8px; padding: 8px 96px 0 0; background: var(--paper); border-bottom: 1px solid var(--rule); }   /* 오른쪽은 닫기 단추 자리 (S56: 배경을 줄 끝까지 깔아 아래 글이 비치지 않게) */
 .sw-tab { flex: 1; font: inherit; font-size: 14px; padding: 8px 0 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
 .sw-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
-.sw-track { display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.sw-track::-webkit-scrollbar { display: none; }
-.sw-pane { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.sw { overflow-x: clip; }   /* 나타날 때 옆으로 16px 비켜 있어도 가로 스크롤 막대가 생기지 않게 (리뷰 N7) */
+.sw-track { touch-action: pan-y pinch-zoom; }   /* S57 시안 C: 한 장만 보이고, 옆으로 밀고 손을 떼면 바뀐다 (세로 스크롤은 그대로) */
+.sw-pane { min-width: 0; }
+.sw-pane[hidden] { display: none; }
+.sw-pane.sw-in { animation: sw-in 0.22s ease-out; }
+@keyframes sw-in { from { opacity: 0; transform: translateX(var(--sw-dx, 16px)); } to { opacity: 1; transform: none; } }
 .ft { margin: 0; padding: 0; border: 0; }
 .ft-title { font-family: var(--serif); font-size: 1.25em; line-height: 1.4; margin: 2px 0 4px; }
 .ft-meta { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 0.85em; color: var(--muted); }

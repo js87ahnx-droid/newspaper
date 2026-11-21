@@ -14,9 +14,10 @@ BAR = """() => { const p = document.querySelector('#reader .reader-panel').getBo
   const t = document.querySelector('#reader .sw-tabs'), tr = t && t.getBoundingClientRect();
   const tab = t && t.querySelector('.sw-tab:last-child').getBoundingClientRect();
   const hit = document.elementFromPoint(c.left + c.width / 2, c.top + c.height / 2);
+  const gx = tab ? (tab.right + c.left) / 2 : 0, gap = tab && document.elementFromPoint(gx, c.top + c.height / 2);   // 전문 탭과 닫기 사이 (S57 리뷰 M10 — 아래 사진이 비치지 않게)
   return { pTop: p.top, pRight: p.right, cTop: c.top, cMid: c.top + c.height / 2, cRight: c.right, cLeft: c.left,
            tTop: tr && tr.top, tMid: tr && (tr.top + tr.bottom) / 2, tBottom: tr && tr.bottom, tabRight: tab && tab.right,
-           closeOnTop: !!(hit && hit.closest('[data-reader-close]')) }; }"""
+           closeOnTop: !!(hit && hit.closest('[data-reader-close]')), gapBar: !tab || !!(gap && gap.closest('.sw-tabs, .reader-bar')) }; }"""
 
 
 @pytest.mark.parametrize("w,h", [(390, 844), (1180, 820)])
@@ -26,7 +27,7 @@ def test_tabs_and_close_one_bar_stays_on_top(browser, tmp_path, monkeypatch, w, 
     page.set_viewport_size({"width": w, "height": h})
     page.wait_for_timeout(400)
     _open_title(page, '[data-lang="ko"]:not([data-read=""])')
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")
     page.wait_for_timeout(600)
     shot = os.environ.get("S56_SHOTS")
@@ -41,6 +42,7 @@ def test_tabs_and_close_one_bar_stays_on_top(browser, tmp_path, monkeypatch, w, 
         assert r["cTop"] >= r["pTop"] and r["cRight"] <= r["pRight"], r
         assert r["tabRight"] <= r["cLeft"], r                            # 전문 탭과 닫기가 겹치지 않음
         assert r["closeOnTop"], r                                        # 닫기가 아래 글에 가리지 않음
+        assert r["gapBar"], r                                            # 탭과 닫기 사이로 아래 사진·글이 비치지 않음
     assert page.evaluate("() => document.querySelector('#reader .reader-panel').scrollTop") > 500
     page.evaluate("() => document.querySelector('[data-reader-close]').click()")
     assert page.evaluate("() => document.getElementById('reader').hidden")

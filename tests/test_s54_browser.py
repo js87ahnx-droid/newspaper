@@ -32,13 +32,13 @@ def test_title_shows_full_text_once_per_url(browser, tmp_path, monkeypatch):
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE))
     iid = _open_title(page, '[data-lang="ko"]:not([data-read=""])')
     assert iid
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     r = page.evaluate(READ)
     assert r["ft"] and r["h"] == ["요약", "전문"] and r["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and not r["fail"] and r["tr"] == []
     assert len(_gets(seen)) == 1
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)                       # 다시 열기 — 같은 주소는 다시 안 받음
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     page.evaluate("() => document.querySelector('#reader .reader-body .meta .orig-btn').click()")   # 창 안 "원문" — 같은 결과
     page.wait_for_selector(".readview .rv-p")
     assert len(_gets(seen)) == 1
@@ -72,7 +72,7 @@ def test_inflight_shared_when_reopened(browser, tmp_path, monkeypatch):
     assert len(pending) == 1                                              # 받는 중 닫고 다시 열어도 1건
     assert page.evaluate("() => document.querySelector('#reader .ft .rv-status').textContent") == "전문을 불러오는 중…"
     pending[0].fulfill(status=200, headers={**cors, "Content-Type": "application/json"}, body=json.dumps(ARTICLE))
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     assert not errors, errors
     ctx.close()
 
@@ -82,12 +82,12 @@ def test_failure_shows_link_and_retries_next_open(browser, tmp_path, monkeypatch
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch,
                                     lambda u, b=None: (calls.append(u), (502, {"ok": False, "reason": "원문 http 403"}))[1])
     iid = _open_title(page, '[data-lang="ko"]:not([data-read=""])')
-    page.wait_for_selector("#reader .ft .rv-fail")
+    page.wait_for_selector("#reader .ft .rv-fail", state="attached")
     r = page.evaluate(READ)
     assert "원문 http 403" in r["status"] and page.evaluate("() => !!document.querySelector('#reader .ft .rv-link-big')")
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)
-    page.wait_for_selector("#reader .ft .rv-fail")
+    page.wait_for_selector("#reader .ft .rv-fail", state="attached")
     assert len(calls) == 2 and not errors                                  # 실패는 남기지 않아 다시 받음
     ctx.close()
 
@@ -104,8 +104,12 @@ def _blocked_and_paywall(ed):
     b["view"] = b.get("view") or {}
 
 
+# 유료 매체(Spiegel)는 120자 미만이면 맛보기로 보고 실패 처리한다(S57) — 유료 매체 시험은 긴 본문으로
+LONG = dict(ARTICLE, paragraphs=["첫 문단 <b>태그는 글자로</b>", "둘째 문단입니다. " * 8, "셋째 문단입니다. " * 8])
+
+
 def test_blocked_shows_alternatives_and_paywall_note(browser, tmp_path, monkeypatch):
-    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), mutate=_blocked_and_paywall)
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, LONG), mutate=_blocked_and_paywall)
     _open_title(page, '[data-href*="world/x.html"]')
     r = page.evaluate(READ)
     assert not r["ft"] and r["alt"] == ["조선일보", "BBC"], r                 # 막힌 매체(Reuters) 빼고, 매체당 하나
@@ -114,7 +118,7 @@ def test_blocked_shows_alternatives_and_paywall_note(browser, tmp_path, monkeypa
     assert len(_gets(seen)) == 1
     _close(page)
     _open_title(page, '[data-href*="spiegel.de/ausland/x"]')
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     r = page.evaluate(READ)
     assert r["pay"] and r["tr"] == ["한국어로 번역"]                          # 유료 안내, 외국어는 단추만
     assert not [s for s in seen if s["url"].endswith("/translate")]
@@ -127,15 +131,15 @@ def test_translate_button_once(browser, tmp_path, monkeypatch):
     def handler(u, body=None):
         if u.endswith("/translate"):
             return 200, {"ok": True, "texts": ["번역됨"] * len(body["texts"])}
-        return 200, ARTICLE
+        return 200, LONG
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler, mutate=_blocked_and_paywall)
     iid = _open_title(page, '[data-href*="spiegel.de/ausland/x"]')
-    page.wait_for_selector("#reader .ft .rv-tab")
+    page.wait_for_selector("#reader .ft .rv-tab", state="attached")
     page.evaluate("() => document.querySelector('#reader .ft .rv-tab').click()")
     page.wait_for_function("() => document.querySelector('#reader .ft .rv-p').textContent === '번역됨'")
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)
-    page.wait_for_selector("#reader .ft .rv-tab")
+    page.wait_for_selector("#reader .ft .rv-tab", state="attached")
     page.evaluate("() => document.querySelector('#reader .ft .rv-tab').click()")
     page.wait_for_function("() => document.querySelector('#reader .ft .rv-p').textContent === '번역됨'")
     assert len([s for s in seen if s["url"].endswith("/translate")]) == 1 and not errors
@@ -154,7 +158,7 @@ def test_horizontal_scroll_none_phone(browser, tmp_path, monkeypatch):
     page.set_viewport_size({"width": 390, "height": 844})
     page.wait_for_timeout(600)
     _open_title(page, '[data-lang="ko"]:not([data-read=""])')
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     m = page.evaluate("() => ({ sw: document.scrollingElement.scrollWidth, iw: innerWidth, pw: document.querySelector('#reader .reader-panel').scrollWidth, pc: document.querySelector('#reader .reader-panel').clientWidth })")
     assert m["sw"] <= m["iw"] and m["pw"] <= m["pc"] + 1 and not errors, m
     ctx.close()
@@ -234,7 +238,29 @@ def test_no_full_section_for_china_and_wide_no_scroll(browser, tmp_path, monkeyp
     assert not page.evaluate("() => !!document.querySelector('#reader .ft, #reader .ft-alt:not([hidden])')")
     _close(page)
     _open_title(page, '[data-lang="ko"]:not([data-read=""])')
-    page.wait_for_selector("#reader .ft .rv-p")
+    page.wait_for_selector("#reader .ft .rv-p", state="attached")
     m = page.evaluate("() => ({ sw: document.scrollingElement.scrollWidth, iw: innerWidth })")
     assert m["sw"] <= m["iw"] and not errors, m
+    ctx.close()
+
+
+def test_paywall_short_teaser_counts_as_failure(browser, tmp_path, monkeypatch):
+    """S57: 유료 매체가 120자 미만만 주면(맛보기) 전문 대신 실패 안내 + 원래 기사 링크."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), mutate=_blocked_and_paywall)
+    _open_title(page, '[data-href*="spiegel.de/ausland/x"]')
+    page.wait_for_selector("#reader .ft .rv-fail", state="attached")
+    r = page.evaluate("() => ({ fail: document.querySelector('#reader .ft .rv-fail').textContent, ps: document.querySelectorAll('#reader .ft .rv-p').length, link: !!document.querySelector('#reader .ft .rv-link-big') })")
+    assert "유료 기사 앞부분만" in r["fail"] and r["ps"] == 0 and r["link"], r
+    assert not errors, errors
+    ctx.close()
+
+
+def test_breaking_news_without_body_says_so(browser, tmp_path, monkeypatch):
+    """S57: 중계 서버가 "본문 없는 속보"면 받기 실패 대신 그 이유를 쓴다."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (422, {"ok": False, "reason": "본문 없는 속보"}))
+    _open_title(page, '[data-lang="ko"]:not([data-read=""])')
+    page.wait_for_selector("#reader .ft .rv-fail", state="attached")
+    t = page.evaluate("() => document.querySelector('#reader .ft .rv-fail').textContent")
+    assert t.startswith("제목만 먼저 나온 속보라 본문이 아직 없습니다"), t
+    assert not errors, errors
     ctx.close()
