@@ -76,3 +76,48 @@ test("하이픈 꼴 기본 그림(og-default·no-image)도 뺌", async () => {
     assert.equal(r.images.length, 0, og);
   }
 });
+
+test("연합 속보 꼴: 본문 칸 한두 줄(120자 미만)도 본문 (S57)", async () => {
+  const html = `<html><body><article><div class="story-news article"><p>지어낸 속보 한 줄입니다. 시험용으로 만든 글입니다.</p></div></article></body></html>`;
+  const r = await run(html);
+  assert.equal(r.ok, true);
+  assert.equal(r.via, "본문 칸");
+  assert.equal(r.paragraphs.length, 1);
+});
+
+test("본문 표시 없는 짧은 문단 모음은 여전히 실패 (S57)", async () => {
+  const html = `<html><body><div class="box"><p>${line(1)}</p></div></body></html>`;
+  const r = await run(html);
+  assert.equal(r.ok, false);
+});
+
+test("짧은 본문 칸 + 긴 문단 모음이면 문단 모음 (S57 — 요약 상자 칸이 이기지 않게)", async () => {
+  const html = `<html><body><div class="article_view"><p>요약 상자에 들어간 짧은 한 줄입니다. 지어낸 글입니다.</p></div>
+    ${[1, 2, 3, 4, 5, 6].map((n) => `<p>${line(n)}</p>`).join("")}</body></html>`;
+  const r = await run(html);
+  assert.equal(r.ok, true);
+  assert.equal(r.via, "문단");
+});
+
+test("구조화 데이터의 짧은 맛보기만 있으면 실패 (S57 — 유료 매체 맛보기)", async () => {
+  const ld = JSON.stringify({ "@type": "NewsArticle", articleBody: "구독자만 읽을 수 있는 기사입니다. 지어낸 안내문입니다." });
+  const r = await run(`<html><head><script type="application/ld+json">${ld}</script></head><body><div></div></body></html>`);
+  assert.equal(r.ok, false);
+});
+
+test("본문 칸 경계: 19자 실패, 20자 성공 (S57)", async () => {
+  const mk = (t) => `<html><body><div class="story-news"><p>${t}</p></div></body></html>`;
+  assert.equal((await run(mk("가".repeat(17) + "다."))).ok, false);
+  assert.equal((await run(mk("가".repeat(18) + "다."))).ok, true);
+});
+
+test("짧은 본문 칸: 자리 글·문장이 아닌 글은 실패, 본문 없는 [속보]는 그 이유로 (S57 리뷰 M4)", async () => {
+  const mk = (t, title = "지어낸 제목") => `<html><head><meta property="og:title" content="${title}"></head><body><div class="story-news"><p>${t}</p></div></body></html>`;
+  assert.equal((await run(mk("기사 본문을 불러오는 중입니다. 잠시만 기다려 주세요."))).ok, false);
+  assert.equal((await run(mk("2026.11.20 홍길동 기자 photo@example.test"))).ok, false);
+  const r = await run(mk("2026.11.20 홍길동 기자 photo@example.test", "[속보] 지어낸 제목 | 연합뉴스"));
+  assert.equal(r.ok, false);
+  assert.equal(r.reason, "본문 없는 속보");
+  const r2 = await run(`<html><head><meta property="og:title" content="[속보] 지어낸 제목 &amp; 시험"></head><body><div class="story-news"><figure><img src="https://x.example/p.jpg"></figure></div></body></html>`);
+  assert.equal(r2.reason, "본문 없는 속보");
+});

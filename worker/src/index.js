@@ -72,21 +72,41 @@ function json(body, status, extra) {
 }
 
 // 넘겨주기(redirect)를 직접 따라가며 매번 허용목록을 확인한다 (허용 매체가 다른 곳으로 넘겨도 따라가지 않게)
-async function fetchArticle(url) {
+// 넘겨줄 때 받은 쿠키는 같은 매체(허용목록의 같은 도메인) 안에서만 다음 요청에 싣는다 (S57 — 쿠키를 심고 같은 주소로 되넘기는 매체)
+export function siteOf(host) {
+  host = String(host || "").toLowerCase().replace(/\.$/, "");
+  return DOMAINS.find((d) => host === d || host.endsWith("." + d)) || host;
+}
+
+export function cookiePairs(headers) {
+  const raw = typeof headers.getSetCookie === "function" ? headers.getSetCookie() : (headers.get("Set-Cookie") ? [headers.get("Set-Cookie")] : []);
+  return raw.map((c) => ({ pair: c.split(";")[0].trim(), gone: /;\s*max-age\s*=\s*0(?![0-9])/i.test(c) }))
+    .filter((c) => /^[^=\s;]+=/.test(c.pair));
+}
+
+export async function fetchArticle(url, fetcher = fetch) {
   let cur = url;
+  const jar = {};   // 매체 → {이름: "이름=값"}
   for (let i = 0; i <= MAX_REDIRECTS; i++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+    const site = siteOf(cur.hostname);
+    const headers = { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml", "Accept-Language": "ko,en;q=0.8,ja;q=0.6" };
+    if (jar[site]) headers["Cookie"] = Object.values(jar[site]).join("; ");
     let res;
     try {
-      res = await fetch(cur.toString(), {
+      res = await fetcher(cur.toString(), {
         redirect: "manual",
         signal: ctrl.signal,
-        headers: { "User-Agent": UA, "Accept": "text/html,application/xhtml+xml", "Accept-Language": "ko,en;q=0.8,ja;q=0.6" },
+        headers,
         cf: { cacheTtl: 0, cacheEverything: false },
       });
     } finally {
       clearTimeout(timer);
+    }
+    for (const c of cookiePairs(res.headers)) {
+      const name = c.pair.slice(0, c.pair.indexOf("="));
+      if (c.gone) { if (jar[site]) delete jar[site][name]; } else (jar[site] ||= {})[name] = c.pair;   // Max-Age=0 은 지움 (리뷰 N11)
     }
     if (res.status >= 300 && res.status < 400 && res.headers.get("Location")) {
       const next = checkUrl(new URL(res.headers.get("Location"), cur).toString());

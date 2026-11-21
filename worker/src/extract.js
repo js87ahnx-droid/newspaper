@@ -24,8 +24,9 @@ const SKIP = "script, style, noscript, nav, footer, aside, form, button, iframe,
 const BLOCK = "p, div, br, li, h1, h2, h3, h4, h5, h6, section, blockquote, tr, figure, ul, ol, table, dd, dt";
 const VOID = new Set(["br", "img", "hr", "meta", "link", "input", "source", "wbr", "col", "embed", "area", "base", "param", "track"]);
 
-const MIN_CHARS = 120;     // 이보다 짧으면 본문이 아니라 안내문·요약 (짧은 사진 기사는 150자 안팎 — 동아 실측)
-const MIN_LOOSE = 300;     // 매체가 본문이라고 표시하지 않은 문단 모음은 더 길어야 본문으로 본다
+const MIN_MARKED = 120;    // 이보다 짧으면 본문이 아니라 안내문·요약 (짧은 사진 기사는 150자 안팎 — 동아 실측)
+const MIN_SHORT = 20;      // 다만 매체 본문 칸에 이것만 있고 다른 후보가 없으면 한 줄 속보로 본다 (S57 — 연합 "[속보]" 76자). 구조화 데이터의 짧은 맛보기는 안 받음
+const MIN_LOOSE = 300;    // 매체가 본문이라고 표시하지 않은 문단 모음은 더 길어야 본문으로 본다
 const MAX_CHARS = 30000;
 const MAX_IMAGES = 6;
 
@@ -124,6 +125,14 @@ function fromFusion(src) {
   return { paras, images };
 }
 
+// 짧은 본문 칸(20~119자)을 본문으로 볼까 (S57 리뷰 M4): 자리 글("불러오는 중…")이 아니고 문장으로 끝날 때만 (기자 이름·전자우편·사진 설명 조각은 안 받음)
+const PLACEHOLDER = /불러오|로딩|loading|자바스크립트|javascript|활성화|enable/i;
+export function shortOk(paras) {
+  const t = paras.join(" ").trim();
+  if (PLACEHOLDER.test(t)) return false;
+  return /[.!?。다요]["'”’)]?$/.test(t);
+}
+
 export async function extract(response, url, debug) {
   const st = {
     skip: 0, body: 0, art: 0, p: false,
@@ -218,10 +227,16 @@ export async function extract(response, url, debug) {
     { via: "출판 데이터", paras: fusion.paras },
     { via: "기사 문단", paras: decode(st.artP).filter((p) => p.length >= 40) },
     { via: "문단", paras: decode(st.allP).filter((p) => p.length >= 60) },
-  ].filter((c) => size(c.paras) >= (c.via === "기사 문단" || c.via === "문단" ? MIN_LOOSE : MIN_CHARS));
+  ].filter((c) => size(c.paras) >= (c.via === "기사 문단" || c.via === "문단" ? MIN_LOOSE : c.via === "본문 칸" ? MIN_SHORT : MIN_MARKED));
   if (debug) return { ok: false, reason: "debug", debug: { skip: st.skip, body: st.body, art: st.art, bodyText: st.bodyText.length, artP: st.artP.length, allP: st.allP.length, ld: st.ld.length, fusion: st.fusion.length, cands: cands.map((c) => c.via + ":" + size(c.paras)) } };
-  if (!cands.length) return { ok: false, reason: "본문을 찾지 못함" };
-  // 앞 세 후보(매체가 본문이라고 표시한 곳)를 우선, 그중 가장 긴 것. 없으면 문단 모음
+  const pageTitle = decodeEntities(String(st.meta["og:title"] || st.title || ""));
+  const noBody = () => ({ ok: false, reason: /\[(속보|1보)\]/.test(pageTitle) ? "본문 없는 속보" : "본문을 찾지 못함" });   // 제목만 먼저 나온 속보 (S57 — 연합 사장단 인사 속보)
+  if (!cands.length) return noBody();
+  // 앞 세 후보(매체가 본문이라고 표시한 곳)를 우선, 그중 가장 긴 것. 없으면 문단 모음.
+  // 짧은 본문 칸(MIN_MARKED 미만 — 속보)은 다른 후보가 하나도 없을 때만 (S57 — 요약 상자에 걸린 짧은 칸이 긴 문단 모음을 이기지 않게)
+  const full = cands.filter((c) => c.via === "본문 칸" ? size(c.paras) >= MIN_MARKED : true);
+  if (full.length) cands.splice(0, cands.length, ...full);
+  else if (!shortOk(cands[0].paras)) return noBody();
   const marked = cands.filter((c) => c.via !== "기사 문단" && c.via !== "문단");
   const best = (marked.length ? marked : cands).reduce((a, b) => (size(b.paras) > size(a.paras) ? b : a));
 
