@@ -296,7 +296,13 @@ mark { background: var(--mark); color: inherit; padding: 0 1px; }
 .reader { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; cursor: pointer; }  /* cursor: iOS 가 바깥 누르기를 click 으로 보내게 (S28c) */
 .reader[hidden] { display: none; }
 .reader-panel { cursor: auto; background: var(--paper); color: var(--ink); width: min(720px, 100%); max-height: 100%; overflow: auto; border-radius: 8px; padding: 14px 18px 18px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); -webkit-overflow-scrolling: touch; }
-.reader-close { float: right; font: inherit; border: 1px solid var(--rule, #c9bfae); background: transparent; color: var(--ink); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+/* 창 위 막대 (S56): 닫기는 스크롤해도 위에 붙어 있다. 두 장(요약·전문) 탭이 있으면 막대 높이를 0 으로 겹쳐 탭 줄 오른쪽 끝에 — 한 줄로 고정 */
+.reader-bar { position: sticky; top: -14px; z-index: 3; display: flex; justify-content: flex-end; align-items: center; margin: -14px 0 6px; padding: 8px 0 6px; background: var(--paper); }
+.reader-panel:has(.sw-tabs) .reader-bar { height: 0; padding: 0; margin: -14px 0 0; background: transparent; align-items: flex-start; }
+.reader-panel:has(.sw-tabs) .reader-close { margin-top: 10px; }
+.reader-close { font: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); border-radius: 999px; padding: 4px 12px 4px 14px; cursor: pointer; }   /* 탭(밑줄 글자)과 같은 글꼴·색, 먹색으로 칠한 둥근 단추라 탭과 다르게 보인다 */
+.reader-close:hover { opacity: 0.85; }
+.reader-close:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .reader-body .item { border: 0; }
 .reader-body .item .lead { -webkit-line-clamp: unset; display: block; }
 .reader-body .item .photo img { max-height: 340px; }
@@ -616,12 +622,15 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .cn-title a:hover, .cn-title a:focus-visible { text-decoration: underline; }
 .cn-row + .cn-row dt { margin-top: 6px; }
 /* S55 ① 자세히 창 두 장 넘기기 (시안 A) */
-.sw-tabs { position: sticky; top: -14px; z-index: 2; display: flex; gap: 4px; margin: 0 92px 8px 0; padding-top: 4px; background: var(--paper); border-bottom: 1px solid var(--rule); }   /* 오른쪽은 닫기 단추 자리 */
+.sw-tabs { position: sticky; top: -14px; z-index: 2; display: flex; gap: 4px; margin: 0 0 8px; padding: 8px 96px 0 0; background: var(--paper); border-bottom: 1px solid var(--rule); }   /* 오른쪽은 닫기 단추 자리 (S56: 배경을 줄 끝까지 깔아 아래 글이 비치지 않게) */
 .sw-tab { flex: 1; font: inherit; font-size: 14px; padding: 8px 0 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
 .sw-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 700; }
-.sw-track { display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.sw-track::-webkit-scrollbar { display: none; }
-.sw-pane { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.sw { overflow-x: clip; }   /* 나타날 때 옆으로 16px 비켜 있어도 가로 스크롤 막대가 생기지 않게 (리뷰 N7) */
+.sw-track { touch-action: pan-y pinch-zoom; }   /* S57 시안 C: 한 장만 보이고, 옆으로 밀고 손을 떼면 바뀐다 (세로 스크롤은 그대로) */
+.sw-pane { min-width: 0; }
+.sw-pane[hidden] { display: none; }
+.sw-pane.sw-in { animation: sw-in 0.22s ease-out; }
+@keyframes sw-in { from { opacity: 0; transform: translateX(var(--sw-dx, 16px)); } to { opacity: 1; transform: none; } }
 .ft { margin: 0; padding: 0; border: 0; }
 .ft-title { font-family: var(--serif); font-size: 1.25em; line-height: 1.4; margin: 2px 0 4px; }
 .ft-meta { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 0.85em; color: var(--muted); }
