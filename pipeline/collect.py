@@ -74,6 +74,17 @@ _IMG_SRC = re.compile(r'<img[^>]+src=["\'](https?://[^"\']+)["\']', re.I)
 _IMG_EXT = re.compile(r"\.(jpe?g|png|webp|gif)(\?|$)", re.I)
 
 
+def _letters(s: str) -> str:
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+def name_only_title(title: str, *names: str | None) -> bool:
+    """제목이 매체 이름뿐인가 (S57 — Google 뉴스가 "- Al Jazeera - Al Jazeera" 꼴로 줄 때가 있다).
+    글자·숫자만 남겨 비교하므로 앞뒤 대시(-–—)·세로선·공백은 상관없다. names: sources.yaml 이름, Google 뉴스가 붙인 꼬리, 피드의 매체 이름"""
+    t = _letters(title)
+    return not t or any(n and t == _letters(n) for n in names)
+
+
 def entry_image(entry) -> str | None:
     """RSS 항목이 직접 주는 대표 이미지 주소. 가장 큰 것을 고른다. 없으면 None."""
     cands: list[tuple[int, str]] = []
@@ -100,11 +111,17 @@ def entry_to_article(entry, src: Source, feed: Feed, now: datetime) -> Article |
     title = clean_text(entry.get("title"))
     if not link or not title:
         return None
+    tail = None
     if feed.kind == "google_news":
         # Google 뉴스 제목은 "제목 - 매체명" 형식이고 요약은 제목을 되풀이한 링크뿐이다
+        m = _GNEWS_SUFFIX.search(title)
+        tail = m.group(0).strip(" -") if m else None
         title = _PEOPLE_SUFFIX.sub("", _GNEWS_SUFFIX.sub("", title))
         # "제목 - 조선비즈 - Chosunbiz" 처럼 매체 이름이 한 번 더 붙은 것 (S22d)
         title = re.sub(rf"\s+-\s+{re.escape(src.name)}$", "", title)
+    feed_src = entry.get("source") if isinstance(entry.get("source"), dict) else {}
+    if name_only_title(title, src.name, tail, feed_src.get("title")):
+        return None
     if feed.title_must and feed.title_must not in title:
         return None
     if feed.url_must and not re.search(feed.url_must, link):

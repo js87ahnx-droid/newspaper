@@ -309,6 +309,27 @@ def test_google_news_items_have_no_fake_lead():
     assert b.lead.startswith("这是")
 
 
+def test_name_only_titles_are_dropped():
+    """S57: Google 뉴스 제목이 매체 이름뿐이면("- Al Jazeera - Al Jazeera") 버린다. 매체 이름으로 시작하는 진짜 제목은 남긴다."""
+    from pipeline.collect import entry_to_article
+    from pipeline.settings import Feed, Source
+    now = datetime(2026, 11, 21, 1, tzinfo=timezone.utc)
+    gn = Feed(section="analysis", url="https://news.google.com/rss/search?q=site:aljazeera.com", kind="google_news")
+    rss = Feed(section="top", url="https://a.test/rss")
+    src = Source(name="Al Jazeera", country="QA", lean="중도", type="방송", weight=0.9, paywall=False, enabled=True, feeds=[gn, rss])
+    mk = lambda t: {"link": "https://news.google.com/rss/articles/X", "title": t, "summary": "x", "published": "Fri, 20 Nov 2026 09:00:00 GMT"}
+    for t in ["- Al Jazeera - Al Jazeera", "Al Jazeera - Al Jazeera", "Al Jazeera", "— Al Jazeera —", " - "]:
+        assert entry_to_article(mk(t), src, gn, now) is None, t
+    assert entry_to_article(mk("Al Jazeera"), src, rss, now) is None   # 보통 RSS 도
+    a = entry_to_article(mk("Al Jazeera reports on Gaza talks - Al Jazeera"), src, gn, now)
+    assert a and a.title == "Al Jazeera reports on Gaza talks"
+    # Google 뉴스가 붙인 이름이 sources.yaml 이름과 다를 때 (꼬리·피드의 source 제목으로 비교)
+    nyt = Source(name="New York Times", country="US", lean="진보", type="종합지", weight=1.0, paywall=True, enabled=True, feeds=[gn])
+    assert entry_to_article(mk("The New York Times - The New York Times"), nyt, gn, now) is None
+    assert entry_to_article({**mk("The New York Times"), "source": {"title": "The New York Times"}}, nyt, gn, now) is None
+    assert entry_to_article(mk("Trump and the Fed - The New York Times"), nyt, gn, now)
+
+
 def test_google_news_copy_yields_to_official(tmp_path):
     """S43: 같은 기사의 Google 뉴스 판은 먼저 나왔어도 공식 판(주소·리드·사진)에 합친다. 제목이 조금 달라도 합치고, 다른 기사는 남긴다."""
     from dataclasses import replace
