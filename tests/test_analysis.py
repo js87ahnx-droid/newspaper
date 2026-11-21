@@ -82,6 +82,37 @@ def test_analysis_rejects_repeat_and_copy(tmp_path):
     assert all("analysis" not in it.get("llm", {}) for it in out["sections"]["front"])
 
 
+def test_mixed_latin_detects_stray_english():
+    from pipeline.llm import mixed_latin
+    assert mixed_latin("공화당에서는 호significant 두 명이 반대했다.")
+    assert mixed_latin("의원들은 significant반대 의견을 냈다.")
+    for ok in ["대형 AI 데이터센터가 늘었다.", "iPhone을 내놓았다.", "OpenAI는 밝혔다.", "G7 정상회의", "금리를 0.25%p 내렸다.",
+               "엔비디아(Nvidia)는", "https://www.example.com/abc를 참고", "[Watch] 캐나다 총리",
+               "수십km 떨어진 곳", "수백kg 무게", "기준금리를 수십bp 올렸다", "수천ha 숲이 탔다", "수백MW 발전소"]:
+        assert not mixed_latin(ok), ok
+
+
+def test_analysis_retries_mixed_english_once(tmp_path):
+    """S57: 요약에 영어 낱말이 끼면 그 묶음만 한 번 더 묻는다. 두 번째에 고쳐지면 싣고, 또 섞이면 분석 없음."""
+    bad = dict(GOOD, summary=GOOD["summary"].replace("정거장 네 곳이", "정거장 호significant 네 곳이"))
+    answers = [{"i1": bad, "i2": bad}, {"i1": GOOD, "i2": bad}]
+    calls = []
+
+    def run(prompt):
+        calls.append(prompt)
+        if "headline" not in prompt:
+            return json.dumps({"result": json.dumps({"issues": {}})})
+        return json.dumps({"result": json.dumps({"issues": answers.pop(0) if answers else {}}, ensure_ascii=False)})
+    ed = {"sections": {"front": [item("i1"), item("i2", url="https://a.test/2")]}, "compare": [], "stats": {}}
+    out = enrich(ed, cfg(), load_interests().foreign_display, tmp_path / "llm.json",
+                 Budget(tmp_path / "u.json", date(2026, 10, 16), 10), runner=run)
+    st = out["stats"]["llm"]["analysis"]
+    assert len([c for c in calls if "headline" in c]) == 2 and st["retried"] == 2 and st["asked"] == 2   # 다시 물은 것은 asked 에 안 셈
+    assert st["rejected"] == {"i2": "영어 섞임"}
+    front = out["sections"]["front"]
+    assert front[0]["llm"]["analysis"]["summary"] == GOOD["summary"] and "analysis" not in front[1].get("llm", {})
+
+
 def test_analysis_limited_to_top_issues_and_batched(tmp_path):
     calls = []
     items = [item(f"i{n}", url=f"https://a.test/{n}") for n in range(5)]

@@ -206,6 +206,19 @@ def new_facts(text: str, title: str) -> int:
     return sum(1 for w in set(_WORD.findall(text.lower())) if not any(w in t or t in w for t in tw))
 
 
+# 한국어 글에 잘못 끼어든 영어 낱말 (S57 — "공화당에서는 호significant 두 명이"): 한글 바로 뒤의 로마자 소문자,
+# 또는 한글 바로 앞에 붙은 4자 이상 소문자 낱말. "AI 데이터센터"·"iPhone을"·"OpenAI는"·"G7"·"5%p" 는 통과
+_MIXED = re.compile(r"[가-힣][a-z]{2,}|(?<![A-Za-z])[a-z]{4,}[가-힣]")
+
+
+# 한글 수사 뒤에 붙는 단위는 한국어 표기 ("수십km"·"수백kg"·"수십bp" — S57 리뷰 M5)
+_UNITS = re.compile(r"(?<=[가-힣])(?:kwh|mwh|gwh|twh|km|kg|mm|cm|nm|bp|ha|ml|mg|ppm|ppb|kw|mw|gw|tw|mb|gb|tb|kb|ms|hz)(?![a-z])")
+
+
+def mixed_latin(text: str) -> bool:
+    return bool(_MIXED.search(_UNITS.sub("", re.sub(r"https?://\S+", "", text))))
+
+
 def check_summary(summary: str, titles: list[str]) -> str | None:
     """S14 기준: 제목과의 문자 겹침 < 0.6, 제목에 없는 사실 1개 이상. 어긋나면 이유."""
     if not summary or len(summary) < 40:
@@ -224,9 +237,16 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
 
     done = cache.setdefault("analysis", {})
     todo = [it for it in items[: cfg.analysis_issues] if it["issue_id"] not in done]
-    stats = {"asked": 0, "ok": 0, "rejected": {}, "issues_with_body": 0, "articles": 0, "articles_with_body": 0, "calls": []}
-    for i in range(0, len(todo), cfg.analysis_batch):
-        batch = todo[i : i + cfg.analysis_batch]
+    stats = {"asked": 0, "ok": 0, "rejected": {}, "issues_with_body": 0, "articles": 0, "articles_with_body": 0, "calls": [], "retried": 0}
+    batches = [todo[i : i + cfg.analysis_batch] for i in range(0, len(todo), cfg.analysis_batch)]
+    retry: list[dict] | None = []
+    while batches or retry:
+        if not batches:   # "영어 섞임"으로 거른 묶음만 한 번 더 (S57)
+            stats["retried"] = len(retry)
+            batches = [retry[i : i + cfg.analysis_batch] for i in range(0, len(retry), cfg.analysis_batch)]   # 묶음 크기는 그대로
+            retry = None
+        batch = batches.pop(0)
+        first = retry is not None   # 다시 묻는 묶음은 집계(asked·articles)에 다시 넣지 않음 (리뷰 N9)
         rows = []
         for it in batch:
             seen, arts = set(), []
@@ -235,16 +255,16 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
                     continue
                 seen.add(a["source"])
                 body = bodies.get(a["url"])
-                stats["articles"] += 1
-                stats["articles_with_body"] += body is not None
+                stats["articles"] += first
+                stats["articles_with_body"] += first and body is not None
                 arts.append({"매체": a["source"], "성향": a.get("lean", ""), "국가": a.get("country", ""),
                              "시각": a.get("published", ""), "제목": a["title"],
                              "본문": body[:ANALYSIS_BODY_CHARS] if body else f"(본문 없음) {a.get('lead', '')[:300]}"})
-            stats["issues_with_body"] += any(bodies.get(a["url"]) for a in it["articles"])
+            stats["issues_with_body"] += first and any(bodies.get(a["url"]) for a in it["articles"])
             past = [{"날짜": t.get("date"), "제목": t.get("title"), "정리": t.get("summary") or ""}
                     for t in it.get("timeline") or []]
             rows.append({"id": it["issue_id"], "지난 경과": past, "기사": arts})
-        stats["asked"] += len(batch)
+        stats["asked"] += len(batch) if first else 0
         res, st = guarded(ANALYSIS_PROMPT.format(data=_data_block(rows)), model=cfg.analysis_model,
                           timeout=cfg.analysis_timeout_sec, system=ANALYSIS_SYSTEM)
         stats["calls"].append(st)
@@ -265,9 +285,14 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
             body_list = [b for a in it["articles"] if (b := bodies.get(a["url"]))]
             if not why and any(copied_span(t, body_list) for t in texts):
                 why = "본문 그대로 옮김"
+            if not why and any(mixed_latin(t) for t in texts + [str(out.get("headline", ""))] + [str(x) for x in out.get("points") or []]):
+                why = "영어 섞임"
+                if retry is not None:   # 한 번만 다시 묻는다
+                    retry.append(it)
             if why:
                 stats["rejected"][it["issue_id"]] = why
                 continue
+            stats["rejected"].pop(it["issue_id"], None)
             done[it["issue_id"]] = {
                 "headline": str(out.get("headline", ""))[:60],
                 "summary": str(out.get("summary", "")),
