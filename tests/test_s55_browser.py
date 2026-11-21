@@ -25,7 +25,7 @@ def test_two_pages_tabs_and_swipe(browser, tmp_path, monkeypatch, w, h):
     _open_title(page, '[data-lang="ko"]:not([data-read=""])')
     page.wait_for_selector("#reader .sw .ft .rv-p")
     s = page.evaluate(ST)
-    assert s["tabs"] == ["AI 정리", "전문"] and s["sel"] == ["true", "false"] and s["role"] == "tablist" and s["roles"] == ["tab", "tab"]
+    assert s["tabs"] == ["요약", "전문"] and s["sel"] == ["true", "false"] and s["role"] == "tablist" and s["roles"] == ["tab", "tab"]
     assert all(s["ctl"]) and s["hidden"] == ["false", "true"] and s["left"] == 0 and not s["bigHead"]
     assert s["ps"] == len(ARTICLE["paragraphs"]) and s["tabbable2"] == 0 and s["sw"] <= 0, s
     assert abs(s["h"] - s["ph"][0]) <= 2, s                                     # 칸 높이 = 지금 장(AI 정리)
@@ -48,7 +48,7 @@ def test_blocked_second_page_alternatives_and_back_resets(browser, tmp_path, mon
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE), mutate=_blocked_and_paywall)
     _open_title(page, '[data-href*="world/x.html"]')
     s = page.evaluate(ST)
-    assert s and s["tabs"] == ["AI 정리", "같은 사건 전문"], s
+    assert s and s["tabs"] == ["요약", "같은 사건 전문"], s
     assert s["tabbable2"] == 0, s                                              # 안 보이는 장의 단추는 Tab 에서 빠짐 (리뷰 B1)
     page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")
     page.wait_for_timeout(500)
@@ -71,7 +71,7 @@ def test_failure_shows_alternatives_in_second_page(browser, tmp_path, monkeypatc
     _open_title(page, '[data-href*="spiegel.de/ausland/fail-x"]')
     page.wait_for_selector("#reader .ft .rv-fail")
     r = page.evaluate("() => ({ tabs: [...document.querySelectorAll('#reader .sw-tab')].map(t => t.textContent), pay: !!document.querySelector('#reader .ft-pay'), link: !!document.querySelector('#reader .ft .rv-link-big') })")
-    assert r == {"tabs": ["AI 정리", "전문"], "pay": True, "link": True}, r
+    assert r == {"tabs": ["요약", "전문"], "pay": True, "link": True}, r
     assert not errors, errors
     ctx.close()
 

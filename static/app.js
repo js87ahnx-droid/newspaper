@@ -1360,7 +1360,7 @@
     return j && j.timeout ? "원문 사이트가 응답하지 않습니다" : j && j.net ? "연결하지 못했습니다"
       : "원문을 가져오지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : "");
   }
-  // 자세히 창 두 장 넘기기 (S55 시안 A): "AI 정리 · 전문" 탭 + 가로로 두 장(scroll-snap). 옆으로 밀거나 탭을 누르면 바뀐다.
+  // 자세히 창 두 장 넘기기 (S55 시안 A): "요약 · 전문" 탭 + 가로로 두 장(scroll-snap). 옆으로 밀거나 탭을 누르면 바뀐다.
   // 전문을 받을 수 있으면 둘째 장에 본문, 못 받는 기사는 "같은 사건 전문"(대체 기사 목록), 둘 다 없으면 한 장 그대로
   var swSeq = 0;
   function swPanes(wrap) { return Array.prototype.slice.call(wrap.querySelectorAll(":scope > .sw-track > .sw-pane")); }
@@ -1394,7 +1394,7 @@
     var wrap = mk("div", "sw"), tabs = mk("div", "sw-tabs"), tr = mk("div", "sw-track");
     tabs.setAttribute("role", "tablist");
     var p1 = mk("div", "sw-pane"), p2 = mk("div", "sw-pane");
-    ["AI 정리", label2].forEach(function (label, i) {
+    ["요약", label2].forEach(function (label, i) {
       var t = mk("button", "sw-tab", label);
       t.type = "button";
       t.id = id + "-t" + i;

@@ -34,7 +34,7 @@ def test_title_shows_full_text_once_per_url(browser, tmp_path, monkeypatch):
     assert iid
     page.wait_for_selector("#reader .ft .rv-p")
     r = page.evaluate(READ)
-    assert r["ft"] and r["h"] == ["AI 정리", "전문"] and r["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and not r["fail"] and r["tr"] == []
+    assert r["ft"] and r["h"] == ["요약", "전문"] and r["ps"][0] == "첫 문단 <b>태그는 글자로</b>" and not r["fail"] and r["tr"] == []
     assert len(_gets(seen)) == 1
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)                       # 다시 열기 — 같은 주소는 다시 안 받음
