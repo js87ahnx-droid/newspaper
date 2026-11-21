@@ -98,7 +98,7 @@ def _display(item: dict, display) -> dict:
         t = an["headline"] or item["title"]
         return {
             "title": t, "orig_title": item["title"] if an["headline"] else None,
-            "lead": an["summary"], "lead_note": "AI 정리", "analysis": an, "deck": deck_of(llm, t),
+            "lead": an["summary"], "lead_note": "요약", "analysis": an, "deck": deck_of(llm, t),
             "lang": rep["lang"], "paywall": rep.get("paywall", False), "kind": rep.get("kind", "rss"),
         }
     if llm.get("ko_title") and want_title(rep["lang"], display):

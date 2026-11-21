@@ -106,7 +106,7 @@
       <p class="iv-who"><span class="iv-tag">인터뷰</span> {{ a.person }}</p>
       <h3 class="hl"><a href="{{ real_url(a.url) }}" target="_blank" rel="noopener noreferrer"{{ art(a.url, a.source, a.lang) }}>{{ a.ko_title or a.title }}</a></h3>
       {% if a.ko_title %}<p class="orig" lang="{{ a.lang }}">{{ a.title }}</p>{% endif %}
-      {% if a.insight %}<p class="lead" data-note="AI 정리">{{ a.insight }}</p>{% endif %}
+      {% if a.insight %}<p class="lead" data-note="요약">{{ a.insight }}</p>{% endif %}
       <div class="meta">
         {% if a.time %}<time class="tm">{{ a.time }}</time>{% endif %}
         <span class="src">{{ a.source }}</span> <span class="badge lean-{{ a.cls }}">{{ a.lean }}</span>
@@ -361,7 +361,7 @@
   <section class="sec sec-guide" data-section="guide" data-title="{{ guide_title }}">
     <div class="item guide-intro">
       <p class="disclaimer">성향 라벨은 일반적인 평가일 뿐 기사마다 다를 수 있습니다. 라벨은 sources.yaml 에서 고칠 수 있습니다.</p>
-      <p>이 지면은 각 매체 RSS의 제목·요약과 원문 링크, 그리고 AI가 여러 매체 기사를 읽고 새로 쓴 정리("AI 정리")로 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
+      <p>이 지면은 각 매체 RSS의 제목·요약과 원문 링크, 그리고 AI가 여러 매체 기사를 읽고 새로 쓴 정리("요약")로 만듭니다. 기사 본문은 싣지 않으며 저작권은 각 매체에 있습니다. 사진은 매체가 RSS로 제공한 대표 이미지를 원래 주소에서 불러옵니다.</p>
       <p>기사 자리: 1면은 그날 각 신문 1면·홈페이지 헤드라인으로 오른 이슈("1면 조선·동아 / 헤드라인 BBC")를 가장 무겁게 보고, 주목도(다룬 매체 수·영향력·국가 수)와 중요도(분야·핵심어)를 함께 봅니다. 지면의 30%는 관심도와 무관하게 주목도 상위 이슈로 채우고, 관심도 때문에 들어온 기사는 절반을 넘지 않습니다. 정해진 쪽에 다 못 들어간 기사는 단신으로 실립니다.</p>
     </div>
     <div class="item guide-table">
