@@ -214,14 +214,15 @@ def test_foreign_article_gets_korean_translation(browser, tmp_path, monkeypatch)
     assert b
     page.wait_for_selector(".readview .rv-tab")
     v = _view(page)
-    assert posts[-1]["lang"] == "en" and posts[-1]["texts"] == ["English title", "First.", "Second."]
+    assert all(p["lang"] == "en" for p in posts) and [t for p in posts for t in p["texts"]] == ["English title", "First.", "Second."]
+    assert len(posts[0]["texts"]) <= 2                                            # 첫 묶음은 작게 (S58 — 위부터 차례로)
     assert v["title"] == "[번역] English title" and v["ps"] == ["[번역] First.", "[번역] Second."] and v["tabs"] == ["한국어", "원문"]
     page.click(".readview .rv-tab >> text=원문")
     assert _view(page)["ps"] == ["First.", "Second."]
     page.click(".readview .rv-tab >> text=한국어")
     assert _view(page)["ps"][0] == "[번역] First."
     post = [s for s in seen if s["method"] == "POST"]
-    assert len(post) == 1 and post[0]["key"] == "k-test" and errors == []
+    assert len(post) == len(posts) == 2 and all(p["key"] == "k-test" for p in post) and errors == []
     ctx.close()
 
 

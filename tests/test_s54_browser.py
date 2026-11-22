@@ -128,21 +128,29 @@ def test_blocked_shows_alternatives_and_paywall_note(browser, tmp_path, monkeypa
 
 
 def test_translate_button_once(browser, tmp_path, monkeypatch):
+    posts = []
+
     def handler(u, body=None):
         if u.endswith("/translate"):
+            posts.append(body["texts"])
             return 200, {"ok": True, "texts": ["번역됨"] * len(body["texts"])}
         return 200, LONG
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler, mutate=_blocked_and_paywall)
     iid = _open_title(page, '[data-href*="spiegel.de/ausland/x"]')
     page.wait_for_selector("#reader .ft .rv-tab", state="attached")
     page.evaluate("() => document.querySelector('#reader .ft .rv-tab').click()")
-    page.wait_for_function("() => document.querySelector('#reader .ft .rv-p').textContent === '번역됨'")
+    page.wait_for_selector("#reader .ft .rv-lang .rv-tab.on", state="attached")   # 다 되면 한국어/원문 전환
+    n1 = len(posts)
+    sent = [t for ts in posts for t in ts]
+    assert len(posts[0]) <= 2                                                    # 첫 묶음은 작게
+    paras = page.evaluate("() => [...document.querySelectorAll('#reader .ft .rv-p')].map(p => p.getAttribute('data-orig'))")
+    assert sent == paras and len(sent) == len(LONG["paragraphs"])                # 문단마다 한 번씩, 위부터 순서대로 (S58 — 리뷰 N6)
     _close(page)
     page.evaluate("(i) => NEWS.openReader(i)", iid)
     page.wait_for_selector("#reader .ft .rv-tab", state="attached")
     page.evaluate("() => document.querySelector('#reader .ft .rv-tab').click()")
     page.wait_for_function("() => document.querySelector('#reader .ft .rv-p').textContent === '번역됨'")
-    assert len([s for s in seen if s["url"].endswith("/translate")]) == 1 and not errors
+    assert len(posts) == n1 and not errors                                        # 다시 열면 요청 없음
     ctx.close()
 
 
@@ -217,8 +225,11 @@ def test_alt_button_uses_its_own_title_and_noread_message(browser, tmp_path, mon
 
 
 def test_reader_window_translation_cached(browser, tmp_path, monkeypatch):
+    posts = []
+
     def handler(u, body=None):
         if u.endswith("/translate"):
+            posts.append(body["texts"])
             return 200, {"ok": True, "texts": ["번역됨"] * len(body["texts"])}
         return 200, ARTICLE
     ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, handler, mutate=_blocked_and_paywall)
@@ -226,7 +237,7 @@ def test_reader_window_translation_cached(browser, tmp_path, monkeypatch):
         page.evaluate("() => document.querySelector('#flow article.item > .meta .orig-btn[data-href*=\"spiegel.de/ausland/x\"]').click()")
         page.wait_for_selector(".readview .rv-tab")
         _close(page)
-    assert len([s for s in seen if s["url"].endswith("/translate")]) == 1 and not errors
+    assert sum(len(ts) for ts in posts) == 1 + len(ARTICLE["paragraphs"]) and not errors   # 제목+문단을 한 번씩, 두 번째 열기는 요청 없음
     ctx.close()
 
 
