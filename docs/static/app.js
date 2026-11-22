@@ -1423,24 +1423,40 @@
     p1.appendChild(node);
     wrap.appendChild(tabs);
     wrap.appendChild(tr);
-    // 밀기: 손을 뗄 때 가로로 충분히 밀었으면 왼쪽으로 민 것 → 다음 장, 오른쪽 → 앞 장. 세로 스크롤은 그대로(touch-action: pan-y)
+    swSelect(wrap, 0, false);
+    return { wrap: wrap, pane: p2 };
+  }
+  // 밀기 (S57 시안 C → S58: 창 전체에서): 손을 뗄 때 가로로 충분히 밀었으면 왼쪽 → 다음 장, 오른쪽 → 앞 장.
+  // 두 장 칸 아래 빈 창(짧은 "같은 사건 전문" 장)이나 위 막대에서 민 것도 받는다. 세로 스크롤·두 손가락 확대는 그대로
+  function swCur() {
+    if (!reader || reader.hidden) return null;
+    var w = reader.querySelector(".reader-body .sw");
+    return w && w.isConnected ? w : null;
+  }
+  function swGo(k) {
+    var w = swCur();
+    if (w && k !== +(w.getAttribute("data-k") || 0)) swSelect(w, k, true, true);
+  }
+  (function () {
+    var panel = reader && reader.querySelector(".reader-panel");
+    if (!panel) return;
     var x0 = null, y0 = 0;
-    function swipeEnd(x, y) {
-      if (x0 === null) return;
-      var dx = x - x0, dy = y - y0;
+    panel.addEventListener("touchstart", function (e) { if (e.touches.length === 1 && swCur()) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive: true });
+    panel.addEventListener("touchend", function (e) {
+      var t = e.changedTouches[0];
+      if (x0 === null || !t) return;
+      var dx = t.clientX - x0, dy = t.clientY - y0;
       x0 = null;
-      if (window.getSelection && String(window.getSelection())) return;   // 글을 끌어 고르는 중이면 장을 바꾸지 않음 (리뷰 N8)
+      if (window.getSelection && String(window.getSelection())) return;   // 글을 끌어 고르는 중이면 장을 바꾸지 않음 (S57 리뷰 N8)
       if (Math.abs(dx) < SW_MIN || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      var k = dx < 0 ? 1 : 0;
-      if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, true, true);
-    }
-    tr.addEventListener("touchstart", function (e) { if (e.touches.length === 1) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive: true });
-    tr.addEventListener("touchend", function (e) { var t = e.changedTouches[0]; if (t) swipeEnd(t.clientX, t.clientY); }, { passive: true });
-    tr.addEventListener("touchcancel", function () { x0 = null; }, { passive: true });
-    // 노트북 터치패드·Shift+휠 가로 밀기: 한 번의 밀기(이벤트 사이 250ms 안)로 모은 가로 양이 SW_MIN 을 넘으면 (리뷰 M3)
+      swGo(dx < 0 ? 1 : 0);
+    }, { passive: true });
+    panel.addEventListener("touchcancel", function () { x0 = null; }, { passive: true });
+    // 노트북 터치패드·Shift+휠 가로 밀기: 한 번의 밀기(이벤트 사이 250ms 안)로 모은 가로 양이 SW_MIN 을 넘으면 (S57 리뷰 M3)
     var wsum = 0, wy = 0, wlast = 0, wdone = false;
-    tr.addEventListener("wheel", function (e) {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();   // 가로 밀기가 브라우저 '뒤로'로 새지 않게 (리뷰 M2) — 세로 스크롤은 그대로
+    panel.addEventListener("wheel", function (e) {
+      if (!swCur()) return;
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();   // 가로 밀기가 브라우저 '뒤로'로 새지 않게 (S57 리뷰 M2) — 세로 스크롤은 그대로
       var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, now = Date.now();
       if (now - wlast > 250) { wsum = 0; wy = 0; wdone = false; }
       wlast = now;
@@ -1448,12 +1464,9 @@
       wy += Math.abs(e.deltaY * unit);
       if (wdone || Math.abs(wsum) < SW_MIN || Math.abs(wsum) < wy * 1.5) return;
       wdone = true;   // 이 밀기에서는 한 번만
-      var k = wsum > 0 ? 1 : 0;
-      if (k !== +(wrap.getAttribute("data-k") || 0)) swSelect(wrap, k, true, true);
+      swGo(wsum > 0 ? 1 : 0);
     }, { passive: false });
-    swSelect(wrap, 0, false);
-    return { wrap: wrap, pane: p2 };
-  }
+  })();
   function swReset(root) {   // "← 돌아가기"로 다시 붙이면 첫 장·첫 탭으로
     Array.prototype.forEach.call(root.querySelectorAll(".sw"), function (w) { swSelect(w, 0, false); });
   }
@@ -1535,7 +1548,99 @@
       swSelect(w.wrap, k, false);   // 새로 넣은 단추도 안 보이는 장이면 Tab 에서 빼기
     });
   }
-  // 전문 칸 번역은 단추를 눌렀을 때만 (무료 할당량 — 제목을 누를 때마다 자동 번역하지 않는다). 결과는 주소별로 TR 에
+  // 번역 (S58 — 위부터 차례로): 문단(요소)을 묶음으로 나눠 따로 요청하고, 묶음이 오는 대로 그 문단을 바로 바꾼다.
+  // 첫 묶음은 작게(1~2개) — 첫 글이 빨리 보이게. 동시에 6개까지, 위 묶음부터. 받은 문단은 주소별로 이 탭에 쌓아(TRS) 멈췄다 다시 해도 못 받은 것만.
+  // 실패 = 요청 실패·ok 아님·원문은 있는데 번역이 빈 글(서버는 실패한 묶음을 빈 글로 채운다) — 그 묶음의 실패 문단만 한 번 더. 전부 받았을 때만 TR(완성본)
+  var TRS = {};   // 주소별: got(받은 문단), fly(보내 둔 문단 → 결과 약속), subs(지금 보고 있는 창들)
+  var TR_PAR = 6, TR_FIRST = { zh: 150, ja: 150 }, TR_GROUP = { zh: 250, ja: 250 };
+  // 동시 6개: 예전엔 서버가 한 요청 안에서 묶음을 모두 동시에 불렀다(1,500자씩) — 지면이 나눠 보내도 끝까지 걸리는 시간이 늘지 않게 (S58 리뷰 M3)
+  var TR_FATAL = /키 없음|지원하지 않는 언어|번역 기능 없음|문단 수 초과|글이 너무 김|잘못된/;   // 다시 해도 소용없는 실패 — 바로 멈춤 (리뷰 M4)
+  function trChunks(texts, todo, lang) {
+    var out = [], cur = [], n = 0, first = TR_FIRST[lang] || 400, size = TR_GROUP[lang] || 1200;
+    todo.forEach(function (i) {
+      var len = texts[i].length, lim = out.length ? size : first;
+      if (cur.length && (n + len > lim || (!out.length && cur.length >= 2))) { out.push(cur); cur = []; n = 0; }
+      cur.push(i); n += len;
+    });
+    if (cur.length) out.push(cur);
+    return out;
+  }
+  function trRun(texts, lang, key, alive, onPart, onDone) {
+    var S = TRS[key] && TRS[key].got.length === texts.length ? TRS[key] : (TRS[key] = { got: texts.map(function () { return null; }), fly: {}, subs: [] });
+    var got = S.got;
+    texts.forEach(function (t, i) { if (got[i] == null && !t.trim()) got[i] = t; });   // 빈 문단은 그대로
+    var seen = {};
+    var mine = function (i, t) { if (!seen[i]) { seen[i] = 1; onPart(i, t); } };
+    S.subs.push(mine);
+    var todo = [], waits = [];
+    got.forEach(function (t, i) { if (t != null) mine(i, t); else if (S.fly[i]) waits.push(i); else todo.push(i); });
+    var queue = trChunks(texts, todo, lang).map(function (c) { return { ks: c, tries: 0 }; });
+    var running = 0, waiting = 0, stopped = false, fatal = "";   // waiting: 다른 창이 보낸 문단을 기다리는 수 — 동시 요청 수에는 안 셈
+    // 다른 창(닫기 전 같은 기사)이 보내 둔 문단은 다시 보내지 않고 그 결과를 기다린다 (리뷰 M1) — 실패면 이 창이 한 번 더
+    waits.forEach(function (i) {
+      waiting++;
+      S.fly[i].then(function (t) { waiting--; if (!t && got[i] == null) queue.push({ ks: [i], tries: 1 }); next(); });
+    });
+    function finish() {
+      S.subs = S.subs.filter(function (f) { return f !== mine; });
+      var miss = got.filter(function (t) { return t == null; }).length;
+      if (!miss) TR[key] = got.slice();
+      onDone(miss, stopped, fatal);
+    }
+    function next() {
+      while (running < TR_PAR && queue.length) {
+        if (fatal || !alive()) { stopped = !fatal; queue = []; break; }
+        send(queue.shift());
+      }
+      if (!running && !waiting && !queue.length) finish();
+    }
+    function send(c) {
+      running++;
+      var p = relay("/translate", { body: JSON.stringify({ lang: lang, texts: c.ks.map(function (i) { return texts[i]; }) }) }, null).then(function (j) {
+        if (j && !j.ok && TR_FATAL.test(j.reason || "")) fatal = j.reason;
+        return j && j.ok && j.texts && j.texts.length === c.ks.length ? j.texts : null;
+      }, function () { return null; });
+      c.ks.forEach(function (i, m) {
+        S.fly[i] = p.then(function (res) { var t = res && typeof res[m] === "string" ? res[m].trim() : ""; return t || null; });
+      });
+      p.then(function (res) {
+        running--;
+        var bad = [];
+        c.ks.forEach(function (i, m) {
+          delete S.fly[i];
+          var t = res && typeof res[m] === "string" ? res[m].trim() : "";
+          if (t) { if (got[i] == null) got[i] = t; S.subs.slice().forEach(function (f) { f(i, got[i]); }); }
+          else if (got[i] == null) bad.push(i);
+        });
+        if (bad.length && c.tries < 1 && !fatal) queue.unshift({ ks: bad, tries: c.tries + 1 });
+        next();
+      });
+    }
+    next();
+  }
+  // 문단 요소에 번역을 넣는다 (한국어/원문 전환용으로 둘 다 들고 있음)
+  function trPut(n, orig, ko) { n.setAttribute("data-orig", orig); n.setAttribute("data-ko", ko); n.textContent = ko; }
+  function trToggle(bar, nodes, failed, retry) {   // 한국어/원문 전환 단추 (+ 못 옮긴 문단 안내·다시)
+    bar.innerHTML = "";
+    ["한국어", "원문"].forEach(function (label, k) {
+      var b = mk("button", "rv-tab" + (k === 0 ? " on" : ""), label);
+      b.type = "button";
+      b.setAttribute("aria-pressed", k === 0 ? "true" : "false");
+      b.addEventListener("click", function () {
+        nodes.forEach(function (n) { if (n.hasAttribute("data-ko")) n.textContent = n.getAttribute(k === 0 ? "data-ko" : "data-orig"); });
+        Array.prototype.forEach.call(bar.querySelectorAll(".rv-tab"), function (x, m) { x.classList.toggle("on", m === k); x.setAttribute("aria-pressed", m === k ? "true" : "false"); });
+      });
+      bar.appendChild(b);
+    });
+    bar.appendChild(mk("span", "rv-lang-note", failed ? "AI 번역 — " + failed + "개 문단은 옮기지 못했습니다" : "AI 번역"));
+    if (failed && retry) {
+      var again = mk("button", "rv-tab", "다시");
+      again.type = "button";
+      again.addEventListener("click", retry);
+      bar.appendChild(again);
+    }
+  }
+  // 전문 칸 번역은 단추를 눌렀을 때만 (무료 할당량 — 제목을 누를 때마다 자동 번역하지 않는다)
   function translateButton(box, before, nodes, lang, url) {
     var bar = mk("div", "rv-lang");
     var go = mk("button", "rv-tab", "한국어로 번역");
@@ -1544,33 +1649,27 @@
     box.insertBefore(bar, before);
     var texts = nodes.map(function (n) { return n.textContent; });
     var key = url + "|p";
-    var show = function (ko) {
-      nodes.forEach(function (n, i) { n.setAttribute("data-orig", texts[i]); n.setAttribute("data-ko", ko[i] || texts[i]); n.textContent = ko[i] || texts[i]; });
+    function run() {
+      var done = 0;
       bar.innerHTML = "";
-      ["한국어", "원문"].forEach(function (label, k) {
-        var b = mk("button", "rv-tab" + (k === 0 ? " on" : ""), label);
-        b.type = "button";
-        b.setAttribute("aria-pressed", k === 0 ? "true" : "false");
-        b.addEventListener("click", function () {
-          nodes.forEach(function (n) { n.textContent = n.getAttribute(k === 0 ? "data-ko" : "data-orig"); });
-          Array.prototype.forEach.call(bar.querySelectorAll(".rv-tab"), function (x, m) { x.classList.toggle("on", m === k); x.setAttribute("aria-pressed", m === k ? "true" : "false"); });
-        });
-        bar.appendChild(b);
-      });
-      bar.appendChild(mk("span", "rv-lang-note", "AI 번역"));
-    };
-    go.addEventListener("click", function () {
-      if (TR[key]) { show(TR[key]); return; }
       go.disabled = true;
-      go.textContent = "한국어로 옮기는 중…";
-      relay("/translate", { body: JSON.stringify({ lang: lang, texts: texts }) }, null).then(function (j) {
-        if (!j || !j.ok || !j.texts || j.texts.length !== texts.length) { go.disabled = false; go.textContent = "번역하지 못했습니다 — 다시"; return; }
-        TR[key] = j.texts;
-        show(j.texts);
-      }, function () { go.disabled = false; go.textContent = "번역하지 못했습니다 — 다시"; });
+      bar.appendChild(go);
+      var tick = function () { go.textContent = "한국어로 옮기는 중… " + done + "/" + texts.length + " 문단"; };
+      tick();
+      trRun(texts, lang, key, function () { return box.isConnected && !reader.hidden; },
+        function (i, t) { trPut(nodes[i], texts[i], t); done++; tick(); },
+        function (miss, stopped, fatal) {
+          if (stopped) { go.disabled = false; go.textContent = "한국어로 번역 (이어서)"; return; }   // 창을 떠났다 돌아온 경우
+          if (miss === texts.length) { go.disabled = false; go.textContent = "번역하지 못했습니다" + (fatal ? " (" + fatal + ")" : "") + " — 다시"; return; }
+          trToggle(bar, nodes, miss, fatal ? null : run);
+        });
+    }
+    go.addEventListener("click", function () {
+      if (TR[key] && TR[key].length === texts.length) { nodes.forEach(function (n, i) { trPut(n, texts[i], TR[key][i]); }); trToggle(bar, nodes, 0); return; }
+      run();
     });
   }
-  // 번역: 문단 요소들(원문 글)을 한국어로 바꿔 보이고, 한국어/원문 전환 단추를 단다
+  // 원문 창 번역 (자동): 문단 요소들(제목 포함)을 위부터 한국어로 바꿔 보이고, 다 되면 한국어/원문 전환 단추를 단다
   function translateInto(view, nodes, lang, seq, key) {
     if (!RD || !lang || lang === "ko" || !nodes.length) return;
     var bar = mk("div", "rv-lang");
@@ -1578,26 +1677,27 @@
     bar.appendChild(note);
     view.insertBefore(bar, view.querySelector(".rv-body"));
     var texts = nodes.map(function (n) { return n.textContent; });
-    var got = key && TR[key] && TR[key].length === texts.length ? Promise.resolve({ ok: true, texts: TR[key] })   // 같은 주소는 이 탭에서 한 번만 번역 (S54)
-      : relay("/translate", { body: JSON.stringify({ lang: lang, texts: texts }) }, seq);
-    got.then(function (j) {
-      if (j && j.ok && j.texts && j.texts.length === texts.length && key) TR[key] = j.texts;
-      if (seq !== readSeq) return;
-      if (!j || !j.ok || !j.texts || j.texts.length !== texts.length) { note.textContent = "번역하지 못했습니다" + (j && j.reason ? " (" + j.reason + ")" : ""); return; }
-      nodes.forEach(function (n, i) { n.setAttribute("data-orig", texts[i]); n.setAttribute("data-ko", j.texts[i] || texts[i]); n.textContent = j.texts[i] || texts[i]; });
+    key = key || ("view|" + texts.join("\n").slice(0, 200));
+    if (TR[key] && TR[key].length === texts.length) { nodes.forEach(function (n, i) { trPut(n, texts[i], TR[key][i]); }); trToggle(bar, nodes, 0); return; }   // 같은 주소는 이 탭에서 한 번만 (S54)
+    function run() {
+      var done = 0;
       bar.innerHTML = "";
-      ["한국어", "원문"].forEach(function (label, k) {
-        var b = mk("button", "rv-tab" + (k === 0 ? " on" : ""), label);
-        b.type = "button";
-        b.setAttribute("aria-pressed", k === 0 ? "true" : "false");
-        b.addEventListener("click", function () {
-          nodes.forEach(function (n) { n.textContent = n.getAttribute(k === 0 ? "data-ko" : "data-orig"); });
-          Array.prototype.forEach.call(bar.querySelectorAll(".rv-tab"), function (x, m) { x.classList.toggle("on", m === k); x.setAttribute("aria-pressed", m === k ? "true" : "false"); });
+      bar.appendChild(note);
+      var tick = function () { note.textContent = "한국어로 옮기는 중… " + done + "/" + texts.length + " 문단"; };
+      tick();
+      trRun(texts, lang, key, function () { return seq === readSeq; },
+        function (i, t) { if (seq !== readSeq) return; trPut(nodes[i], texts[i], t); done++; tick(); },
+        function (miss, stopped, fatal) {
+          if (stopped || seq !== readSeq) return;
+          if (miss === texts.length) {   // 전부 실패 — 이유와 다시 (리뷰 N3·M4)
+            note.textContent = "번역하지 못했습니다" + (fatal ? " (" + fatal + ")" : "");
+            if (!fatal) { var again = mk("button", "rv-tab", "다시"); again.type = "button"; again.addEventListener("click", run); bar.appendChild(again); }
+            return;
+          }
+          trToggle(bar, nodes, miss, fatal ? null : run);
         });
-        bar.appendChild(b);
-      });
-      bar.appendChild(mk("span", "rv-lang-note", "AI 번역"));
-    }, function () { if (seq === readSeq) note.textContent = "번역하지 못했습니다 (연결 실패)"; });
+    }
+    run();
   }
   function openArticle(el) {
     if (!reader) return;

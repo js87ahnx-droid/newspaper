@@ -1,20 +1,20 @@
 {
   "v": 1,
-  "week": "2026-W47",
-  "edition": "2026-11-18",
-  "applied": "2026-11-17T21:34:55+00:00",
+  "week": "2026-W48",
+  "edition": "2026-11-23",
+  "applied": "2026-11-22T20:34:36+00:00",
   "reviews": 24,
   "weights": {
-    "attention": 0.355,
-    "importance": 0.295,
-    "headline": 0.257,
-    "continuity": 0.102
+    "attention": 0.36,
+    "importance": 0.29,
+    "headline": 0.264,
+    "continuity": 0.104
   },
   "topic_importance": {
-    "economy": 0.9,
-    "semis_ai": 0.9,
+    "economy": 0.8,
+    "semis_ai": 1.0,
     "politics": 1.0,
-    "international": 0.827,
+    "international": 0.754,
     "industry": 0.7,
     "society": 0.6,
     "entertainment_sports": 0.2,
@@ -27,52 +27,52 @@
       "kind": "weight",
       "key": "attention",
       "label": "주목도",
-      "from": 0.35,
-      "to": 0.355
+      "from": 0.355,
+      "to": 0.36
     },
     {
       "kind": "weight",
       "key": "importance",
       "label": "중요도",
-      "from": 0.3,
-      "to": 0.295
+      "from": 0.295,
+      "to": 0.29
     },
     {
       "kind": "weight",
       "key": "headline",
       "label": "머리기사",
-      "from": 0.25,
-      "to": 0.257
+      "from": 0.257,
+      "to": 0.264
     },
     {
       "kind": "weight",
       "key": "continuity",
       "label": "연속성",
-      "from": 0.1,
-      "to": 0.102
+      "from": 0.102,
+      "to": 0.104
     },
     {
       "kind": "topic",
       "key": "economy",
       "label": "경제·증시",
-      "from": 1.0,
-      "to": 0.9,
+      "from": 0.9,
+      "to": 0.8,
       "reviews": 5
     },
     {
       "kind": "topic",
       "key": "semis_ai",
       "label": "반도체·AI",
-      "from": 0.8,
-      "to": 0.9,
+      "from": 0.9,
+      "to": 1.0,
       "reviews": 3
     },
     {
       "kind": "topic",
       "key": "international",
       "label": "국제",
-      "from": 0.9,
-      "to": 0.827,
+      "from": 0.827,
+      "to": 0.754,
       "reviews": 15
     }
   ],
@@ -132,6 +132,65 @@
           "label": "국제",
           "from": 0.9,
           "to": 0.827,
+          "reviews": 15
+        }
+      ]
+    },
+    {
+      "week": "2026-W48",
+      "edition": "2026-11-23",
+      "reviews": 24,
+      "changes": [
+        {
+          "kind": "weight",
+          "key": "attention",
+          "label": "주목도",
+          "from": 0.355,
+          "to": 0.36
+        },
+        {
+          "kind": "weight",
+          "key": "importance",
+          "label": "중요도",
+          "from": 0.295,
+          "to": 0.29
+        },
+        {
+          "kind": "weight",
+          "key": "headline",
+          "label": "머리기사",
+          "from": 0.257,
+          "to": 0.264
+        },
+        {
+          "kind": "weight",
+          "key": "continuity",
+          "label": "연속성",
+          "from": 0.102,
+          "to": 0.104
+        },
+        {
+          "kind": "topic",
+          "key": "economy",
+          "label": "경제·증시",
+          "from": 0.9,
+          "to": 0.8,
+          "reviews": 5
+        },
+        {
+          "kind": "topic",
+          "key": "semis_ai",
+          "label": "반도체·AI",
+          "from": 0.9,
+          "to": 1.0,
+          "reviews": 3
+        },
+        {
+          "kind": "topic",
+          "key": "international",
+          "label": "국제",
+          "from": 0.827,
+          "to": 0.754,
           "reviews": 15
         }
       ]
