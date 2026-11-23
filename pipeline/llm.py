@@ -245,13 +245,15 @@ def off_urls(off, urls: list[str]) -> list[str]:
 
 
 def prune_off(it: dict, off: list[str]) -> bool:
-    """이슈에서 다른 일을 다룬 기사(off 주소)를 뺀다 (S59). 대표 기사가 빠지면 머리기사로 올린 매체 → 국내 → 첫 기사 순으로 대표를 바꾼다.
-    사진 출처 매체 기사가 하나도 안 남으면 사진을 지운다. 뺀 것이 있으면 True."""
+    """이슈에서 다른 일을 다룬 기사(off 주소)를 뺀다 (S59). 분석에는 매체마다 1건만 보내므로, 그 기사가 다른 일이면 그 매체의
+    다른 기사(판정 안 받음)도 함께 뺀다 — 같은 매체 기사가 남아 사진·머리기사가 그대로 남지 않게 (구현 리뷰 M2).
+    대표 기사가 빠지면 머리기사로 올린 매체 → 국내 → 첫 기사 순으로 대표를 바꾼다. 사진 출처 매체가 빠지면 사진을 지운다. 뺀 것이 있으면 True."""
     off_set = set(off)
-    keep = [a for a in it["articles"] if a["url"] not in off_set]
+    off_src = {a["source"] for a in it["articles"] if a["url"] in off_set}
+    keep = [a for a in it["articles"] if a["source"] not in off_src]
     if not keep or len(keep) == len(it["articles"]):
         return False
-    gone = [a for a in it["articles"] if a["url"] in off_set]
+    gone = [a for a in it["articles"] if a["source"] in off_src]
     it["articles"] = keep
     left = {a["source"] for a in keep}
     for k in ("headline_by", "pages_by"):
@@ -260,7 +262,7 @@ def prune_off(it: dict, off: list[str]) -> bool:
     cov = it.get("coverage")
     if isinstance(cov, dict):
         cov["sources"], cov["countries"] = len(left), len({a.get("country") for a in keep})
-    if it.get("url") in off_set or it.get("source") not in left:
+    if it.get("source") not in left:
         heads = it.get("headline_by") or {}
         rep = (next((a for a in keep if a["source"] in heads), None)
                or next((a for a in keep if a.get("country") == "KR"), None) or keep[0])
@@ -323,7 +325,6 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
             offs = cache.setdefault(OFF_KEY, {})
             if off:
                 offs[it["issue_id"]] = off
-                stats["off"] = stats.get("off", 0) + 1
             else:
                 offs.pop(it["issue_id"], None)
             if no_news(out):   # 지면에서 내린다 (enrich) — 정리도 경과 기록도 남기지 않음
@@ -613,11 +614,19 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             items = [it for ps in edition["sections"].values() for it in ps]
             related = [r for it in items for r in it.get("related", [])]
         # S59: 묶음에 섞인 다른 일 기사 빼기 — 경제 해설·한국어 패스·같은 사건 합치기 앞
+        # 같은 이슈의 사본(입장 비교면·종합면 후보 angles)도 같이 (구현 리뷰 M1·N2). 다시 enrich 할 때 지난 기록은 지운다(N1)
         offs = cache.get(OFF_KEY, {})
-        pruned = [it["issue_id"] for it in items if it["issue_id"] in offs and prune_off(it, offs[it["issue_id"]])]
-        if pruned:
-            status["analysis"] += f", 다른 일 기사 뺌 {len(pruned)}건"
-            edition.setdefault("stats", {})["off_removed"] = {i: next(it["off_removed"] for it in items if it["issue_id"] == i) for i in pruned}
+        copies = items + edition.get("compare", []) + [g for it in items for g in it.get("angles") or []]
+        for it in copies:
+            it.pop("off_removed", None)
+        edition.get("stats", {}).pop("off_removed", None)
+        removed = {}
+        for it in copies:
+            if it["issue_id"] in offs and prune_off(it, offs[it["issue_id"]]):
+                removed.setdefault(it["issue_id"], it["off_removed"])
+        if removed:
+            status["analysis"] += f", 다른 일 기사 뺌 {len(removed)}건"
+            edition.setdefault("stats", {})["off_removed"] = removed
 
     # 0-1. 경제 기사 심화 해설 (S31b): 이론으로 보면·실제로는·상세 분석·지켜볼 지표. known = 독자가 "필요 없어요"로 표시한 개념
     econ, estats = {}, None

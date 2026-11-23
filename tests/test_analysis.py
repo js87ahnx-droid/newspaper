@@ -261,7 +261,7 @@ def test_prune_off_removes_only_that_article_and_moves_rep():
     from pipeline.llm import prune_off
     it = mixed_item()
     assert prune_off(it, ["https://cx.test/1"])
-    assert [a["id"] for a in it["articles"]] == ["k1", "k2", "k3"]          # 같은 매체의 다른 기사는 남음
+    assert [a["id"] for a in it["articles"]] == ["k1", "k2", "k3"]
     assert it["headline_by"] == {"한국경제": [3, "rss"]} and it["pages_by"] == {}
     assert it["coverage"] == {"sources": 2, "countries": 1}
     assert (it["source"], it["title"], it["url"]) == ("한국경제", "우대금리 축소 점검", "https://hk.test/1")   # 머리기사로 올린 매체가 먼저
@@ -289,7 +289,11 @@ def test_prune_off_keeps_photo_and_rep_when_untouched():
     it = mixed_item()
     assert prune_off(it, ["https://yh.test/2"])
     assert it["source"] == "차이신" and it["photo"] and it["pages_by"] == {"차이신": "A2"}
-    assert "연합뉴스" in {a["source"] for a in it["articles"]}
+    assert [a["id"] for a in it["articles"]] == ["c1", "k1"]                 # 판정받은 기사가 다른 일이면 같은 매체의 안 보낸 기사도 (구현 리뷰 M2)
+    it = mixed_item()
+    it["articles"].append(dict(it["articles"][0], id="c2", url="https://cx.test/2"))   # 차이신 기사가 둘 — 하나만 분석에 감
+    prune_off(it, ["https://cx.test/1"])
+    assert "차이신" not in {a["source"] for a in it["articles"]} and it["photo"] is None
     it = mixed_item()
     assert not prune_off(it, [a["url"] for a in it["articles"]]) and len(it["articles"]) == 4   # 전부면 그대로
     assert not prune_off(it, ["https://none.test/"]) and "off_removed" not in it
@@ -332,3 +336,45 @@ def test_analysis_off_prunes_issue_even_when_analysis_rejected(tmp_path):
     assert "analysis" not in got.get("llm", {})                              # 분석은 버려졌어도
     assert out["stats"]["off_removed"] == {"m1": [{"source": "차이신", "title": "三季度银行业息差低位企稳"}]}
     assert "다른 일 기사 뺌 1건" in out["stats"]["llm"]["status"]["analysis"]
+
+
+def test_off_prunes_copies_and_clears_on_rerun(tmp_path):
+    """S59 구현 리뷰 M1·N2·N1: 입장 비교면·종합면 후보 사본도 같이 거르고, 다시 enrich 하면 지난 기록을 새로."""
+    from pipeline.llm import OFF_KEY
+    it = mixed_item()
+    it["angles"] = [mixed_item()]
+    cmp_copy = mixed_item()
+    ed = {"sections": {"economy": [it]}, "compare": [cmp_copy], "stats": {}}
+    cache = tmp_path / "llm.json"
+    cache.write_text(json.dumps({"analysis": {"m1": dict(GOOD)}, OFF_KEY: {"m1": ["https://cx.test/1"]}}), encoding="utf-8")
+    out = enrich(ed, cfg(), load_interests().foreign_display, cache, Budget(tmp_path / "u.json", date(2026, 11, 23), 10),
+                 runner=runner_with({}, []))
+    for x in (out["sections"]["economy"][0], out["sections"]["economy"][0]["angles"][0], out["compare"][0]):
+        assert "차이신" not in {a["source"] for a in x["articles"]} and x["off_removed"], x["issue_id"]
+    # 다시 enrich — 이미 빠져 뺄 것이 없으면 기록도 없음
+    out2 = enrich(out, cfg(), load_interests().foreign_display, cache, Budget(tmp_path / "u.json", date(2026, 11, 23), 10),
+                  runner=runner_with({}, []))
+    assert "off_removed" not in out2["stats"] and "off_removed" not in out2["sections"]["economy"][0]
+
+
+def test_restance_after_prune_uses_remaining_articles():
+    """S59 구현 리뷰 M3: 뺀 이슈만 남은 기사로 stance 다시 — 국내 기사만 남으면 다른 나라 묶음이 없다."""
+    from pipeline.__main__ import restance
+    from pipeline.collect import Article
+    from pipeline.llm import prune_off
+    from pipeline.stance import day_prior, stance
+
+    it = mixed_item()
+    arts = [Article(id=a["id"], url=a["url"], source=a["source"], country=a["country"], lean=a["lean"], media_type="종합지",
+                    weight=1.0, paywall=False, kind="rss", title=a["title"], lead=a["lead"], lang=a["lang"],
+                    published=a["published"], date_source="feed") for a in it["articles"]]
+    by_id = {a.id: a for a in arts}
+    prior = day_prior(arts)
+    it["stance"] = stance(arts, prior)
+    assert {g["code"] for g in it["stance"]["country"]} == {"CN", "KR"}
+    untouched = mixed_item()
+    untouched["issue_id"], untouched["stance"] = "m2", "그대로"
+    prune_off(it, ["https://cx.test/1"])
+    ed = {"sections": {"economy": [it, untouched]}, "compare": []}
+    assert restance(ed, by_id, prior) == 1
+    assert [g["code"] for g in it["stance"]["country"]] == ["KR"] and untouched["stance"] == "그대로"

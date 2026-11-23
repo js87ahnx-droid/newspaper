@@ -436,6 +436,18 @@ def _store_econ(args: argparse.Namespace, raw: Path, edition: dict | None = None
         print(f"경제 해설 보관: 이 호 {'씀' if wrote else '해설 없음'}" + (f", 지난 호 채움 {', '.join(filled)}" if filled else ""))
 
 
+def restance(edition: dict, by_id: dict, prior) -> int:
+    """S59: 분석이 다른 일로 본 기사를 뺀 이슈(off_removed — 면 기사·입장 비교면 사본)만 남은 기사로 stance 를 다시. 다시 한 수."""
+    from .stance import stance
+
+    n = 0
+    for it in [x for ps in edition["sections"].values() for x in ps] + edition.get("compare", []):
+        if it.get("off_removed"):
+            it["stance"] = stance([by_id[a["id"]] for a in it["articles"] if a["id"] in by_id], prior)
+            n += 1
+    return n
+
+
 def cmd_enrich(args: argparse.Namespace) -> int:
     """입장 차이(무토큰)를 붙이고, LLM 훅이 켜져 있으면 요약·번역을 붙인다."""
     from .collect import Article
@@ -532,8 +544,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
                          past_econ=past_econ, jonghap_ctx=([s.id for s in cfg.sections], {s.name: s.country for s in sources.sources}),
                          curated_keep=cfg.curated.keep if cfg.curated.enabled else None)   # S51 ⑦: 큐레이션 판 고르기 AI 한 번
         del bodies
-        for it in (x for ps in edition["sections"].values() for x in ps if x.get("off_removed")):   # S59: 다른 일 기사를 뺀 이슈만 다시
-            it["stance"] = stance([by_id[a["id"]] for a in it["articles"] if a["id"] in by_id], prior)
+        restance(edition, by_id, prior)   # S59: 다른 일 기사를 뺀 이슈만 입장 차이·성향 안내 다시
         st = edition["stats"]["llm"]
         if ed_topic_note:
             st.setdefault("status", {})["ed_topics"] = ed_topic_note   # S54 ⑥ 사설 같은 주제 묶기

@@ -571,12 +571,12 @@ def _opinion_view(op: dict | None, shown: dict[str, str] | None = None) -> dict 
         t = shown.get(x.get("issue_id") or "")
         return {**x, "issue_title": t} if t else x
 
-    for g in (g for c in op["compare"] for g in c["groups"]):
-        g["cls"] = LEAN_CLASS.get(g["lean"], "mid")
-        g["editorials"] = [named(e) for e in g["editorials"]]
+    compare = [{**(named(c) if c.get("on_page") else c),   # 원본(edition)은 그대로 두고 새 dict 로 (구현 리뷰 N3)
+                "groups": [{**g, "cls": LEAN_CLASS.get(g["lean"], "mid"), "editorials": [named(e) for e in g["editorials"]]}
+                           for g in c["groups"]]} for c in op["compare"]]
     eds = [{**named(e), "cls": LEAN_CLASS.get(e["lean"], "mid")} for e in op["editorials"]]
     cols = [{**named(c), "cls": LEAN_CLASS.get(c["lean"], "mid")} for c in op["columns"]]
-    return {"compare": [named(c) if c.get("on_page") else c for c in op["compare"]], "editorial_chunks": [eds[i:i + OP_CHUNK] for i in range(0, len(eds), OP_CHUNK)],
+    return {"compare": compare, "editorial_chunks": [eds[i:i + OP_CHUNK] for i in range(0, len(eds), OP_CHUNK)],
             "columns": cols, "column_chunks": [cols[i:i + OP_CHUNK] for i in range(0, len(cols), OP_CHUNK)]}
 
 

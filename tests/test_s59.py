@@ -28,4 +28,4 @@ def test_opinion_titles_use_shown_korean_title():
     assert v["editorial_chunks"][0][0]["issue_title"] == shown["i1"] and v["columns"][0]["issue_title"] == shown["i1"]
     assert "issue_title" not in v["columns"][1]
     assert _opinion_view(op, shown)["compare"][0]["issue_title"] == shown["i1"]   # 같은 호 두 판(두 번 그림)도 같음
-    assert op["compare"][0]["issue_title"] == zh                           # 묶음 원본은 그대로
+    assert op["compare"][0]["issue_title"] == zh and op["compare"][0]["groups"][0]["editorials"][0]["issue_title"] == zh   # 원본은 그대로 (구현 리뷰 N3)
