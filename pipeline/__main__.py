@@ -532,6 +532,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
                          past_econ=past_econ, jonghap_ctx=([s.id for s in cfg.sections], {s.name: s.country for s in sources.sources}),
                          curated_keep=cfg.curated.keep if cfg.curated.enabled else None)   # S51 ⑦: 큐레이션 판 고르기 AI 한 번
         del bodies
+        for it in (x for ps in edition["sections"].values() for x in ps if x.get("off_removed")):   # S59: 다른 일 기사를 뺀 이슈만 다시
+            it["stance"] = stance([by_id[a["id"]] for a in it["articles"] if a["id"] in by_id], prior)
         st = edition["stats"]["llm"]
         if ed_topic_note:
             st.setdefault("status", {})["ed_topics"] = ed_topic_note   # S54 ⑥ 사설 같은 주제 묶기
@@ -544,6 +546,8 @@ def cmd_enrich(args: argparse.Namespace) -> int:
             llm_note += f" | 분석 버림 {st['analysis']['rejected']}"
         if st.get("econ") and st["econ"]["rejected"]:
             llm_note += f" | 경제 해설 버림 {st['econ']['rejected']}"
+        if edition.get("stats", {}).get("off_removed"):   # S59: 섞인 다른 일 기사를 뺀 것 — 잘못 뺐는지 확인용
+            llm_note += " | 다른 일 기사 뺌 " + "; ".join(f"{i}: {', '.join(x['source'] for x in v)}" for i, v in edition["stats"]["off_removed"].items())
         if st.get("merged_duplicates"):
             llm_note += f" | 같은 사건 합침 {len(st['merged_duplicates'])}건"
         if edition.get("stats", {}).get("an_moved"):   # S49a: 분석을 다른 기사에 옮겨 붙인 합침 — 잘못 묶였는지 확인용

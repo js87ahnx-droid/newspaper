@@ -171,8 +171,10 @@ ANALYSIS_PROMPT = """각 이슈(id)마다 여러 매체 기사(본문 또는 요
 - stances: 매체가 둘 이상이고 관점·강조점이 실제로 다를 때만, 매체별로 [{{"source": 매체 이름, "view": 그 매체가 강조하는 점 한 문장}}]. 차이가 없으면 빈 배열
 - brief: 한 줄 요약 (40자 안팎)
 - empty: 기사에 실제 내용이 없거나(제목이 매체 이름뿐 등) 지난 경과에 비해 새로 알려진 사실이 없으면 true, 아니면 false
+- off: 묶음 안에서 이 이슈의 중심 사건과 다른 일을 다룬 기사의 "번호" 목록(없으면 빈 배열). 같은 분야·비슷한 주제라도 나라·기관이 다르면 다른 일이다
+  (예: 한국 은행 우대금리 묶음에 든 중국 은행 실적 기사, 한국 가스요금 묶음에 든 영국 가스회사 요금 기사). off 기사는 headline·summary·background·points·stances·brief 에 쓰지 않는다
 "본문 없음"인 기사는 제목·요약만 근거로 쓴다. 근거가 부족한 항목은 짧게 쓰거나 비운다.
-출력 형식: {{"issues": {{"<id>": {{"headline": "", "summary": "", "background": "", "points": [], "stances": [], "brief": "", "empty": false}}}}}}
+출력 형식: {{"issues": {{"<id>": {{"headline": "", "summary": "", "background": "", "points": [], "stances": [], "brief": "", "empty": false, "off": []}}}}}}
 {data}"""
 
 # AI 가 "새 내용 없음"이라고 쓴 정리 (S24d: 10/19호 "중앙일보 인수전 관련 새 정보 없음") — empty 를 빠뜨려도 잡는다
@@ -230,6 +232,46 @@ def check_summary(summary: str, titles: list[str]) -> str | None:
     return None
 
 
+OFF_KEY = "analysis_off"   # 이슈 → 분석이 "다른 일"이라 본 기사 주소 (S59 — 11/23 우대금리 속 차이신, 가스요금 속 BBC)
+
+
+def off_urls(off, urls: list[str]) -> list[str]:
+    """분석 응답의 off(기사 번호) → 주소. 없는 번호는 버리고, 보낸 기사를 전부 가리키면 아무것도 빼지 않는다."""
+    if not isinstance(off, list):
+        return []
+    got = list(dict.fromkeys(urls[int(n) - 1] for n in off
+                             if str(n).strip().isdigit() and 1 <= int(n) <= len(urls)))
+    return got if len(got) < len(urls) else []
+
+
+def prune_off(it: dict, off: list[str]) -> bool:
+    """이슈에서 다른 일을 다룬 기사(off 주소)를 뺀다 (S59). 대표 기사가 빠지면 머리기사로 올린 매체 → 국내 → 첫 기사 순으로 대표를 바꾼다.
+    사진 출처 매체 기사가 하나도 안 남으면 사진을 지운다. 뺀 것이 있으면 True."""
+    off_set = set(off)
+    keep = [a for a in it["articles"] if a["url"] not in off_set]
+    if not keep or len(keep) == len(it["articles"]):
+        return False
+    gone = [a for a in it["articles"] if a["url"] in off_set]
+    it["articles"] = keep
+    left = {a["source"] for a in keep}
+    for k in ("headline_by", "pages_by"):
+        if isinstance(it.get(k), dict):
+            it[k] = {s: v for s, v in it[k].items() if s in left}
+    cov = it.get("coverage")
+    if isinstance(cov, dict):
+        cov["sources"], cov["countries"] = len(left), len({a.get("country") for a in keep})
+    if it.get("url") in off_set or it.get("source") not in left:
+        heads = it.get("headline_by") or {}
+        rep = (next((a for a in keep if a["source"] in heads), None)
+               or next((a for a in keep if a.get("country") == "KR"), None) or keep[0])
+        it.update(title=rep["title"], url=rep["url"], source=rep["source"], lean=rep.get("lean", it.get("lean")),
+                  lead=rep.get("lead") or "")
+    if it.get("photo_source") and it["photo_source"] not in left:
+        it["photo"] = it["photo_source"] = None
+    it["off_removed"] = [{"source": a["source"], "title": a["title"]} for a in gone]
+    return True
+
+
 def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> tuple[dict, dict]:
     """지면 상위 묶음 분석. bodies: 기사 주소 → 본문(str|None) — 프롬프트에만 넣고 결과에는 LLM 글만 남긴다.
     돌려주는 것: ({issue_id: 분석}, 통계)"""
@@ -247,9 +289,10 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
             retry = None
         batch = batches.pop(0)
         first = retry is not None   # 다시 묻는 묶음은 집계(asked·articles)에 다시 넣지 않음 (리뷰 N9)
-        rows = []
+        rows, shown = [], {}
         for it in batch:
             seen, arts = set(), []
+            shown[it["issue_id"]] = urls = []   # 기사 번호(1부터) → 주소 (S59 off)
             for a in sorted(it["articles"], key=lambda a: bodies.get(a["url"]) is None):
                 if a["source"] in seen or len(arts) >= ANALYSIS_ARTICLES:
                     continue
@@ -257,7 +300,8 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
                 body = bodies.get(a["url"])
                 stats["articles"] += first
                 stats["articles_with_body"] += first and body is not None
-                arts.append({"매체": a["source"], "성향": a.get("lean", ""), "국가": a.get("country", ""),
+                urls.append(a["url"])
+                arts.append({"번호": len(urls), "매체": a["source"], "성향": a.get("lean", ""), "국가": a.get("country", ""),
                              "시각": a.get("published", ""), "제목": a["title"],
                              "본문": body[:ANALYSIS_BODY_CHARS] if body else f"(본문 없음) {a.get('lead', '')[:300]}"})
             stats["issues_with_body"] += first and any(bodies.get(a["url"]) for a in it["articles"])
@@ -275,6 +319,13 @@ def analyze(items: list[dict], bodies: dict, cfg: Llm, cache: dict, guarded) -> 
             if not isinstance(out, dict):
                 stats["rejected"][it["issue_id"]] = "응답 없음"
                 continue
+            off = off_urls(out.get("off"), shown[it["issue_id"]])   # 분석을 버려도 쓴다 (S59 리뷰)
+            offs = cache.setdefault(OFF_KEY, {})
+            if off:
+                offs[it["issue_id"]] = off
+                stats["off"] = stats.get("off", 0) + 1
+            else:
+                offs.pop(it["issue_id"], None)
             if no_news(out):   # 지면에서 내린다 (enrich) — 정리도 경과 기록도 남기지 않음
                 done[it["issue_id"]] = {"empty": True}
                 stats["rejected"][it["issue_id"]] = "새 내용 없음"
@@ -561,6 +612,12 @@ def enrich(edition: dict, cfg: Llm, display, cache_path: Path, budget: Budget, r
             status["analysis"] += f", 새 내용 없음 {len(dropped)}건 내림"
             items = [it for ps in edition["sections"].values() for it in ps]
             related = [r for it in items for r in it.get("related", [])]
+        # S59: 묶음에 섞인 다른 일 기사 빼기 — 경제 해설·한국어 패스·같은 사건 합치기 앞
+        offs = cache.get(OFF_KEY, {})
+        pruned = [it["issue_id"] for it in items if it["issue_id"] in offs and prune_off(it, offs[it["issue_id"]])]
+        if pruned:
+            status["analysis"] += f", 다른 일 기사 뺌 {len(pruned)}건"
+            edition.setdefault("stats", {})["off_removed"] = {i: next(it["off_removed"] for it in items if it["issue_id"] == i) for i in pruned}
 
     # 0-1. 경제 기사 심화 해설 (S31b): 이론으로 보면·실제로는·상세 분석·지켜볼 지표. known = 독자가 "필요 없어요"로 표시한 개념
     econ, estats = {}, None

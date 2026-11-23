@@ -238,3 +238,97 @@ def test_reset_budget_in_daily_script(tmp_path):
     subprocess.run([sys.executable, "-c", snippet, "2026-11-03"], cwd=tmp_path, check=True, capture_output=True)
     import json as _json
     assert _json.loads((raw / "llm-usage.json").read_text(encoding="utf-8")) == {"2026-11-02": 40, "cost": {"2026-11-03": {"usd": 1}}}
+
+
+def mixed_item():
+    """S59: 한국 우대금리 묶음에 중국 차이신 기사가 섞인 이슈 — 대표·사진·머리기사가 차이신."""
+    return {"issue_id": "m1", "title": "三季度银行业息差低位企稳", "lead": "中国银行业", "url": "https://cx.test/1",
+            "source": "차이신", "lean": "경제지", "photo": "https://cx.test/p.jpg", "photo_source": "차이신",
+            "headline_by": {"차이신": [1, "rss"], "한국경제": [3, "rss"]}, "pages_by": {"차이신": "A2"},
+            "coverage": {"sources": 3, "countries": 2}, "timeline": [],
+            "articles": [
+                {"id": "c1", "url": "https://cx.test/1", "source": "차이신", "lean": "경제지", "country": "CN", "lang": "zh",
+                 "title": "三季度银行业息差低位企稳", "lead": "中国银行业", "published": "2026-11-22T01:00:00+00:00"},
+                {"id": "k1", "url": "https://hk.test/1", "source": "한국경제", "lean": "경제지", "country": "KR", "lang": "ko",
+                 "title": "우대금리 축소 점검", "lead": "금융당국은", "published": "2026-11-22T02:00:00+00:00"},
+                {"id": "k2", "url": "https://yh.test/1", "source": "연합뉴스", "lean": "중도", "country": "KR", "lang": "ko",
+                 "title": "은행 우대금리 자체 점검", "lead": "시중은행", "published": "2026-11-22T03:00:00+00:00"},
+                {"id": "k3", "url": "https://yh.test/2", "source": "연합뉴스", "lean": "중도", "country": "KR", "lang": "ko",
+                 "title": "장기 고정금리 주담대 TF", "lead": "다음 달", "published": "2026-11-22T04:00:00+00:00"}]}
+
+
+def test_prune_off_removes_only_that_article_and_moves_rep():
+    from pipeline.llm import prune_off
+    it = mixed_item()
+    assert prune_off(it, ["https://cx.test/1"])
+    assert [a["id"] for a in it["articles"]] == ["k1", "k2", "k3"]          # 같은 매체의 다른 기사는 남음
+    assert it["headline_by"] == {"한국경제": [3, "rss"]} and it["pages_by"] == {}
+    assert it["coverage"] == {"sources": 2, "countries": 1}
+    assert (it["source"], it["title"], it["url"]) == ("한국경제", "우대금리 축소 점검", "https://hk.test/1")   # 머리기사로 올린 매체가 먼저
+    assert it["photo"] is None and it["photo_source"] is None
+    assert it["off_removed"] == [{"source": "차이신", "title": "三季度银行业息差低位企稳"}]
+
+
+def test_prune_off_rep_order_domestic_then_first():
+    from pipeline.llm import prune_off
+    it = mixed_item()
+    it["headline_by"] = {"차이신": [1, "rss"]}
+    it["articles"][1]["country"] = "US"
+    prune_off(it, ["https://cx.test/1"])
+    assert it["source"] == "연합뉴스" and it["url"] == "https://yh.test/1"   # 머리기사 매체가 없으면 국내 기사
+    it = mixed_item()
+    it["headline_by"] = {}
+    for a in it["articles"]:
+        a["country"] = "US"
+    prune_off(it, ["https://cx.test/1"])
+    assert it["url"] == "https://hk.test/1"                                  # 그것도 없으면 첫 기사
+
+
+def test_prune_off_keeps_photo_and_rep_when_untouched():
+    from pipeline.llm import prune_off
+    it = mixed_item()
+    assert prune_off(it, ["https://yh.test/2"])
+    assert it["source"] == "차이신" and it["photo"] and it["pages_by"] == {"차이신": "A2"}
+    assert "연합뉴스" in {a["source"] for a in it["articles"]}
+    it = mixed_item()
+    assert not prune_off(it, [a["url"] for a in it["articles"]]) and len(it["articles"]) == 4   # 전부면 그대로
+    assert not prune_off(it, ["https://none.test/"]) and "off_removed" not in it
+
+
+def test_off_urls_numbers():
+    from pipeline.llm import off_urls
+    urls = ["u1", "u2", "u3"]
+    assert off_urls([1], urls) == ["u1"]
+    assert off_urls(["2", 9, "x", 0], urls) == ["u2"]
+    assert off_urls([1, 2, 3], urls) == [] and off_urls("1", urls) == [] and off_urls(None, urls) == []
+
+
+def test_analysis_off_prunes_issue_even_when_analysis_rejected(tmp_path):
+    """S59: 분석 응답 off(기사 번호)로 그 기사를 뺀다 — 분석이 영어 섞임으로 버려져도. 프롬프트에 번호·off 지시."""
+    calls = []
+    bad = dict(GOOD, summary=GOOD["summary"].replace("정거장 네 곳이", "정거장 호significant 네 곳이"))
+    it = mixed_item()
+    seen = {}
+
+    def run(prompt):
+        calls.append(prompt)
+        if "headline" not in prompt:
+            return json.dumps({"result": json.dumps({"issues": {}})})
+        # 프롬프트에서 차이신 기사의 번호를 찾아 off 로
+        block = prompt[prompt.index("<data>"):]
+        rows = json.loads(block[block.index("["):block.rindex("]") + 1]) if "[" in block else []
+        arts = rows[0]["기사"]
+        seen["arts"] = arts
+        n = next(a["번호"] for a in arts if a["매체"] == "차이신")
+        return json.dumps({"result": json.dumps({"issues": {"m1": dict(bad, off=[n])}}, ensure_ascii=False)})
+    ed = {"sections": {"economy": [it]}, "compare": [], "stats": {}}
+    out = enrich(ed, cfg(), load_interests().foreign_display, tmp_path / "llm.json",
+                 Budget(tmp_path / "u.json", date(2026, 11, 23), 10), runner=run)
+    head = calls[[i for i, c in enumerate(calls) if "headline" in c][0]]
+    assert '"off"' in head and "중국 은행 실적" in head
+    assert all("번호" in a for a in seen["arts"])
+    got = out["sections"]["economy"][0]
+    assert "차이신" not in {a["source"] for a in got["articles"]} and got["source"] == "한국경제"
+    assert "analysis" not in got.get("llm", {})                              # 분석은 버려졌어도
+    assert out["stats"]["off_removed"] == {"m1": [{"source": "차이신", "title": "三季度银行业息差低位企稳"}]}
+    assert "다른 일 기사 뺌 1건" in out["stats"]["llm"]["status"]["analysis"]

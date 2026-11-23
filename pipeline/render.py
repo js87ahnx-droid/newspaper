@@ -559,20 +559,38 @@ def editing_view(cfg: Config) -> dict:
     }
 
 
-def _opinion_view(op: dict | None) -> dict | None:
+def _opinion_view(op: dict | None, shown: dict[str, str] | None = None) -> dict | None:
     """논평·사설면: 사설·칼럼 목록은 OP_CHUNK 편씩 끊어 쪽 나누기가 자연스럽게 되도록 (칼럼 한 덩어리가 통째로 다음 쪽으로 넘어가 앞 쪽이 비던 것 — S18).
-    S55: 6·5편 → 1편 — 덩어리가 커서 쪽 아래가 비고, 6편째에서 끊겨 성향 묶음이 쪽 사이에서 갈렸다(11/19). 이어지는 덩어리는 한 목록처럼 붙여 그린다(CSS .op-cont)"""
+    S55: 6·5편 → 1편 — 덩어리가 커서 쪽 아래가 비고, 6편째에서 끊겨 성향 묶음이 쪽 사이에서 갈렸다(11/19). 이어지는 덩어리는 한 목록처럼 붙여 그린다(CSS .op-cont)
+    shown(S59): 이슈 → 지면에 보이는 제목. 묶음 제목·"관련:" 줄을 원제목(11/23 중국어) 대신 그것으로"""
     if not op or not (op["compare"] or op["editorials"] or op["columns"]):
         return None
+    shown = shown or {}
+
+    def named(x: dict) -> dict:
+        t = shown.get(x.get("issue_id") or "")
+        return {**x, "issue_title": t} if t else x
+
     for g in (g for c in op["compare"] for g in c["groups"]):
         g["cls"] = LEAN_CLASS.get(g["lean"], "mid")
-    eds = [{**e, "cls": LEAN_CLASS.get(e["lean"], "mid")} for e in op["editorials"]]
-    cols = [{**c, "cls": LEAN_CLASS.get(c["lean"], "mid")} for c in op["columns"]]
-    return {"compare": op["compare"], "editorial_chunks": [eds[i:i + OP_CHUNK] for i in range(0, len(eds), OP_CHUNK)],
+        g["editorials"] = [named(e) for e in g["editorials"]]
+    eds = [{**named(e), "cls": LEAN_CLASS.get(e["lean"], "mid")} for e in op["editorials"]]
+    cols = [{**named(c), "cls": LEAN_CLASS.get(c["lean"], "mid")} for c in op["columns"]]
+    return {"compare": [named(c) if c.get("on_page") else c for c in op["compare"]], "editorial_chunks": [eds[i:i + OP_CHUNK] for i in range(0, len(eds), OP_CHUNK)],
             "columns": cols, "column_chunks": [cols[i:i + OP_CHUNK] for i in range(0, len(cols), OP_CHUNK)]}
 
 
-OP_CHUNK = 1   # 논평면 목록 덩어리 크기 (S55 — 11/19 데이터로 2편과 견줘 쪽 채움이 더 고름: 마지막 쪽 빼고 91% 넘게)
+def shown_titles(edition: dict, display) -> dict[str, str]:
+    """이슈 → 지면에 보이는 제목(한국어 제목이 있으면 그것). 같은 사건으로 합쳐진 이슈는 합친 이슈의 제목 (S59)."""
+    out: dict[str, str] = {}
+    for it in (x for ps in edition["sections"].values() for x in ps):
+        t = _display(it, display)["title"]
+        for iid in [*it.get("merged", []), it["issue_id"]]:
+            out[iid] = t
+    return out
+
+
+OP_CHUNK = 1  # 논평면 목록 덩어리 크기 (S55 — 11/19 데이터로 2편과 견줘 쪽 채움이 더 고름: 마지막 쪽 빼고 91% 넘게)
 
 
 def time_label(published: str | None, tz: str) -> str | None:
@@ -719,7 +737,7 @@ def build_context(edition: dict, cfg: Config, interests: Interests, sources: Sou
         "date_long": f"{d.year}년 {d.month}월 {d.day}일 {'월화수목금토일'[d.weekday()]}요일",
         "sections": sections, "compare": compare, "compare_title": titles.get("compare", "입장 비교"),
         "guide": guide, "guide_title": titles.get("guide", "매체 성향 가이드·출처"),
-        "opinion": _opinion_view(edition.get("opinion")), "opinion_title": titles.get("opinion", "논평·사설"),
+        "opinion": _opinion_view(edition.get("opinion"), shown_titles(edition, interests.foreign_display)), "opinion_title": titles.get("opinion", "논평·사설"),
         # 지정 칼럼 (S22d): 논평면 맨 앞 칸
         "picks": [{**p, "cls": LEAN_CLASS.get(p.get("lean"), "mid"), "time": time_label(p.get("published"), cfg.timezone)}
                   for p in edition.get("picks") or []],
