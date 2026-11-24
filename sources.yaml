@@ -332,8 +332,26 @@ sources:
       # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
       - {section: top, url: "https://news.google.com/rss/search?q=site:politico.com+when:1d&hl=en-US&gl=US&ceid=US:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku"}
 
-  # ---------------- 영국 ----------------
+  - name: CNBC
+    country: US
+    lean: 경제지
+    type: 방송
+    weight: 0.8
+    paywall: false   # CNBC Pro 기사만 유료
+    enabled: true
+    site: [cnbc.com]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    langs: [en]
+    headline: [{kind: feed, url: "https://www.cnbc.com/id/100003114/device/rss/rss.html"}]   # Top News, 편집 순서
+    # 2026-11-24 사용자 요청(S60). 실측: 공식 피드 30건씩, 하루 안 기사 Top 30·국제 30·기술 25, 사진 없음, 기사 200 무료. 투자 클럽·종목 추천 글이 섞여 기사 주소(/20yy/)만
+    feeds:
+      - {section: top, url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", main: true, url_must: "cnbc[.]com/20[0-9]{2}/", title_not: "^(Watch|Listen)[ :]"}
+      - {section: international, url: "https://www.cnbc.com/id/100727362/device/rss/rss.html", url_must: "cnbc[.]com/20[0-9]{2}/"}
+      - {section: markets, url: "https://www.cnbc.com/id/10000664/device/rss/rss.html", url_must: "cnbc[.]com/20[0-9]{2}/"}
+      - {section: economy, url: "https://www.cnbc.com/id/20910258/device/rss/rss.html", url_must: "cnbc[.]com/20[0-9]{2}/"}
+      - {section: politics, url: "https://www.cnbc.com/id/10000113/device/rss/rss.html", url_must: "cnbc[.]com/20[0-9]{2}/"}
+      - {section: tech, url: "https://www.cnbc.com/id/19854910/device/rss/rss.html", url_must: "cnbc[.]com/20[0-9]{2}/"}
 
+  # ---------------- 영국 ----------------
   - name: BBC
     country: UK
     lean: 통신·공영
@@ -367,6 +385,24 @@ sources:
       - {section: analysis, url: "https://www.theguardian.com/tone/analysis/rss", url_must: "^(?!.*/(sport|football)/)"}
       - {section: analysis, url: "https://www.theguardian.com/tone/explainers/rss", url_must: "^(?!.*/(sport|football)/)", title_not: "war briefing|what we know so far"}
       - {section: analysis, url: "https://www.theguardian.com/news/series/the-long-read/rss", title_not: "podcast|^From the archive"}
+
+  - name: Telegraph
+    country: UK
+    lean: 보수
+    type: 종합지
+    weight: 0.8
+    paywall: true
+    enabled: true
+    site: [telegraph.co.uk]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    reader: false   # 실측 2026-11-24: 유료 벽, 연속 요청에 봇 차단(429) → 원문 링크로 (S60)
+    langs: [en]
+    # 2026-11-24 사용자 요청(S60). 실측: 섹션 피드(news·politics·opinion)는 몇 주~몇 달 지난 글만, world-news 는 429,
+    # 전체 피드 rss.xml 은 120건 중 하루 안 5건·대부분 스포츠 → 전체 피드는 뉴스 주소만 거르고, Google 뉴스로 보강
+    feeds:
+      - {section: top, url: "https://www.telegraph.co.uk/rss.xml", main: true, url_must: "telegraph[.]co[.]uk/(news|world-news|politics|business|money|global-health|us)/20"}
+      - {section: top, url: "https://news.google.com/rss/search?q=site:telegraph.co.uk+when:1d&hl=en-GB&gl=GB&ceid=GB:en", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku|[Ll]ive:? |[Ff]ootball|[Cc]ricket|[Rr]ugby|[Pp]remier [Ll]eague"}
+      - {section: economy, url: "https://www.telegraph.co.uk/business/rss.xml", url_must: "telegraph[.]co[.]uk/business/20"}
+      - {section: opinion, url: "https://news.google.com/rss/search?q=site:telegraph.co.uk/opinion+when:1d&hl=en-GB&gl=GB&ceid=GB:en", kind: google_news}
 
   - name: Reuters
     country: UK
@@ -493,6 +529,23 @@ sources:
       - {section: analysis, url: "https://www.lemonde.fr/les-decodeurs/rss_full.xml", lang: fr, title_not: "^Ce qu.il faut retenir"}
       # Google 뉴스 보강 (S43, 2026-11-06 실측: 공식 피드에 없는 기사가 잡힘). 순서는 매체 편집이 아니라 머리기사 신호로 쓰지 않음
       - {section: top, url: "https://news.google.com/rss/search?q=site:lemonde.fr+when:1d&hl=fr&gl=FR&ceid=FR:fr", kind: google_news, title_not: "[|] *(Latest|Breaking)|[Ll]ive results|^(Opinion|Watch|Listen|Podcast|Live Q&A)[ :|]|^World in Brief|^What to watch|^(Direct|Tribune)[ :|]|^[^ ]+( [^ ]+)?$|[|] [A-Z][a-z]+ [0-9]{1,2}(st|nd|rd|th) [0-9]{4}$|Company Announcement|Crossword|Wordle|Sudoku", lang: fr}
+
+  - name: Le Figaro
+    country: FR
+    lean: 보수
+    type: 종합지
+    weight: 0.8
+    paywall: true    # 구독자 기사(Abonnés) 일부 유료
+    enabled: true
+    site: [lefigaro.fr]   # 기사 주소 도메인 (원문 재배열 중계 허용목록, S17)
+    headline: [{kind: feed, url: "https://www.lefigaro.fr/rss/figaro_actualites.xml"}]
+    # 2026-11-24 사용자 요청(S60). 실측: 공식 피드 20건씩, 하루 안 기사가 대부분, 사진 있음, 기사 200(구독 기사는 앞부분만). 프랑스어판(제목 번역 + 한국어 요약)
+    # 실시간 중계(en-direct)는 거름. 논평(Figaro Vox)은 프랑스어라 논평면(번역 안 함)에 넣지 않음
+    feeds:
+      - {section: top, url: "https://www.lefigaro.fr/rss/figaro_actualites.xml", main: true, lang: fr, url_must: "^(?!.*/en-direct-)(?!.*/vox/)", title_not: "^EN DIRECT"}
+      - {section: international, url: "https://www.lefigaro.fr/rss/figaro_international.xml", lang: fr, url_must: "^(?!.*/en-direct-)(?!.*/vox/)", title_not: "^EN DIRECT"}
+      - {section: politics, url: "https://www.lefigaro.fr/rss/figaro_politique.xml", lang: fr, url_must: "^(?!.*/en-direct-)(?!.*/vox/)", title_not: "^EN DIRECT"}
+      - {section: economy, url: "https://www.lefigaro.fr/rss/figaro_economie.xml", lang: fr, url_must: "^(?!.*/en-direct-)(?!.*/vox/)", title_not: "^EN DIRECT"}
 
   # ---------------- 일본 ----------------
   - name: 요미우리신문

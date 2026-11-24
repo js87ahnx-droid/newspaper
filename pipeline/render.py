@@ -138,7 +138,8 @@ KO_NAMES = {"New York Times": "뉴욕타임스", "Wall Street Journal": "월스�
             "Reuters": "로이터", "AP": "AP통신", "Nikkei Asia": "닛케이", "Japan Times": "재팬타임스", "SCMP": "사우스차이나모닝포스트",
             "Bloomberg": "블룸버그", "Financial Times": "파이낸셜타임스", "The Economist": "이코노미스트", "Le Monde": "르몽드",
             "Washington Post": "워싱턴포스트", "Al Jazeera": "알자지라", "Global Times": "환구시보", "BBC": "비비씨", "CNN": "씨엔엔",
-            "Politico": "폴리티코", "Politico Europe": "폴리티코 유럽", "Der Spiegel": "슈피겔"}
+            "Politico": "폴리티코", "Politico Europe": "폴리티코 유럽", "Der Spiegel": "슈피겔",
+            "CNBC": "씨엔비씨", "Telegraph": "텔레그래프", "Le Figaro": "르피가로"}
 
 
 def _source_key(name: str) -> str:
