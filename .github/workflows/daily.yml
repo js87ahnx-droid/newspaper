@@ -157,6 +157,7 @@ jobs:
         env:
           EDITION: ${{ steps.publish.outputs.date }}
           STATUS_TOKEN: ${{ github.token }}
+          RENDER_ONLY: ${{ inputs.render_only && '1' || '0' }}   # S61: render_only 는 완료 예정 시각 기록(recent)에 넣지 않는다
         run: python3 scripts/run_status.py done "$EDITION" || true
       - name: 발행 상태 — 실패
         # 호가 올라간 뒤(누적분 저장 등)의 실패는 목록에 "발행 실패"를 띄우지 않는다 (S52 계획 리뷰 M4)

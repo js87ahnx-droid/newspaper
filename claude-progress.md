@@ -859,3 +859,4 @@
 - S59 리뷰 반영 뒤 전체 시험: 709 통과, 1 실패(test_feedback_browser::test_sliders_save_relayout_and_push) — 따로 돌리면 통과(26초), 긴 실행 중 브라우저 시험 타이밍 흔들림으로 봄.
 - S60(2026-11-24) 수집 매체 추가: CNBC·Telegraph·Le Figaro (Politico 는 이미 있음). worker/src/domains.json 39곳, KO_NAMES 에 한글 이름. 관련 시험 155 통과. 금붕어 리뷰는 설정 추가라 생략(implementation-notes 43차). 다음 호에서 세 매체 기사가 들어오는지 확인
 - S59·S60 푸시 ef02e96, Worker 재배포 ffec987c
+- S61(2026-11-25) 발행 전 1면 덮개·목록 예정 시각: 시안 build/mockup-s61.html → 사용자 1면 A·목록 ②. 계획 금붕어 리뷰 B3·M7·N6 — 모두 계획에 반영(B1 recent 키 없음 이어받기, B2 render_only·시간 밖 실행 제외, B3 자동 새로 고침 탭마다 1번, M2 상태 못 읽으면 안 덮음 등)

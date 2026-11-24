@@ -13,6 +13,7 @@ GitHub Contents API 로 원격에만 커밋한다. 발행 작업의 checkout(doc
   GITHUB_REPOSITORY   소유자/저장소, STATUS_BRANCH (기본 main)
   GITHUB_SERVER_URL·GITHUB_RUN_ID  실행 주소
   EDITION_DATE        fail 때 단계 기록이 없으면 이 날짜
+  RENDER_ONLY         "1" 이면 done 을 최근 기록(recent)에 넣지 않는다 (S61)
   NEWS_PASSWORD·READER_URL·READER_KEY·CLAUDE_CODE_OAUTH_TOKEN  오류 문장에서 이 값들을 지운다
 """
 from __future__ import annotations
@@ -48,6 +49,8 @@ SENTENCE = re.compile(r"(?:[^\W\d_]{2,}\W+){2,}[^\W\d_]{2,}")   # 낱말 3개 �
 NO_POST = {6, 7}   # 몇 분이면 끝나는 단계는 기록만 하고 올리지 않는다 — 상태 커밋·Pages 빌드 줄이기 (시간당 약 10회 권장, 계획 리뷰 2·3차)
 LAST_HIDDEN = "로그 마지막 줄은 글이 들어 있어 생략 — Actions 로그 확인"
 NO_LOG = "발행 준비(설치·캐시)에서 실패 — Actions 로그 확인"
+RECENT = 7   # 최근 완료 기록 개수 (S61: 화면이 완료 예정 시각을 이 기록의 중앙값으로 낸다)
+KST = timezone(timedelta(hours=9))
 
 
 def now_iso() -> str:
@@ -173,7 +176,36 @@ def _decode(content) -> dict:
         return {}
 
 
-def put(body: dict, env=os.environ, opener=urllib.request.urlopen) -> str:
+def _parse(iso: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def regular_run(body: dict, env=os.environ) -> bool:
+    """최근 기록에 넣을 실행 (S61 계획 리뷰 B2·M1): render_only 가 아니고, 그 호 날짜 KST 05:00~09:00 에 시작한 실행."""
+    if env.get("RENDER_ONLY") == "1":
+        return False
+    st = _parse(body.get("started", ""))
+    if not st or st.tzinfo is None:
+        return False
+    k = st.astimezone(KST)
+    return k.date().isoformat() == body.get("date") and 5 <= k.hour < 9
+
+
+def merge_recent(old, body: dict, add: bool) -> list:
+    """옛 recent 를 이어받고(add 면 이 실행을 덧붙여) 날짜 순 최근 RECENT 개. 깨진 항목은 버린다."""
+    rows = {}
+    for r in old if isinstance(old, list) else []:
+        if isinstance(r, dict) and isinstance(r.get("date"), str) and _parse(r.get("started", "")) and _parse(r.get("finished", "")):
+            rows[r["date"]] = {"date": r["date"], "started": r["started"], "finished": r["finished"]}
+    if add:
+        rows[body["date"]] = {"date": body["date"], "started": body["started"], "finished": body["updated"]}
+    return [rows[d] for d in sorted(rows)][-RECENT:]
+
+
+def put(body: dict, env=os.environ, opener=urllib.request.urlopen, add_recent: bool = False) -> str:
     token, repo = env.get("STATUS_TOKEN"), env.get("GITHUB_REPOSITORY")
     if not token or not repo:
         return "토큰 없음 — 올리지 않음"
@@ -181,11 +213,11 @@ def put(body: dict, env=os.environ, opener=urllib.request.urlopen) -> str:
     url = f"https://api.github.com/repos/{repo}/contents/{PATH}"
     head = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "newspaper-status"}
-    content = base64.b64encode((json.dumps(body, ensure_ascii=False, indent=1) + "\n").encode("utf-8")).decode()
     last = ""
     for _ in range(2):   # sha 가 바뀌어 409·422 면 한 번 더
         try:
             sha = None
+            old = {}
             try:
                 with opener(urllib.request.Request(f"{url}?ref={branch}", headers=head), timeout=15) as r:
                     cur = json.loads(r.read().decode("utf-8"))
@@ -196,6 +228,9 @@ def put(body: dict, env=os.environ, opener=urllib.request.urlopen) -> str:
             except urllib.error.HTTPError as e:
                 if e.code != 404:
                     raise
+            # 원격을 읽었거나(키가 없거나 깨졌으면 빈 목록) 404 일 때만 여기 온다 — 옛 기록을 이어받는다 (S61 계획 리뷰 B1)
+            body = {**body, "recent": merge_recent(old.get("recent") if isinstance(old, dict) else None, body, add_recent)}
+            content = base64.b64encode((json.dumps(body, ensure_ascii=False, indent=1) + "\n").encode("utf-8")).decode()
             data = {"message": f"상태: {body['date']} {body['state']} {body['step']}/{body['steps']} {body['label']}",
                     "content": content, "branch": branch}
             if sha:
@@ -233,7 +268,8 @@ def cmd_done(date: str, env=os.environ, opener=urllib.request.urlopen) -> str:
     cur = read_step()
     if not date or not cur or cur.get("date") != date:
         return "이 실행에서 시작하지 않은 호 — 건너뜀"
-    return put(payload(date, "done", cur.get("step", 7), cur["started"], env=env), env, opener)
+    body = payload(date, "done", cur.get("step", 7), cur["started"], env=env)
+    return put(body, env, opener, add_recent=regular_run(body, env))
 
 
 def cmd_fail(cancelled: bool, env=os.environ, opener=urllib.request.urlopen) -> str:
