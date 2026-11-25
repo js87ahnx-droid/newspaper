@@ -860,3 +860,4 @@
 - S60(2026-11-24) 수집 매체 추가: CNBC·Telegraph·Le Figaro (Politico 는 이미 있음). worker/src/domains.json 39곳, KO_NAMES 에 한글 이름. 관련 시험 155 통과. 금붕어 리뷰는 설정 추가라 생략(implementation-notes 43차). 다음 호에서 세 매체 기사가 들어오는지 확인
 - S59·S60 푸시 ef02e96, Worker 재배포 ffec987c
 - S61(2026-11-25) 발행 전 1면 덮개·목록 예정 시각: 시안 build/mockup-s61.html → 사용자 1면 A·목록 ②. 계획 금붕어 리뷰 B3·M7·N6 — 모두 계획에 반영(B1 recent 키 없음 이어받기, B2 render_only·시간 밖 실행 제외, B3 자동 새로 고침 탭마다 1번, M2 상태 못 읽으면 안 덮음 등)
+- S61 구현: 0d07a52(S61a recent)·cd1acb3(S61b~d 화면). 전체 시험 742 통과. 구현 금붕어 리뷰 B0·M5·N5 — 모두 고침(implementation-notes 44차). 남은 것: 푸시 뒤 render_only 로 오늘 호 다시 발행, 11/26 아침 6시 화면 확인

@@ -272,3 +272,92 @@ def test_archive_no_wait_row(browser, site, case):
     rows = page.evaluate(ROWS)
     assert len(rows) == 3 and not any(r["badge"] for r in rows) and not errors, (rows, errors)
     ctx.close()
+
+
+# ---------- 구현 리뷰 반영 ----------
+def test_today_page_front_button_untouched(browser, site):
+    """M1: 이미 오늘 호인 페이지에서 상태를 읽어도 1면 단추가 켜지지 않는다 (1면이면 꺼 둠)."""
+    root, url = site
+    _status(root)
+    ctx, page, errors = _open(browser, url, _kst(6, 30, day=25))
+    assert page.evaluate(CARD) is None
+    page.evaluate("() => NEWS_PEND.draw({date: '2026-11-25', state: 'done', recent: []})")
+    assert page.evaluate("() => document.querySelector('#toolbar [data-act=\"front\"]').disabled") and not errors
+    ctx.close()
+
+
+def test_front_stays_locked_on_rebuild_and_page_inert(browser, site):
+    """M2·N6: 덮은 동안 다시 그려도 1면 단추는 잠김, 지면은 inert. 걷으면 원래대로."""
+    root, url = site
+    _running(root)
+    ctx, page, errors = _open(browser, url, _kst(6, 52), 1180, 820)
+    page.evaluate("() => NEWS.goTo(4)")
+    page.set_viewport_size({"width": 1000, "height": 800})
+    page.wait_for_timeout(600)
+    r = page.evaluate("() => [document.querySelector('#toolbar [data-act=\"front\"]').disabled, document.getElementById('book').inert]")
+    assert r == [True, True], r
+    page.click(".pend-btn")
+    r = page.evaluate("() => [document.querySelector('#toolbar [data-act=\"front\"]').disabled, document.getElementById('book').inert, NEWS.state().current]")
+    assert r[0] == (r[2] == 0) and r[1] is False and not errors, r
+    ctx.close()
+
+
+def test_reader_closed_when_cover_appears(browser, site):
+    root, url = site
+    _status(root)                                                   # 6시 전 · 어제 호 완료 → 아직 안 덮음
+    ctx, page, errors = _open(browser, url, _kst(5, 50))
+    page.evaluate("() => NEWS.openReader(document.querySelector('#flow article.item').getAttribute('data-issue'))")
+    page.wait_for_timeout(200)
+    assert page.evaluate("() => !document.getElementById('reader').hidden")
+    page.evaluate("(s) => NEWS_PEND.draw(s)", json.loads(json.dumps(_running(root))))
+    assert page.evaluate("() => document.getElementById('reader').hidden && !!document.querySelector('.pend')") and not errors
+    ctx.close()
+
+
+def test_no_status_js_no_cover(browser, site):
+    """N9: status.js 를 못 받으면(오프라인 등) 덮지 않고 지면은 그대로."""
+    root, url = site
+    _running(root)
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, timezone_id="Asia/Seoul")
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.route("**/static/status.js*", lambda r: r.abort())
+    page.clock.set_fixed_time(_kst(6, 52))
+    page.goto(url)
+    page.wait_for_function("window.NEWS && NEWS.state().pages > 0")
+    page.wait_for_timeout(500)
+    assert page.evaluate(CARD) is None and not errors, errors
+    ctx.close()
+
+
+def test_eta_with_records(browser, site):
+    """N8: 기록 2·3개의 걸리는 시간(짝수 평균)·시작 시각 중앙값."""
+    root, url = site
+    _status(root)
+    ctx, page, errors = _open(browser, url, _kst(6, 10), tz="America/New_York")
+    r = page.evaluate("""(R) => [NEWS_ETA.duration({recent: R.slice(0, 2)}), NEWS_ETA.duration({recent: R}),
+                                 NEWS_ETA.startGuess({recent: R.slice(0, 2)}), NEWS_ETA.startGuess({recent: R})]""", RECENT)
+    assert r == [27.5, 30, 6 * 60 + 4, 6 * 60 + 34], r      # 25·30분 평균 / 05:34·06:34 평균 06:04 / 셋이면 06:34
+    ctx.close()
+
+
+def test_archive_listed_top_with_old_status(browser, site):
+    """M3: 목록 맨 위가 이미 오늘(D)인데 상태 파일은 옛 날짜(시작 전처럼 보임) → 대기 줄 없음."""
+    root, url = site
+    _status(root, date="2026-11-24")
+    ctx, page, errors = _open(browser, url + "archive/", _kst(6, 30, day=25))
+    rows = page.evaluate(ROWS)
+    assert len(rows) == 3 and not any(r["badge"] for r in rows) and not errors, rows
+    ctx.close()
+
+
+def test_archive_wait_row_above_yesterday_error(browser, site):
+    """M4: 어제(목록에 없는 새 날짜) 발행 실패가 남은 채 오늘 6시가 지나면, 오늘 대기 줄이 맨 위·어제 실패 줄이 그 아래."""
+    root, url = site
+    _status(root, date="2026-11-26", state="error", step=5, label="지면 만들기", started=_z(_kst(6, 34)), updated=_z(_kst(7, 0)),
+            message="x")
+    ctx, page, errors = _open(browser, url + "archive/", _kst(6, 20, day=27))
+    rows = page.evaluate(ROWS)
+    assert [r["badge"] for r in rows[:2]] == ["발행 대기", "발행 실패"] and len(rows) == 5 and not errors, rows
+    ctx.close()

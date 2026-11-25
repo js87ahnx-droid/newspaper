@@ -738,7 +738,7 @@
     var a = current + 1, b = spread && mode !== "scroll" ? Math.min(current + 2, last) : a;
     pageInfo.textContent = (a === b ? a : a + "–" + b) + " / " + last + "쪽";
     var fr = document.querySelector('[data-act="front"]');
-    if (fr) fr.disabled = current === 0;   // 이미 1면이면 누를 일이 없다
+    if (fr) fr.disabled = current === 0 || !!(pend && pend.on);   // 이미 1면이면 누를 일이 없다 · 발행 전 덮개 동안 잠금 (S61 구현 리뷰 M2)
   }
 
   function build(keepIssue, keepPage) {
@@ -1883,7 +1883,8 @@
     function mk(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
     function lock(on) {
       LOCK.forEach(function (a) { var b = document.querySelector('#toolbar [data-act="' + a + '"]'); if (b) b.disabled = on; });
-      if (!on) syncToolbar();   // 확대·축소 단추는 배율에 따른 원래 상태로
+      book.inert = on; flow.inert = on;   // 키보드(Tab)로도 덮개 밑 지면에 못 가게 (구현 리뷰 N6)
+      if (!on) { syncToolbar(); if (pages.length) showInfo(); }   // 확대·축소·1면 단추는 원래 상태로 (구현 리뷰 M1)
     }
     function longDate(d) {
       var p = d.split("-"), wd = "일월화수목금토"[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
@@ -1907,6 +1908,7 @@
       return s;
     }
     function uncover() {
+      if (!me.on && !el) return;   // 덮은 적 없으면 아무것도 안 건드림 (구현 리뷰 M1 — 1면 단추가 켜지던 것)
       if (el) el.remove();
       el = null; me.on = false;
       lock(false);
@@ -1931,11 +1933,18 @@
         el.appendChild(card);
         document.body.appendChild(el);
       }
+      if (!me.on) {
+        if (reader && !reader.hidden) closeReader();   // 덮기 전에 열어 둔 자세히 창 (구현 리뷰 N7)
+        var sv = document.getElementById("survey"); if (sv) sv.hidden = true;
+      }
       me.on = true;
       lock(true);
       if (tb) tb.textContent = i.name + " 뉴스";
       if (pageInfo) pageInfo.style.visibility = "hidden";   // 옛 호 쪽 번호
       var c = el.querySelector(".pend-card");
+      var key = JSON.stringify([i.phase, i.etaText, i.step, i.label, i.started, i.updated]);
+      if (c.getAttribute("data-key") === key) return;   // 같은 내용이면 다시 그리지 않음 — 화면 읽기 도구가 되풀이 읽지 않게 (N10)
+      c.setAttribute("data-key", key);
       c.textContent = "";
       c.setAttribute("data-phase", i.phase);
       var word = { wait: "발행 대기", delayed: "발행 대기", run: "발행 중", late: "발행 중", stuck: "발행 중", error: "발행 실패", done: "발행 완료" }[i.phase];

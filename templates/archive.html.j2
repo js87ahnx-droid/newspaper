@@ -68,7 +68,7 @@
     // S61 목록 ②: 아침 6시 뒤 새 호가 아직 시작 전이면 맨 위에 "발행 대기" 줄 (status.js 가 없으면 지금처럼)
     var eta = window.NEWS_ETA ? window.NEWS_ETA.info(s) : null;
     if (eta && (eta.phase === "wait" || eta.phase === "delayed") && eta.date > top) {
-      var w = el("li", "st-new st-run");
+      var w = el("li", "st-new st-run st-wait");
       w.setAttribute("data-st", "1");
       var wr = el("div", "st-row");
       wr.appendChild(el("span", "name", name(eta.date)));
@@ -98,7 +98,8 @@
       row.appendChild(el("span", "hi", ""));
       row.appendChild(el("span", "day", "월화수목금토일"[(new Date(s.date + "T00:00:00Z").getUTCDay() + 6) % 7] + "요일"));
       li.appendChild(row);
-      list.insertBefore(li, list.firstChild);
+      var wt = list.querySelector("li.st-wait");   // 새 호 "발행 대기" 줄이 있으면 그 아래 (옛 날짜가 위로 오지 않게, 구현 리뷰 M4)
+      list.insertBefore(li, wt ? wt.nextSibling : list.firstChild);
     } else {
       var b = el("span", "st-badge", badge);
       b.setAttribute("data-st", "1");
