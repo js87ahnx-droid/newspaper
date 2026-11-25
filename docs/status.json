@@ -1,12 +1,12 @@
 {
- "date": "2026-11-25",
- "state": "done",
- "step": 7,
+ "date": "2026-11-26",
+ "state": "running",
+ "step": 1,
  "steps": 7,
- "label": "올리기",
+ "label": "시작",
  "message": "",
- "started": "2026-11-25T09:59:47Z",
- "updated": "2026-11-25T09:59:59Z",
- "run": "https://github.com/js87ahnx-droid/newspaper/actions/runs/45590493708",
+ "started": "2026-11-25T21:34:27Z",
+ "updated": "2026-11-25T21:34:27Z",
+ "run": "https://github.com/js87ahnx-droid/newspaper/actions/runs/45705439556",
  "recent": []
 }
