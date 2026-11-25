@@ -861,3 +861,4 @@
 - S59·S60 푸시 ef02e96, Worker 재배포 ffec987c
 - S61(2026-11-25) 발행 전 1면 덮개·목록 예정 시각: 시안 build/mockup-s61.html → 사용자 1면 A·목록 ②. 계획 금붕어 리뷰 B3·M7·N6 — 모두 계획에 반영(B1 recent 키 없음 이어받기, B2 render_only·시간 밖 실행 제외, B3 자동 새로 고침 탭마다 1번, M2 상태 못 읽으면 안 덮음 등)
 - S61 구현: 0d07a52(S61a recent)·cd1acb3(S61b~d 화면). 전체 시험 742 통과. 구현 금붕어 리뷰 B0·M5·N5 — 모두 고침(implementation-notes 44차). 남은 것: 푸시 뒤 render_only 로 오늘 호 다시 발행, 11/26 아침 6시 화면 확인
+- S61 푸시·render_only(11/25) 성공. S59 보완(두 장 자세히 창 최소 2/3) 뒤 다시 render_only

@@ -42,3 +42,23 @@ def test_plain_reader_and_long_article(browser, tmp_path, monkeypatch):
     assert page.evaluate(PANEL_H) <= 844 - 32 + 1
     assert not errors, errors
     ctx.close()
+
+
+def test_tabbed_detail_window_at_least_two_thirds(browser, tmp_path, monkeypatch):
+    """요약·전문 두 장 자세히 창(.sw 로 감싸 article 이 창 바로 아래가 아님)도 화면 2/3 아래로 안 작아짐 (11/25 단신에서 작게 나옴)."""
+    ctx, page, errors, seen = _open(browser, tmp_path, monkeypatch, lambda u, b=None: (200, ARTICLE))
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.wait_for_timeout(400)
+    iid = page.evaluate("""() => { const a = [...document.querySelectorAll('#flow article.item')].filter(x =>
+        !['china', 'opinion', 'analysis'].includes(x.getAttribute('data-section')) &&
+        x.querySelector(':scope > .meta .orig-btn[data-read]:not([data-read=""])'));
+      a.sort((x, y) => x.textContent.length - y.textContent.length); return a[0].getAttribute('data-issue'); }""")
+    page.evaluate("(i) => NEWS.openReader(i)", iid)
+    page.wait_for_timeout(300)
+    assert page.evaluate("() => !!document.querySelector('#reader .reader-body > .sw')")
+    h0 = page.evaluate(PANEL_H)
+    assert h0 >= 844 * 0.66 - 1 and h0 <= 844 - 32 + 1, h0
+    page.evaluate("() => document.querySelectorAll('#reader .sw-tab')[1].click()")
+    page.wait_for_timeout(400)
+    assert abs(page.evaluate(PANEL_H) - h0) <= 1 and not errors, errors
+    ctx.close()
