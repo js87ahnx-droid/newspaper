@@ -45,9 +45,11 @@ def _status(docs, **kw):
     return s
 
 
-def _open(browser, url, w=1180, h=820, tz="Asia/Seoul"):
+def _open(browser, url, w=1180, h=820, tz="Asia/Seoul", eta=False):
     ctx = browser.new_context(viewport={"width": w, "height": h}, timezone_id=tz)
     page = ctx.new_page()
+    if not eta:   # S61 완료 예정(status.js)은 지금 시각에 따라 "발행 대기" 줄을 더한다 → 여기서는 빼고 S52 동작만 (= status.js 없을 때 그대로)
+        page.route("**/static/status.js*", lambda r: r.abort())
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" and "404" not in m.text and "Failed to load" not in m.text else None)

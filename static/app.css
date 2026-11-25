@@ -649,3 +649,34 @@ body.ed-curated .page-inner .item::after { content: ""; display: block; clear: b
 .item.oppick.op-cont:not(.op-restart) { border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 0; }
 .page-inner > .item.oppick.op-cont:first-child, .page-inner > .sec-title + .item.oppick.op-cont { border-top: 1px solid var(--rule, #c9bfae); border-radius: 6px 6px 0 0; padding-top: 8px; }
 .oplist.op-cont.op-gap { padding-top: 6px; }   /* 다른 묶음 뒤인데 소제목을 못 단 경우 */
+
+/* ---------- 발행 전 덮개 (S61, 시안 A) ---------- */
+.pend { position: fixed; left: 0; right: 0; bottom: 0; top: calc(44px + env(safe-area-inset-top, 0px)); z-index: 15;
+  background: var(--paper); overflow: hidden; touch-action: none; }
+.pend-sheet { max-width: 720px; margin: 0 auto; padding: 16px; filter: blur(5px); opacity: .75; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.pend-mast { text-align: center; border-bottom: 3px double var(--ink); padding-bottom: 8px; margin-bottom: 14px; }
+.pend-title { font-family: var(--serif); font-size: 30px; font-weight: 700; }
+.pend-date { font-size: 13px; color: var(--muted); }
+.pend-sk { height: 14px; margin: 8px 0; border-radius: 3px; background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.pend-sk.h { height: 26px; width: 92%; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+.pend-sk.h2 { height: 18px; width: 72%; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+.pend-sk.img { height: 170px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.pend-sk.w90 { width: 90%; } .pend-sk.w80 { width: 80%; } .pend-sk.w60 { width: 60%; }
+.pend-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.pend-card { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 32px); overflow: auto; box-sizing: border-box; text-align: center;
+  background: color-mix(in srgb, var(--paper) 92%, transparent); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 16px 16px 14px; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); }
+.pend-k { font-size: 12px; color: var(--muted); }
+.pend-big { font-size: 20px; font-weight: 700; margin: 4px 0 2px; }
+.pend-eta { font-size: 15px; font-weight: 700; margin: 2px 0 10px; }
+.pend-card[data-phase="error"] .pend-big, .pend-card[data-phase="error"] .pend-eta { color: var(--accent); }
+.pend-bar { height: 5px; background: var(--rule); border-radius: 3px; overflow: hidden; }
+.pend-bar > i { display: block; height: 100%; background: var(--ink); }
+.pend-step { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.pend-btn { margin-top: 12px; font: inherit; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--ink);
+  border-radius: 16px; padding: 6px 14px; cursor: pointer; }
+.pend-toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 30;
+  font: inherit; font-size: 14px; color: var(--paper); background: var(--ink); border: 0; border-radius: 20px; padding: 9px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .25); cursor: pointer; max-width: calc(100% - 32px); }
+#toolbar button:disabled { opacity: .35; cursor: default; }

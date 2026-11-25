@@ -42,6 +42,7 @@
   {% endfor %}
   </ul>
 </main>
+<script src="{{ base }}static/status.js?v={{ ver }}"></script>
 <script>
 /* 발행 진행 상황 (S52): docs/status.json 을 읽어 오늘 호 줄에 "발행 중 / 발행 실패"를 띄운다.
    글은 모두 textContent 로 넣는다 — 오류 문장에 피드 글이 섞여도 스크립트로 돌지 않게 (이 도메인에 기억된 비밀번호가 있다) */
@@ -64,6 +65,20 @@
     if (!s || !/^\d{4}-\d\d-\d\d$/.test(s.date || "")) return;
     var rows = list.querySelectorAll("li[data-date]");
     var top = rows.length ? rows[0].getAttribute("data-date") : "";
+    // S61 목록 ②: 아침 6시 뒤 새 호가 아직 시작 전이면 맨 위에 "발행 대기" 줄 (status.js 가 없으면 지금처럼)
+    var eta = window.NEWS_ETA ? window.NEWS_ETA.info(s) : null;
+    if (eta && (eta.phase === "wait" || eta.phase === "delayed") && eta.date > top) {
+      var w = el("li", "st-new st-run");
+      w.setAttribute("data-st", "1");
+      var wr = el("div", "st-row");
+      wr.appendChild(el("span", "name", name(eta.date)));
+      wr.appendChild(el("span", "st-badge", "발행 대기"));
+      wr.appendChild(el("span", "hi", ""));
+      wr.appendChild(el("span", "day", "월화수목금토일"[(new Date(eta.date + "T00:00:00Z").getUTCDay() + 6) % 7] + "요일"));
+      w.appendChild(wr);
+      w.appendChild(el("div", "st-sub", eta.phase === "wait" ? "곧 시작 · " + eta.etaText + " KST 완료 예정" : "발행이 늦어지고 있음"));
+      list.insertBefore(w, list.firstChild);
+    }
     var host = list.querySelector('li[data-date="' + s.date + '"]');
     var running = s.state === "running", error = s.state === "error", done = s.state === "done";
     if (!running && !error && !done) return;
@@ -97,7 +112,9 @@
     var sub = done ? "목록 반영 중 — 눌러서 열기"
       : error ? step + "/" + steps + " " + label + "에서 멈춤 · " + hm(s.updated)
       : stale ? step + "/" + steps + " " + label + " · 마지막 갱신 " + hm(s.updated)
-      : step + "/" + steps + " " + label + " 중 · " + hm(s.updated) + " 갱신 (" + hm(s.started) + " 시작)";
+      : step + "/" + steps + " " + label + " 중 · " + hm(s.updated) + " 갱신 (" + hm(s.started) + " 시작)"
+        + (eta && eta.date === s.date && eta.phase === "run" ? " · " + eta.etaText + " KST 완료 예정"
+           : eta && eta.date === s.date && eta.phase === "late" ? " · 예정보다 늦어지는 중" : "");
     var subEl = el("div", "st-sub", sub);
     subEl.setAttribute("data-st", "1");
     li.appendChild(subEl);
@@ -122,7 +139,8 @@
         if (seen === "running" && s && s.state === "done") { location.reload(); return; }
         if (s) seen = s.state;   // 한 번 못 읽어도 "running 을 보던 중"은 기억 (구현 리뷰 N2)
         try { draw(s); } catch (e) { /* 그리기 실패는 목록에 영향 없게 */ }
-        setTimeout(load, s && s.state === "running" ? RUN : seen === "running" ? RUN : IDLE);
+        var ph = s && window.NEWS_ETA ? window.NEWS_ETA.info(s).phase : null;   // S61: 시작 전 대기 중에도 1분마다
+        setTimeout(load, s && s.state === "running" ? RUN : seen === "running" || ph === "wait" ? RUN : IDLE);
       });
   }
   window.NEWS_STATUS = { draw: draw, load: load };

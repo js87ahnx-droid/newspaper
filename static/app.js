@@ -25,6 +25,7 @@
   var overflowPages = [], clipped = 0;  // 쪽 나누기 때 잰 넘친 쪽·잘라 낸 기사 (검증용)
   var demotedCount = 0, briefCount = 0, dropped = 0, emptySummary = 0;  // 단신으로 내린 기사·단신 수·쪽이 모자라 못 실은 기사·요약 없는 기사
   var E = window.EDITION || {};
+  var pend = null;      // 발행 전 덮개 (S61) — 아래에서 만든다
   var mode = "flip";    // flip: 펼침·종이 넘김 / scroll: 한 면 보기 (스크롤·줌)
   var zoom = 1;
   var scroller = null, sizer = null, zoomer = null, pageH = 0, pageW = 0;
@@ -1172,8 +1173,9 @@
     var fs = document.querySelector('[data-act="fullscreen"]');
     if (fs) fs.hidden = standalone();   // 홈 화면 앱이면 이미 주소창이 없다
     var zi = document.querySelector('[data-act="zoom+"]'), zo = document.querySelector('[data-act="zoom-"]');
-    if (zi) { zi.hidden = mode !== "scroll"; zi.disabled = zoom >= ZMAX; }
-    if (zo) { zo.hidden = mode !== "scroll"; zo.disabled = zoom <= ZMIN; }
+    var locked = !!(pend && pend.on);   // 발행 전 덮개 동안은 잠금 (S61)
+    if (zi) { zi.hidden = mode !== "scroll"; zi.disabled = locked || zoom >= ZMAX; }
+    if (zo) { zo.hidden = mode !== "scroll"; zo.disabled = locked || zoom <= ZMIN; }
   }
 
   function go(delta) {
@@ -1215,6 +1217,7 @@
 
   document.addEventListener("keydown", function (e) {
     if (reader && !reader.hidden) return;
+    if (pend && pend.on) return;   // 발행 전 덮개 (S61)
     if (e.key === "ArrowRight") go(1);
     if (e.key === "ArrowLeft") go(-1);
   });
@@ -1858,6 +1861,141 @@
     reader.addEventListener("click", function (e) { if (e.target === reader && downOut) closeReader(); downOut = false; });
   }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && reader && !reader.hidden) closeReader(); }, true);
+
+  // ---------- 발행 전 덮개 (S61, 시안 A) ----------
+  // 오늘 호 페이지(base "")만: 아침 6시가 지났거나 새 호 발행이 시작됐는데 이 페이지가 아직 옛 호면, 새 날짜 제호와
+  // 제목·사진 자리만 있는 빈 틀을 흐리게 덮고 가운데 카드에 진행 상황·완료 예정 시각(status.js)을 보인다.
+  // 상태 파일을 못 읽으면 덮지 않는다. 글은 모두 textContent (오류 문장에 피드 글이 섞일 수 있음, S52)
+  pend = (function () {
+    var me = { on: false, draw: null };
+    var ETA = window.NEWS_ETA, P = E.edition;
+    if (!ETA || E.base !== "" || !/^\d{4}-\d\d-\d\d$/.test(P || "") || !window.fetch) return me;
+    var LOCK = ["front", "prev", "next", "zoom-", "zoom+", "view", "fullscreen", "font-", "font+", "settings"];
+    var SRC = "status.json", RUN = 60e3, IDLE = 300e3;
+    var el = null, toast = null, mem = {};
+    var tb = document.querySelector("#toolbar .tb-title"), tbText = tb ? tb.textContent : "";
+    function ss(k, v) {   // sessionStorage — 못 쓰면 이 페이지 동안만(mem), 쓰기 성공 여부를 돌려줌
+      try {
+        if (v === undefined) return sessionStorage.getItem(k) || mem[k] || null;
+        sessionStorage.setItem(k, v); mem[k] = v; return true;
+      } catch (e) { if (v === undefined) return mem[k] || null; mem[k] = v; return false; }
+    }
+    function mk(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+    function lock(on) {
+      LOCK.forEach(function (a) { var b = document.querySelector('#toolbar [data-act="' + a + '"]'); if (b) b.disabled = on; });
+      if (!on) syncToolbar();   // 확대·축소 단추는 배율에 따른 원래 상태로
+    }
+    function longDate(d) {
+      var p = d.split("-"), wd = "일월화수목금토"[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
+      return p[0] + "년 " + (+p[1]) + "월 " + (+p[2]) + "일 " + wd + "요일";
+    }
+    function sheet(D) {   // 빈 틀 (흐림)
+      var s = mk("div", "pend-sheet");
+      s.setAttribute("aria-hidden", "true");
+      var m = mk("div", "pend-mast");
+      m.appendChild(mk("div", "pend-title", ETA.label(D) + " 뉴스"));
+      m.appendChild(mk("div", "pend-date", longDate(D)));
+      s.appendChild(m);
+      ["h", "h2", "img", "w90", "w80", "w60"].forEach(function (c) { s.appendChild(mk("div", "pend-sk " + c)); });
+      var cols = mk("div", "pend-cols");
+      for (var i = 0; i < 4; i++) {
+        var c = mk("div");
+        ["h2", "", "w80", "w60"].forEach(function (k) { c.appendChild(mk("div", "pend-sk " + k)); });
+        cols.appendChild(c);
+      }
+      s.appendChild(cols);
+      return s;
+    }
+    function uncover() {
+      if (el) el.remove();
+      el = null; me.on = false;
+      lock(false);
+      if (tb) tb.textContent = tbText;
+      if (pageInfo) pageInfo.style.visibility = "";
+    }
+    function showToast(i) {
+      if (toast) return;
+      toast = mk("button", "pend-toast", i.name + "가 나왔습니다 · 열기");
+      toast.type = "button";
+      toast.addEventListener("click", function () { location.reload(); });
+      document.body.appendChild(toast);
+    }
+    function cover(i) {
+      if (!el || el.getAttribute("data-date") !== i.date) {
+        if (el) el.remove();
+        el = mk("div", "pend");
+        el.setAttribute("data-date", i.date);
+        el.appendChild(sheet(i.date));
+        var card = mk("div", "pend-card");
+        card.setAttribute("role", "status");
+        el.appendChild(card);
+        document.body.appendChild(el);
+      }
+      me.on = true;
+      lock(true);
+      if (tb) tb.textContent = i.name + " 뉴스";
+      if (pageInfo) pageInfo.style.visibility = "hidden";   // 옛 호 쪽 번호
+      var c = el.querySelector(".pend-card");
+      c.textContent = "";
+      c.setAttribute("data-phase", i.phase);
+      var word = { wait: "발행 대기", delayed: "발행 대기", run: "발행 중", late: "발행 중", stuck: "발행 중", error: "발행 실패", done: "발행 완료" }[i.phase];
+      c.appendChild(mk("div", "pend-k", "오늘 호"));
+      c.appendChild(mk("div", "pend-big", i.name + " " + word));
+      var eta = { wait: i.etaText + " KST 완료 예정", run: i.etaText + " KST 완료 예정", late: "예정보다 늦어지는 중",
+                  delayed: "발행이 늦어지고 있음", stuck: "멈춘 것 같음 · 마지막 갱신 " + i.updated,
+                  error: i.step + "/" + i.steps + " " + i.label + "에서 멈춤 · " + i.updated, done: "새 지면 반영 중" }[i.phase];
+      c.appendChild(mk("div", "pend-eta", eta));
+      if (i.phase === "wait" || i.phase === "run" || i.phase === "late") {
+        var bar = mk("div", "pend-bar"), fill = mk("i");
+        fill.style.width = (i.phase === "wait" ? 0 : i.step / i.steps * 100).toFixed(1) + "%";
+        bar.appendChild(fill);
+        c.appendChild(bar);
+        c.appendChild(mk("div", "pend-step", i.phase === "wait" ? "곧 시작"
+          : i.step + "/" + i.steps + " " + i.label + " 중 · " + i.updated + " 갱신 (" + i.started + " 시작)"));
+      }
+      var b = mk("button", "pend-btn", i.phase === "done" ? "새로 고침" : ETA.label(P) + " 호 보기");
+      b.type = "button";
+      b.addEventListener("click", function () {
+        if (i.phase === "done") { location.reload(); return; }
+        ss("s61-hide-" + i.date, "1");
+        uncover();
+      });
+      c.appendChild(b);
+    }
+    function draw(st, now) {
+      if (!st) return;                                    // 못 읽음 — 지금 화면 그대로 (처음이면 안 덮음)
+      var i = ETA.info(st, now);
+      if (i.date <= P) { uncover(); return; }             // 이 페이지가 이미 오늘 호
+      if (i.phase === "done") {
+        var rk = "s61-reload-" + i.date;
+        if (ss("s61-hide-" + i.date)) { uncover(); showToast(i); return; }   // 걷은 탭은 새로 고치지 않고 알림만
+        if (ss(rk)) { cover(i); return; }                 // 한 번 새로 고쳤는데도 옛 호(Pages 반영 지연) → "반영 중" + 단추
+        if (me.on) {
+          if (ss(rk, "1")) { location.reload(); return; } // 덮고 있던 탭은 한 번 자동으로
+          cover(i); return;                               // 저장소를 못 쓰면 자동 새로 고침 안 함 (되풀이 막기)
+        }
+        showToast(i);                                     // 완료 뒤 처음 연 옛 페이지
+        return;
+      }
+      if (!i.phase || ss("s61-hide-" + i.date)) { uncover(); return; }
+      cover(i);
+      return i;
+    }
+    me.draw = draw;
+    function load() {
+      fetch(SRC + "?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; })
+        .then(function (st) {
+          var i = null;
+          try { draw(st); i = st && ETA.info(st); } catch (e) { /* 덮개 실패는 지면에 영향 없게 */ }
+          setTimeout(load, i && /^(wait|run|late)$/.test(i.phase) ? RUN : IDLE);
+        });
+    }
+    load();
+    return me;
+  })();
+  window.NEWS_PEND = pend;
 
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register((window.EDITION && window.EDITION.base || "") + "sw.js").catch(function () { /* 오프라인 캐시는 선택 기능 */ });
