@@ -1,12 +1,12 @@
 {
  "date": "2026-11-28",
  "state": "running",
- "step": 3,
+ "step": 4,
  "steps": 7,
- "label": "편집",
+ "label": "AI 요약·분석",
  "message": "",
  "started": "2026-11-27T21:34:38Z",
- "updated": "2026-11-27T21:38:01Z",
+ "updated": "2026-11-27T21:40:07Z",
  "run": "https://github.com/js87ahnx-droid/newspaper/actions/runs/46071072558",
  "recent": [
   {
